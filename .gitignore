@@ -6,3 +6,8 @@ coverage
 .env.*
 bun.lockb
 *.log
+
+# E2E test artifacts
+test-results/
+playwright-report/
+storageState.json

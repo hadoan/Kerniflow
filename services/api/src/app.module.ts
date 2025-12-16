@@ -7,6 +7,7 @@ import { InvoicesModule } from "./modules/invoices";
 import { WorkflowModule } from "./modules/workflow";
 import { AutomationModule } from "./modules/automation";
 import { ReportingModule } from "./modules/reporting";
+import { TestHarnessModule } from "./modules/test-harness";
 
 @Module({
   controllers: [AppController],
@@ -18,6 +19,7 @@ import { ReportingModule } from "./modules/reporting";
     WorkflowModule,
     AutomationModule,
     ReportingModule,
+    ...(process.env.NODE_ENV === "test" ? [TestHarnessModule] : []),
   ],
 })
 export class AppModule {}

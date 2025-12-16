@@ -1,20 +1,20 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { ChevronRight, Moon, Sun, Globe, LogOut } from 'lucide-react';
-import { Logo } from '@/shared/components/Logo';
-import { Button } from '@/shared/ui/button';
-import { moduleRegistry, settingsNavItem, getEnabledModules, getComingSoonModules } from '@/modules/registry';
-import { useThemeStore } from '@/shared/theme/themeStore';
-import { cn } from '@/shared/lib/utils';
+import React from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { ChevronRight, Moon, Sun, Globe, LogOut } from "lucide-react";
+import { Logo } from "@/shared/components/Logo";
+import { Button } from "@/shared/ui/button";
+import { settingsNavItem, getEnabledModules, getComingSoonModules } from "@/modules/registry";
+import { useThemeStore } from "@/shared/theme/themeStore";
+import { cn } from "@/shared/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/shared/ui/dropdown-menu';
-import { getDb } from '@/shared/mock/mockDb';
+} from "@/shared/ui/dropdown-menu";
+import { getDb } from "@/shared/mock/mockDb";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -23,7 +23,7 @@ interface SidebarProps {
 
 export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
   const { t, i18n } = useTranslation();
-  const location = useLocation();
+  const _location = useLocation();
   const { theme, setTheme } = useThemeStore();
   const db = getDb();
 
@@ -32,19 +32,20 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
-    localStorage.setItem('bizflow-language', lang);
+    localStorage.setItem("bizflow-language", lang);
   };
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
     <aside
       className={cn(
-        'flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300',
-        collapsed ? 'w-16' : 'w-64'
+        "flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
       )}
+      data-testid="sidebar-nav"
     >
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
@@ -62,7 +63,7 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin">
+      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin" data-testid="sidebar-nav">
         {/* Enabled modules */}
         <div className="space-y-1">
           {enabledModules.flatMap((module) =>
@@ -70,12 +71,13 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
               <NavLink
                 key={item.id}
                 to={item.path}
+                data-testid={`nav-${item.id}`}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                   )
                 }
               >
@@ -91,7 +93,7 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
           <div className="mt-6">
             <div className="px-3 mb-2">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {t('common.comingSoon')}
+                {t("common.comingSoon")}
               </span>
             </div>
             <div className="space-y-1">
@@ -118,10 +120,10 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
           to={settingsNavItem.path}
           className={({ isActive }) =>
             cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
               isActive
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
             )
           }
         >
@@ -130,7 +132,7 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
         </NavLink>
 
         {/* Controls row */}
-        <div className={cn('flex items-center', collapsed ? 'flex-col gap-2' : 'gap-2 px-2')}>
+        <div className={cn("flex items-center", collapsed ? "flex-col gap-2" : "gap-2 px-2")}>
           {/* Theme toggle */}
           <Button
             variant="ghost"
@@ -138,7 +140,7 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
             onClick={toggleTheme}
             className="text-muted-foreground hover:text-foreground"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
           {/* Language switcher */}
@@ -153,12 +155,8 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem onClick={() => changeLanguage('de')}>
-                🇩🇪 Deutsch
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage('en')}>
-                🇬🇧 English
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => changeLanguage("de")}>🇩🇪 Deutsch</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => changeLanguage("en")}>🇬🇧 English</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -167,29 +165,33 @@ export function AppSidebar({ collapsed = false, onToggle }: SidebarProps) {
         {!collapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors">
+              <button
+                data-testid="user-menu-trigger"
+                className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors"
+              >
                 <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-sm font-medium">
-                  {db.user.name.split(' ').map(n => n[0]).join('')}
+                  {db.user.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
                 </div>
                 <div className="flex-1 text-left">
                   <div className="text-sm font-medium text-sidebar-foreground truncate">
                     {db.user.name}
                   </div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {db.tenant.name}
-                  </div>
+                  <div className="text-xs text-muted-foreground truncate">{db.tenant.name}</div>
                 </div>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56" data-testid="user-menu">
               <div className="px-2 py-1.5">
                 <div className="text-sm font-medium">{db.user.name}</div>
                 <div className="text-xs text-muted-foreground">{db.user.email}</div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-danger">
+              <DropdownMenuItem data-testid="logout" className="text-danger">
                 <LogOut className="h-4 w-4 mr-2" />
-                {t('common.comingSoon')}
+                {t("common.comingSoon")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

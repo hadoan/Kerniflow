@@ -1,0 +1,115 @@
+version: "3.9"
+
+services:
+  # ============================================================================
+  # POSTGRES DATABASE (E2E Test DB)
+  # ============================================================================
+  postgres:
+    image: postgres:17-alpine
+    container_name: kerniflow_e2e_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kerniflow_e2e}
+      POSTGRES_USER: ${POSTGRES_USER:-kerniflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kerniflow}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_e2e_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - kerniflow_e2e
+
+  # ============================================================================
+  # REDIS CACHE & QUEUE (E2E)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: kerniflow_e2e_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_e2e_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - kerniflow_e2e
+
+  # ============================================================================
+  # NESTJS API (E2E - NODE_ENV=test)
+  # ============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: kerniflow_e2e_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: info
+      TEST_HARNESS_SECRET: ${TEST_HARNESS_SECRET:-test-secret-key}
+      JWT_SECRET: ${JWT_SECRET:-test-jwt-secret-change-me}
+    ports:
+      - "3000:3000"
+    networks:
+      - kerniflow_e2e
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ============================================================================
+  # NESTJS WORKER (E2E - NODE_ENV=test)
+  # ============================================================================
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kerniflow_e2e_worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: info
+    networks:
+      - kerniflow_e2e
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  postgres_e2e_data:
+  redis_e2e_data:
+
+networks:
+  kerniflow_e2e:
+    driver: bridge

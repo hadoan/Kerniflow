@@ -38,7 +38,6 @@ WORKDIR /app
 
 # Copy installed dependencies from builder
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.pnpm-store ./.pnpm-store
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/package.json ./package.json
