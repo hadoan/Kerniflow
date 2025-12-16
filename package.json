@@ -1,0 +1,23 @@
+{
+  "name": "kerniflow",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.26.0",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "dev:web": "pnpm --filter @kerniflow/web dev",
+    "dev:api": "pnpm --filter @kerniflow/api dev",
+    "dev:worker": "pnpm --filter @kerniflow/worker dev"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.3",
+    "tsdown": "^0.18.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

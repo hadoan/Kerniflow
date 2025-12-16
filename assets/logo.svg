@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="240" viewBox="0 0 960 240">
+  <rect width="960" height="240" rx="40" fill="#0B0F14"/>
+  <g fill="none" stroke="#2EE6C5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M120 60v120"/>
+    <path d="M120 120l80-60"/>
+    <path d="M120 120l80 60"/>
+    <path d="M260 70h60c30 0 50 18 50 40s-20 40-50 40h-60v40"/>
+  </g>
+  <text x="420" y="145" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto"
+        font-size="72" font-weight="700" fill="#EAF2FF" letter-spacing="1.5">
+    Kerniflow
+  </text>
+  <text x="425" y="185" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto"
+        font-size="22" fill="#8AA0B5">
+    AI-native workflows → ERP kernel
+  </text>
+</svg>

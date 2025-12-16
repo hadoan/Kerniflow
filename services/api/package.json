@@ -1,0 +1,19 @@
+{
+  "name": "@kerniflow/api",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "@kerniflow/contracts": "workspace:*",
+    "@kerniflow/domain": "workspace:*",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/platform-express": "^11.1.9",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "scripts": {
+    "dev": "pnpm -w exec tsx watch src/main.ts",
+    "start": "pnpm -w exec tsx src/main.ts",
+    "typecheck": "pnpm -w exec tsc -p tsconfig.json --noEmit"
+  }
+}
