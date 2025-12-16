@@ -1,0 +1,58 @@
+# ============================================================================
+# Build stage for dependencies
+# ============================================================================
+FROM node:22-alpine AS builder
+
+RUN corepack enable pnpm
+
+WORKDIR /app
+
+# Copy root-level pnpm configuration
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+
+# Copy workspace package structures (so pnpm can resolve dependencies)
+COPY apps/web/package.json ./apps/web/
+COPY packages/contracts/package.json ./packages/contracts/
+
+# Install dependencies (frozen lockfile for deterministic builds)
+RUN pnpm install --frozen-lockfile --recursive
+
+# Copy source code
+COPY . .
+
+# ============================================================================
+# Development / Runtime stage
+# ============================================================================
+FROM node:22-alpine
+
+RUN corepack enable pnpm
+
+WORKDIR /app
+
+# Copy installed dependencies from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.pnpm-store ./.pnpm-store
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/package.json ./package.json
+
+# Copy root tsconfig files
+COPY tsconfig.base.json tsconfig.web.json ./
+
+# Copy workspace packages
+COPY packages ./packages
+COPY apps/web ./apps/web
+
+# Build packages that web depends on
+RUN pnpm --filter @kerniflow/contracts build
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Default environment
+ENV NODE_ENV=development
+ENV VITE_API_BASE_URL=http://localhost:4000
+
+# Run Vite dev server bound to 0.0.0.0 (accessible from host)
+# --host 0.0.0.0 makes it accessible outside the container
+CMD ["pnpm", "--filter", "@kerniflow/web", "dev", "--host", "0.0.0.0"]

@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/contracts",
+  "name": "@kerniflow/data",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -20,6 +20,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "zod": "^3.22.0"
+    "@prisma/client": "^5.0.0",
+    "prisma": "^5.0.0"
   }
 }

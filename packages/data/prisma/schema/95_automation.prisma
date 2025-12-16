@@ -1,0 +1,53 @@
+model OutboxEvent {
+  id          String   @id @default(cuid())
+  tenantId    String
+  eventType   String
+  payloadJson String
+  status      OutboxStatus @default(PENDING)
+  attempts    Int      @default(0)
+  availableAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status, availableAt])
+}
+
+model DomainEvent {
+  id        String   @id @default(cuid())
+  tenantId  String
+  eventType String
+  payload   String
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, eventType])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  action    String
+  entity    String
+  entityId  String
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, entity, entityId])
+}
+
+model IdempotencyKey {
+  id           String   @id @default(cuid())
+  tenantId     String
+  key          String
+  action       String
+  responseJson String?
+  createdAt    DateTime @default(now())
+
+  @@unique([tenantId, key])
+  @@index([tenantId, action])
+}
+
+enum OutboxStatus {
+  PENDING
+  SENT
+  FAILED
+}

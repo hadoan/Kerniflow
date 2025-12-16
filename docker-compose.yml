@@ -1,0 +1,151 @@
+version: "3.9"
+
+services:
+  # ============================================================================
+  # POSTGRES DATABASE
+  # ============================================================================
+  postgres:
+    image: postgres:17-alpine
+    container_name: kerniflow_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kerniflow}
+      POSTGRES_USER: ${POSTGRES_USER:-kerniflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kerniflow}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - kerniflow
+
+  # ============================================================================
+  # REDIS CACHE & QUEUE
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: kerniflow_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - kerniflow
+
+  # ============================================================================
+  # NESTJS API (DEMO & FULL PROFILES)
+  # ============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: kerniflow_api
+    restart: unless-stopped
+    profiles:
+      - full
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      LOG_LEVEL: debug
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - ./services/api/src:/app/services/api/src
+      - ./packages/data/src:/app/packages/data/src
+      - ./packages/contracts/src:/app/packages/contracts/src
+      - ./packages/domain/src:/app/packages/domain/src
+    networks:
+      - kerniflow
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ============================================================================
+  # NESTJS WORKER (FULL PROFILE ONLY)
+  # ============================================================================
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: kerniflow_worker
+    restart: unless-stopped
+    profiles:
+      - full
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow?schema=public}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      LOG_LEVEL: debug
+    volumes:
+      - ./services/worker/src:/app/services/worker/src
+      - ./packages/data/src:/app/packages/data/src
+      - ./packages/contracts/src:/app/packages/contracts/src
+      - ./packages/domain/src:/app/packages/domain/src
+    networks:
+      - kerniflow
+
+  # ============================================================================
+  # VITE FRONTEND (DEMO & FULL PROFILES)
+  # ============================================================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:4000}
+    container_name: kerniflow_web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:4000}
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./apps/web/index.html:/app/apps/web/index.html
+      - ./apps/web/vite.config.ts:/app/apps/web/vite.config.ts
+      - ./packages/contracts/src:/app/packages/contracts/src
+    networks:
+      - kerniflow
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  kerniflow:
+    driver: bridge

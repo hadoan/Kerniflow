@@ -1,0 +1,1 @@
+// DTOs are handled by Zod schemas in contracts

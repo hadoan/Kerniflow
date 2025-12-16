@@ -35,3 +35,37 @@ export const mockReceipts: Receipt[] = [
 ];
 
 export const CONTRACTS_HELLO = "Kerniflow contracts loaded ✅";
+
+// New schemas for architecture patterns
+import { z } from 'zod';
+
+export const ExpenseCreateInputSchema = z.object({
+  tenantId: z.string(),
+  amount: z.number().positive(),
+  description: z.string().min(1),
+});
+
+export type ExpenseCreateInput = z.infer<typeof ExpenseCreateInputSchema>;
+
+export const ExpenseCreateOutputSchema = z.object({
+  id: z.string(),
+  tenantId: z.string(),
+  amount: z.number(),
+  description: z.string(),
+  createdAt: z.string(),
+});
+
+export type ExpenseCreateOutput = z.infer<typeof ExpenseCreateOutputSchema>;
+
+export const OutboxEventPayloadSchema = z.object({
+  eventType: z.string(),
+  tenantId: z.string(),
+  payload: z.record(z.any()),
+});
+
+export type OutboxEventPayload = z.infer<typeof OutboxEventPayloadSchema>;
+
+export const EVENT_NAMES = {
+  EXPENSE_CREATED: 'expense.created',
+  INVOICE_ISSUED: 'invoice.issued',
+} as const;

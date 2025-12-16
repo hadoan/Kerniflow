@@ -1,0 +1,36 @@
+model WorkflowDefinition {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  instances WorkflowInstance[]
+
+  @@index([tenantId])
+}
+
+model WorkflowInstance {
+  id         String   @id @default(cuid())
+  tenantId   String
+  definitionId String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  definition WorkflowDefinition @relation(fields: [definitionId], references: [id])
+  tasks      Task[]
+
+  @@index([tenantId, status])
+}
+
+model Task {
+  id           String   @id @default(cuid())
+  instanceId   String
+  name         String
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}

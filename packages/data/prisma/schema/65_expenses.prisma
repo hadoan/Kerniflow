@@ -1,0 +1,10 @@
+model Expense {
+  id          String   @id @default(cuid())
+  tenantId    String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+}
