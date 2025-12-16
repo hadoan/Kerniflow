@@ -1,0 +1,14 @@
+node_modules
+dist
+build
+coverage
+.next
+out
+*.log
+.DS_Store
+.env*
+.git
+.husky
+.vscode
+pnpm-lock.yaml
+CHANGELOG.md

@@ -1,0 +1,10 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Skip hook if HUSKY is set to 0
+if [ "$HUSKY" = "0" ]; then
+  exit 0
+fi
+
+# Run lint-staged on staged files only
+pnpm lint-staged

@@ -7,6 +7,7 @@
     "node": ">=22.19.0"
   },
   "scripts": {
+    "prepare": "husky",
     "dev": "pnpm build:packages && pnpm -r --parallel dev",
     "build": "pnpm -r build",
     "build:packages": "pnpm --filter '@kerniflow/contracts' --filter '@kerniflow/domain' --filter '@kerniflow/data' build",
@@ -16,12 +17,23 @@
     "dev:worker": "pnpm --filter @kerniflow/worker dev",
     "prisma:generate": "pnpm --filter @kerniflow/data exec prisma generate",
     "prisma:migrate": "pnpm --filter @kerniflow/data exec prisma migrate dev",
-    "migrate": "pnpm --filter @kerniflow/data exec tsx --env-file=../../.env ../../../node_modules/.bin/prisma migrate dev"
+    "migrate": "pnpm --filter @kerniflow/data exec tsx --env-file=../../.env ../../../node_modules/.bin/prisma migrate dev",
+    "format": "prettier -w .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "check": "pnpm lint && pnpm typecheck"
   },
   "devDependencies": {
+    "@eslint/js": "^9.32.0",
     "@types/node": "^22.19.3",
+    "eslint": "^9.32.0",
+    "globals": "^15.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
     "tsdown": "^0.18.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.38.0"
   }
 }

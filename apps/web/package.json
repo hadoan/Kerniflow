@@ -84,6 +84,6 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "pnpm -w exec tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc --noEmit"
   }
 }
