@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from '@/shared/ui/button';
+import { cn } from '@/shared/lib/utils';
 
 export function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

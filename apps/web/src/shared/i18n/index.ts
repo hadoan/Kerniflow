@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import de from './locales/de.json';
 
-const savedLanguage = localStorage.getItem('bizflow-language') || 'de';
+const savedLanguage = localStorage.getItem('bizflow-language') || 'en';
 
 i18n
   .use(initReactI18next)

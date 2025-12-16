@@ -3,17 +3,17 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Moon, Sun, Globe, LogOut } from 'lucide-react';
 import { Logo } from '@/shared/components/Logo';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/button';
 import { moduleRegistry, settingsNavItem, getEnabledModules, getComingSoonModules } from '@/modules/registry';
 import { useThemeStore } from '@/shared/theme/themeStore';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 import { getDb } from '@/shared/mock/mockDb';
 
 interface SidebarProps {
