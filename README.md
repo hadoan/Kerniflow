@@ -1,68 +1,198 @@
-# Kerniflow (minimal scaffold)
+# Kerniflow
 
-Monorepo via `pnpm-workspace.yaml` (apps + services + packages).
+Kerniflow is an **AI-native modular ERP kernel** designed to start small (freelancer workflows like **expenses + invoices + assistant**) and scale into full ERP domains (restaurant/hotel/factory packs) without forking code.
 
-- apps/web: Vite + React + Tailwind + i18n mock UI
-- services/api: NestJS HTTP API (tsx runtime)
-- services/worker: NestJS application context worker
-- packages/contracts + packages/domain: shared TS packages built with tsdown
+This repo is a **pnpm monorepo** with clear boundaries:
 
-## Quick start
+- **DDD bounded contexts** per module
+- **Hexagonal** ports/adapters (domain + use-cases are framework-free)
+- **Outbox + Worker** for reliable async workflows
+- **CQRS-lite reads** for dashboards
+- **Idempotency + Audit** as defaults
+
+---
+
+## Repo structure
+
+```text
+apps/
+  web/                      # Frontend (Vite/Next.js depending on your setup)
+
+services/
+  api/                      # NestJS API (RBAC, tools, workflows, use-cases)
+  worker/                   # NestJS Worker (outbox, jobs, automations)
+  mock-server/              # Dedicated mock backend for frontend demo/dev
+
+packages/
+  contracts/                # Shared FE/BE: schemas + types + tool contracts
+  domain/                   # Optional shared pure domain rules (no Prisma/Nest/React)
+  data/                     # Backend-only Prisma + repositories
+
+docs/                       # Architecture docs
+assets/                     # Brand/logo assets
+```
+
+---
+
+## Prerequisites
+
+- **Node.js** (recommended: latest LTS)
+- **pnpm** (workspace package manager)
+- **Docker** (optional, for Postgres/Redis via compose)
+
+---
+
+## Quick start (local dev)
+
+### 1) Install
 
 ```bash
 pnpm install
-pnpm -r build
+```
+
+### 2) Run frontend with dedicated mock server (recommended for UI work)
+
+```bash
+pnpm dev:mock
+pnpm dev:web
+```
+
+Or run everything together if you have a combined script:
+
+```bash
 pnpm dev
 ```
 
-## Code Quality
-
-This repo uses **Husky** + **lint-staged** for automated code quality checks and **GitHub Actions** for CI.
-
-### Setup
-
-Hooks are automatically installed when you run `pnpm install` (via the `prepare` script).
-
-### Manual Commands
+### 3) Run backend stack (API + Worker)
 
 ```bash
-# Format all code
-pnpm format
-
-# Run ESLint
-pnpm lint
-
-# Fix ESLint issues
-pnpm lint:fix
-
-# Typecheck all packages
-pnpm typecheck
-
-# Run all checks (lint + typecheck)
-pnpm check
+pnpm dev:api
+pnpm dev:worker
 ```
 
-### Hooks
+---
 
-- **Pre-commit**: Runs Prettier and ESLint on staged files only (fast ✨)
-- **Pre-push**: Runs typecheck across the monorepo
-- **CI**: Full validation on every PR/push (eslint, prettier, typecheck, build)
+## Common scripts (root)
 
-### Skip Hooks
-
-If needed, bypass hooks with:
+> Scripts may vary slightly depending on current repo state.
 
 ```bash
-HUSKY=0 git commit
-HUSKY=0 git push
+pnpm dev           # start main dev environment (often web + mock)
+pnpm dev:web       # start frontend
+pnpm dev:mock      # start mock server
+pnpm dev:api       # start NestJS API
+pnpm dev:worker    # start NestJS worker
+
+pnpm build         # build all packages/apps
+pnpm typecheck     # typecheck all packages
+pnpm lint          # lint (if configured)
+pnpm format        # format (if configured)
 ```
 
-⚠️ Use sparingly—hooks exist to keep code quality high.
+---
 
-### Monorepo Note
+## Environment variables
 
-- ESLint runs from repo root but respects package-specific configs
-- Prettier formats all supported files in the monorepo
-- Typecheck runs on all packages that define a `typecheck` script in their `package.json`
+Create a `.env` (or per-service env files) from `.env.example`:
 
-For package-specific linting configs, see [apps/web/eslint.config.js](apps/web/eslint.config.js).
+Typical values:
+
+- `DATABASE_URL` (Postgres connection)
+- `REDIS_URL` (Redis connection)
+- `VITE_API_BASE_URL` (frontend → mock server or api)
+
+---
+
+## Development modes
+
+### UI-first (recommended)
+
+- Frontend calls `services/mock-server`
+- Mock server simulates:
+  - latency
+  - pagination/filtering
+  - idempotency
+  - assistant tool endpoints
+
+### Full stack
+
+- Frontend calls `services/api`
+- API uses Postgres + Prisma
+- Worker publishes outbox events and runs jobs
+
+---
+
+## Architecture rules (do not break)
+
+### Dependency direction
+
+✅ Allowed:
+
+- `apps/web` → `packages/contracts`, `packages/domain`
+- `services/api` → `packages/contracts`, `packages/domain`, `packages/data`
+- `services/worker` → `packages/contracts`, `packages/domain`, `packages/data`
+- `packages/domain` → `packages/contracts`
+
+🚫 Forbidden:
+
+- `packages/contracts` importing anything else
+- frontend importing backend internals
+- shared packages importing feature modules
+- cross-module direct DB writes (no “shared DB access”)
+
+### Domain boundaries
+
+- **Domain + use-cases**: no framework imports (no NestJS, no Prisma)
+- **Infra adapters** implement ports (Prisma/JWT/queues/etc.)
+- **Outbox** written in the same transaction as state changes
+- **Worker** publishes/retries outbox events
+- **Idempotency** required for write commands/tools
+- **AuditLog** for security-sensitive actions
+
+---
+
+## Where to add new features
+
+### Add a new ERP module (example: inventory)
+
+1. Backend:
+   - `services/api/src/modules/inventory/*`
+   - Prisma tables in `packages/data/prisma/schema/*`
+
+2. Contracts:
+   - `packages/contracts/src/inventory/*`
+
+3. Frontend:
+   - `apps/web/src/modules/inventory/*`
+
+4. Optional: mock server routes
+   - `services/mock-server/src/routes/inventory.ts`
+
+---
+
+## Troubleshooting
+
+### pnpm workspace import issues
+
+- Ensure `pnpm-workspace.yaml` includes `apps/*`, `services/*`, `packages/*`
+- Run a clean install:
+
+```bash
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+### CORS errors (frontend ↔ api/mock)
+
+- Confirm mock/api enables CORS for the frontend origin
+- Confirm frontend uses the correct `VITE_API_BASE_URL`
+
+### Prisma schema split
+
+- If using multi-file Prisma schema, ensure Prisma is configured to load the schema directory (and your generator scripts point to it).
+
+---
+
+## License
+
+TBD
