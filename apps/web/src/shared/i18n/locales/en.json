@@ -1,0 +1,189 @@
+{
+  "common": {
+    "appName": "Bizflow",
+    "tagline": "Run your business, end-to-end.",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "close": "Close",
+    "viewAll": "View all",
+    "comingSoon": "Coming soon",
+    "noResults": "No results found",
+    "error": "Something went wrong",
+    "success": "Success",
+    "currency": "EUR",
+    "locale": "en-DE"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "assistant": "Assistant",
+    "expenses": "Expenses",
+    "invoices": "Invoices",
+    "clients": "Clients",
+    "settings": "Settings",
+    "projects": "Projects",
+    "accounting": "Accounting",
+    "inventory": "Inventory",
+    "automation": "Automation",
+    "documents": "Documents",
+    "hr": "HR"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "revenueThisMonth": "Revenue this month",
+    "outstandingInvoices": "Outstanding invoices",
+    "expensesThisMonth": "Expenses this month",
+    "quickActions": "Quick actions",
+    "recentActivity": "Recent activity",
+    "addExpense": "Add expense",
+    "createInvoice": "Create invoice",
+    "openAssistant": "Open assistant"
+  },
+  "assistant": {
+    "title": "Assistant",
+    "placeholder": "Ask me anything or upload a receipt...",
+    "suggestions": {
+      "addReceipt": "Add this receipt as an expense",
+      "generateInvoice": "Generate invoice for a client",
+      "showExpenses": "Show expenses this month",
+      "taxHelp": "What can I deduct in Germany?"
+    },
+    "toolCards": {
+      "extractingReceipt": "Extracting receipt data...",
+      "creatingExpense": "Creating expense...",
+      "generatingInvoice": "Generating invoice draft...",
+      "issuingInvoice": "Issuing invoice..."
+    },
+    "disclaimer": "This is not legal or tax advice. Please consult a tax professional for specific guidance.",
+    "confirmExpense": "Confirm expense details",
+    "invoicePreview": "Invoice preview",
+    "openExpense": "Open expense",
+    "openInvoice": "Open invoice",
+    "issueInvoice": "Issue invoice"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "addExpense": "Add expense",
+    "noExpenses": "No expenses yet",
+    "noExpensesDescription": "Start by adding your first expense or upload a receipt to the assistant.",
+    "merchant": "Merchant",
+    "date": "Date",
+    "amount": "Amount",
+    "category": "Category",
+    "vat": "VAT",
+    "project": "Project",
+    "receipt": "Receipt",
+    "notes": "Notes",
+    "categories": {
+      "office_supplies": "Office supplies",
+      "software": "Software",
+      "travel": "Travel",
+      "meals": "Meals",
+      "home_office": "Home office",
+      "education": "Education",
+      "hardware": "Hardware",
+      "phone_internet": "Phone/Internet",
+      "other": "Other"
+    }
+  },
+  "invoices": {
+    "title": "Invoices",
+    "createInvoice": "Create invoice",
+    "noInvoices": "No invoices yet",
+    "noInvoicesDescription": "Create your first invoice to get started.",
+    "invoiceNumber": "Invoice #",
+    "client": "Client",
+    "date": "Date",
+    "dueDate": "Due date",
+    "amount": "Amount",
+    "status": "Status",
+    "items": "Items",
+    "subtotal": "Subtotal",
+    "vatAmount": "VAT",
+    "total": "Total",
+    "paymentTerms": "Payment terms",
+    "notes": "Notes",
+    "statuses": {
+      "draft": "Draft",
+      "issued": "Issued",
+      "sent": "Sent",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "actions": {
+      "issue": "Issue invoice",
+      "markPaid": "Mark as paid",
+      "sendReminder": "Send reminder",
+      "download": "Download PDF",
+      "preview": "Preview"
+    },
+    "wizard": {
+      "selectClient": "Select client",
+      "addItems": "Add line items",
+      "review": "Review & create"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "addClient": "Add client",
+    "noClients": "No clients yet",
+    "noClientsDescription": "Add your first client to start creating invoices.",
+    "name": "Name",
+    "company": "Company",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "city": "City",
+    "country": "Country",
+    "vatId": "VAT ID",
+    "invoiceHistory": "Invoice history",
+    "totalRevenue": "Total revenue"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "business": "Business",
+    "tax": "Tax settings",
+    "invoiceSettings": "Invoice settings",
+    "language": "Language",
+    "theme": "Theme",
+    "name": "Name",
+    "email": "Email",
+    "businessName": "Business name",
+    "address": "Address",
+    "vatId": "VAT ID",
+    "defaultVatRate": "Default VAT rate",
+    "invoicePrefix": "Invoice prefix",
+    "invoiceNumberFormat": "Invoice number format",
+    "paymentTermsDays": "Payment terms (days)",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "languages": {
+      "en": "English",
+      "de": "Deutsch"
+    }
+  },
+  "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "thisYear": "This year",
+    "daysAgo": "{{count}} days ago"
+  }
+}

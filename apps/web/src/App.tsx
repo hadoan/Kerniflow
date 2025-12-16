@@ -1,66 +1,41 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
-import { mockReceipts } from "@kerniflow/contracts";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AppShell } from "./app/AppShell";
+import DashboardPage from "./modules/core/DashboardPage";
+import AssistantPage from "./modules/assistant/AssistantPage";
+import ExpensesPage from "./modules/expenses/ExpensesPage";
+import InvoicesPage from "./modules/invoices/InvoicesPage";
+import ClientsPage from "./modules/clients/ClientsPage";
+import SettingsPage from "./modules/settings/SettingsPage";
+import NotFound from "./pages/NotFound";
+import "./shared/i18n";
 
-export default function App() {
-  const { t, i18n } = useTranslation();
+const queryClient = new QueryClient();
 
-  const toggleLang = () => i18n.changeLanguage(i18n.language === "en" ? "de" : "en");
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route element={<AppShell />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/assistant" element={<AssistantPage />} />
+            <Route path="/expenses" element={<ExpensesPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/clients" element={<ClientsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
-      <header className="mx-auto max-w-5xl px-6 py-10">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-            <p className="mt-2 text-sm text-zinc-300">{t("subtitle")}</p>
-          </div>
-          <button
-            onClick={toggleLang}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm hover:bg-zinc-800"
-          >
-            {t("switchLang")} ({i18n.language})
-          </button>
-        </div>
-      </header>
-
-      <main className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-6 pb-12 md:grid-cols-2">
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-          <h2 className="text-lg font-semibold">{t("chat")}</h2>
-          <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-sm text-zinc-200">
-            <p className="font-medium">👋 “Add this receipt as an expense and categorize it.”</p>
-            <p className="mt-2 text-zinc-400">
-              (Mock) Next step: connect to your tool-driven agent, streaming responses.
-            </p>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button className="rounded-xl bg-teal-400/15 px-4 py-2 text-sm text-teal-200 hover:bg-teal-400/20">
-              {t("uploadReceipt")}
-            </button>
-            <button className="rounded-xl bg-indigo-400/15 px-4 py-2 text-sm text-indigo-200 hover:bg-indigo-400/20">
-              {t("generateInvoice")}
-            </button>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
-          <h2 className="text-lg font-semibold">{t("receipts")}</h2>
-          <ul className="mt-4 space-y-3">
-            {mockReceipts.map((r) => (
-              <li key={r.id} className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">{r.merchant}</div>
-                  <div className="text-sm text-zinc-300">{(r.totalCents / 100).toFixed(2)} {r.currency}</div>
-                </div>
-                <div className="mt-1 text-xs text-zinc-400">
-                  VAT {Math.round(r.vatRate * 100)}% · {r.category ?? "Uncategorized"}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </main>
-    </div>
-  );
-}
+export default App;

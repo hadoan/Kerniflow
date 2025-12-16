@@ -1,0 +1,189 @@
+{
+  "common": {
+    "appName": "Bizflow",
+    "tagline": "Ihr Geschäft, von Anfang bis Ende.",
+    "loading": "Wird geladen...",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "search": "Suchen",
+    "filter": "Filter",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "back": "Zurück",
+    "next": "Weiter",
+    "confirm": "Bestätigen",
+    "close": "Schließen",
+    "viewAll": "Alle anzeigen",
+    "comingSoon": "Demnächst verfügbar",
+    "noResults": "Keine Ergebnisse gefunden",
+    "error": "Etwas ist schief gelaufen",
+    "success": "Erfolgreich",
+    "currency": "EUR",
+    "locale": "de-DE"
+  },
+  "nav": {
+    "dashboard": "Übersicht",
+    "assistant": "Assistent",
+    "expenses": "Ausgaben",
+    "invoices": "Rechnungen",
+    "clients": "Kunden",
+    "settings": "Einstellungen",
+    "projects": "Projekte",
+    "accounting": "Buchhaltung",
+    "inventory": "Inventar",
+    "automation": "Automatisierung",
+    "documents": "Dokumente",
+    "hr": "Personal"
+  },
+  "dashboard": {
+    "title": "Übersicht",
+    "welcome": "Willkommen zurück",
+    "revenueThisMonth": "Umsatz diesen Monat",
+    "outstandingInvoices": "Offene Rechnungen",
+    "expensesThisMonth": "Ausgaben diesen Monat",
+    "quickActions": "Schnellaktionen",
+    "recentActivity": "Letzte Aktivität",
+    "addExpense": "Ausgabe hinzufügen",
+    "createInvoice": "Rechnung erstellen",
+    "openAssistant": "Assistent öffnen"
+  },
+  "assistant": {
+    "title": "Assistent",
+    "placeholder": "Fragen Sie mich etwas oder laden Sie einen Beleg hoch...",
+    "suggestions": {
+      "addReceipt": "Diesen Beleg als Ausgabe hinzufügen",
+      "generateInvoice": "Rechnung für einen Kunden erstellen",
+      "showExpenses": "Ausgaben diesen Monat anzeigen",
+      "taxHelp": "Was kann ich in Deutschland absetzen?"
+    },
+    "toolCards": {
+      "extractingReceipt": "Belegdaten werden extrahiert...",
+      "creatingExpense": "Ausgabe wird erstellt...",
+      "generatingInvoice": "Rechnungsentwurf wird erstellt...",
+      "issuingInvoice": "Rechnung wird ausgestellt..."
+    },
+    "disclaimer": "Dies ist keine Rechts- oder Steuerberatung. Bitte konsultieren Sie einen Steuerberater für spezifische Fragen.",
+    "confirmExpense": "Ausgabendetails bestätigen",
+    "invoicePreview": "Rechnungsvorschau",
+    "openExpense": "Ausgabe öffnen",
+    "openInvoice": "Rechnung öffnen",
+    "issueInvoice": "Rechnung ausstellen"
+  },
+  "expenses": {
+    "title": "Ausgaben",
+    "addExpense": "Ausgabe hinzufügen",
+    "noExpenses": "Noch keine Ausgaben",
+    "noExpensesDescription": "Fügen Sie Ihre erste Ausgabe hinzu oder laden Sie einen Beleg beim Assistenten hoch.",
+    "merchant": "Händler",
+    "date": "Datum",
+    "amount": "Betrag",
+    "category": "Kategorie",
+    "vat": "MwSt.",
+    "project": "Projekt",
+    "receipt": "Beleg",
+    "notes": "Notizen",
+    "categories": {
+      "office_supplies": "Bürobedarf",
+      "software": "Software",
+      "travel": "Reisekosten",
+      "meals": "Verpflegung",
+      "home_office": "Homeoffice",
+      "education": "Fortbildung",
+      "hardware": "Hardware",
+      "phone_internet": "Telefon/Internet",
+      "other": "Sonstiges"
+    }
+  },
+  "invoices": {
+    "title": "Rechnungen",
+    "createInvoice": "Rechnung erstellen",
+    "noInvoices": "Noch keine Rechnungen",
+    "noInvoicesDescription": "Erstellen Sie Ihre erste Rechnung um loszulegen.",
+    "invoiceNumber": "Rechnung Nr.",
+    "client": "Kunde",
+    "date": "Datum",
+    "dueDate": "Fällig am",
+    "amount": "Betrag",
+    "status": "Status",
+    "items": "Positionen",
+    "subtotal": "Zwischensumme",
+    "vatAmount": "MwSt.",
+    "total": "Gesamt",
+    "paymentTerms": "Zahlungsziel",
+    "notes": "Notizen",
+    "statuses": {
+      "draft": "Entwurf",
+      "issued": "Ausgestellt",
+      "sent": "Gesendet",
+      "paid": "Bezahlt",
+      "overdue": "Überfällig"
+    },
+    "actions": {
+      "issue": "Rechnung ausstellen",
+      "markPaid": "Als bezahlt markieren",
+      "sendReminder": "Erinnerung senden",
+      "download": "PDF herunterladen",
+      "preview": "Vorschau"
+    },
+    "wizard": {
+      "selectClient": "Kunde auswählen",
+      "addItems": "Positionen hinzufügen",
+      "review": "Prüfen & erstellen"
+    }
+  },
+  "clients": {
+    "title": "Kunden",
+    "addClient": "Kunde hinzufügen",
+    "noClients": "Noch keine Kunden",
+    "noClientsDescription": "Fügen Sie Ihren ersten Kunden hinzu um Rechnungen zu erstellen.",
+    "name": "Name",
+    "company": "Firma",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "address": "Adresse",
+    "city": "Stadt",
+    "country": "Land",
+    "vatId": "USt-IdNr.",
+    "invoiceHistory": "Rechnungshistorie",
+    "totalRevenue": "Gesamtumsatz"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "profile": "Profil",
+    "business": "Geschäft",
+    "tax": "Steuereinstellungen",
+    "invoiceSettings": "Rechnungseinstellungen",
+    "language": "Sprache",
+    "theme": "Design",
+    "name": "Name",
+    "email": "E-Mail",
+    "businessName": "Firmenname",
+    "address": "Adresse",
+    "vatId": "USt-IdNr.",
+    "defaultVatRate": "Standard MwSt.-Satz",
+    "invoicePrefix": "Rechnungspräfix",
+    "invoiceNumberFormat": "Rechnungsnummernformat",
+    "paymentTermsDays": "Zahlungsziel (Tage)",
+    "themes": {
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System"
+    },
+    "languages": {
+      "en": "English",
+      "de": "Deutsch"
+    }
+  },
+  "time": {
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "thisWeek": "Diese Woche",
+    "thisMonth": "Dieser Monat",
+    "lastMonth": "Letzter Monat",
+    "thisYear": "Dieses Jahr",
+    "daysAgo": "vor {{count}} Tagen"
+  }
+}
