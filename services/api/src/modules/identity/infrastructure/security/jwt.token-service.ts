@@ -1,32 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
-import { ITokenService } from '../../application/ports/token-service.port';
+import { Injectable } from "@nestjs/common";
+import * as jwt from "jsonwebtoken";
+import { ITokenService } from "../../application/ports/token-service.port";
 
 /**
  * JWT Token Service Implementation
  */
 @Injectable()
 export class JwtTokenService implements ITokenService {
-  private readonly accessTokenSecret = process.env.JWT_ACCESS_SECRET || 'your-access-secret-change-in-production';
-  private readonly refreshTokenSecret = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-change-in-production';
-  private readonly accessTokenExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
-  private readonly refreshTokenExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+  private readonly accessTokenSecret =
+    process.env.JWT_ACCESS_SECRET || "your-access-secret-change-in-production";
+  private readonly refreshTokenSecret =
+    process.env.JWT_REFRESH_SECRET || "your-refresh-secret-change-in-production";
+  private readonly accessTokenExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN || "15m";
+  private readonly refreshTokenExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
 
-  generateAccessToken(data: {
-    userId: string;
-    email: string;
-    tenantId: string;
-  }): string {
+  generateAccessToken(data: { userId: string; email: string; tenantId: string }): string {
     return jwt.sign(
       {
         userId: data.userId,
         email: data.email,
-        tenantId: data.tenantId
+        tenantId: data.tenantId,
       },
-      this.accessTokenSecret,
+      this.accessTokenSecret as string,
       {
-        expiresIn: this.accessTokenExpiresIn
-      }
+        expiresIn: this.accessTokenExpiresIn as string,
+      } as jwt.SignOptions
     );
   }
 
@@ -34,18 +32,16 @@ export class JwtTokenService implements ITokenService {
     return jwt.sign(
       {
         // Minimal payload - the actual data is looked up from DB
-        jti: Math.random().toString(36).substring(7)
+        jti: Math.random().toString(36).substring(7),
       },
-      this.refreshTokenSecret,
+      this.refreshTokenSecret as string,
       {
-        expiresIn: this.refreshTokenExpiresIn
-      }
+        expiresIn: this.refreshTokenExpiresIn as string,
+      } as jwt.SignOptions
     );
   }
 
-  async verifyAccessToken(
-    token: string
-  ): Promise<{
+  async verifyAccessToken(token: string): Promise<{
     userId: string;
     email: string;
     tenantId: string;
@@ -75,7 +71,7 @@ export class JwtTokenService implements ITokenService {
 
     return {
       accessTokenExpiresIn: this.accessTokenExpiresIn,
-      refreshTokenExpiresInMs: refreshMs
+      refreshTokenExpiresInMs: refreshMs,
     };
   }
 
@@ -84,7 +80,7 @@ export class JwtTokenService implements ITokenService {
       s: 1000,
       m: 60 * 1000,
       h: 60 * 60 * 1000,
-      d: 24 * 60 * 60 * 1000
+      d: 24 * 60 * 60 * 1000,
     };
 
     const match = expireString.match(/^(\d+)([smhd])$/);

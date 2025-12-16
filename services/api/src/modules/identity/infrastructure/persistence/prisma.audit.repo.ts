@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { prisma } from '@kerniflow/data';
-import { IAuditPort } from '../../application/ports/audit.port';
+import { Injectable } from "@nestjs/common";
+import { prisma } from "@kerniflow/data";
+import { IAuditPort } from "../../application/ports/audit.port";
 
 /**
  * Prisma Audit Repository Implementation
@@ -17,17 +17,18 @@ export class PrismaAuditRepository implements IAuditPort {
     userAgent?: string;
     metadataJson?: string;
   }): Promise<void> {
-    await prisma.auditLog.create({
-      data: {
-        tenantId: data.tenantId,
-        actorUserId: data.actorUserId,
-        action: data.action,
-        targetType: data.targetType,
-        targetId: data.targetId,
-        ip: data.ip,
-        userAgent: data.userAgent,
-        metadataJson: data.metadataJson
-      }
-    });
+    const createData: any = {
+      action: data.action,
+    };
+
+    if (data.tenantId) createData.tenantId = data.tenantId;
+    if (data.actorUserId) createData.actorUserId = data.actorUserId;
+    if (data.targetType) createData.targetType = data.targetType;
+    if (data.targetId) createData.targetId = data.targetId;
+    if (data.ip) createData.ip = data.ip;
+    if (data.userAgent) createData.userAgent = data.userAgent;
+    if (data.metadataJson) createData.metadataJson = data.metadataJson;
+
+    await prisma.auditLog.create({ data: createData });
   }
 }

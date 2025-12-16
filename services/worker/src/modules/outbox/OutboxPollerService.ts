@@ -1,9 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { OutboxRepository } from '@kerniflow/data';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { OutboxRepository } from "@kerniflow/data";
 
 @Injectable()
 export class OutboxPollerService implements OnModuleInit {
-  private intervalId: NodeJS.Timeout;
+  private intervalId: NodeJS.Timeout | undefined;
 
   constructor(private readonly outboxRepo: OutboxRepository) {}
 
@@ -17,11 +17,12 @@ export class OutboxPollerService implements OnModuleInit {
       for (const event of events) {
         try {
           // Placeholder: publish by logging
-          console.log('Publishing outbox event:', event.eventType, event.payloadJson);
+          console.log("Publishing outbox event:", event.eventType, event.payloadJson);
           await this.outboxRepo.markSent(event.id);
         } catch (error) {
-          console.error('Failed to publish event:', event.id, error);
-          await this.outboxRepo.markFailed(event.id, error.message);
+          console.error("Failed to publish event:", event.id, error);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          await this.outboxRepo.markFailed(event.id, errorMessage);
         }
       }
     }, 5000); // 5 seconds

@@ -1,9 +1,15 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { IMembershipRepository } from '../../application/ports/membership.repo.port';
-import { IRoleRepository } from '../../application/ports/role.repo.port';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  SetMetadata,
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { IMembershipRepository } from "../../application/ports/membership.repo.port";
+import { IRoleRepository } from "../../application/ports/role.repo.port";
 
-export const REQUIRE_PERMISSION = 'require_permission';
+export const REQUIRE_PERMISSION = "require_permission";
 
 /**
  * RBAC Guard
@@ -19,10 +25,7 @@ export class RbacGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermission = this.reflector.get<string>(
-      REQUIRE_PERMISSION,
-      context.getHandler()
-    );
+    const requiredPermission = this.reflector.get<string>(REQUIRE_PERMISSION, context.getHandler());
 
     if (!requiredPermission) {
       return true; // No permission required
@@ -33,23 +36,21 @@ export class RbacGuard implements CanActivate {
     const tenantId = request.tenantId;
 
     if (!userId || !tenantId) {
-      throw new ForbiddenException('User or tenant not found in context');
+      throw new ForbiddenException("User or tenant not found in context");
     }
 
     // Get user's membership and role
     const membership = await this.membershipRepo.findByTenantAndUser(tenantId, userId);
 
     if (!membership) {
-      throw new ForbiddenException('User is not a member of this tenant');
+      throw new ForbiddenException("User is not a member of this tenant");
     }
 
     // Get role permissions
     const permissions = await this.roleRepo.getPermissions(membership.getRoleId());
 
     if (!permissions.includes(requiredPermission)) {
-      throw new ForbiddenException(
-        `User does not have permission: ${requiredPermission}`
-      );
+      throw new ForbiddenException(`User does not have permission: ${requiredPermission}`);
     }
 
     return true;
@@ -60,9 +61,5 @@ export class RbacGuard implements CanActivate {
  * Decorator to require a specific permission
  */
 export const RequirePermission = (permission: string) => {
-  return (target: any, propertyKey?: string, descriptor?: PropertyDescriptor) => {
-    const reflector = new Reflector();
-    reflector.set(REQUIRE_PERMISSION, permission, descriptor?.value || target);
-    return target;
-  };
+  return SetMetadata(REQUIRE_PERMISSION, permission);
 };

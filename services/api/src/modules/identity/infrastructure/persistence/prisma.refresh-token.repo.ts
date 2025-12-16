@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { prisma } from '@kerniflow/data';
-import { IRefreshTokenRepository } from '../../application/ports/refresh-token.repo.port';
+import { Injectable } from "@nestjs/common";
+import { prisma } from "@kerniflow/data";
+import { IRefreshTokenRepository } from "../../application/ports/refresh-token.repo.port";
 
 /**
  * Prisma Refresh Token Repository Implementation
@@ -15,28 +15,26 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
     expiresAt: Date;
   }): Promise<void> {
     await prisma.refreshToken.create({
-      data
+      data,
     });
   }
 
-  async findValidByHash(
-    hash: string
-  ): Promise<{
+  async findValidByHash(hash: string): Promise<{
     id: string;
     userId: string;
     tenantId: string;
     expiresAt: Date;
     revokedAt: Date | null;
   } | null> {
-    const token = await prisma.refreshToken.findUnique({
+    const token = await prisma.refreshToken.findFirst({
       where: { tokenHash: hash },
       select: {
         id: true,
         userId: true,
         tenantId: true,
         expiresAt: true,
-        revokedAt: true
-      }
+        revokedAt: true,
+      },
     });
 
     if (!token) return null;
@@ -46,17 +44,14 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
   async revoke(id: string): Promise<void> {
     await prisma.refreshToken.update({
       where: { id },
-      data: { revokedAt: new Date() }
+      data: { revokedAt: new Date() },
     });
   }
 
-  async revokeAllForUserInTenant(
-    userId: string,
-    tenantId: string
-  ): Promise<void> {
+  async revokeAllForUserInTenant(userId: string, tenantId: string): Promise<void> {
     await prisma.refreshToken.updateMany({
       where: { userId, tenantId, revokedAt: null },
-      data: { revokedAt: new Date() }
+      data: { revokedAt: new Date() },
     });
   }
 
@@ -64,9 +59,9 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
     const result = await prisma.refreshToken.deleteMany({
       where: {
         expiresAt: {
-          lt: new Date()
-        }
-      }
+          lt: new Date(),
+        },
+      },
     });
 
     return result.count;
