@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useChat, DefaultChatTransport } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk/react";
 import { nanoid } from "nanoid";
 import { Button } from "@/shared/ui/button";
 
@@ -50,31 +50,27 @@ export const CopilotPage: React.FC = () => {
   const tenantId = "demo-tenant"; // TODO: pull from auth/tenant context
   const accessToken = ""; // TODO: pull from auth context
 
-  const transport = useMemo(
+  const chatOptions = useMemo(
     () =>
-      new DefaultChatTransport({
+      ({
         api: `${apiBase}/copilot/chat`,
-        streamProtocol: "data",
-        prepareHeaders: async () => ({
+        headers: {
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
           "X-Tenant-Id": tenantId,
           "X-Idempotency-Key": crypto.randomUUID ? crypto.randomUUID() : nanoid(),
-        }),
-        prepareBody: async ({ messages }) => ({
-          messages,
+        },
+        body: {
           requestData: {
             tenantId,
             locale: "en",
             activeModule: "freelancer",
           },
-        }),
-      } as any),
+        },
+      }) as any,
     [apiBase, tenantId, accessToken]
   );
 
-  const { messages, input, handleInputChange, handleSubmit, addToolResult } = useChat({
-    transport,
-  } as any);
+  const { messages, input, handleInputChange, handleSubmit, addToolResult } = useChat(chatOptions);
 
   const renderPart = (part: MessagePart, messageId: string) => {
     if (part.type === "text") return <p className="whitespace-pre-wrap">{part.text}</p>;
@@ -90,14 +86,14 @@ export const CopilotPage: React.FC = () => {
                 toolCallId: part.toolCallId,
                 result: { confirmed: true },
                 toolName: part.toolName,
-              })
+              } as any)
             }
             onCancel={() =>
               addToolResult?.({
                 toolCallId: part.toolCallId,
                 result: { confirmed: false },
                 toolName: part.toolName,
-              })
+              } as any)
             }
           />
         );

@@ -2,6 +2,20 @@ import { z } from "zod";
 
 export const CONTRACTS_HELLO = "Kerniflow contracts loaded ✅";
 
+// Legacy helpers used by domain utils
+export type Currency = "EUR";
+export type Locale = "de-DE" | "en-US";
+export type ExpenseCategory = "Office" | "Meals" | "Travel" | "Software" | "Other";
+export interface Receipt {
+  id: string;
+  merchant: string;
+  issuedAtISO: string;
+  totalCents: number;
+  vatRate: number;
+  currency: Currency;
+  category?: ExpenseCategory;
+}
+
 // Common
 export const ApiErrorSchema = z.object({
   error: z.string(),
