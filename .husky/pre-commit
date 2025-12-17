@@ -5,3 +5,19 @@ fi
 
 # Run lint-staged on staged files only
 pnpm lint-staged
+
+if [ $? -ne 0 ]; then
+  echo "❌ lint-staged failed. Fix errors and try again."
+  exit 1
+fi
+
+echo "Running targeted build to ensure code compiles..."
+pnpm -r --filter @kerniflow/contracts --filter @kerniflow/domain --filter @kerniflow/data --filter @kerniflow/api --filter @kerniflow/worker build
+
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed. Fix errors and try again."
+  echo "   To skip: HUSKY=0 git commit -m \"...\""
+  exit 1
+fi
+
+echo "✅ Build succeeded."
