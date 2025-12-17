@@ -3,6 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Ensure Prisma ships engines for local dev and alpine arm64 builds
+  binaryTargets = ["native", "linux-musl-arm64-openssl-1.1.x"]
   previewFeatures = ["prismaSchemaFolder"]
 }
 

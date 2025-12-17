@@ -4,6 +4,7 @@
 FROM node:22-alpine AS builder
 
 RUN corepack enable pnpm
+RUN apk add --no-cache python3 make g++ openssl
 
 WORKDIR /app
 
@@ -17,7 +18,8 @@ COPY packages/domain/package.json ./packages/domain/
 COPY packages/contracts/package.json ./packages/contracts/
 
 # Install dependencies (frozen lockfile for deterministic builds)
-RUN pnpm install --frozen-lockfile --recursive
+RUN pnpm install --frozen-lockfile --recursive && \
+    pnpm rebuild bcrypt
 
 # Copy source code
 COPY . .
@@ -25,7 +27,8 @@ COPY . .
 # Build packages that Worker depends on
 RUN pnpm --filter @kerniflow/contracts build && \
     pnpm --filter @kerniflow/domain build && \
-    pnpm --filter @kerniflow/data build
+    pnpm --filter @kerniflow/data build && \
+    pnpm --filter @kerniflow/data exec prisma generate --schema prisma/schema
 
 # ============================================================================
 # Development / Runtime stage
@@ -33,6 +36,7 @@ RUN pnpm --filter @kerniflow/contracts build && \
 FROM node:22-alpine
 
 RUN corepack enable pnpm
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 

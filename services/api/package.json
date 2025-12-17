@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "@kerniflow/contracts": "workspace:*",
     "@kerniflow/domain": "workspace:*",
     "@kerniflow/data": "workspace:*",
@@ -22,8 +23,8 @@
     "@types/node": "^20.10.0"
   },
   "scripts": {
-    "dev": "tsx watch --env-file=../../.env src/main.ts",
-    "start": "tsx --env-file=../../.env src/main.ts",
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
