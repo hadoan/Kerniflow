@@ -15,6 +15,7 @@ export interface Receipt {
   currency: Currency;
   category?: ExpenseCategory;
 }
+export const mockReceipts: Receipt[] = [];
 
 // Common
 export const ApiErrorSchema = z.object({

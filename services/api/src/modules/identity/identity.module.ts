@@ -17,9 +17,9 @@ import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { IdGeneratorPort, ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { IdempotencyPort, IDEMPOTENCY_PORT_TOKEN } from "../../shared/ports/idempotency.port";
-import { OutboxPort } from "../../shared/ports/outbox.port";
-import { AuditPort } from "../../shared/ports/audit.port";
-import { ClockPort } from "../../shared/ports/clock.port";
+import { OUTBOX_PORT_TOKEN } from "../../shared/ports/outbox.port";
+import { AUDIT_PORT_TOKEN } from "../../shared/ports/audit.port";
+import { CLOCK_PORT_TOKEN, ClockPort } from "../../shared/ports/clock.port";
 import { SignUpUseCase } from "./application/use-cases/sign-up.usecase";
 import { SignInUseCase } from "./application/use-cases/sign-in.usecase";
 import { RefreshTokenUseCase } from "./application/use-cases/refresh-token.usecase";
@@ -113,18 +113,9 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
       provide: IDEMPOTENCY_PORT_TOKEN,
       useClass: PrismaIdempotencyAdapter,
     },
-    {
-      provide: OutboxPort,
-      useClass: PrismaOutboxAdapter,
-    },
-    {
-      provide: AuditPort,
-      useClass: PrismaAuditRepository,
-    },
-    {
-      provide: ClockPort,
-      useExisting: SystemClock,
-    },
+    { provide: OUTBOX_PORT_TOKEN, useClass: PrismaOutboxAdapter },
+    { provide: AUDIT_PORT_TOKEN, useClass: PrismaAuditRepository },
+    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     {
       provide: SignUpUseCase,
       useFactory: (
@@ -135,8 +126,8 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
         passwordHasher: any,
         tokenService: any,
         refreshTokenRepo: any,
-        outbox: OutboxPort,
-        audit: AuditPort,
+        outbox: any,
+        audit: any,
         idempotency: IdempotencyPort,
         idGen: IdGeneratorPort,
         clock: ClockPort
@@ -167,7 +158,7 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
         AUDIT_PORT_TOKEN,
         IDEMPOTENCY_PORT_TOKEN,
         ID_GENERATOR_TOKEN,
-        CLOCK_TOKEN,
+        CLOCK_PORT_TOKEN,
       ],
     },
     {
