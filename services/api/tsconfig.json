@@ -5,7 +5,11 @@
     "moduleResolution": "nodenext",
     "strict": false,
     "strictNullChecks": true,
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["shared/*"]
+    }
   },
   "include": ["src"]
 }
