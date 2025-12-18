@@ -44,7 +44,7 @@ const invoiceIssueTool: DomainToolPort = {
 };
 
 @Module({
-  imports: [IdentityModule],
+  imports: [],
   controllers: [CopilotController],
   providers: [
     PrismaAgentRunRepository,

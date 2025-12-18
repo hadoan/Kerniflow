@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/no-explicit-any: "error" */
 import { Module } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
@@ -17,30 +18,35 @@ import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { IdGeneratorPort, ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { IdempotencyPort, IDEMPOTENCY_PORT_TOKEN } from "../../shared/ports/idempotency.port";
-import { OUTBOX_PORT_TOKEN } from "../../shared/ports/outbox.port";
-import { AUDIT_PORT_TOKEN } from "../../shared/ports/audit.port";
 import { CLOCK_PORT_TOKEN, ClockPort } from "../../shared/ports/clock.port";
 import { SignUpUseCase } from "./application/use-cases/sign-up.usecase";
 import { SignInUseCase } from "./application/use-cases/sign-in.usecase";
 import { RefreshTokenUseCase } from "./application/use-cases/refresh-token.usecase";
 import { SignOutUseCase } from "./application/use-cases/sign-out.usecase";
 import { SwitchTenantUseCase } from "./application/use-cases/switch-tenant.usecase";
+import { AuthGuard } from "./presentation/http/auth.guard";
 
 // Security
 import { BcryptPasswordHasher } from "./infrastructure/security/bcrypt.password-hasher";
 import { JwtTokenService } from "./infrastructure/security/jwt.token-service";
 
 // Ports / Tokens
-import { USER_REPOSITORY_TOKEN } from "./application/ports/user.repo.port";
-import { TENANT_REPOSITORY_TOKEN } from "./application/ports/tenant.repo.port";
-import { MEMBERSHIP_REPOSITORY_TOKEN } from "./application/ports/membership.repo.port";
-import { REFRESH_TOKEN_REPOSITORY_TOKEN } from "./application/ports/refresh-token.repo.port";
-import { ROLE_REPOSITORY_TOKEN } from "./application/ports/role.repo.port";
-import { PASSWORD_HASHER_TOKEN } from "./application/ports/password-hasher.port";
-import { TOKEN_SERVICE_TOKEN } from "./application/ports/token-service.port";
-import { OUTBOX_PORT_TOKEN } from "./application/ports/outbox.port";
-import { AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
+import { IUserRepository, USER_REPOSITORY_TOKEN } from "./application/ports/user.repo.port";
+import { ITenantRepository, TENANT_REPOSITORY_TOKEN } from "./application/ports/tenant.repo.port";
+import {
+  IMembershipRepository,
+  MEMBERSHIP_REPOSITORY_TOKEN,
+} from "./application/ports/membership.repo.port";
+import {
+  IRefreshTokenRepository,
+  REFRESH_TOKEN_REPOSITORY_TOKEN,
+} from "./application/ports/refresh-token.repo.port";
+import { IRoleRepository, ROLE_REPOSITORY_TOKEN } from "./application/ports/role.repo.port";
+import { IPasswordHasher, PASSWORD_HASHER_TOKEN } from "./application/ports/password-hasher.port";
+import { ITokenService, TOKEN_SERVICE_TOKEN } from "./application/ports/token-service.port";
 import { CLOCK_TOKEN } from "./application/ports/clock.port";
+import { IOutboxPort, OUTBOX_PORT_TOKEN } from "./application/ports/outbox.port";
+import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
 
 @Module({
   controllers: [AuthController],
@@ -54,6 +60,7 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
     PrismaAuditRepository,
     PrismaOutboxAdapter,
     PrismaIdempotencyAdapter,
+    AuthGuard,
 
     // Security
     BcryptPasswordHasher,
@@ -113,21 +120,19 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
       provide: IDEMPOTENCY_PORT_TOKEN,
       useClass: PrismaIdempotencyAdapter,
     },
-    { provide: OUTBOX_PORT_TOKEN, useClass: PrismaOutboxAdapter },
-    { provide: AUDIT_PORT_TOKEN, useClass: PrismaAuditRepository },
     { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     {
       provide: SignUpUseCase,
       useFactory: (
-        userRepo: any,
-        tenantRepo: any,
-        membershipRepo: any,
-        roleRepo: any,
-        passwordHasher: any,
-        tokenService: any,
-        refreshTokenRepo: any,
-        outbox: any,
-        audit: any,
+        userRepo: IUserRepository,
+        tenantRepo: ITenantRepository,
+        membershipRepo: IMembershipRepository,
+        roleRepo: IRoleRepository,
+        passwordHasher: IPasswordHasher,
+        tokenService: ITokenService,
+        refreshTokenRepo: IRefreshTokenRepository,
+        outbox: IOutboxPort,
+        audit: IAuditPort,
         idempotency: IdempotencyPort,
         idGen: IdGeneratorPort,
         clock: ClockPort
@@ -164,13 +169,13 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
     {
       provide: SignInUseCase,
       useFactory: (
-        userRepo: any,
-        membershipRepo: any,
-        passwordHasher: any,
-        tokenService: any,
-        refreshTokenRepo: any,
-        outbox: OutboxPort,
-        audit: AuditPort,
+        userRepo: IUserRepository,
+        membershipRepo: IMembershipRepository,
+        passwordHasher: IPasswordHasher,
+        tokenService: ITokenService,
+        refreshTokenRepo: IRefreshTokenRepository,
+        outbox: IOutboxPort,
+        audit: IAuditPort,
         idempotency: IdempotencyPort,
         idGen: IdGeneratorPort,
         clock: ClockPort
@@ -203,10 +208,10 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
     {
       provide: RefreshTokenUseCase,
       useFactory: (
-        refreshRepo: any,
-        tokenService: any,
-        userRepo: any,
-        audit: any,
+        refreshRepo: IRefreshTokenRepository,
+        tokenService: ITokenService,
+        userRepo: IUserRepository,
+        audit: IAuditPort,
         clock: ClockPort
       ) => new RefreshTokenUseCase(refreshRepo, tokenService, userRepo, audit, clock),
       inject: [
@@ -219,19 +224,19 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
     },
     {
       provide: SignOutUseCase,
-      useFactory: (refreshRepo: any, outbox: OutboxPort, audit: AuditPort) =>
+      useFactory: (refreshRepo: IRefreshTokenRepository, outbox: IOutboxPort, audit: IAuditPort) =>
         new SignOutUseCase(refreshRepo, outbox, audit),
       inject: [REFRESH_TOKEN_REPOSITORY_TOKEN, OUTBOX_PORT_TOKEN, AUDIT_PORT_TOKEN],
     },
     {
       provide: SwitchTenantUseCase,
       useFactory: (
-        membershipRepo: any,
-        tokenService: any,
-        userRepo: any,
-        refreshTokenRepo: any,
-        outbox: OutboxPort,
-        audit: AuditPort,
+        membershipRepo: IMembershipRepository,
+        tokenService: ITokenService,
+        userRepo: IUserRepository,
+        refreshTokenRepo: IRefreshTokenRepository,
+        outbox: IOutboxPort,
+        audit: IAuditPort,
         clock: ClockPort
       ) =>
         new SwitchTenantUseCase(
@@ -271,6 +276,7 @@ import { CLOCK_TOKEN } from "./application/ports/clock.port";
     RefreshTokenUseCase,
     SignOutUseCase,
     SwitchTenantUseCase,
+    AuthGuard,
     ID_GENERATOR_TOKEN,
     IDEMPOTENCY_PORT_TOKEN,
   ],

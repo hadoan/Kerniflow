@@ -20,7 +20,7 @@ import { AiCopilotModule } from "./modules/ai-copilot/ai-copilot.module";
     WorkflowModule,
     AutomationModule,
     ReportingModule,
-    AiCopilotModule,
+    // AiCopilotModule,
     ...(process.env.NODE_ENV === "test" ? [TestHarnessModule] : []),
   ],
 })

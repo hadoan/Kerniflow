@@ -5,7 +5,7 @@ export class PrismaAuditAdapter implements AuditPort {
   async write(entry: AuditEntry): Promise<void> {
     await prisma.auditLog.create({
       data: {
-        tenantId: entry.tenantId,
+        tenantId: entry.tenantId!,
         actorUserId: entry.actorUserId ?? null,
         action: entry.action,
         entity: entry.targetType ?? "",

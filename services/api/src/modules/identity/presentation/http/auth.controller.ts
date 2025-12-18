@@ -71,8 +71,8 @@ export class AuthController {
       idempotencyKey: idempotencyKey ?? input.idempotencyKey ?? "default",
       context: buildRequestContext({
         requestId: req?.headers["x-request-id"] as string | undefined,
-        tenantId: null,
-        actorUserId: null,
+        tenantId: undefined,
+        actorUserId: undefined,
       }),
     });
 
@@ -99,7 +99,10 @@ export class AuthController {
     const result = await this.signInUseCase.execute({
       ...input,
       idempotencyKey: input.idempotencyKey,
-      context: buildRequestContext({ tenantId: input.tenantId ?? null, actorUserId: null }),
+      context: buildRequestContext({
+        tenantId: input.tenantId ?? undefined,
+        actorUserId: undefined,
+      }),
     });
 
     return {
