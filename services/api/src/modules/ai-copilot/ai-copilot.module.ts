@@ -1,7 +1,6 @@
-import { Module, Logger } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { CopilotController } from "./presentation/http/copilot.controller";
 
-const logger = new Logger("AiCopilotModule");
 import { StreamCopilotChatUseCase } from "./application/use-cases/stream-copilot-chat.usecase";
 import { PrismaAgentRunRepository } from "./infrastructure/persistence/prisma.agent-run.repo";
 import { PrismaMessageRepository } from "./infrastructure/persistence/prisma.message.repo";
@@ -17,8 +16,9 @@ import { DomainToolPort } from "./application/ports/domain-tool.port";
 import { z } from "zod";
 import { AuditPort } from "./application/ports/audit.port";
 import { OutboxPort } from "./application/ports/outbox.port";
-import { ClockPort } from "@kerniflow/kernel";
+import { ClockPort } from "@kerniflow/kernel/ports/clock.port";
 import { IdentityModule } from "../identity/identity.module";
+import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 
 const invoiceDraftTool: DomainToolPort = {
   name: "invoice.createDraft",
@@ -57,17 +57,24 @@ const invoiceIssueTool: DomainToolPort = {
     PrismaOutboxAdapter,
     InMemoryIdempotencyAdapter,
     TenantGuard,
+    { provide: "COPILOT_LOGGER", useClass: NestLoggerAdapter },
     {
       provide: AiSdkModelAdapter,
       useFactory: (
         toolExec: PrismaToolExecutionRepository,
         audit: PrismaAuditAdapter,
-        outbox: PrismaOutboxAdapter
+        outbox: PrismaOutboxAdapter,
+        logger: NestLoggerAdapter
       ) => {
         logger.debug("Creating AiSdkModelAdapter");
         return new AiSdkModelAdapter(toolExec, audit, outbox);
       },
-      inject: [PrismaToolExecutionRepository, PrismaAuditAdapter, PrismaOutboxAdapter],
+      inject: [
+        PrismaToolExecutionRepository,
+        PrismaAuditAdapter,
+        PrismaOutboxAdapter,
+        "COPILOT_LOGGER",
+      ],
     },
     {
       provide: "COPILOT_CLOCK",
@@ -88,7 +95,8 @@ const invoiceIssueTool: DomainToolPort = {
         audit: PrismaAuditAdapter,
         outbox: PrismaOutboxAdapter,
         idem: InMemoryIdempotencyAdapter,
-        clock: ClockPort
+        clock: ClockPort,
+        logger: NestLoggerAdapter
       ) => {
         logger.debug("Creating StreamCopilotChatUseCase");
         return new StreamCopilotChatUseCase(
@@ -113,6 +121,7 @@ const invoiceIssueTool: DomainToolPort = {
         PrismaOutboxAdapter,
         InMemoryIdempotencyAdapter,
         "COPILOT_CLOCK",
+        "COPILOT_LOGGER",
       ],
     },
   ],

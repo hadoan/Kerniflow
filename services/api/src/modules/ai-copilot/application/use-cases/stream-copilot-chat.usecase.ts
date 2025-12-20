@@ -8,7 +8,7 @@ import { LanguageModelPort } from "../ports/language-model.port";
 import { AuditPort } from "../ports/audit.port";
 import { OutboxPort } from "../ports/outbox.port";
 import { IdempotencyPort } from "../ports/idempotency.port";
-import { ClockPort } from "@kerniflow/kernel";
+import { ClockPort } from "@kerniflow/kernel/ports/clock.port";
 import { Response } from "express";
 
 export class StreamCopilotChatUseCase {
