@@ -18,10 +18,10 @@ const baseDefinition = (overrides: Partial<CustomFieldDefinition>): CustomFieldD
   isActive: overrides.isActive ?? true,
   createdAt: overrides.createdAt ?? new Date(),
   updatedAt: overrides.updatedAt ?? new Date(),
-  defaultValue: overrides.defaultValue,
-  description: overrides.description,
-  options: overrides.options,
-  validation: overrides.validation,
+  ...(overrides.defaultValue !== undefined && { defaultValue: overrides.defaultValue }),
+  ...(overrides.description !== undefined && { description: overrides.description }),
+  ...(overrides.options !== undefined && { options: overrides.options }),
+  ...(overrides.validation !== undefined && { validation: overrides.validation }),
 });
 
 describe("validateAndNormalizeCustomValues", () => {

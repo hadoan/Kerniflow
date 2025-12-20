@@ -10,7 +10,7 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
     const existing = await prisma.idempotencyKey.findUnique({
       where: {
         tenantId_actionKey_key: {
-          tenantId,
+          tenantId: tenantId as string,
           actionKey,
           key,
         },
@@ -32,7 +32,7 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
     await prisma.idempotencyKey.upsert({
       where: {
         tenantId_actionKey_key: {
-          tenantId,
+          tenantId: tenantId as string,
           actionKey,
           key,
         },

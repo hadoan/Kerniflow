@@ -7,7 +7,7 @@ export const buildSignUpInput = (overrides: Partial<SignUpInput> = {}): SignUpIn
     password: "password123",
     tenantName: "Acme Inc",
     idempotencyKey: "idem-1",
-    context: buildRequestContext({ tenantId: null, actorUserId: null }),
+    context: buildRequestContext({ tenantId: undefined, actorUserId: undefined }),
     ...overrides,
   };
 };

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { BaseUseCase } from "../application/base-usecase";
 import { UseCaseContext } from "../application/context";
 import { ValidationError } from "../application/errors";
-import { isErr, isOk, ok, unwrap } from "../application/result";
+import { isErr, isOk, ok, unwrap, Result } from "../application/result";
 import { InMemoryIdempotency } from "../testing/in-memory-idempotency";
 import { NoopLogger } from "../testing/noop-logger";
 import { UnitOfWorkPort } from "../ports/unit-of-work.port";
@@ -12,6 +12,10 @@ import { IdempotencyPort } from "../ports/idempotency.port";
 const ctx: UseCaseContext = { tenantId: "tenant-1", userId: "user-1" };
 
 class EchoUseCase extends BaseUseCase<string, string> {
+  constructor(deps: { logger: NoopLogger }) {
+    super(deps);
+  }
+
   protected async handle(input: string): Promise<Result<string, ValidationError>> {
     return ok(`echo:${input}`);
   }
@@ -33,6 +37,10 @@ class TransactionUseCase extends BaseUseCase<string, string> {
 class IdempotentUseCase extends BaseUseCase<{ idempotencyKey: string }, number> {
   count = 0;
 
+  constructor(deps: { logger: NoopLogger; idempotency?: IdempotencyPort }) {
+    super(deps);
+  }
+
   protected async handle(): Promise<Result<number, ValidationError>> {
     this.count += 1;
     return ok(this.count);
@@ -40,6 +48,10 @@ class IdempotentUseCase extends BaseUseCase<{ idempotencyKey: string }, number> 
 }
 
 class ValidateUseCase extends BaseUseCase<string, string> {
+  constructor(deps: { logger: NoopLogger }) {
+    super(deps);
+  }
+
   protected validate(): string {
     throw new Error("invalid");
   }
@@ -58,8 +70,12 @@ describe("BaseUseCase", () => {
   });
 
   it("wraps execution in transaction when provided", async () => {
-    const withinTransaction = vi.fn(async <T>(fn: () => Promise<T>) => fn());
-    const fakeUow: UnitOfWorkPort = { withinTransaction };
+    const withinTransaction = vi.fn(<T>(fn: () => Promise<T>): Promise<T> => fn()) as <T>(
+      fn: () => Promise<T>
+    ) => Promise<T>;
+    const fakeUow: UnitOfWorkPort = {
+      withinTransaction,
+    };
     const uc = new TransactionUseCase(new NoopLogger(), fakeUow);
 
     const result = await uc.execute("tx", ctx);

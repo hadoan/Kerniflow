@@ -22,7 +22,7 @@ export class CustomFieldIndexRepository implements CustomFieldIndexPort {
           valueNumber: row.valueNumber ?? null,
           valueDate: row.valueDate ?? null,
           valueBool: row.valueBool ?? null,
-          valueJson: row.valueJson ?? null,
+          valueJson: (row.valueJson ?? null) as any,
         })),
         skipDuplicates: true,
       }),

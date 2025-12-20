@@ -4,7 +4,12 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@kerniflow/contracts": ["../contracts/src"],
+      "@kerniflow/domain": ["../domain/src"],
+      "@kerniflow/kernel": ["../kernel/src"]
+    }
   },
   "include": ["src"]
 }

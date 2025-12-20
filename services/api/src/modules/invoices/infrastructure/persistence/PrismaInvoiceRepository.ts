@@ -14,7 +14,7 @@ export class PrismaInvoiceRepository implements InvoiceRepositoryPort {
         totalCents: invoice.totalCents,
         currency: invoice.currency,
         issuedAt: invoice.issuedAt,
-        custom: invoice.custom,
+        custom: invoice.custom as any,
       },
       create: {
         id: invoice.id,
@@ -24,7 +24,7 @@ export class PrismaInvoiceRepository implements InvoiceRepositoryPort {
         totalCents: invoice.totalCents,
         currency: invoice.currency,
         issuedAt: invoice.issuedAt,
-        custom: invoice.custom,
+        custom: invoice.custom as any,
         lines: {
           create: invoice.lines.map((line) => ({
             id: line.id,

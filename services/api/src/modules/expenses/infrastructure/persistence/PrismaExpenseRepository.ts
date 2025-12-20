@@ -16,7 +16,7 @@ export class PrismaExpenseRepository implements ExpenseRepositoryPort {
         category: expense.category,
         issuedAt: expense.issuedAt,
         createdByUserId: expense.createdByUserId,
-        custom: expense.custom,
+        custom: expense.custom as any,
       },
     });
   }
