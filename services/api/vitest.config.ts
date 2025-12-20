@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@shared": path.resolve(__dirname, "src/shared"),
+      "@kerniflow/kernel": path.resolve(__dirname, "../..", "packages/kernel/src"),
     },
   },
 });

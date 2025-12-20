@@ -8,6 +8,7 @@
     "@kerniflow/contracts": "workspace:*",
     "@kerniflow/data": "workspace:*",
     "@kerniflow/domain": "workspace:*",
+    "@kerniflow/kernel": "workspace:*",
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
     "@nestjs/platform-express": "^11.1.9",

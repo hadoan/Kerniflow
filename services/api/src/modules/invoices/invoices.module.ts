@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { InvoicesController } from "./presentation/http/invoices.controller";
 import { PrismaInvoiceRepository } from "./infrastructure/persistence/PrismaInvoiceRepository";
-import { CreateInvoiceDraftUseCase } from "./application/use-cases/CreateInvoiceDraftUseCase";
+import { CreateInvoiceDraftUseCase } from "./application/use-cases/create-invoice-draft/CreateInvoiceDraftUseCase";
 import { IssueInvoiceUseCase } from "./application/use-cases/IssueInvoiceUseCase";
 import { OutboxPort, OUTBOX_PORT_TOKEN } from "../../shared/ports/outbox.port";
 import { AuditPort, AUDIT_PORT_TOKEN } from "../../shared/ports/audit.port";
@@ -14,6 +14,11 @@ import { PrismaIdempotencyAdapter } from "../../shared/infrastructure/persistenc
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { CustomFieldDefinitionRepository, CustomFieldIndexRepository } from "@kerniflow/data";
+import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
+import { PrismaUnitOfWorkAdapter } from "../../shared/adapters/uow/prisma-uow.adapter";
+import { DbIdempotencyAdapter } from "../../shared/adapters/idempotency/db-idempotency.adapter";
+import { SystemIdGeneratorAdapter } from "../../shared/adapters/id-generator/system-id-generator.adapter";
+import { prisma } from "@kerniflow/data";
 
 @Module({
   controllers: [InvoicesController],
@@ -32,29 +37,24 @@ import { CustomFieldDefinitionRepository, CustomFieldIndexRepository } from "@ke
         repo: PrismaInvoiceRepository,
         outbox: OutboxPort,
         audit: AuditPort,
-        idempotency: IdempotencyPort,
-        idGen: IdGeneratorPort,
-        clock: ClockPort,
         customDefs: CustomFieldDefinitionRepository,
         customIndexes: CustomFieldIndexRepository
       ) =>
-        new CreateInvoiceDraftUseCase(
-          repo,
+        new CreateInvoiceDraftUseCase({
+          logger: new NestLoggerAdapter(),
+          uow: new PrismaUnitOfWorkAdapter(prisma),
+          idempotency: new DbIdempotencyAdapter(prisma, "invoices.create_draft"),
+          invoiceRepo: repo,
           outbox,
           audit,
-          idempotency,
-          idGen,
-          clock,
-          customDefs,
-          customIndexes
-        ),
+          idGenerator: new SystemIdGeneratorAdapter(),
+          customFieldDefinitions: customDefs,
+          customFieldIndexes: customIndexes,
+        }),
       inject: [
         PrismaInvoiceRepository,
         OUTBOX_PORT_TOKEN,
         AUDIT_PORT_TOKEN,
-        IDEMPOTENCY_PORT_TOKEN,
-        ID_GENERATOR_TOKEN,
-        CLOCK_PORT_TOKEN,
         CustomFieldDefinitionRepository,
         CustomFieldIndexRepository,
       ],

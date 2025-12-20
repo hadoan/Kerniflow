@@ -10,7 +10,7 @@
     "prepare": "husky",
     "dev": "pnpm build:packages && pnpm -r --parallel dev",
     "build": "pnpm -r build",
-    "build:packages": "pnpm --filter '@kerniflow/contracts' --filter '@kerniflow/domain' --filter '@kerniflow/data' build",
+    "build:packages": "pnpm --filter '@kerniflow/kernel' --filter '@kerniflow/contracts' --filter '@kerniflow/domain' --filter '@kerniflow/data' build",
     "typecheck": "pnpm -r typecheck",
     "dev:web": "pnpm --filter @kerniflow/web dev",
     "dev:api": "pnpm build:packages && pnpm --filter @kerniflow/api dev",

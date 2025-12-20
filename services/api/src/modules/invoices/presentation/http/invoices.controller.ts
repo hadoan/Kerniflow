@@ -1,9 +1,11 @@
 import { Body, Controller, Param, Post, Req } from "@nestjs/common";
-import { CreateInvoiceDraftUseCase } from "../../application/use-cases/CreateInvoiceDraftUseCase";
+import { isErr, UseCaseContext } from "@kerniflow/kernel";
+import { CreateInvoiceDraftUseCase } from "../../application/use-cases/create-invoice-draft/CreateInvoiceDraftUseCase";
 import { IssueInvoiceUseCase } from "../../application/use-cases/IssueInvoiceUseCase";
 import { CreateInvoiceDraftInputSchema, IssueInvoiceInputSchema } from "@kerniflow/contracts";
-import { buildRequestContext } from "../../../../shared/context/request-context";
 import { Request } from "express";
+import { toHttpException } from "../../../../shared/http/usecase-error.mapper";
+import { buildRequestContext } from "../../../../shared/context/request-context";
 
 @Controller("invoices")
 export class InvoicesController {
@@ -15,30 +17,30 @@ export class InvoicesController {
   @Post("draft")
   async createDraft(@Body() body: unknown, @Req() req: Request) {
     const input = CreateInvoiceDraftInputSchema.parse(body);
-    const ctx = buildRequestContext({
-      requestId: req.headers["x-request-id"] as string | undefined,
+    const ctx: UseCaseContext = {
       tenantId: input.tenantId,
-      actorUserId: input.actorUserId,
-    });
-    const invoice = await this.createDraftUseCase.execute({
-      ...input,
-      idempotencyKey: (req.headers["x-idempotency-key"] as string) ?? "default",
-      context: ctx,
-    });
-    return {
-      id: invoice.id,
-      status: invoice.status,
-      tenantId: invoice.tenantId,
-      totalCents: invoice.totalCents,
-      currency: invoice.currency,
-      lines: invoice.lines.map((l) => ({
-        id: l.id,
-        description: l.description,
-        qty: l.qty,
-        unitPriceCents: l.unitPriceCents,
-      })),
-      custom: invoice.custom ?? undefined,
+      userId: input.actorUserId,
+      requestId: req.headers["x-request-id"] as string | undefined,
+      correlationId: req.headers["x-correlation-id"] as string | undefined,
     };
+    const result = await this.createDraftUseCase.execute(
+      {
+        tenantId: input.tenantId,
+        currency: input.currency,
+        clientId: input.clientId ?? null,
+        lines: input.lines,
+        actorUserId: input.actorUserId,
+        custom: input.custom,
+        idempotencyKey: req.headers["x-idempotency-key"] as string | undefined,
+      },
+      ctx
+    );
+
+    if (isErr(result)) {
+      throw toHttpException(result.error);
+    }
+
+    return result.value;
   }
 
   @Post(":id/issue")

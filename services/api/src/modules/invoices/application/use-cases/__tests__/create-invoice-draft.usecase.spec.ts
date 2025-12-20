@@ -1,19 +1,19 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { CreateInvoiceDraftUseCase } from "../CreateInvoiceDraftUseCase";
-import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
-import { MockOutboxPort } from "@shared/testkit/mocks/mock-outbox-port";
-import { MockAuditPort } from "@shared/testkit/mocks/mock-audit-port";
-import { MockIdempotencyPort } from "@shared/testkit/mocks/mock-idempotency-port";
-import { FakeIdGenerator } from "@shared/testkit/fakes/fake-id-generator";
-import { FakeClock } from "@shared/testkit/fakes/fake-clock";
-import { buildCreateDraftInput } from "../../../testkit/builders/build-create-draft-input";
+import { beforeEach, describe, expect, it } from "vitest";
 import { CustomFieldDefinitionPort, CustomFieldIndexPort } from "@kerniflow/domain";
+import { InMemoryIdempotency, NoopLogger, unwrap } from "@kerniflow/kernel";
+
+import { CreateInvoiceDraftUseCase } from "../create-invoice-draft/CreateInvoiceDraftUseCase";
+import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
+import { buildCreateDraftInput } from "../../../testkit/builders/build-create-draft-input";
+import { MockAuditPort } from "@shared/testkit/mocks/mock-audit-port";
+import { MockOutboxPort } from "@shared/testkit/mocks/mock-outbox-port";
+import { FakeIdGenerator } from "@kerniflow/kernel";
 
 let useCase: CreateInvoiceDraftUseCase;
 let repo: FakeInvoiceRepository;
 let outbox: MockOutboxPort;
 let audit: MockAuditPort;
-let idempotency: MockIdempotencyPort;
+let idempotency: InMemoryIdempotency;
 let customDefs: CustomFieldDefinitionPort;
 let customIndexes: CustomFieldIndexPort;
 
@@ -21,7 +21,7 @@ beforeEach(() => {
   repo = new FakeInvoiceRepository();
   outbox = new MockOutboxPort();
   audit = new MockAuditPort();
-  idempotency = new MockIdempotencyPort();
+  idempotency = new InMemoryIdempotency();
   customDefs = {
     listActiveByEntityType: async () => [],
     getById: async () => null,
@@ -32,21 +32,23 @@ beforeEach(() => {
     upsertIndexesForEntity: async () => {},
     deleteIndexesForEntity: async () => {},
   };
-  useCase = new CreateInvoiceDraftUseCase(
-    repo,
+  useCase = new CreateInvoiceDraftUseCase({
+    logger: new NoopLogger(),
+    idempotency,
+    invoiceRepo: repo,
     outbox,
     audit,
-    idempotency,
-    new FakeIdGenerator("inv"),
-    new FakeClock(),
-    customDefs,
-    customIndexes
-  );
+    idGenerator: new FakeIdGenerator(["inv-1", "line-1", "line-2", "line-3"]),
+    customFieldDefinitions: customDefs,
+    customFieldIndexes: customIndexes,
+  });
 });
 
 describe("CreateInvoiceDraftUseCase", () => {
   it("creates a draft invoice with lines and audit", async () => {
-    const invoice = await useCase.execute(buildCreateDraftInput());
+    const { cmd, ctx } = buildCreateDraftInput();
+    const result = await useCase.execute(cmd, ctx);
+    const invoice = unwrap(result);
 
     expect(invoice.status).toBe("DRAFT");
     expect(invoice.lines).toHaveLength(1);
@@ -55,9 +57,9 @@ describe("CreateInvoiceDraftUseCase", () => {
   });
 
   it("is idempotent on repeated key", async () => {
-    const input = buildCreateDraftInput({ idempotencyKey: "idem-1" });
-    const first = await useCase.execute(input);
-    const second = await useCase.execute(input);
+    const { cmd, ctx } = buildCreateDraftInput({ idempotencyKey: "idem-1" });
+    const first = unwrap(await useCase.execute(cmd, ctx));
+    const second = unwrap(await useCase.execute(cmd, ctx));
 
     expect(second.id).toBe(first.id);
     expect(repo.invoices).toHaveLength(1);
