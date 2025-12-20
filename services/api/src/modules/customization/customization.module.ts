@@ -1,5 +1,7 @@
-import { Module } from "@nestjs/common";
+import { Module, Logger } from "@nestjs/common";
 import { CustomFieldsController } from "./presentation/custom-fields.controller";
+
+const logger = new Logger("CustomizationModule");
 import { EntityLayoutController } from "./presentation/entity-layout.controller";
 import { CustomizationService } from "./customization.service";
 import {
@@ -7,6 +9,7 @@ import {
   EntityLayoutRepository,
   CustomFieldIndexRepository,
 } from "@kerniflow/data";
+import { IdentityModule } from "../identity/identity.module";
 import { PrismaAuditAdapter } from "../../shared/infrastructure/persistence/prisma-audit.adapter";
 import { PrismaIdempotencyAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency.adapter";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
@@ -17,6 +20,7 @@ import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 
 @Module({
+  imports: [IdentityModule],
   controllers: [CustomFieldsController, EntityLayoutController],
   providers: [
     CustomizationService,

@@ -1,5 +1,7 @@
-import { Module } from "@nestjs/common";
+import { Module, Logger } from "@nestjs/common";
 import { CopilotController } from "./presentation/http/copilot.controller";
+
+const logger = new Logger("AiCopilotModule");
 import { StreamCopilotChatUseCase } from "./application/use-cases/stream-copilot-chat.usecase";
 import { PrismaAgentRunRepository } from "./infrastructure/persistence/prisma.agent-run.repo";
 import { PrismaMessageRepository } from "./infrastructure/persistence/prisma.message.repo";
@@ -44,18 +46,29 @@ const invoiceIssueTool: DomainToolPort = {
 };
 
 @Module({
-  imports: [],
-  controllers: [CopilotController],
+  imports: [IdentityModule],
+  controllers: [], // [CopilotController],
   providers: [
     PrismaAgentRunRepository,
     PrismaMessageRepository,
     PrismaToolExecutionRepository,
     ToolRegistry,
-    AiSdkModelAdapter,
     PrismaAuditAdapter,
     PrismaOutboxAdapter,
     InMemoryIdempotencyAdapter,
     TenantGuard,
+    {
+      provide: AiSdkModelAdapter,
+      useFactory: (
+        toolExec: PrismaToolExecutionRepository,
+        audit: PrismaAuditAdapter,
+        outbox: PrismaOutboxAdapter
+      ) => {
+        logger.debug("Creating AiSdkModelAdapter");
+        return new AiSdkModelAdapter(toolExec, audit, outbox);
+      },
+      inject: [PrismaToolExecutionRepository, PrismaAuditAdapter, PrismaOutboxAdapter],
+    },
     {
       provide: "COPILOT_CLOCK",
       useValue: { now: () => new Date() },
@@ -76,8 +89,9 @@ const invoiceIssueTool: DomainToolPort = {
         outbox: PrismaOutboxAdapter,
         idem: InMemoryIdempotencyAdapter,
         clock: ClockPort
-      ) =>
-        new StreamCopilotChatUseCase(
+      ) => {
+        logger.debug("Creating StreamCopilotChatUseCase");
+        return new StreamCopilotChatUseCase(
           runs,
           messages,
           toolExec,
@@ -87,7 +101,8 @@ const invoiceIssueTool: DomainToolPort = {
           outbox as OutboxPort,
           idem,
           clock
-        ),
+        );
+      },
       inject: [
         PrismaAgentRunRepository,
         PrismaMessageRepository,

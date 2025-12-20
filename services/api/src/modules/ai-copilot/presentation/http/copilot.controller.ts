@@ -8,6 +8,7 @@ import {
   UseGuards,
   BadRequestException,
   Inject,
+  Logger,
 } from "@nestjs/common";
 import { Response, Request } from "express";
 import { CopilotChatRequestDto } from "./copilot.dto";
@@ -18,10 +19,14 @@ import { ClockPort } from "../../application/ports/clock.port";
 
 @Controller("copilot")
 export class CopilotController {
+  private readonly logger = new Logger(CopilotController.name);
+
   constructor(
     private readonly streamCopilotChat: StreamCopilotChatUseCase,
     @Inject("COPILOT_CLOCK") private readonly clock: ClockPort
-  ) {}
+  ) {
+    this.logger.debug("CopilotController instantiated");
+  }
 
   @Post("chat")
   @UseGuards(IdentityAuthGuard, TenantGuard)

@@ -1,6 +1,9 @@
 /* eslint @typescript-eslint/no-explicit-any: "error" */
 import { Module } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { Logger } from "@nestjs/common";
+
+const logger = new Logger("IdentityModule");
 
 // Controllers
 import { AuthController } from "./presentation/http/auth.controller";
@@ -131,8 +134,9 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
         idempotency: IdempotencyPort,
         idGen: IdGeneratorPort,
         clock: ClockPort
-      ) =>
-        new SignUpUseCase(
+      ) => {
+        logger.debug("Creating SignUpUseCase");
+        return new SignUpUseCase(
           userRepo,
           tenantRepo,
           membershipRepo,
@@ -145,7 +149,8 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
           idempotency,
           idGen,
           clock
-        ),
+        );
+      },
       inject: [
         USER_REPOSITORY_TOKEN,
         TENANT_REPOSITORY_TOKEN,
@@ -174,8 +179,9 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
         idempotency: IdempotencyPort,
         idGen: IdGeneratorPort,
         clock: ClockPort
-      ) =>
-        new SignInUseCase(
+      ) => {
+        logger.debug("Creating SignInUseCase");
+        return new SignInUseCase(
           userRepo,
           membershipRepo,
           passwordHasher,
@@ -186,7 +192,8 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
           idempotency,
           idGen,
           clock
-        ),
+        );
+      },
       inject: [
         USER_REPOSITORY_TOKEN,
         MEMBERSHIP_REPOSITORY_TOKEN,
@@ -208,7 +215,10 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
         userRepo: IUserRepository,
         audit: IAuditPort,
         clock: ClockPort
-      ) => new RefreshTokenUseCase(refreshRepo, tokenService, userRepo, audit, clock),
+      ) => {
+        logger.debug("Creating RefreshTokenUseCase");
+        return new RefreshTokenUseCase(refreshRepo, tokenService, userRepo, audit, clock);
+      },
       inject: [
         REFRESH_TOKEN_REPOSITORY_TOKEN,
         TOKEN_SERVICE_TOKEN,
@@ -219,8 +229,14 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
     },
     {
       provide: SignOutUseCase,
-      useFactory: (refreshRepo: IRefreshTokenRepository, outbox: IOutboxPort, audit: IAuditPort) =>
-        new SignOutUseCase(refreshRepo, outbox, audit),
+      useFactory: (
+        refreshRepo: IRefreshTokenRepository,
+        outbox: IOutboxPort,
+        audit: IAuditPort
+      ) => {
+        logger.debug("Creating SignOutUseCase");
+        return new SignOutUseCase(refreshRepo, outbox, audit);
+      },
       inject: [REFRESH_TOKEN_REPOSITORY_TOKEN, OUTBOX_PORT_TOKEN, AUDIT_PORT_TOKEN],
     },
     {
@@ -233,8 +249,9 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
         outbox: IOutboxPort,
         audit: IAuditPort,
         clock: ClockPort
-      ) =>
-        new SwitchTenantUseCase(
+      ) => {
+        logger.debug("Creating SwitchTenantUseCase");
+        return new SwitchTenantUseCase(
           membershipRepo,
           tokenService,
           userRepo,
@@ -242,7 +259,8 @@ import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
           outbox,
           audit,
           clock
-        ),
+        );
+      },
       inject: [
         MEMBERSHIP_REPOSITORY_TOKEN,
         TOKEN_SERVICE_TOKEN,

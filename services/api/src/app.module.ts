@@ -21,8 +21,8 @@ import { CustomizationModule } from "./modules/customization/customization.modul
     WorkflowModule,
     AutomationModule,
     ReportingModule,
-    CustomizationModule,
-    // AiCopilotModule,
+    // CustomizationModule,
+    AiCopilotModule,
     ...(process.env.NODE_ENV === "test" ? [TestHarnessModule] : []),
   ],
 })
