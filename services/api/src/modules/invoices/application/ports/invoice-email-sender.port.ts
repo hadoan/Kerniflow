@@ -6,6 +6,7 @@ export type SendInvoiceEmailRequest = {
   bcc?: string[];
   subject: string;
   html: string;
+  text: string;
   attachments?: Array<{ filename: string; path: string }>;
   correlationId?: string;
   idempotencyKey: string;

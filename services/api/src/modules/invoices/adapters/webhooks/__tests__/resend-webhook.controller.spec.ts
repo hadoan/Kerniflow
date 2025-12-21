@@ -100,15 +100,15 @@ describe("ResendWebhookController", () => {
       await controller.handleWebhook(mockRequest as any, mockResponse as any);
 
       // Assert
-      expect(mockResendInstance.webhooks.verify).toHaveBeenCalledWith(
-        mockRequest.rawBody!.toString("utf-8"),
-        {
+      expect(mockResendInstance.webhooks.verify).toHaveBeenCalledWith({
+        body: mockRequest.rawBody!.toString("utf-8"),
+        headers: {
           "svix-id": "msg_123",
           "svix-timestamp": "1234567890",
           "svix-signature": "v1,signature123",
         },
-        "test-webhook-secret"
-      );
+        secret: "test-webhook-secret",
+      });
 
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.json).toHaveBeenCalledWith({ received: true });

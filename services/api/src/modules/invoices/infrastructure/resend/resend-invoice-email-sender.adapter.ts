@@ -24,29 +24,42 @@ export class ResendInvoiceEmailSenderAdapter implements InvoiceEmailSenderPort {
   }
 
   async sendInvoiceEmail(req: SendInvoiceEmailRequest): Promise<SendInvoiceEmailResponse> {
-    const { data, error } = await this.resend.emails.send(
-      {
-        from: this.fromAddress,
-        to: req.to,
-        cc: req.cc,
-        bcc: req.bcc,
-        subject: req.subject,
-        html: req.html,
-        attachments: req.attachments?.map((att) => ({
-          filename: att.filename,
-          path: att.path,
-        })),
-        reply_to: this.replyTo,
-        headers: req.correlationId
-          ? {
-              "X-Correlation-ID": req.correlationId,
-            }
-          : undefined,
-      },
-      {
-        idempotencyKey: req.idempotencyKey,
-      }
-    );
+    const emailOptions: any = {
+      from: this.fromAddress,
+      to: req.to,
+      subject: req.subject,
+      html: req.html,
+      text: req.text,
+    };
+
+    if (req.cc) {
+      emailOptions.cc = req.cc;
+    }
+
+    if (req.bcc) {
+      emailOptions.bcc = req.bcc;
+    }
+
+    if (req.attachments) {
+      emailOptions.attachments = req.attachments.map((att) => ({
+        filename: att.filename,
+        path: att.path,
+      }));
+    }
+
+    if (this.replyTo) {
+      emailOptions.replyTo = this.replyTo;
+    }
+
+    if (req.correlationId) {
+      emailOptions.headers = {
+        "X-Correlation-ID": req.correlationId,
+      };
+    }
+
+    const { data, error } = await this.resend.emails.send(emailOptions, {
+      idempotencyKey: req.idempotencyKey,
+    });
 
     if (error) {
       throw new Error(`Resend API error: ${error.message}`);

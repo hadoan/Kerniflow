@@ -5,11 +5,17 @@
   "dependencies": {
     "@kerniflow/contracts": "workspace:*",
     "@kerniflow/data": "workspace:*",
+    "@kerniflow/email-templates": "workspace:*",
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
+    "@prisma/client": "^5.0.0",
+    "react": "^18.3.1",
     "reflect-metadata": "^0.2.2",
     "resend": "^6.6.0",
     "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12"
   },
   "scripts": {
     "dev": "node --watch -r ts-node/register/transpile-only src/main.ts",

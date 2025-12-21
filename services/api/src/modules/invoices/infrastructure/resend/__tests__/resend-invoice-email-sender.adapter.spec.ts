@@ -52,26 +52,21 @@ describe("ResendInvoiceEmailSenderAdapter", () => {
       to: ["customer@example.com"],
       subject: "Invoice INV-001",
       html: "<h1>Invoice</h1>",
+      text: "Invoice",
       idempotencyKey: "key-123",
     });
 
     // Assert
-    expect(mockResendInstance.emails.send).toHaveBeenCalledWith(
-      {
-        from: "Test Company <test@example.com>",
-        to: ["customer@example.com"],
-        subject: "Invoice INV-001",
-        html: "<h1>Invoice</h1>",
-        reply_to: "support@example.com",
-        cc: undefined,
-        bcc: undefined,
-        attachments: undefined,
-        headers: undefined,
-      },
-      {
-        idempotencyKey: "key-123",
-      }
-    );
+    const call = mockResendInstance.emails.send.mock.calls[0];
+    expect(call[0].from).toBe("Test Company <test@example.com>");
+    expect(call[0].to).toEqual(["customer@example.com"]);
+    expect(call[0].subject).toBe("Invoice INV-001");
+    expect(call[0].html).toBe("<h1>Invoice</h1>");
+    expect(call[0].text).toBe("Invoice");
+    expect(call[0].replyTo).toBe("support@example.com");
+    expect(call[1]).toEqual({
+      idempotencyKey: "key-123",
+    });
 
     expect(result).toEqual({
       provider: "resend",
@@ -95,6 +90,7 @@ describe("ResendInvoiceEmailSenderAdapter", () => {
       bcc: ["archive@example.com"],
       subject: "Invoice INV-001",
       html: "<h1>Invoice</h1>",
+      text: "Invoice",
       idempotencyKey: "key-123",
     });
 
@@ -118,6 +114,7 @@ describe("ResendInvoiceEmailSenderAdapter", () => {
       to: ["customer@example.com"],
       subject: "Invoice INV-001",
       html: "<h1>Invoice</h1>",
+      text: "Invoice",
       attachments: [
         {
           filename: "invoice.pdf",
@@ -151,6 +148,7 @@ describe("ResendInvoiceEmailSenderAdapter", () => {
       to: ["customer@example.com"],
       subject: "Invoice INV-001",
       html: "<h1>Invoice</h1>",
+      text: "Invoice",
       correlationId: "corr-123",
       idempotencyKey: "key-123",
     });
@@ -177,6 +175,7 @@ describe("ResendInvoiceEmailSenderAdapter", () => {
         to: ["customer@example.com"],
         subject: "Invoice INV-001",
         html: "<h1>Invoice</h1>",
+        text: "Invoice",
         idempotencyKey: "key-123",
       })
     ).rejects.toThrow("Resend API error: Invalid API key");
@@ -197,6 +196,7 @@ describe("ResendInvoiceEmailSenderAdapter", () => {
         to: ["customer@example.com"],
         subject: "Invoice INV-001",
         html: "<h1>Invoice</h1>",
+        text: "Invoice",
         idempotencyKey: "key-123",
       })
     ).rejects.toThrow("Resend API did not return an email ID");
@@ -229,6 +229,7 @@ describe("ResendInvoiceEmailSenderAdapter", () => {
       to: ["customer@example.com"],
       subject: "Invoice INV-001",
       html: "<h1>Invoice</h1>",
+      text: "Invoice",
       idempotencyKey: "key-123",
     });
 
