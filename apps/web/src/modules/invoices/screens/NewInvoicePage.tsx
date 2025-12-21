@@ -147,7 +147,7 @@ export default function NewInvoicePage() {
   };
 
   // Get selected client
-  const selectedClient = clients.find((c) => c.id === form.watch("customerId"));
+  const selectedClient = clients.find((c) => c.id === form.watch("customerPartyId"));
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -195,8 +195,8 @@ export default function NewInvoicePage() {
                   <div>
                     <Label className="text-xs text-muted-foreground uppercase">Billed to</Label>
                     <Select
-                      value={form.watch("customerId")}
-                      onValueChange={(value) => form.setValue("customerId", value)}
+                      value={form.watch("customerPartyId")}
+                      onValueChange={(value) => form.setValue("customerPartyId", value)}
                     >
                       <SelectTrigger className="mt-2" data-testid="invoice-customer-select">
                         <SelectValue placeholder="Select a client" />
@@ -213,9 +213,9 @@ export default function NewInvoicePage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {form.formState.errors.customerId && (
+                    {form.formState.errors.customerPartyId && (
                       <p className="text-sm text-destructive mt-1">
-                        {form.formState.errors.customerId.message}
+                        {form.formState.errors.customerPartyId.message}
                       </p>
                     )}
                   </div>

@@ -47,7 +47,7 @@ export function toCreateInvoiceInput(form: InvoiceFormData): CreateInvoiceInput 
   const toLocalDate = (date: Date | undefined) => (date ? format(date, "yyyy-MM-dd") : undefined);
 
   return {
-    customerId: form.customerId,
+    customerPartyId: form.customerPartyId,
     currency: form.currency,
     notes: form.notes,
     terms: form.terms,
@@ -76,6 +76,7 @@ export function getDefaultInvoiceFormValues(): Partial<InvoiceFormData> {
     invoiceNumber: `${year}${month}${day}-${year}${month}${random}`,
     currency: "EUR",
     vatRate: 19,
+    customerPartyId: undefined,
     lineItems: [
       {
         description: "",
