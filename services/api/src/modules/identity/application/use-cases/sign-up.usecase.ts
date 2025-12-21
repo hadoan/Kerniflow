@@ -77,7 +77,7 @@ export class SignUpUseCase {
       throw new ConflictError("User with this email already exists");
     }
 
-    const tenantId = this.idGenerator.next();
+    const tenantId = this.idGenerator.newId();
     const slug = this.generateSlug(input.tenantName);
     const existingTenant = await this.tenantRepo.findBySlug(slug);
     if (existingTenant) {
@@ -87,13 +87,13 @@ export class SignUpUseCase {
     const tenant = Tenant.create(tenantId, input.tenantName, slug);
     await this.tenantRepo.create(tenant);
 
-    const userId = this.idGenerator.next();
+    const userId = this.idGenerator.newId();
     const passwordHash = await this.passwordHasher.hash(password.getValue());
     const user = User.create(userId, email, passwordHash, input.userName || null);
     await this.userRepo.create(user);
 
     const ownerRole = await this.ensureOwnerRole(tenantId);
-    const membershipId = this.idGenerator.next();
+    const membershipId = this.idGenerator.newId();
     const membership = Membership.create(membershipId, tenantId, userId, ownerRole);
     await this.membershipRepo.create(membership);
 
@@ -105,7 +105,7 @@ export class SignUpUseCase {
     const refreshToken = this.tokenService.generateRefreshToken();
     const { refreshTokenExpiresInMs } = this.tokenService.getExpirationTimes();
     await this.refreshTokenRepo.create({
-      id: this.idGenerator.next(),
+      id: this.idGenerator.newId(),
       userId,
       tenantId,
       tokenHash: await this.hashToken(refreshToken),
@@ -171,7 +171,7 @@ export class SignUpUseCase {
   private async ensureOwnerRole(tenantId: string): Promise<string> {
     const existing = await this.roleRepo.findBySystemKey(tenantId, "OWNER");
     if (existing) return existing.id;
-    const id = this.idGenerator.next();
+    const id = this.idGenerator.newId();
     await this.roleRepo.create({ id, tenantId, name: "Owner", systemKey: "OWNER" });
     return id;
   }

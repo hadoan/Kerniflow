@@ -89,7 +89,7 @@ export class SignInUseCase {
     const { refreshTokenExpiresInMs } = this.tokenService.getExpirationTimes();
 
     await this.refreshTokenRepo.create({
-      id: this.idGenerator.next(),
+      id: this.idGenerator.newId(),
       userId: user.getId(),
       tenantId: selectedTenantId,
       tokenHash: await this.hashRefreshToken(refreshToken),

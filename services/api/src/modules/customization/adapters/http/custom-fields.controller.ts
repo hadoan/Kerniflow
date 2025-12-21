@@ -17,12 +17,12 @@ import {
   CreateCustomFieldDefinitionSchema,
   UpdateCustomFieldDefinitionSchema,
 } from "@kerniflow/contracts";
-import { AuthGuard } from "../../identity/adapters/http/auth.guard";
+import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
 import {
   CurrentTenantId,
   CurrentUserId,
-} from "../../identity/adapters/http/current-user.decorator";
-import { CustomizationService } from "../customization.service";
+} from "../../../identity/adapters/http/current-user.decorator";
+import { CustomizationService } from "../../customization.service";
 
 @UseGuards(AuthGuard)
 @Controller("customization/custom-fields")
