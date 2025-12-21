@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CustomValuesSchema } from "./common/customization/custom-field";
+export * from "./documents";
 export * from "./invoices";
 export * from "./customers";
 export * from "./shared/local-date.schema";

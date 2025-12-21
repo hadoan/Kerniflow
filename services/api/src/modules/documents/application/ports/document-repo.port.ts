@@ -1,0 +1,14 @@
+import { DocumentAggregate } from "../../domain/document.aggregate";
+import { DocumentLinkEntityType, DocumentType } from "../../domain/document.types";
+
+export interface DocumentRepoPort {
+  create(document: DocumentAggregate): Promise<void>;
+  save(document: DocumentAggregate): Promise<void>;
+  findById(tenantId: string, documentId: string): Promise<DocumentAggregate | null>;
+  findByTypeAndEntityLink(
+    tenantId: string,
+    type: DocumentType,
+    entityType: DocumentLinkEntityType,
+    entityId: string
+  ): Promise<DocumentAggregate | null>;
+}

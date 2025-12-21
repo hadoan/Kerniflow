@@ -10,6 +10,7 @@ import { TestHarnessModule } from "./modules/test-harness";
 import { AiCopilotModule } from "./modules/ai-copilot/ai-copilot.module";
 import { CustomizationModule } from "./modules/customization/customization.module";
 import { PartyCrmModule } from "./modules/party-crm";
+import { DocumentsModule } from "./modules/documents";
 
 @Module({
   controllers: [AppController],
@@ -18,6 +19,7 @@ import { PartyCrmModule } from "./modules/party-crm";
     PartyCrmModule,
     ExpensesModule,
     InvoicesModule,
+    DocumentsModule,
     WorkflowModule,
     AutomationModule,
     ReportingModule,
