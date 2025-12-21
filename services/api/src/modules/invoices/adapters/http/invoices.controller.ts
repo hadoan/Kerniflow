@@ -83,7 +83,7 @@ export class InvoicesHttpController {
   async list(@Query() query: any, @Req() req: Request) {
     const input = ListInvoicesInputSchema.parse({
       status: query.status,
-      customerId: query.customerId,
+      customerPartyId: query.customerPartyId,
       fromDate: query.fromDate,
       toDate: query.toDate,
       cursor: query.cursor,

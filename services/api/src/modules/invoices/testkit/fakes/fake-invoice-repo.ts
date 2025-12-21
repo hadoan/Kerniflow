@@ -39,7 +39,8 @@ export class FakeInvoiceRepository implements InvoiceRepoPort {
     const startIndex = cursor ? this.invoices.findIndex((i) => i.id === cursor) + 1 : 0;
     let items = this.invoices.filter((i) => i.tenantId === tenantId);
     if (filters.status) items = items.filter((i) => i.status === filters.status);
-    if (filters.customerId) items = items.filter((i) => i.customerId === filters.customerId);
+    if (filters.customerPartyId)
+      items = items.filter((i) => i.customerPartyId === filters.customerPartyId);
     if (filters.fromDate) items = items.filter((i) => i.createdAt >= filters.fromDate!);
     if (filters.toDate) items = items.filter((i) => i.createdAt <= filters.toDate!);
 

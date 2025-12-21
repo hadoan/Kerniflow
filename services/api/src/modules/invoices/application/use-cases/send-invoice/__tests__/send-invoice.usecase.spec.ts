@@ -34,12 +34,12 @@ describe("SendInvoiceUseCase", () => {
       const invoice = InvoiceAggregate.createDraft({
         id: "inv-1",
         tenantId: "tenant-1",
-        customerId: "cust-1",
+        customerPartyId: "cust-1",
         currency: "USD",
         lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 10000 }],
         createdAt: new Date(),
       });
-      invoice.finalize("INV-001", new Date(), new Date());
+      invoice.finalize("INV-001", new Date(), new Date(), { name: "Customer" });
       invoiceRepo.invoices = [invoice];
 
       // Act
@@ -85,12 +85,12 @@ describe("SendInvoiceUseCase", () => {
       const invoice = InvoiceAggregate.createDraft({
         id: "inv-1",
         tenantId: "tenant-1",
-        customerId: "cust-1",
+        customerPartyId: "cust-1",
         currency: "USD",
         lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
         createdAt: new Date(),
       });
-      invoice.finalize("INV-001", new Date(), new Date());
+      invoice.finalize("INV-001", new Date(), new Date(), { name: "Customer" });
       invoiceRepo.invoices = [invoice];
 
       // Act
@@ -133,7 +133,7 @@ describe("SendInvoiceUseCase", () => {
       const invoice = InvoiceAggregate.createDraft({
         id: "inv-1",
         tenantId: "tenant-1",
-        customerId: "cust-1",
+        customerPartyId: "cust-1",
         currency: "USD",
         lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
         createdAt: new Date(),
@@ -159,12 +159,12 @@ describe("SendInvoiceUseCase", () => {
       const invoice = InvoiceAggregate.createDraft({
         id: "inv-1",
         tenantId: "tenant-1",
-        customerId: "cust-1",
+        customerPartyId: "cust-1",
         currency: "USD",
         lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
         createdAt: new Date(),
       });
-      invoice.finalize("INV-001", new Date(), new Date());
+      invoice.finalize("INV-001", new Date(), new Date(), { name: "Customer" });
       invoice.cancel(new Date());
       invoiceRepo.invoices = [invoice];
 
@@ -189,12 +189,12 @@ describe("SendInvoiceUseCase", () => {
       const invoice = InvoiceAggregate.createDraft({
         id: "inv-1",
         tenantId: "tenant-1",
-        customerId: "cust-1",
+        customerPartyId: "cust-1",
         currency: "USD",
         lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
         createdAt: new Date(),
       });
-      invoice.finalize("INV-001", new Date(), new Date());
+      invoice.finalize("INV-001", new Date(), new Date(), { name: "Customer" });
       invoiceRepo.invoices = [invoice];
 
       // Act: Call twice
@@ -225,12 +225,12 @@ describe("SendInvoiceUseCase", () => {
       const invoice = InvoiceAggregate.createDraft({
         id: "inv-1",
         tenantId: "tenant-1",
-        customerId: "cust-1",
+        customerPartyId: "cust-1",
         currency: "USD",
         lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
         createdAt: new Date(),
       });
-      invoice.finalize("INV-001", new Date(), new Date());
+      invoice.finalize("INV-001", new Date(), new Date(), { name: "Customer" });
       invoiceRepo.invoices = [invoice];
 
       const customKey = "my-custom-idempotency-key";
@@ -269,12 +269,12 @@ describe("SendInvoiceUseCase", () => {
       const invoice = InvoiceAggregate.createDraft({
         id: "inv-1",
         tenantId: "tenant-1",
-        customerId: "cust-1",
+        customerPartyId: "cust-1",
         currency: "USD",
         lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
         createdAt: new Date(),
       });
-      invoice.finalize("INV-001", new Date(), new Date());
+      invoice.finalize("INV-001", new Date(), new Date(), { name: "Customer" });
       invoiceRepo.invoices = [invoice];
 
       // Act: Send to different recipients

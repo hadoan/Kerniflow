@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { IdentityModule } from "./modules/identity";
-import { PartiesModule } from "./modules/parties";
 import { ExpensesModule } from "./modules/expenses";
 import { InvoicesModule } from "./modules/invoices";
 import { WorkflowModule } from "./modules/workflow";
@@ -10,12 +9,13 @@ import { ReportingModule } from "./modules/reporting";
 import { TestHarnessModule } from "./modules/test-harness";
 import { AiCopilotModule } from "./modules/ai-copilot/ai-copilot.module";
 import { CustomizationModule } from "./modules/customization/customization.module";
+import { PartyCrmModule } from "./modules/party-crm";
 
 @Module({
   controllers: [AppController],
   imports: [
     IdentityModule,
-    PartiesModule,
+    PartyCrmModule,
     ExpensesModule,
     InvoicesModule,
     WorkflowModule,

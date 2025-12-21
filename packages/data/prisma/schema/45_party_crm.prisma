@@ -1,0 +1,81 @@
+enum PartyRoleType {
+  CUSTOMER
+  SUPPLIER
+  EMPLOYEE
+  CONTACT
+}
+
+enum ContactPointType {
+  EMAIL
+  PHONE
+}
+
+enum AddressType {
+  BILLING
+}
+
+model Party {
+  id          String    @id @default(cuid())
+  tenantId    String
+  displayName String
+  vatId       String?
+  notes       String?
+  tags        String[]  @default([])
+  archivedAt  DateTime? @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(6)
+
+  contactPoints ContactPoint[]
+  addresses     Address[]
+  roles         PartyRole[]
+
+  @@index([tenantId, displayName])
+  @@index([tenantId])
+}
+
+model PartyRole {
+  id       String       @id @default(cuid())
+  tenantId String
+  partyId  String
+  role     PartyRoleType
+
+  party Party @relation(fields: [partyId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, partyId, role], name: "tenantId_partyId_role")
+  @@index([tenantId, role])
+}
+
+model ContactPoint {
+  id        String           @id @default(cuid())
+  tenantId  String
+  partyId   String
+  type      ContactPointType
+  value     String
+  isPrimary Boolean          @default(false)
+  createdAt DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime         @updatedAt @db.Timestamptz(6)
+
+  party Party @relation(fields: [partyId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, partyId, type], name: "tenantId_partyId_type")
+  @@index([tenantId, partyId, type])
+}
+
+model Address {
+  id         String      @id @default(cuid())
+  tenantId   String
+  partyId    String
+  type       AddressType
+  line1      String
+  line2      String?
+  city       String?
+  postalCode String?
+  country    String?
+  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime    @updatedAt @db.Timestamptz(6)
+
+  party Party @relation(fields: [partyId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, partyId, type], name: "tenantId_partyId_type_address")
+  @@index([tenantId, type])
+}

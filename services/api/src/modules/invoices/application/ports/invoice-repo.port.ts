@@ -3,7 +3,7 @@ import { InvoiceStatus } from "../../domain/invoice.types";
 
 export type ListInvoicesFilters = {
   status?: InvoiceStatus;
-  customerId?: string;
+  customerPartyId?: string;
   fromDate?: Date;
   toDate?: Date;
 };

@@ -6,20 +6,23 @@ import {
   isErr,
   unwrap,
   FixedClock,
+  NotFoundError,
 } from "@kerniflow/kernel";
 import { UpdateInvoiceUseCase } from "./UpdateInvoiceUseCase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
+import { FakeCustomerQueryPort } from "../../../testkit/fakes/fake-customer-query";
 
 describe("UpdateInvoiceUseCase", () => {
   let useCase: UpdateInvoiceUseCase;
   let repo: FakeInvoiceRepository;
+  let customers: FakeCustomerQueryPort;
 
   const seedInvoice = (status: "DRAFT" | "ISSUED" | "SENT" | "PAID" | "CANCELED" = "DRAFT") => {
     const invoice = InvoiceAggregate.createDraft({
       id: "inv-1",
       tenantId: "tenant-1",
-      customerId: "cust-1",
+      customerPartyId: "cust-1",
       currency: "USD",
       lineItems: [
         { id: "line-1", description: "Item", qty: 1, unitPriceCents: 500 },
@@ -34,12 +37,18 @@ describe("UpdateInvoiceUseCase", () => {
 
   beforeEach(() => {
     repo = new FakeInvoiceRepository();
+    customers = new FakeCustomerQueryPort();
+    customers.setSnapshot("tenant-1", {
+      partyId: "cust-1",
+      displayName: "Customer One",
+    });
     const clock = new FixedClock(new Date("2025-01-04T00:00:00.000Z"));
     useCase = new UpdateInvoiceUseCase({
       logger: new NoopLogger(),
       invoiceRepo: repo,
       idGenerator: new FakeIdGenerator(["line-3"]),
       clock,
+      customerQuery: customers,
     });
   });
 
@@ -74,6 +83,22 @@ describe("UpdateInvoiceUseCase", () => {
     expect(isErr(result)).toBe(true);
     if (isErr(result)) {
       expect(result.error).toBeInstanceOf(ConflictError);
+    }
+  });
+
+  it("requires customer to exist when changing customer", async () => {
+    const invoice = seedInvoice("DRAFT");
+    const result = await useCase.execute(
+      {
+        invoiceId: invoice.id,
+        headerPatch: { customerPartyId: "missing" },
+      },
+      { tenantId: invoice.tenantId }
+    );
+
+    expect(isErr(result)).toBe(true);
+    if (isErr(result)) {
+      expect(result.error).toBeInstanceOf(NotFoundError);
     }
   });
 });

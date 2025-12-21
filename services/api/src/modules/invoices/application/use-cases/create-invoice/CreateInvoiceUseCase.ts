@@ -3,6 +3,7 @@ import {
   ClockPort,
   IdGeneratorPort,
   LoggerPort,
+  NotFoundError,
   Result,
   TimeService,
   UseCaseContext,
@@ -15,6 +16,7 @@ import { CreateInvoiceInput, CreateInvoiceOutput } from "@kerniflow/contracts";
 import { InvoiceRepoPort } from "../../ports/invoice-repo.port";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";
+import { CustomerQueryPort } from "../../ports/customer-query.port";
 
 type Deps = {
   logger: LoggerPort;
@@ -22,6 +24,7 @@ type Deps = {
   idGenerator: IdGeneratorPort;
   clock: ClockPort;
   timeService: TimeService;
+  customerQuery: CustomerQueryPort;
 };
 
 export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, CreateInvoiceOutput> {
@@ -30,8 +33,8 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
   }
 
   protected validate(input: CreateInvoiceInput): CreateInvoiceInput {
-    if (!input.customerId) {
-      throw new ValidationError("customerId is required");
+    if (!input.customerPartyId) {
+      throw new ValidationError("customerPartyId is required");
     }
     if (!input.currency) {
       throw new ValidationError("currency is required");
@@ -50,6 +53,14 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
       return err(new ValidationError("tenantId missing from context"));
     }
 
+    const customer = await this.useCaseDeps.customerQuery.getCustomerBillingSnapshot(
+      ctx.tenantId,
+      input.customerPartyId
+    );
+    if (!customer) {
+      return err(new NotFoundError("Customer not found"));
+    }
+
     const createdAt = this.useCaseDeps.clock.now();
     const invoiceDate =
       input.invoiceDate ?? (await this.useCaseDeps.timeService.todayInTenant(ctx.tenantId));
@@ -65,7 +76,7 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
     const aggregate = InvoiceAggregate.createDraft({
       id: invoiceId,
       tenantId: ctx.tenantId,
-      customerId: input.customerId,
+      customerPartyId: input.customerPartyId,
       currency: input.currency,
       notes: input.notes,
       terms: input.terms,
@@ -73,6 +84,20 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
       dueDate,
       lineItems: lines,
       createdAt,
+      billToSnapshot: {
+        name: customer.displayName,
+        email: customer.email ?? null,
+        vatId: customer.vatId ?? null,
+        address: customer.billingAddress
+          ? {
+              line1: customer.billingAddress.line1,
+              line2: customer.billingAddress.line2 ?? null,
+              city: customer.billingAddress.city ?? null,
+              postalCode: customer.billingAddress.postalCode ?? null,
+              country: customer.billingAddress.country ?? null,
+            }
+          : undefined,
+      },
     });
 
     await this.useCaseDeps.invoiceRepo.create(ctx.tenantId, aggregate);

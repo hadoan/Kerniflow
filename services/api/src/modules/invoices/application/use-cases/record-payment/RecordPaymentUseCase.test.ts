@@ -23,13 +23,13 @@ describe("RecordPaymentUseCase", () => {
     const invoice = InvoiceAggregate.createDraft({
       id: "inv-1",
       tenantId: "tenant-1",
-      customerId: "cust",
+      customerPartyId: "cust",
       currency: "USD",
       lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
       createdAt: new Date(),
     });
     const now = clock.now();
-    invoice.finalize("INV-1", now, now);
+    invoice.finalize("INV-1", now, now, { name: "Customer" });
     repo.invoices = [invoice];
 
     const result = await useCase.execute(

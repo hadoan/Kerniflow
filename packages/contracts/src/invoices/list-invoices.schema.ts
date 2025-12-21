@@ -4,7 +4,7 @@ import { localDateSchema } from "../shared/local-date.schema";
 
 export const ListInvoicesInputSchema = z.object({
   status: InvoiceStatusSchema.optional(),
-  customerId: z.string().optional(),
+  customerPartyId: z.string().optional(),
   fromDate: localDateSchema.optional(),
   toDate: localDateSchema.optional(),
   cursor: z.string().optional(),

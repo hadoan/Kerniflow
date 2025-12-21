@@ -20,6 +20,7 @@ import {
   INVOICE_NUMBERING_PORT,
   InvoiceNumberingPort,
 } from "./application/ports/invoice-numbering.port";
+import { CUSTOMER_QUERY_PORT, CustomerQueryPort } from "./application/ports/customer-query.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { InvoiceNumberingAdapter } from "./infrastructure/prisma/prisma-numbering.adapter";
@@ -27,9 +28,10 @@ import { IdentityModule } from "../identity";
 import { TimeService } from "@kerniflow/kernel";
 import { PrismaTenantTimeZoneAdapter } from "../../shared/time/prisma-tenant-timezone.adapter";
 import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
+import { PartyCrmModule } from "../party-crm";
 
 @Module({
-  imports: [IdentityModule],
+  imports: [IdentityModule, PartyCrmModule],
   controllers: [InvoicesHttpController, ResendWebhookController],
   providers: [
     PrismaInvoiceRepoAdapter,
@@ -54,7 +56,8 @@ import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
         repo: PrismaInvoiceRepoAdapter,
         idGen: SystemIdGenerator,
         clock: SystemClock,
-        timeService: TimeService
+        timeService: TimeService,
+        customerQuery: CustomerQueryPort
       ) =>
         new CreateInvoiceUseCase({
           logger: new NestLoggerAdapter(),
@@ -62,34 +65,54 @@ import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
           idGenerator: idGen,
           clock,
           timeService,
+          customerQuery,
         }),
-      inject: [PrismaInvoiceRepoAdapter, ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN, TimeService],
+      inject: [
+        PrismaInvoiceRepoAdapter,
+        ID_GENERATOR_TOKEN,
+        CLOCK_PORT_TOKEN,
+        TimeService,
+        CUSTOMER_QUERY_PORT,
+      ],
     },
     {
       provide: UpdateInvoiceUseCase,
-      useFactory: (repo: PrismaInvoiceRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
+      useFactory: (
+        repo: PrismaInvoiceRepoAdapter,
+        idGen: SystemIdGenerator,
+        clock: SystemClock,
+        customerQuery: CustomerQueryPort
+      ) =>
         new UpdateInvoiceUseCase({
           logger: new NestLoggerAdapter(),
           invoiceRepo: repo,
           idGenerator: idGen,
           clock,
+          customerQuery,
         }),
-      inject: [PrismaInvoiceRepoAdapter, ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN],
+      inject: [PrismaInvoiceRepoAdapter, ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN, CUSTOMER_QUERY_PORT],
     },
     {
       provide: FinalizeInvoiceUseCase,
       useFactory: (
         repo: PrismaInvoiceRepoAdapter,
         numbering: InvoiceNumberingPort,
-        clock: SystemClock
+        clock: SystemClock,
+        customerQuery: CustomerQueryPort
       ) =>
         new FinalizeInvoiceUseCase({
           logger: new NestLoggerAdapter(),
           invoiceRepo: repo,
           numbering,
           clock,
+          customerQuery,
         }),
-      inject: [PrismaInvoiceRepoAdapter, INVOICE_NUMBERING_PORT, CLOCK_PORT_TOKEN],
+      inject: [
+        PrismaInvoiceRepoAdapter,
+        INVOICE_NUMBERING_PORT,
+        CLOCK_PORT_TOKEN,
+        CUSTOMER_QUERY_PORT,
+      ],
     },
     {
       provide: SendInvoiceUseCase,

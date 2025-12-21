@@ -17,7 +17,7 @@ describe("GetInvoiceByIdUseCase", () => {
     const invoice = InvoiceAggregate.createDraft({
       id: "inv-1",
       tenantId: "tenant-1",
-      customerId: "cust-1",
+      customerPartyId: "cust-1",
       currency: "USD",
       lineItems: [{ id: "line-1", description: "Item", qty: 1, unitPriceCents: 1000 }],
       createdAt: new Date(),

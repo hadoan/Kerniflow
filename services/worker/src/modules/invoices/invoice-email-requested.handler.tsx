@@ -65,12 +65,10 @@ export class InvoiceEmailRequestedHandler implements EventHandler {
 
     // 3. Prepare email template props
     const companyName = "Your Company"; // TODO: Get from tenant settings
-    const customerName = "Customer"; // TODO: Get from customer table
 
     const emailProps = mapToInvoiceEmailProps({
       invoice,
       companyName,
-      customerName,
       customMessage: payload.message,
       locale: payload.locale,
       // viewInvoiceUrl: `https://app.example.com/invoices/${invoice.id}`, // TODO: Generate from config

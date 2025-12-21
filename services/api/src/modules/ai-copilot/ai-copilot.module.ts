@@ -20,9 +20,12 @@ import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adap
 import { InvoicesModule } from "../invoices/invoices.module";
 import { InvoicesApplication } from "../invoices/application/invoices.application";
 import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
+import { PartyCrmModule } from "../party-crm";
+import { PartyCrmApplication } from "../party-crm/application/party-crm.application";
+import { buildCustomerTools } from "../party-crm/adapters/tools/customer.tools";
 
 @Module({
-  imports: [IdentityModule, InvoicesModule],
+  imports: [IdentityModule, InvoicesModule, PartyCrmModule],
   controllers: [CopilotController],
   providers: [
     PrismaAgentRunRepository,
@@ -58,8 +61,11 @@ import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
     },
     {
       provide: COPILOT_TOOLS,
-      useFactory: (invoices: InvoicesApplication) => buildInvoiceTools(invoices),
-      inject: [InvoicesApplication],
+      useFactory: (invoices: InvoicesApplication, partyCrm: PartyCrmApplication) => [
+        ...buildInvoiceTools(invoices),
+        ...buildCustomerTools(partyCrm),
+      ],
+      inject: [InvoicesApplication, PartyCrmApplication],
     },
     {
       provide: StreamCopilotChatUseCase,

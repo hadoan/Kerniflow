@@ -25,7 +25,7 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
     await prisma.invoice.upsert({
       where: { id: invoice.id },
       update: {
-        customerId: invoice.customerId,
+        customerPartyId: invoice.customerPartyId,
         number: invoice.number,
         status: invoice.status as any,
         currency: invoice.currency,
@@ -35,12 +35,20 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
         dueDate: toPrismaDate(invoice.dueDate),
         issuedAt: invoice.issuedAt,
         sentAt: invoice.sentAt,
+        billToName: invoice.billToName,
+        billToEmail: invoice.billToEmail,
+        billToVatId: invoice.billToVatId,
+        billToAddressLine1: invoice.billToAddressLine1,
+        billToAddressLine2: invoice.billToAddressLine2,
+        billToCity: invoice.billToCity,
+        billToPostalCode: invoice.billToPostalCode,
+        billToCountry: invoice.billToCountry,
         updatedAt: invoice.updatedAt,
       },
       create: {
         id: invoice.id,
         tenantId: invoice.tenantId,
-        customerId: invoice.customerId,
+        customerPartyId: invoice.customerPartyId,
         number: invoice.number,
         status: invoice.status as any,
         currency: invoice.currency,
@@ -50,6 +58,14 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
         dueDate: toPrismaDate(invoice.dueDate),
         issuedAt: invoice.issuedAt,
         sentAt: invoice.sentAt,
+        billToName: invoice.billToName,
+        billToEmail: invoice.billToEmail,
+        billToVatId: invoice.billToVatId,
+        billToAddressLine1: invoice.billToAddressLine1,
+        billToAddressLine2: invoice.billToAddressLine2,
+        billToCity: invoice.billToCity,
+        billToPostalCode: invoice.billToPostalCode,
+        billToCountry: invoice.billToCountry,
         createdAt: invoice.createdAt,
         updatedAt: invoice.updatedAt,
         lines: {
@@ -104,7 +120,7 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
     return new InvoiceAggregate({
       id: data.id,
       tenantId: data.tenantId,
-      customerId: (data as any).customerId ?? "",
+      customerPartyId: (data as any).customerPartyId ?? "",
       currency: data.currency,
       notes: (data as any).notes ?? null,
       terms: (data as any).terms ?? null,
@@ -116,6 +132,14 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
       invoiceDate: fromPrismaDate((data as any).invoiceDate ?? null),
       dueDate: fromPrismaDate((data as any).dueDate ?? null),
       sentAt: (data as any).sentAt ?? null,
+      billToName: (data as any).billToName ?? null,
+      billToEmail: (data as any).billToEmail ?? null,
+      billToVatId: (data as any).billToVatId ?? null,
+      billToAddressLine1: (data as any).billToAddressLine1 ?? null,
+      billToAddressLine2: (data as any).billToAddressLine2 ?? null,
+      billToCity: (data as any).billToCity ?? null,
+      billToPostalCode: (data as any).billToPostalCode ?? null,
+      billToCountry: (data as any).billToCountry ?? null,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     });
@@ -129,7 +153,7 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
   ): Promise<ListInvoicesResult> {
     const where: any = { tenantId };
     if (filters.status) where.status = filters.status;
-    if (filters.customerId) where.customerId = filters.customerId;
+    if (filters.customerPartyId) where.customerPartyId = filters.customerPartyId;
     if (filters.fromDate || filters.toDate) {
       where.createdAt = {};
       if (filters.fromDate) where.createdAt.gte = filters.fromDate;
@@ -155,7 +179,7 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
       return new InvoiceAggregate({
         id: row.id,
         tenantId: row.tenantId,
-        customerId: (row as any).customerId ?? "",
+        customerPartyId: (row as any).customerPartyId ?? "",
         currency: row.currency,
         notes: (row as any).notes ?? null,
         terms: (row as any).terms ?? null,
@@ -167,6 +191,14 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
         invoiceDate: fromPrismaDate((row as any).invoiceDate ?? null),
         dueDate: fromPrismaDate((row as any).dueDate ?? null),
         sentAt: (row as any).sentAt ?? null,
+        billToName: (row as any).billToName ?? null,
+        billToEmail: (row as any).billToEmail ?? null,
+        billToVatId: (row as any).billToVatId ?? null,
+        billToAddressLine1: (row as any).billToAddressLine1 ?? null,
+        billToAddressLine2: (row as any).billToAddressLine2 ?? null,
+        billToCity: (row as any).billToCity ?? null,
+        billToPostalCode: (row as any).billToPostalCode ?? null,
+        billToCountry: (row as any).billToCountry ?? null,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       });

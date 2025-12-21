@@ -1,10 +1,23 @@
 import { LocalDate } from "@kerniflow/kernel";
 import { InvoiceLine, InvoicePayment, InvoiceStatus, InvoiceTotals } from "./invoice.types";
 
+type BillToSnapshot = {
+  name: string;
+  email?: string | null;
+  vatId?: string | null;
+  address?: {
+    line1: string;
+    line2?: string | null;
+    city?: string | null;
+    postalCode?: string | null;
+    country?: string | null;
+  };
+};
+
 type InvoiceProps = {
   id: string;
   tenantId: string;
-  customerId: string;
+  customerPartyId: string;
   currency: string;
   notes?: string | null;
   terms?: string | null;
@@ -16,6 +29,14 @@ type InvoiceProps = {
   payments: InvoicePayment[];
   issuedAt?: Date | null;
   sentAt?: Date | null;
+  billToName?: string | null;
+  billToEmail?: string | null;
+  billToVatId?: string | null;
+  billToAddressLine1?: string | null;
+  billToAddressLine2?: string | null;
+  billToCity?: string | null;
+  billToPostalCode?: string | null;
+  billToCountry?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -23,7 +44,7 @@ type InvoiceProps = {
 export class InvoiceAggregate {
   id: string;
   tenantId: string;
-  customerId: string;
+  customerPartyId: string;
   currency: string;
   notes?: string | null;
   terms?: string | null;
@@ -35,6 +56,14 @@ export class InvoiceAggregate {
   payments: InvoicePayment[];
   issuedAt: Date | null;
   sentAt: Date | null;
+  billToName: string | null;
+  billToEmail: string | null;
+  billToVatId: string | null;
+  billToAddressLine1: string | null;
+  billToAddressLine2: string | null;
+  billToCity: string | null;
+  billToPostalCode: string | null;
+  billToCountry: string | null;
   createdAt: Date;
   updatedAt: Date;
   totals: InvoiceTotals;
@@ -42,7 +71,7 @@ export class InvoiceAggregate {
   constructor(props: InvoiceProps) {
     this.id = props.id;
     this.tenantId = props.tenantId;
-    this.customerId = props.customerId;
+    this.customerPartyId = props.customerPartyId;
     this.currency = props.currency;
     this.notes = props.notes ?? null;
     this.terms = props.terms ?? null;
@@ -54,6 +83,14 @@ export class InvoiceAggregate {
     this.payments = props.payments;
     this.issuedAt = props.issuedAt ?? null;
     this.sentAt = props.sentAt ?? null;
+    this.billToName = props.billToName ?? null;
+    this.billToEmail = props.billToEmail ?? null;
+    this.billToVatId = props.billToVatId ?? null;
+    this.billToAddressLine1 = props.billToAddressLine1 ?? null;
+    this.billToAddressLine2 = props.billToAddressLine2 ?? null;
+    this.billToCity = props.billToCity ?? null;
+    this.billToPostalCode = props.billToPostalCode ?? null;
+    this.billToCountry = props.billToCountry ?? null;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
     this.totals = this.calculateTotals();
@@ -62,7 +99,7 @@ export class InvoiceAggregate {
   static createDraft(params: {
     id: string;
     tenantId: string;
-    customerId: string;
+    customerPartyId: string;
     currency: string;
     notes?: string;
     terms?: string;
@@ -70,8 +107,9 @@ export class InvoiceAggregate {
     dueDate?: LocalDate | null;
     lineItems: InvoiceLine[];
     createdAt: Date;
+    billToSnapshot?: BillToSnapshot | null;
   }) {
-    return new InvoiceAggregate({
+    const aggregate = new InvoiceAggregate({
       ...params,
       status: "DRAFT",
       invoiceDate: params.invoiceDate ?? null,
@@ -82,22 +120,25 @@ export class InvoiceAggregate {
       sentAt: null,
       updatedAt: params.createdAt,
     });
+    if (params.billToSnapshot) {
+      aggregate.setBillToSnapshot(params.billToSnapshot);
+    }
+    return aggregate;
   }
 
   updateHeader(
-    patch: Partial<Pick<InvoiceProps, "customerId" | "currency" | "notes" | "terms">>,
+    patch: Partial<Pick<InvoiceProps, "customerPartyId" | "currency" | "notes" | "terms">>,
     now: Date
   ) {
     const allowedAfterDraft = ["notes", "terms"];
     if (this.status !== "DRAFT") {
-      // Allow updating notes/terms even after draft, but block other fields
       const disallowedPatch = Object.keys(patch).some((k) => !allowedAfterDraft.includes(k));
       if (disallowedPatch) {
         throw new Error("Cannot update invoice header after finalize");
       }
     }
 
-    if (patch.customerId !== undefined) this.customerId = patch.customerId;
+    if (patch.customerPartyId !== undefined) this.customerPartyId = patch.customerPartyId;
     if (patch.currency !== undefined) this.currency = patch.currency;
     if (patch.notes !== undefined) this.notes = patch.notes;
     if (patch.terms !== undefined) this.terms = patch.terms;
@@ -122,16 +163,21 @@ export class InvoiceAggregate {
     this.touch(now);
   }
 
-  finalize(number: string, issuedAt: Date, now: Date) {
+  finalize(number: string, issuedAt: Date, now: Date, billTo: BillToSnapshot) {
     if (this.status !== "DRAFT") {
       throw new Error("Only draft invoices can be finalized");
     }
-    if (!this.customerId) {
+    if (!this.customerPartyId) {
       throw new Error("Customer is required to finalize");
     }
     if (!this.lineItems.length) {
       throw new Error("At least one line item is required to finalize");
     }
+    if (!billTo.name.trim()) {
+      throw new Error("Bill-to name is required to finalize");
+    }
+
+    this.setBillToSnapshot(billTo);
     this.status = "ISSUED";
     this.number = number;
     this.issuedAt = issuedAt;
@@ -171,6 +217,17 @@ export class InvoiceAggregate {
     this.notes = reason ?? this.notes ?? null;
     this.sentAt = canceledAt ?? this.sentAt;
     this.touch(now);
+  }
+
+  setBillToSnapshot(snapshot: BillToSnapshot) {
+    this.billToName = snapshot.name;
+    this.billToEmail = snapshot.email ?? null;
+    this.billToVatId = snapshot.vatId ?? null;
+    this.billToAddressLine1 = snapshot.address?.line1 ?? null;
+    this.billToAddressLine2 = snapshot.address?.line2 ?? null;
+    this.billToCity = snapshot.address?.city ?? null;
+    this.billToPostalCode = snapshot.address?.postalCode ?? null;
+    this.billToCountry = snapshot.address?.country ?? null;
   }
 
   private calculateTotals(): InvoiceTotals {

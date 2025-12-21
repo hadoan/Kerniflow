@@ -47,7 +47,7 @@ export class ListInvoicesUseCase extends BaseUseCase<ListInvoicesInput, ListInvo
       ctx.tenantId,
       {
         status: input.status,
-        customerId: input.customerId,
+        customerPartyId: input.customerPartyId,
         fromDate,
         toDate,
       },

@@ -6,14 +6,13 @@ type MapperInput = {
     lines: InvoiceLine[];
   };
   companyName: string;
-  customerName: string;
   customMessage?: string | undefined;
   viewInvoiceUrl?: string | undefined;
   locale?: string | undefined;
 };
 
 export function mapToInvoiceEmailProps(input: MapperInput): InvoiceEmailProps {
-  const { invoice, companyName, customerName, customMessage, viewInvoiceUrl, locale } = input;
+  const { invoice, companyName, customMessage, viewInvoiceUrl, locale } = input;
 
   // Calculate total amount
   const totalAmountCents = invoice.lines.reduce(
@@ -47,7 +46,7 @@ export function mapToInvoiceEmailProps(input: MapperInput): InvoiceEmailProps {
     dueDate: invoice.dueDate ? formatDate(invoice.dueDate) : "Upon receipt",
     totalAmount: formatAmount(totalAmountCents),
     currency: invoice.currency.toUpperCase(),
-    customerName,
+    customerName: invoice.billToName ?? "Customer",
     customMessage,
     lines: invoice.lines.map((line: InvoiceLine) => ({
       description: line.description,

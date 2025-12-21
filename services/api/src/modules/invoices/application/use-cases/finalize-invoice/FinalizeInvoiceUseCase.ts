@@ -15,12 +15,14 @@ import { FinalizeInvoiceInput, FinalizeInvoiceOutput } from "@kerniflow/contract
 import { InvoiceRepoPort } from "../../ports/invoice-repo.port";
 import { InvoiceNumberingPort } from "../../ports/invoice-numbering.port";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";
+import { CustomerQueryPort } from "../../ports/customer-query.port";
 
 type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
   numbering: InvoiceNumberingPort;
   clock: ClockPort;
+  customerQuery: CustomerQueryPort;
 };
 
 export class FinalizeInvoiceUseCase extends BaseUseCase<
@@ -44,10 +46,31 @@ export class FinalizeInvoiceUseCase extends BaseUseCase<
       return err(new NotFoundError("Invoice not found"));
     }
 
+    const customer = await this.useCaseDeps.customerQuery.getCustomerBillingSnapshot(
+      ctx.tenantId,
+      invoice.customerPartyId
+    );
+    if (!customer) {
+      return err(new NotFoundError("Customer not found"));
+    }
+
     try {
       const now = this.useCaseDeps.clock.now();
       const number = await this.useCaseDeps.numbering.nextInvoiceNumber(ctx.tenantId);
-      invoice.finalize(number, now, now);
+      invoice.finalize(number, now, now, {
+        name: customer.displayName,
+        email: customer.email ?? null,
+        vatId: customer.vatId ?? null,
+        address: customer.billingAddress
+          ? {
+              line1: customer.billingAddress.line1,
+              line2: customer.billingAddress.line2 ?? null,
+              city: customer.billingAddress.city ?? null,
+              postalCode: customer.billingAddress.postalCode ?? null,
+              country: customer.billingAddress.country ?? null,
+            }
+          : undefined,
+      });
     } catch (error) {
       if (error instanceof ValidationError || error instanceof ConflictError) {
         return err(error);

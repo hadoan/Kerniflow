@@ -1,7 +1,15 @@
 model Invoice {
   id          String        @id @default(cuid())
   tenantId    String
-  customerId  String
+  customerPartyId    String
+  billToName         String?
+  billToEmail        String?
+  billToVatId        String?
+  billToAddressLine1 String?
+  billToAddressLine2 String?
+  billToCity         String?
+  billToPostalCode   String?
+  billToCountry      String?
   number      String?
   status      InvoiceStatus @default(DRAFT)
   currency    String
@@ -18,6 +26,7 @@ model Invoice {
   payments  InvoicePayment[]
 
   @@index([tenantId, status])
+  @@index([tenantId, customerPartyId])
   @@index([tenantId, createdAt])
   @@unique([tenantId, number])
 }

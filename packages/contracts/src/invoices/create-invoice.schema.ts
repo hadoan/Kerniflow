@@ -9,7 +9,7 @@ export const InvoiceLineInputSchema = z.object({
 });
 
 export const CreateInvoiceInputSchema = z.object({
-  customerId: z.string(),
+  customerPartyId: z.string(),
   currency: z.string(),
   notes: z.string().optional(),
   terms: z.string().optional(),

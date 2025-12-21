@@ -28,7 +28,7 @@ describe("ListInvoicesUseCase", () => {
     const inv1 = InvoiceAggregate.createDraft({
       id: "inv-1",
       tenantId: "tenant-1",
-      customerId: "cust",
+      customerPartyId: "cust",
       currency: "USD",
       lineItems: [{ id: "l1", description: "A", qty: 1, unitPriceCents: 100 }],
       createdAt: new Date(),
@@ -37,7 +37,7 @@ describe("ListInvoicesUseCase", () => {
     const inv2 = InvoiceAggregate.createDraft({
       id: "inv-2",
       tenantId: "tenant-1",
-      customerId: "cust",
+      customerPartyId: "cust",
       currency: "USD",
       lineItems: [{ id: "l2", description: "B", qty: 2, unitPriceCents: 200 }],
       createdAt: new Date(),
