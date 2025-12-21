@@ -1,19 +1,44 @@
-import { Result, UseCaseContext, UseCaseError, isErr } from "@kerniflow/kernel";
+import { Result, UseCaseContext, UseCaseError, isErr, LoggerPort } from "@kerniflow/kernel";
 import { Request } from "express";
 import { toHttpException } from "../../../../shared/http/usecase-error.mapper";
+import { NestLoggerAdapter } from "../../../../shared/adapters/logger/nest-logger.adapter";
 
-export const buildUseCaseContext = (req: Request): UseCaseContext => ({
-  tenantId:
-    ((req as any).tenantId as string | undefined) ||
-    (req.headers["x-tenant-id"] as string | undefined),
-  userId:
-    ((req as any).user?.userId as string | undefined) ||
-    ((req as any).user?.id as string | undefined),
-  correlationId:
-    (req.headers["x-correlation-id"] as string | undefined) ||
-    (req.headers["x-request-id"] as string | undefined),
-  requestId: (req.headers["x-request-id"] as string | undefined) ?? undefined,
-});
+const logger: LoggerPort = new NestLoggerAdapter();
+
+type RequestWithAuth = Request & {
+  tenantId?: string;
+  user?: { userId?: string; id?: string };
+  body?: { tenantId?: string };
+  query?: { tenantId?: string };
+};
+
+export const buildUseCaseContext = (req: RequestWithAuth): UseCaseContext => {
+  const ctx: UseCaseContext = {
+    tenantId:
+      req.tenantId ||
+      (req.headers["x-tenant-id"] as string | undefined) ||
+      // Fall back to request body/query for contexts (e.g., e2e without headers)
+      req.body?.tenantId ||
+      req.query?.tenantId,
+    userId: req.user?.userId || req.user?.id,
+    correlationId:
+      (req.headers["x-correlation-id"] as string | undefined) ||
+      (req.headers["x-request-id"] as string | undefined),
+    requestId: (req.headers["x-request-id"] as string | undefined) ?? undefined,
+  };
+
+  if (!ctx.tenantId) {
+    logger.warn("Missing tenantId on request", {
+      hasAuthHeader: Boolean(req.headers["authorization"]),
+      hasTenantHeader: Boolean(req.headers["x-tenant-id"]),
+      hasBodyTenant: Boolean(req.body?.tenantId),
+      path: req.path,
+      method: req.method,
+    });
+  }
+
+  return ctx;
+};
 
 export const mapResultToHttp = <T>(result: Result<T, UseCaseError>): T => {
   if (isErr(result)) {

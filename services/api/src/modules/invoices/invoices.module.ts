@@ -22,8 +22,10 @@ import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { InvoiceNumberingAdapter } from "./infrastructure/prisma/prisma-numbering.adapter";
 import { NoopNotificationAdapter } from "./infrastructure/prisma/noop-notification.adapter";
+import { IdentityModule } from "../identity";
 
 @Module({
+  imports: [IdentityModule],
   controllers: [InvoicesHttpController],
   providers: [
     PrismaInvoiceRepoAdapter,

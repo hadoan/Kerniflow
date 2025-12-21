@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
 import { InvoicesApplication } from "../../application/invoices.application";
 import {
@@ -12,8 +12,10 @@ import {
   UpdateInvoiceInputSchema,
 } from "@kerniflow/contracts";
 import { buildUseCaseContext, mapResultToHttp } from "./mappers";
+import { AuthGuard } from "../../../identity";
 
 @Controller("invoices")
+@UseGuards(AuthGuard)
 export class InvoicesHttpController {
   constructor(private readonly app: InvoicesApplication) {}
 

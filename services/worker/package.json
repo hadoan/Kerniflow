@@ -11,8 +11,8 @@
     "rxjs": "^7.8.2"
   },
   "scripts": {
-    "dev": "tsx watch src/main.ts",
-    "start": "tsx src/main.ts",
+    "dev": "node --watch -r ts-node/register/transpile-only src/main.ts",
+    "start": "node -r ts-node/register/transpile-only src/main.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

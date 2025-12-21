@@ -30,12 +30,18 @@ test.describe("Invoices", () => {
     await page.waitForSelector(selectors.invoices.invoiceForm);
 
     const clientId = "client-1";
+    let chosenClientId = clientId;
     await page.locator(selectors.invoices.customerSelect).click();
     const clientOption = page.locator(selectors.invoices.customerOption(clientId));
     if (await clientOption.count()) {
       await clientOption.click();
     } else {
-      await page.getByRole("option").first().click();
+      const firstOption = page.getByRole("option").first();
+      const testId = await firstOption.getAttribute("data-testid");
+      if (testId?.startsWith("invoice-customer-option-")) {
+        chosenClientId = testId.replace("invoice-customer-option-", "");
+      }
+      await firstOption.click();
     }
 
     await page.locator(selectors.invoices.lineDescriptionInput()).fill("E2E Consulting Package");
@@ -51,7 +57,7 @@ test.describe("Invoices", () => {
     expect(createResponse.ok()).toBeTruthy();
 
     const createdInvoice = await createResponse.json();
-    expect(createdInvoice.customerId).toBe(clientId);
+    expect(createdInvoice.customerId).toBe(chosenClientId);
     expect(createdInvoice.lineItems).toHaveLength(1);
     expect(createdInvoice.lineItems[0]).toMatchObject({
       description: "E2E Consulting Package",
