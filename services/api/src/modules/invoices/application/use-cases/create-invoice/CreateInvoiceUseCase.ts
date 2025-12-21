@@ -21,8 +21,8 @@ type Deps = {
 };
 
 export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, CreateInvoiceOutput> {
-  constructor(private readonly deps: Deps) {
-    super({ logger: deps.logger });
+  constructor(private readonly useCaseDeps: Deps) {
+    super({ logger: useCaseDeps.logger });
   }
 
   protected validate(input: CreateInvoiceInput): CreateInvoiceInput {
@@ -47,9 +47,9 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
     }
 
     const createdAt = new Date();
-    const invoiceId = this.deps.idGenerator.newId();
+    const invoiceId = this.useCaseDeps.idGenerator.newId();
     const lines = input.lineItems.map((line) => ({
-      id: this.deps.idGenerator.newId(),
+      id: this.useCaseDeps.idGenerator.newId(),
       description: line.description,
       qty: line.qty,
       unitPriceCents: line.unitPriceCents,
@@ -66,7 +66,7 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
       createdAt,
     });
 
-    await this.deps.invoiceRepo.create(ctx.tenantId, aggregate);
+    await this.useCaseDeps.invoiceRepo.create(ctx.tenantId, aggregate);
 
     return ok({ invoice: toInvoiceDto(aggregate) });
   }

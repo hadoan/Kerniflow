@@ -67,7 +67,7 @@ export class CreateExpenseUseCase {
     const normalizedCustom = validateAndNormalizeCustomValues(definitions, input.custom);
 
     const expense = new Expense(
-      this.idGenerator.next(),
+      this.idGenerator.newId(),
       input.tenantId,
       input.merchant,
       input.totalCents,

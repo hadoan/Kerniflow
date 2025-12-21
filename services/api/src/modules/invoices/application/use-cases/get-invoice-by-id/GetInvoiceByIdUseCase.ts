@@ -22,8 +22,8 @@ export class GetInvoiceByIdUseCase extends BaseUseCase<
   GetInvoiceByIdCommand,
   GetInvoiceByIdResult
 > {
-  constructor(private readonly deps: Deps) {
-    super({ logger: deps.logger });
+  constructor(private readonly useCaseDeps: Deps) {
+    super({ logger: useCaseDeps.logger });
   }
 
   protected validate(input: GetInvoiceByIdCommand): GetInvoiceByIdCommand {
@@ -42,7 +42,7 @@ export class GetInvoiceByIdUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId is required"));
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.useCaseDeps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(
         new NotFoundError("Invoice not found", { invoiceId: input.invoiceId }, "INVOICE_NOT_FOUND")

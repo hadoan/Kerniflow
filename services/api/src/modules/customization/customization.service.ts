@@ -57,7 +57,7 @@ export class CustomizationService {
     const definition = await this.createDefinition.execute({
       ...input,
       tenantId,
-      id: this.idGen.next(),
+      id: this.idGen.newId(),
       createdAt: this.clock.now(),
       updatedAt: this.clock.now(),
     });
@@ -144,7 +144,7 @@ export class CustomizationService {
 
     const existing = await this.layoutRepo.get(tenantId, entityType);
     const nextVersion = version ?? (existing ? existing.version + 1 : 1);
-    const nextId = existing?.id ?? this.idGen.next();
+    const nextId = existing?.id ?? this.idGen.newId();
 
     const saved = await this.upsertLayoutUseCase.execute({
       tenantId,

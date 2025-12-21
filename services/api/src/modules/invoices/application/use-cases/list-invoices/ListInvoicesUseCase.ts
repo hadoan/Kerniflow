@@ -15,8 +15,8 @@ import { toInvoiceDto } from "../shared/invoice-dto.mapper";
 type Deps = { logger: LoggerPort; invoiceRepo: InvoiceRepoPort };
 
 export class ListInvoicesUseCase extends BaseUseCase<ListInvoicesInput, ListInvoicesOutput> {
-  constructor(private readonly deps: Deps) {
-    super({ logger: deps.logger });
+  constructor(private readonly useCaseDeps: Deps) {
+    super({ logger: useCaseDeps.logger });
   }
 
   protected async handle(
@@ -28,7 +28,7 @@ export class ListInvoicesUseCase extends BaseUseCase<ListInvoicesInput, ListInvo
     }
 
     const pageSize = input.pageSize ?? 20;
-    const { items, nextCursor } = await this.deps.invoiceRepo.list(
+    const { items, nextCursor } = await this.useCaseDeps.invoiceRepo.list(
       ctx.tenantId,
       {
         status: input.status,

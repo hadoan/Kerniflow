@@ -1,8 +1,8 @@
 import { randomUUID } from "crypto";
-import { IdGeneratorPort } from "../ports/id-generator.port";
+import { IdGeneratorPort } from "@kerniflow/kernel";
 
 export class SystemIdGenerator implements IdGeneratorPort {
-  next(): string {
+  newId(): string {
     return randomUUID();
   }
 }

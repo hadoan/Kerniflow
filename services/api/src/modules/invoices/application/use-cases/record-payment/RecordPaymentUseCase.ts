@@ -22,8 +22,8 @@ type Deps = {
 };
 
 export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, RecordPaymentOutput> {
-  constructor(private readonly deps: Deps) {
-    super({ logger: deps.logger });
+  constructor(private readonly useCaseDeps: Deps) {
+    super({ logger: useCaseDeps.logger });
   }
 
   protected validate(input: RecordPaymentInput): RecordPaymentInput {
@@ -41,14 +41,14 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
       return err(new ValidationError("tenantId is required"));
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.useCaseDeps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Invoice not found"));
     }
 
     try {
       invoice.recordPayment({
-        id: this.deps.idGenerator.newId(),
+        id: this.useCaseDeps.idGenerator.newId(),
         amountCents: input.amountCents,
         paidAt: input.paidAt ? new Date(input.paidAt) : new Date(),
         note: input.note,
@@ -60,7 +60,7 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
       return err(new ConflictError((error as Error).message));
     }
 
-    await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.useCaseDeps.invoiceRepo.save(ctx.tenantId, invoice);
     return ok({ invoice: toInvoiceDto(invoice) });
   }
 }

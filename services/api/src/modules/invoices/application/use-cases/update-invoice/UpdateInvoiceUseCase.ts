@@ -22,8 +22,8 @@ type Deps = {
 };
 
 export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, UpdateInvoiceOutput> {
-  constructor(private readonly deps: Deps) {
-    super({ logger: deps.logger });
+  constructor(private readonly useCaseDeps: Deps) {
+    super({ logger: useCaseDeps.logger });
   }
 
   protected validate(input: UpdateInvoiceInput): UpdateInvoiceInput {
@@ -47,7 +47,7 @@ export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, Update
       return err(new ValidationError("tenantId is required"));
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.useCaseDeps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Invoice not found"));
     }
@@ -64,7 +64,7 @@ export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, Update
 
       if (input.lineItems) {
         const newLines = input.lineItems.map((line) => ({
-          id: line.id ?? this.deps.idGenerator.newId(),
+          id: line.id ?? this.useCaseDeps.idGenerator.newId(),
           description: line.description,
           qty: line.qty,
           unitPriceCents: line.unitPriceCents,
@@ -78,7 +78,7 @@ export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, Update
       return err(new ConflictError((error as Error).message));
     }
 
-    await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.useCaseDeps.invoiceRepo.save(ctx.tenantId, invoice);
 
     return ok({ invoice: toInvoiceDto(invoice) });
   }
