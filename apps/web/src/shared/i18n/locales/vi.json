@@ -1,0 +1,190 @@
+{
+  "common": {
+    "appName": "Bizflow",
+    "tagline": "Quản lý doanh nghiệp của bạn, toàn diện.",
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "export": "Xuất",
+    "import": "Nhập",
+    "back": "Quay lại",
+    "next": "Tiếp",
+    "confirm": "Xác nhận",
+    "close": "Đóng",
+    "viewAll": "Xem tất cả",
+    "comingSoon": "Sắp ra mắt",
+    "noResults": "Không tìm thấy kết quả",
+    "error": "Đã xảy ra lỗi",
+    "success": "Thành công",
+    "currency": "VND",
+    "locale": "vi-VN"
+  },
+  "nav": {
+    "dashboard": "Tổng quan",
+    "assistant": "Trợ lý",
+    "expenses": "Chi phí",
+    "invoices": "Hóa đơn",
+    "clients": "Khách hàng",
+    "settings": "Cài đặt",
+    "projects": "Dự án",
+    "accounting": "Kế toán",
+    "inventory": "Kho",
+    "automation": "Tự động hóa",
+    "documents": "Tài liệu",
+    "hr": "Nhân sự"
+  },
+  "dashboard": {
+    "title": "Tổng quan",
+    "welcome": "Chào mừng trở lại",
+    "revenueThisMonth": "Doanh thu tháng này",
+    "outstandingInvoices": "Hóa đơn chưa thanh toán",
+    "expensesThisMonth": "Chi phí tháng này",
+    "quickActions": "Thao tác nhanh",
+    "recentActivity": "Hoạt động gần đây",
+    "addExpense": "Thêm chi phí",
+    "createInvoice": "Tạo hóa đơn",
+    "openAssistant": "Mở trợ lý"
+  },
+  "assistant": {
+    "title": "Trợ lý",
+    "placeholder": "Hỏi tôi bất cứ điều gì hoặc tải lên biên lai...",
+    "suggestions": {
+      "addReceipt": "Thêm biên lai này như chi phí",
+      "generateInvoice": "Tạo hóa đơn cho khách hàng",
+      "showExpenses": "Hiển thị chi phí tháng này",
+      "taxHelp": "Tôi có thể khấu trừ những gì ở Việt Nam?"
+    },
+    "toolCards": {
+      "extractingReceipt": "Đang trích xuất dữ liệu biên lai...",
+      "creatingExpense": "Đang tạo chi phí...",
+      "generatingInvoice": "Đang tạo bản nháp hóa đơn...",
+      "issuingInvoice": "Đang phát hành hóa đơn..."
+    },
+    "disclaimer": "Đây không phải là tư vấn pháp lý hoặc thuế. Vui lòng tham khảo ý kiến chuyên gia thuế cho hướng dẫn cụ thể.",
+    "confirmExpense": "Xác nhận chi tiết chi phí",
+    "invoicePreview": "Xem trước hóa đơn",
+    "openExpense": "Mở chi phí",
+    "openInvoice": "Mở hóa đơn",
+    "issueInvoice": "Phát hành hóa đơn"
+  },
+  "expenses": {
+    "title": "Chi phí",
+    "addExpense": "Thêm chi phí",
+    "noExpenses": "Chưa có chi phí nào",
+    "noExpensesDescription": "Bắt đầu bằng cách thêm chi phí đầu tiên hoặc tải lên biên lai cho trợ lý.",
+    "merchant": "Người bán",
+    "date": "Ngày",
+    "amount": "Số tiền",
+    "category": "Danh mục",
+    "vat": "VAT",
+    "project": "Dự án",
+    "receipt": "Biên lai",
+    "notes": "Ghi chú",
+    "categories": {
+      "office_supplies": "Văn phòng phẩm",
+      "software": "Phần mềm",
+      "travel": "Du lịch",
+      "meals": "Ăn uống",
+      "home_office": "Văn phòng tại nhà",
+      "education": "Giáo dục",
+      "hardware": "Phần cứng",
+      "phone_internet": "Điện thoại/Internet",
+      "other": "Khác"
+    }
+  },
+  "invoices": {
+    "title": "Hóa đơn",
+    "createInvoice": "Tạo hóa đơn",
+    "noInvoices": "Chưa có hóa đơn nào",
+    "noInvoicesDescription": "Tạo hóa đơn đầu tiên để bắt đầu.",
+    "invoiceNumber": "Số hóa đơn",
+    "client": "Khách hàng",
+    "date": "Ngày",
+    "dueDate": "Ngày đến hạn",
+    "amount": "Số tiền",
+    "status": "Trạng thái",
+    "items": "Mục",
+    "subtotal": "Tổng phụ",
+    "vatAmount": "VAT",
+    "total": "Tổng cộng",
+    "paymentTerms": "Điều khoản thanh toán",
+    "notes": "Ghi chú",
+    "statuses": {
+      "draft": "Nháp",
+      "issued": "Đã phát hành",
+      "sent": "Đã gửi",
+      "paid": "Đã thanh toán",
+      "overdue": "Quá hạn"
+    },
+    "actions": {
+      "issue": "Phát hành hóa đơn",
+      "markPaid": "Đánh dấu đã thanh toán",
+      "sendReminder": "Gửi nhắc nhở",
+      "download": "Tải PDF",
+      "preview": "Xem trước"
+    },
+    "wizard": {
+      "selectClient": "Chọn khách hàng",
+      "addItems": "Thêm mục",
+      "review": "Xem lại & tạo"
+    }
+  },
+  "clients": {
+    "title": "Khách hàng",
+    "addClient": "Thêm khách hàng",
+    "noClients": "Chưa có khách hàng nào",
+    "noClientsDescription": "Thêm khách hàng đầu tiên để bắt đầu tạo hóa đơn.",
+    "name": "Tên",
+    "company": "Công ty",
+    "email": "Email",
+    "phone": "Điện thoại",
+    "address": "Địa chỉ",
+    "city": "Thành phố",
+    "country": "Quốc gia",
+    "vatId": "Mã số thuế",
+    "invoiceHistory": "Lịch sử hóa đơn",
+    "totalRevenue": "Tổng doanh thu"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "profile": "Hồ sơ",
+    "business": "Doanh nghiệp",
+    "tax": "Cài đặt thuế",
+    "invoiceSettings": "Cài đặt hóa đơn",
+    "language": "Ngôn ngữ",
+    "theme": "Giao diện",
+    "name": "Tên",
+    "email": "Email",
+    "businessName": "Tên doanh nghiệp",
+    "address": "Địa chỉ",
+    "vatId": "Mã số thuế",
+    "defaultVatRate": "Thuế suất VAT mặc định",
+    "invoicePrefix": "Tiền tố hóa đơn",
+    "invoiceNumberFormat": "Định dạng số hóa đơn",
+    "paymentTermsDays": "Điều khoản thanh toán (ngày)",
+    "themes": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Hệ thống"
+    },
+    "languages": {
+      "en": "English",
+      "de": "Deutsch",
+      "vi": "Tiếng Việt"
+    }
+  },
+  "time": {
+    "today": "Hôm nay",
+    "yesterday": "Hôm qua",
+    "thisWeek": "Tuần này",
+    "thisMonth": "Tháng này",
+    "lastMonth": "Tháng trước",
+    "thisYear": "Năm nay",
+    "daysAgo": "{{count}} ngày trước"
+  }
+}
