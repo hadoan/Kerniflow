@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { InvoiceDtoSchema, InvoiceStatusSchema } from "./invoice.types";
+import { localDateSchema } from "../shared/local-date.schema";
 
 export const ListInvoicesInputSchema = z.object({
   status: InvoiceStatusSchema.optional(),
   customerId: z.string().optional(),
-  fromDate: z.string().optional(),
-  toDate: z.string().optional(),
+  fromDate: localDateSchema.optional(),
+  toDate: localDateSchema.optional(),
   cursor: z.string().optional(),
   pageSize: z.number().int().positive().max(100).optional(),
 });

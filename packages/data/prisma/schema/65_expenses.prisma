@@ -5,11 +5,11 @@ model Expense {
   totalCents      Int
   currency        String
   category        String?
-  issuedAt        DateTime
+  issuedAt        DateTime @db.Timestamptz(6)
   custom          Json?
   createdByUserId String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
 
   @@index([tenantId])
   @@index([tenantId, issuedAt])

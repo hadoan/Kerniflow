@@ -6,6 +6,7 @@
 import { z } from "zod";
 import type { CreateInvoiceInput } from "@kerniflow/contracts";
 import { CreateInvoiceInputSchema, InvoiceLineInputSchema } from "@kerniflow/contracts";
+import { format } from "date-fns";
 
 /**
  * Form schema for line items (extends contract with unit field for UI)
@@ -43,11 +44,15 @@ export type InvoiceLineFormData = z.infer<typeof invoiceLineFormSchema>;
  * Converts Date objects to ISO strings
  */
 export function toCreateInvoiceInput(form: InvoiceFormData): CreateInvoiceInput {
+  const toLocalDate = (date: Date | undefined) => (date ? format(date, "yyyy-MM-dd") : undefined);
+
   return {
     customerId: form.customerId,
     currency: form.currency,
     notes: form.notes,
     terms: form.terms,
+    invoiceDate: toLocalDate(form.invoiceDate),
+    dueDate: toLocalDate(form.dueDate),
     lineItems: form.lineItems.map((item) => ({
       description: item.description,
       qty: item.qty,

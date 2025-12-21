@@ -1,5 +1,6 @@
 import {
   BaseUseCase,
+  ClockPort,
   ConflictError,
   LoggerPort,
   NotFoundError,
@@ -19,6 +20,7 @@ type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
   notification: NotificationPort;
+  clock: ClockPort;
 };
 
 export class SendInvoiceUseCase extends BaseUseCase<SendInvoiceInput, SendInvoiceOutput> {
@@ -40,7 +42,8 @@ export class SendInvoiceUseCase extends BaseUseCase<SendInvoiceInput, SendInvoic
     }
 
     try {
-      invoice.markSent(new Date());
+      const now = this.useCaseDeps.clock.now();
+      invoice.markSent(now, now);
     } catch (error) {
       return err(new ConflictError((error as Error).message));
     }

@@ -10,6 +10,8 @@ export const toInvoiceDto = (invoice: InvoiceAggregate): InvoiceDto => ({
   currency: invoice.currency,
   notes: invoice.notes ?? undefined,
   terms: invoice.terms ?? undefined,
+  invoiceDate: invoice.invoiceDate,
+  dueDate: invoice.dueDate,
   issuedAt: invoice.issuedAt ? invoice.issuedAt.toISOString() : null,
   sentAt: invoice.sentAt ? invoice.sentAt.toISOString() : null,
   createdAt: invoice.createdAt.toISOString(),

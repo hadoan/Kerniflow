@@ -1,12 +1,15 @@
 import { z } from "zod";
 import { InvoiceDtoSchema } from "./invoice.types";
 import { InvoiceLineInputSchema } from "./create-invoice.schema";
+import { localDateSchema } from "../shared/local-date.schema";
 
 export const InvoiceHeaderPatchSchema = z.object({
   customerId: z.string().optional(),
   currency: z.string().optional(),
   notes: z.string().optional(),
   terms: z.string().optional(),
+  invoiceDate: localDateSchema.optional(),
+  dueDate: localDateSchema.optional(),
 });
 
 export const InvoiceLinePatchSchema = InvoiceLineInputSchema.extend({

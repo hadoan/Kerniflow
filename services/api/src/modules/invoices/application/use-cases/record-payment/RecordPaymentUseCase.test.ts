@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { RecordPaymentUseCase } from "./RecordPaymentUseCase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
-import { FakeIdGenerator, NoopLogger, unwrap } from "@kerniflow/kernel";
+import { FakeIdGenerator, FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
 
 describe("RecordPaymentUseCase", () => {
   let useCase: RecordPaymentUseCase;
   let repo: FakeInvoiceRepository;
+  const clock = new FixedClock(new Date("2025-01-03T00:00:00.000Z"));
 
   beforeEach(() => {
     repo = new FakeInvoiceRepository();
@@ -14,6 +15,7 @@ describe("RecordPaymentUseCase", () => {
       logger: new NoopLogger(),
       invoiceRepo: repo,
       idGenerator: new FakeIdGenerator(["pay-1"]),
+      clock,
     });
   });
 
@@ -26,7 +28,8 @@ describe("RecordPaymentUseCase", () => {
       lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
       createdAt: new Date(),
     });
-    invoice.finalize("INV-1", new Date());
+    const now = clock.now();
+    invoice.finalize("INV-1", now, now);
     repo.invoices = [invoice];
 
     const result = await useCase.execute(

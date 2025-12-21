@@ -1,5 +1,6 @@
 import {
   BaseUseCase,
+  ClockPort,
   ConflictError,
   LoggerPort,
   NotFoundError,
@@ -19,6 +20,7 @@ type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
   numbering: InvoiceNumberingPort;
+  clock: ClockPort;
 };
 
 export class FinalizeInvoiceUseCase extends BaseUseCase<
@@ -43,8 +45,9 @@ export class FinalizeInvoiceUseCase extends BaseUseCase<
     }
 
     try {
+      const now = this.useCaseDeps.clock.now();
       const number = await this.useCaseDeps.numbering.nextInvoiceNumber(ctx.tenantId);
-      invoice.finalize(number, new Date());
+      invoice.finalize(number, now, now);
     } catch (error) {
       if (error instanceof ValidationError || error instanceof ConflictError) {
         return err(error);

@@ -1,8 +1,10 @@
 import {
   BaseUseCase,
+  ClockPort,
   IdGeneratorPort,
   LoggerPort,
   Result,
+  TimeService,
   UseCaseContext,
   UseCaseError,
   ValidationError,
@@ -18,6 +20,8 @@ type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
   idGenerator: IdGeneratorPort;
+  clock: ClockPort;
+  timeService: TimeService;
 };
 
 export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, CreateInvoiceOutput> {
@@ -46,7 +50,10 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const createdAt = new Date();
+    const createdAt = this.useCaseDeps.clock.now();
+    const invoiceDate =
+      input.invoiceDate ?? (await this.useCaseDeps.timeService.todayInTenant(ctx.tenantId));
+    const dueDate = input.dueDate ?? null;
     const invoiceId = this.useCaseDeps.idGenerator.newId();
     const lines = input.lineItems.map((line) => ({
       id: this.useCaseDeps.idGenerator.newId(),
@@ -62,6 +69,8 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
       currency: input.currency,
       notes: input.notes,
       terms: input.terms,
+      invoiceDate,
+      dueDate,
       lineItems: lines,
       createdAt,
     });

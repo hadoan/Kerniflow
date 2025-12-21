@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { FakeIdGenerator, NoopLogger, ConflictError, isErr, unwrap } from "@kerniflow/kernel";
+import {
+  FakeIdGenerator,
+  NoopLogger,
+  ConflictError,
+  isErr,
+  unwrap,
+  FixedClock,
+} from "@kerniflow/kernel";
 import { UpdateInvoiceUseCase } from "./UpdateInvoiceUseCase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
@@ -27,10 +34,12 @@ describe("UpdateInvoiceUseCase", () => {
 
   beforeEach(() => {
     repo = new FakeInvoiceRepository();
+    const clock = new FixedClock(new Date("2025-01-04T00:00:00.000Z"));
     useCase = new UpdateInvoiceUseCase({
       logger: new NoopLogger(),
       invoiceRepo: repo,
       idGenerator: new FakeIdGenerator(["line-3"]),
+      clock,
     });
   });
 

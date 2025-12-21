@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ListInvoicesUseCase } from "./ListInvoicesUseCase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
-import { NoopLogger, unwrap } from "@kerniflow/kernel";
+import { FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
+import { TimeService } from "@kerniflow/kernel";
 
 describe("ListInvoicesUseCase", () => {
   let repo: FakeInvoiceRepository;
@@ -10,7 +11,17 @@ describe("ListInvoicesUseCase", () => {
 
   beforeEach(() => {
     repo = new FakeInvoiceRepository();
-    useCase = new ListInvoicesUseCase({ logger: new NoopLogger(), invoiceRepo: repo });
+    const clock = new FixedClock(new Date("2025-01-04T00:00:00.000Z"));
+    const timeService = new TimeService(clock, {
+      async getTenantTimeZone() {
+        return "UTC";
+      },
+    });
+    useCase = new ListInvoicesUseCase({
+      logger: new NoopLogger(),
+      invoiceRepo: repo,
+      timeService,
+    });
   });
 
   it("filters by status", async () => {

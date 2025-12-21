@@ -30,6 +30,10 @@
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.2.0"
+  },
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",

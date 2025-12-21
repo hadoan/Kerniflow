@@ -7,6 +7,13 @@ import {
 } from "../../application/ports/invoice-repo.port";
 import { InvoiceAggregate } from "../../domain/invoice.aggregate";
 import { InvoiceLine, InvoicePayment, InvoiceStatus } from "../../domain/invoice.types";
+import { LocalDate } from "@kerniflow/kernel";
+
+const toPrismaDate = (localDate: LocalDate | null): Date | null =>
+  localDate ? new Date(`${localDate}T00:00:00.000Z`) : null;
+
+const fromPrismaDate = (value: Date | null | undefined): LocalDate | null =>
+  value ? (value.toISOString().slice(0, 10) as LocalDate) : null;
 
 @Injectable()
 export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
@@ -24,9 +31,11 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
         currency: invoice.currency,
         notes: invoice.notes,
         terms: invoice.terms,
+        invoiceDate: toPrismaDate(invoice.invoiceDate),
+        dueDate: toPrismaDate(invoice.dueDate),
         issuedAt: invoice.issuedAt,
         sentAt: invoice.sentAt,
-        updatedAt: new Date(),
+        updatedAt: invoice.updatedAt,
       },
       create: {
         id: invoice.id,
@@ -37,6 +46,8 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
         currency: invoice.currency,
         notes: invoice.notes,
         terms: invoice.terms,
+        invoiceDate: toPrismaDate(invoice.invoiceDate),
+        dueDate: toPrismaDate(invoice.dueDate),
         issuedAt: invoice.issuedAt,
         sentAt: invoice.sentAt,
         createdAt: invoice.createdAt,
@@ -102,6 +113,8 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
       lineItems,
       payments,
       issuedAt: data.issuedAt,
+      invoiceDate: fromPrismaDate((data as any).invoiceDate ?? null),
+      dueDate: fromPrismaDate((data as any).dueDate ?? null),
       sentAt: (data as any).sentAt ?? null,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
@@ -151,6 +164,8 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
         lineItems: lines,
         payments: [],
         issuedAt: row.issuedAt,
+        invoiceDate: fromPrismaDate((row as any).invoiceDate ?? null),
+        dueDate: fromPrismaDate((row as any).dueDate ?? null),
         sentAt: (row as any).sentAt ?? null,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,

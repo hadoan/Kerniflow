@@ -1,5 +1,6 @@
 import {
   BaseUseCase,
+  ClockPort,
   ConflictError,
   LoggerPort,
   NotFoundError,
@@ -17,6 +18,7 @@ import { toInvoiceDto } from "../shared/invoice-dto.mapper";
 type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
+  clock: ClockPort;
 };
 
 export class CancelInvoiceUseCase extends BaseUseCase<CancelInvoiceInput, CancelInvoiceOutput> {
@@ -38,7 +40,8 @@ export class CancelInvoiceUseCase extends BaseUseCase<CancelInvoiceInput, Cancel
     }
 
     try {
-      invoice.cancel(input.reason, new Date());
+      const now = this.useCaseDeps.clock.now();
+      invoice.cancel(input.reason, now, now);
     } catch (error) {
       return err(new ConflictError((error as Error).message));
     }

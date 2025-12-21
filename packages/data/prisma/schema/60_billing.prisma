@@ -1,16 +1,18 @@
 model Invoice {
-  id         String        @id @default(cuid())
-  tenantId   String
-  customerId String
-  number     String?
-  status     InvoiceStatus @default(DRAFT)
-  currency   String
-  notes      String?
-  terms      String?
-  issuedAt   DateTime?
-  sentAt     DateTime?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id          String        @id @default(cuid())
+  tenantId    String
+  customerId  String
+  number      String?
+  status      InvoiceStatus @default(DRAFT)
+  currency    String
+  notes       String?
+  terms       String?
+  invoiceDate DateTime?     @db.Date
+  dueDate     DateTime?     @db.Date
+  issuedAt    DateTime?     @db.Timestamptz(6)
+  sentAt      DateTime?     @db.Timestamptz(6)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
 
   lines     InvoiceLine[]
   payments  InvoicePayment[]
@@ -36,7 +38,7 @@ model InvoicePayment {
   id          String   @id @default(cuid())
   invoiceId   String
   amountCents Int
-  paidAt      DateTime
+  paidAt      DateTime @db.Timestamptz(6)
   note        String?
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)

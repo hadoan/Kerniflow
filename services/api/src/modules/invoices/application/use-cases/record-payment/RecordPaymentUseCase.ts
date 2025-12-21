@@ -1,5 +1,6 @@
 import {
   BaseUseCase,
+  ClockPort,
   ConflictError,
   IdGeneratorPort,
   LoggerPort,
@@ -19,6 +20,7 @@ type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
   idGenerator: IdGeneratorPort;
+  clock: ClockPort;
 };
 
 export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, RecordPaymentOutput> {
@@ -47,12 +49,16 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
     }
 
     try {
-      invoice.recordPayment({
-        id: this.useCaseDeps.idGenerator.newId(),
-        amountCents: input.amountCents,
-        paidAt: input.paidAt ? new Date(input.paidAt) : new Date(),
-        note: input.note,
-      });
+      const now = this.useCaseDeps.clock.now();
+      invoice.recordPayment(
+        {
+          id: this.useCaseDeps.idGenerator.newId(),
+          amountCents: input.amountCents,
+          paidAt: input.paidAt ? new Date(input.paidAt) : now,
+          note: input.note,
+        },
+        now
+      );
     } catch (error) {
       if (error instanceof ValidationError || error instanceof ConflictError) {
         return err(error);

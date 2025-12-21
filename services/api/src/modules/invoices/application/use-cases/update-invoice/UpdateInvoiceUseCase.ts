@@ -1,5 +1,6 @@
 import {
   BaseUseCase,
+  ClockPort,
   ConflictError,
   IdGeneratorPort,
   LoggerPort,
@@ -19,6 +20,7 @@ type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
   idGenerator: IdGeneratorPort;
+  clock: ClockPort;
 };
 
 export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, UpdateInvoiceOutput> {
@@ -53,13 +55,29 @@ export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, Update
     }
 
     try {
+      const now = this.useCaseDeps.clock.now();
       if (input.headerPatch) {
-        invoice.updateHeader({
-          customerId: input.headerPatch.customerId,
-          currency: input.headerPatch.currency,
-          notes: input.headerPatch.notes,
-          terms: input.headerPatch.terms,
-        });
+        invoice.updateHeader(
+          {
+            customerId: input.headerPatch.customerId,
+            currency: input.headerPatch.currency,
+            notes: input.headerPatch.notes,
+            terms: input.headerPatch.terms,
+          },
+          now
+        );
+        if (
+          input.headerPatch.invoiceDate !== undefined ||
+          input.headerPatch.dueDate !== undefined
+        ) {
+          invoice.updateDates(
+            {
+              invoiceDate: input.headerPatch.invoiceDate,
+              dueDate: input.headerPatch.dueDate,
+            },
+            now
+          );
+        }
       }
 
       if (input.lineItems) {
@@ -69,7 +87,7 @@ export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, Update
           qty: line.qty,
           unitPriceCents: line.unitPriceCents,
         }));
-        invoice.replaceLineItems(newLines);
+        invoice.replaceLineItems(newLines, now);
       }
     } catch (error) {
       if (error instanceof ValidationError || error instanceof ConflictError) {

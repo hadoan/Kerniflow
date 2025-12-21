@@ -3,12 +3,13 @@ import { SendInvoiceUseCase } from "./SendInvoiceUseCase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { NoopNotification } from "../../../testkit/fakes/noop-notification";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
-import { NoopLogger, unwrap } from "@kerniflow/kernel";
+import { FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
 
 describe("SendInvoiceUseCase", () => {
   let repo: FakeInvoiceRepository;
   let notification: NoopNotification;
   let useCase: SendInvoiceUseCase;
+  const clock = new FixedClock(new Date("2025-01-02T00:00:00.000Z"));
 
   beforeEach(() => {
     repo = new FakeInvoiceRepository();
@@ -17,6 +18,7 @@ describe("SendInvoiceUseCase", () => {
       logger: new NoopLogger(),
       invoiceRepo: repo,
       notification,
+      clock,
     });
   });
 
@@ -29,7 +31,8 @@ describe("SendInvoiceUseCase", () => {
       lineItems: [{ id: "line-1", description: "Work", qty: 1, unitPriceCents: 1000 }],
       createdAt: new Date(),
     });
-    invoice.finalize("INV-1", new Date());
+    const now = clock.now();
+    invoice.finalize("INV-1", now, now);
     repo.invoices = [invoice];
 
     const result = await useCase.execute(

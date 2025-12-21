@@ -3,12 +3,13 @@ import { FinalizeInvoiceUseCase } from "./FinalizeInvoiceUseCase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { FakeInvoiceNumbering } from "../../../testkit/fakes/fake-numbering";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
-import { NoopLogger, unwrap } from "@kerniflow/kernel";
+import { FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
 
 describe("FinalizeInvoiceUseCase", () => {
   let repo: FakeInvoiceRepository;
   let numbering: FakeInvoiceNumbering;
   let useCase: FinalizeInvoiceUseCase;
+  const clock = new FixedClock(new Date("2025-01-02T00:00:00.000Z"));
 
   beforeEach(() => {
     repo = new FakeInvoiceRepository();
@@ -17,6 +18,7 @@ describe("FinalizeInvoiceUseCase", () => {
       logger: new NoopLogger(),
       invoiceRepo: repo,
       numbering,
+      clock,
     });
   });
 

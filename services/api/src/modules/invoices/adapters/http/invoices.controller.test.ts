@@ -11,6 +11,8 @@ const invoice = {
   status: "DRAFT" as const,
   customerId: "cust-1",
   currency: "USD",
+  invoiceDate: null,
+  dueDate: null,
   issuedAt: null,
   sentAt: null,
   createdAt: new Date().toISOString(),

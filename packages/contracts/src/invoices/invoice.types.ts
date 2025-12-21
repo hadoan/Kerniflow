@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { localDateSchema, utcInstantSchema } from "../shared/local-date.schema";
 
 export const InvoiceStatusSchema = z.enum(["DRAFT", "ISSUED", "SENT", "PAID", "CANCELED"]);
 export type InvoiceStatus = z.infer<typeof InvoiceStatusSchema>;
@@ -14,7 +15,7 @@ export type InvoiceLineDto = z.infer<typeof InvoiceLineSchema>;
 export const InvoicePaymentSchema = z.object({
   id: z.string(),
   amountCents: z.number().int().positive(),
-  paidAt: z.string(),
+  paidAt: utcInstantSchema,
   note: z.string().optional(),
 });
 export type InvoicePaymentDto = z.infer<typeof InvoicePaymentSchema>;
@@ -38,10 +39,12 @@ export const InvoiceDtoSchema = z.object({
   currency: z.string(),
   notes: z.string().optional().nullable(),
   terms: z.string().optional().nullable(),
-  issuedAt: z.string().nullable(),
-  sentAt: z.string().nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  invoiceDate: localDateSchema.nullable(),
+  dueDate: localDateSchema.nullable(),
+  issuedAt: utcInstantSchema.nullable(),
+  sentAt: utcInstantSchema.nullable(),
+  createdAt: utcInstantSchema,
+  updatedAt: utcInstantSchema,
   lineItems: z.array(InvoiceLineSchema),
   payments: z.array(InvoicePaymentSchema).optional(),
   totals: InvoiceTotalsSchema,
