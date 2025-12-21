@@ -162,7 +162,10 @@ describe("ResendWebhookController", () => {
   describe("event processing", () => {
     beforeEach(() => {
       // Mock verification to always succeed
-      mockResendInstance.webhooks.verify.mockImplementation((body: string) => JSON.parse(body));
+      mockResendInstance.webhooks.verify.mockImplementation((arg: any) => {
+        const payload = typeof arg === "string" ? arg : arg.body;
+        return JSON.parse(payload);
+      });
     });
 
     it("updates delivery status to DELIVERED for email.delivered event", async () => {

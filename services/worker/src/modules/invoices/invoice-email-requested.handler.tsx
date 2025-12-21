@@ -1,10 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { prisma } from "@kerniflow/data";
-import { Resend } from "resend";
 import { EventHandler, OutboxEvent } from "../outbox/event-handler.interface";
 import { renderEmail } from "@kerniflow/email-templates";
 import { InvoiceEmail, buildInvoiceEmailSubject } from "@kerniflow/email-templates/invoices";
 import { mapToInvoiceEmailProps } from "./invoice-email-props.mapper";
+import { EMAIL_SENDER_PORT, EmailSenderPort } from "../notifications/ports/email-sender.port";
 
 type InvoiceEmailRequestedPayload = {
   deliveryId: string;
@@ -21,20 +21,8 @@ type InvoiceEmailRequestedPayload = {
 @Injectable()
 export class InvoiceEmailRequestedHandler implements EventHandler {
   readonly eventType = "invoice.email.requested";
-  private resend: Resend;
-  private fromAddress: string;
-  private replyTo?: string | undefined;
 
-  constructor() {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      throw new Error("RESEND_API_KEY environment variable is required");
-    }
-
-    this.resend = new Resend(apiKey);
-    this.fromAddress = process.env.RESEND_FROM ?? "Qansa Billing <billing@example.com>";
-    this.replyTo = process.env.RESEND_REPLY_TO;
-  }
+  constructor(@Inject(EMAIL_SENDER_PORT) private readonly emailSender: EmailSenderPort) {}
 
   async handle(event: OutboxEvent): Promise<void> {
     const payload: InvoiceEmailRequestedPayload = JSON.parse(event.payloadJson);
@@ -80,51 +68,27 @@ export class InvoiceEmailRequestedHandler implements EventHandler {
     const { html, text } = await renderEmail(<InvoiceEmail {...emailProps} />);
 
     try {
-      // 5. Send email via Resend
-      const emailOptions: any = {
-        from: this.fromAddress,
+      // 5. Send email via provider
+      const result = await this.emailSender.sendEmail({
+        tenantId: event.tenantId,
         to: [payload.to],
+        cc: payload.cc,
+        bcc: payload.bcc,
         subject,
         html,
         text,
-      };
-
-      if (payload.cc) {
-        emailOptions.cc = payload.cc;
-      }
-
-      if (payload.bcc) {
-        emailOptions.bcc = payload.bcc;
-      }
-
-      if (this.replyTo) {
-        emailOptions.replyTo = this.replyTo;
-      }
-
-      if (event.correlationId) {
-        emailOptions.headers = {
-          "X-Correlation-ID": event.correlationId,
-        };
-      }
-
-      const { data, error } = await this.resend.emails.send(emailOptions, {
+        replyTo: undefined,
+        headers: event.correlationId ? { "X-Correlation-ID": event.correlationId } : undefined,
         idempotencyKey: payload.idempotencyKey,
       });
-
-      if (error) {
-        throw new Error(`Resend API error: ${error.message}`);
-      }
-
-      if (!data?.id) {
-        throw new Error("Resend API did not return an email ID");
-      }
 
       // 6. Update delivery record to SENT
       await prisma.invoiceEmailDelivery.update({
         where: { id: payload.deliveryId },
         data: {
           status: "SENT",
-          providerMessageId: data.id,
+          provider: result.provider,
+          providerMessageId: result.providerMessageId,
         },
       });
     } catch (error) {

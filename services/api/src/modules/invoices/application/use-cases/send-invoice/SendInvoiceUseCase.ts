@@ -79,7 +79,7 @@ export class SendInvoiceUseCase extends BaseUseCase<SendInvoiceInput, SendInvoic
       invoiceId: input.invoiceId,
       to: input.to,
       status: "QUEUED",
-      provider: "resend",
+      provider: process.env.EMAIL_PROVIDER ?? "resend",
       idempotencyKey,
     });
 

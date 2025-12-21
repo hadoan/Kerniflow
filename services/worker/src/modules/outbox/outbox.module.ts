@@ -2,10 +2,26 @@ import { Module } from "@nestjs/common";
 import { OutboxPollerService } from "./OutboxPollerService";
 import { OutboxRepository } from "@kerniflow/data";
 import { InvoiceEmailRequestedHandler } from "../invoices/invoice-email-requested.handler";
+import { EMAIL_SENDER_PORT, EmailSenderPort } from "../notifications/ports/email-sender.port";
+import { ResendEmailSenderAdapter } from "../notifications/infra/resend/resend-email-sender.adapter";
 
 @Module({
   providers: [
-    InvoiceEmailRequestedHandler,
+    {
+      provide: EMAIL_SENDER_PORT,
+      useFactory: () => {
+        const provider = process.env.EMAIL_PROVIDER ?? "resend";
+        if (provider !== "resend") {
+          throw new Error(`Unsupported email provider: ${provider}`);
+        }
+        return new ResendEmailSenderAdapter();
+      },
+    },
+    {
+      provide: InvoiceEmailRequestedHandler,
+      useFactory: (sender: EmailSenderPort) => new InvoiceEmailRequestedHandler(sender),
+      inject: [EMAIL_SENDER_PORT],
+    },
     {
       provide: OutboxRepository,
       useValue: new OutboxRepository(),
