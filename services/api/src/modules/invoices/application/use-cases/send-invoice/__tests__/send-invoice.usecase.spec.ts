@@ -165,7 +165,7 @@ describe("SendInvoiceUseCase", () => {
         createdAt: new Date(),
       });
       invoice.finalize("INV-001", new Date(), new Date(), { name: "Customer" });
-      invoice.cancel(new Date());
+      invoice.cancel(undefined, undefined, new Date());
       invoiceRepo.invoices = [invoice];
 
       // Act

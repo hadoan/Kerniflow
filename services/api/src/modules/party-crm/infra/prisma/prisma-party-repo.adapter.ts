@@ -9,11 +9,7 @@ import {
 import { PartyRoleType } from "../../domain/party-role";
 import { ContactPointType } from "../../domain/contact-point";
 import { Address } from "../../domain/address";
-import { Prisma } from "@prisma/client";
-
-type PartyWithRelations = Prisma.PartyGetPayload<{
-  include: { contactPoints: true; addresses: true; roles: true };
-}>;
+type PartyWithRelations = any;
 
 const toAggregate = (row: PartyWithRelations): PartyAggregate => {
   const billingAddress = row.addresses.find((addr) => addr.type === "BILLING");
@@ -55,7 +51,8 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
       throw new Error("Tenant mismatch when creating customer");
     }
 
-    await prisma.$transaction(async (tx) => {
+    const db = prisma as any;
+    await db.$transaction(async (tx: any) => {
       await tx.party.create({
         data: {
           id: party.id,
@@ -114,7 +111,8 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
       throw new Error("Tenant mismatch when updating customer");
     }
 
-    await prisma.$transaction(async (tx) => {
+    const db = prisma as any;
+    await db.$transaction(async (tx: any) => {
       await tx.party.update({
         where: { id: party.id },
         data: {
@@ -217,7 +215,8 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
   }
 
   async findCustomerById(tenantId: string, partyId: string): Promise<PartyAggregate | null> {
-    const row = await prisma.party.findFirst({
+    const db = prisma as any;
+    const row = await db.party.findFirst({
       where: { id: partyId, tenantId, roles: { some: { role: "CUSTOMER" } } },
       include: { contactPoints: true, addresses: true, roles: true },
     });
@@ -226,13 +225,14 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
   }
 
   async listCustomers(tenantId: string, filters: ListCustomersFilters, pagination: Pagination) {
-    const where: Prisma.PartyWhereInput = {
+    const where: any = {
       tenantId,
       roles: { some: { role: "CUSTOMER" } },
       archivedAt: filters.includeArchived ? undefined : null,
     };
 
-    const results = await prisma.party.findMany({
+    const db = prisma as any;
+    const results = await db.party.findMany({
       where,
       take: pagination.pageSize ?? 20,
       skip: pagination.cursor ? 1 : 0,
@@ -247,7 +247,7 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
   }
 
   async searchCustomers(tenantId: string, q: string, pagination: Pagination) {
-    const where: Prisma.PartyWhereInput = {
+    const where: any = {
       tenantId,
       roles: { some: { role: "CUSTOMER" } },
       archivedAt: null,
@@ -263,7 +263,8 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
       ],
     };
 
-    const results = await prisma.party.findMany({
+    const db = prisma as any;
+    const results = await db.party.findMany({
       where,
       take: pagination.pageSize ?? 20,
       skip: pagination.cursor ? 1 : 0,

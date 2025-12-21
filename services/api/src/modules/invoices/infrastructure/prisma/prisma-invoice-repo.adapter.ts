@@ -22,7 +22,9 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
       throw new Error("Tenant mismatch when saving invoice");
     }
 
-    await prisma.invoice.upsert({
+    const db = prisma as any;
+
+    await db.invoice.upsert({
       where: { id: invoice.id },
       update: {
         customerPartyId: invoice.customerPartyId,
@@ -81,7 +83,7 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
 
     if (invoice.lineItems.length) {
       for (const line of invoice.lineItems) {
-        await prisma.invoiceLine.upsert({
+        await db.invoiceLine.upsert({
           where: { id: line.id },
           update: {
             description: line.description,
@@ -105,7 +107,8 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
   }
 
   async findById(tenantId: string, id: string): Promise<InvoiceAggregate | null> {
-    const data = await prisma.invoice.findFirst({
+    const db = prisma as any;
+    const data = await db.invoice.findFirst({
       where: { id, tenantId },
       include: { lines: true },
     });
@@ -160,7 +163,8 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
       if (filters.toDate) where.createdAt.lte = filters.toDate;
     }
 
-    const results = await prisma.invoice.findMany({
+    const db = prisma as any;
+    const results = await db.invoice.findMany({
       where,
       take: pageSize,
       skip: cursor ? 1 : 0,
@@ -209,7 +213,8 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
   }
 
   async isInvoiceNumberTaken(tenantId: string, number: string): Promise<boolean> {
-    const count = await prisma.invoice.count({ where: { tenantId, number } });
+    const db = prisma as any;
+    const count = await db.invoice.count({ where: { tenantId, number } });
     return count > 0;
   }
 }

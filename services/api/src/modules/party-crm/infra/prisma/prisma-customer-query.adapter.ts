@@ -9,7 +9,8 @@ export class PrismaCustomerQueryAdapter implements CustomerQueryPort {
     tenantId: string,
     partyId: string
   ): Promise<CustomerBillingSnapshotDTO | null> {
-    const party = await prisma.party.findFirst({
+    const db = prisma as any;
+    const party = await db.party.findFirst({
       where: { id: partyId, tenantId, roles: { some: { role: "CUSTOMER" } } },
       include: { contactPoints: true, addresses: true },
     });

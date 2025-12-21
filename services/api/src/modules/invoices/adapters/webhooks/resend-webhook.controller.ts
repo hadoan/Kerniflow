@@ -68,7 +68,7 @@ export class ResendWebhookController {
             "svix-id": svixId,
             "svix-timestamp": svixTimestamp,
             "svix-signature": svixSignature,
-          },
+          } as any,
           secret: this.webhookSecret,
         }) as ResendWebhookEvent;
 

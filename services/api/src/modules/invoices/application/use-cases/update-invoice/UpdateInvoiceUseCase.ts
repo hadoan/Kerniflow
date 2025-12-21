@@ -11,6 +11,7 @@ import {
   ValidationError,
   err,
   ok,
+  parseLocalDate,
 } from "@kerniflow/kernel";
 import { UpdateInvoiceInput, UpdateInvoiceOutput } from "@kerniflow/contracts";
 import { InvoiceRepoPort } from "../../ports/invoice-repo.port";
@@ -116,8 +117,14 @@ export class UpdateInvoiceUseCase extends BaseUseCase<UpdateInvoiceInput, Update
         ) {
           invoice.updateDates(
             {
-              invoiceDate: input.headerPatch.invoiceDate,
-              dueDate: input.headerPatch.dueDate,
+              invoiceDate:
+                input.headerPatch.invoiceDate !== undefined
+                  ? parseLocalDate(input.headerPatch.invoiceDate)
+                  : undefined,
+              dueDate:
+                input.headerPatch.dueDate !== undefined
+                  ? parseLocalDate(input.headerPatch.dueDate)
+                  : undefined,
             },
             now
           );

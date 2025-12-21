@@ -11,6 +11,7 @@ import {
   ValidationError,
   err,
   ok,
+  parseLocalDate,
 } from "@kerniflow/kernel";
 import { CreateInvoiceInput, CreateInvoiceOutput } from "@kerniflow/contracts";
 import { InvoiceRepoPort } from "../../ports/invoice-repo.port";
@@ -63,8 +64,11 @@ export class CreateInvoiceUseCase extends BaseUseCase<CreateInvoiceInput, Create
 
     const createdAt = this.useCaseDeps.clock.now();
     const invoiceDate =
-      input.invoiceDate ?? (await this.useCaseDeps.timeService.todayInTenant(ctx.tenantId));
-    const dueDate = input.dueDate ?? null;
+      input.invoiceDate !== undefined && input.invoiceDate !== null
+        ? parseLocalDate(input.invoiceDate)
+        : await this.useCaseDeps.timeService.todayInTenant(ctx.tenantId);
+    const dueDate =
+      input.dueDate !== undefined && input.dueDate !== null ? parseLocalDate(input.dueDate) : null;
     const invoiceId = this.useCaseDeps.idGenerator.newId();
     const lines = input.lineItems.map((line) => ({
       id: this.useCaseDeps.idGenerator.newId(),

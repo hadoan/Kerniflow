@@ -8,6 +8,7 @@ import {
   ValidationError,
   err,
   ok,
+  parseLocalDate,
 } from "@kerniflow/kernel";
 import { ListInvoicesInput, ListInvoicesOutput } from "@kerniflow/contracts";
 import { InvoiceRepoPort } from "../../ports/invoice-repo.port";
@@ -33,14 +34,14 @@ export class ListInvoicesUseCase extends BaseUseCase<ListInvoicesInput, ListInvo
       input.fromDate !== undefined && input.fromDate !== null
         ? await this.useCaseDeps.timeService.localDateToTenantStartOfDayUtc(
             ctx.tenantId,
-            input.fromDate
+            parseLocalDate(input.fromDate)
           )
         : undefined;
     const toDate =
       input.toDate !== undefined && input.toDate !== null
         ? await this.useCaseDeps.timeService.localDateToTenantEndOfDayUtc(
             ctx.tenantId,
-            input.toDate
+            parseLocalDate(input.toDate)
           )
         : undefined;
     const { items, nextCursor } = await this.useCaseDeps.invoiceRepo.list(
