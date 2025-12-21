@@ -8,6 +8,7 @@
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.6.0",
     "rxjs": "^7.8.2"
   },
   "scripts": {

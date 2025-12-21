@@ -48,7 +48,7 @@ export class InvoicesHttpController {
     const input = SendInvoiceInputSchema.parse({ ...(body as object), invoiceId });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.sendInvoice.execute(input, ctx);
-    return mapResultToHttp(result).invoice;
+    return mapResultToHttp(result);
   }
 
   @Post(":invoiceId/payments")

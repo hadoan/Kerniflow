@@ -53,3 +53,30 @@ enum InvoiceStatus {
   PAID
   CANCELED
 }
+
+model InvoiceEmailDelivery {
+  id                 String         @id @default(cuid())
+  tenantId           String
+  invoiceId          String
+  to                 String
+  status             DeliveryStatus @default(QUEUED)
+  provider           String         @default("resend")
+  providerMessageId  String?
+  idempotencyKey     String
+  lastError          String?
+  createdAt          DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, invoiceId])
+  @@index([providerMessageId])
+}
+
+enum DeliveryStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  BOUNCED
+  FAILED
+  DELAYED
+}

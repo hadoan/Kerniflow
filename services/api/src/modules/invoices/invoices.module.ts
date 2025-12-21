@@ -1,6 +1,9 @@
 import { Module } from "@nestjs/common";
 import { InvoicesHttpController } from "./adapters/http/invoices.controller";
+import { ResendWebhookController } from "./adapters/webhooks/resend-webhook.controller";
 import { PrismaInvoiceRepoAdapter } from "./infrastructure/prisma/prisma-invoice-repo.adapter";
+import { PrismaInvoiceEmailDeliveryRepoAdapter } from "./infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
+import { PrismaOutboxAdapter } from "./infrastructure/outbox/prisma-outbox.adapter";
 import { InvoicesApplication } from "./application/invoices.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
@@ -17,11 +20,9 @@ import {
   INVOICE_NUMBERING_PORT,
   InvoiceNumberingPort,
 } from "./application/ports/invoice-numbering.port";
-import { NOTIFICATION_PORT, NotificationPort } from "./application/ports/notification.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { InvoiceNumberingAdapter } from "./infrastructure/prisma/prisma-numbering.adapter";
-import { NoopNotificationAdapter } from "./infrastructure/prisma/noop-notification.adapter";
 import { IdentityModule } from "../identity";
 import { TimeService } from "@kerniflow/kernel";
 import { PrismaTenantTimeZoneAdapter } from "../../shared/time/prisma-tenant-timezone.adapter";
@@ -29,7 +30,7 @@ import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
 
 @Module({
   imports: [IdentityModule],
-  controllers: [InvoicesHttpController],
+  controllers: [InvoicesHttpController, ResendWebhookController],
   providers: [
     PrismaInvoiceRepoAdapter,
     SystemIdGenerator,
@@ -45,7 +46,8 @@ import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
       inject: [CLOCK_PORT_TOKEN, TENANT_TIMEZONE_PORT],
     },
     { provide: INVOICE_NUMBERING_PORT, useClass: InvoiceNumberingAdapter },
-    { provide: NOTIFICATION_PORT, useClass: NoopNotificationAdapter },
+    PrismaInvoiceEmailDeliveryRepoAdapter,
+    PrismaOutboxAdapter,
     {
       provide: CreateInvoiceUseCase,
       useFactory: (
@@ -93,16 +95,23 @@ import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
       provide: SendInvoiceUseCase,
       useFactory: (
         repo: PrismaInvoiceRepoAdapter,
-        notification: NotificationPort,
-        clock: SystemClock
+        deliveryRepo: PrismaInvoiceEmailDeliveryRepoAdapter,
+        outbox: PrismaOutboxAdapter,
+        idGen: SystemIdGenerator
       ) =>
         new SendInvoiceUseCase({
           logger: new NestLoggerAdapter(),
           invoiceRepo: repo,
-          notification,
-          clock,
+          deliveryRepo,
+          outbox,
+          idGenerator: idGen,
         }),
-      inject: [PrismaInvoiceRepoAdapter, NOTIFICATION_PORT, CLOCK_PORT_TOKEN],
+      inject: [
+        PrismaInvoiceRepoAdapter,
+        PrismaInvoiceEmailDeliveryRepoAdapter,
+        PrismaOutboxAdapter,
+        ID_GENERATOR_TOKEN,
+      ],
     },
     {
       provide: RecordPaymentUseCase,

@@ -1,14 +1,19 @@
 import { z } from "zod";
-import { InvoiceDtoSchema } from "./invoice.types";
 
 export const SendInvoiceInputSchema = z.object({
   invoiceId: z.string(),
-  channel: z.enum(["email", "link"]).default("email"),
-  emailTo: z.string().email().optional(),
+  to: z.string().email(),
+  cc: z.array(z.string().email()).optional(),
+  bcc: z.array(z.string().email()).optional(),
+  message: z.string().optional(),
+  attachPdf: z.boolean().default(false),
+  idempotencyKey: z.string().optional(),
+  locale: z.string().optional(),
 });
 
 export const SendInvoiceOutputSchema = z.object({
-  invoice: InvoiceDtoSchema,
+  deliveryId: z.string(),
+  status: z.enum(["QUEUED", "SENT", "DELIVERED", "BOUNCED", "FAILED", "DELAYED"]),
 });
 
 export type SendInvoiceInput = z.infer<typeof SendInvoiceInputSchema>;

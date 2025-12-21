@@ -1,7 +1,7 @@
 import {
   BaseUseCase,
-  ClockPort,
   ConflictError,
+  IdGeneratorPort,
   LoggerPort,
   NotFoundError,
   Result,
@@ -13,14 +13,16 @@ import {
 } from "@kerniflow/kernel";
 import { SendInvoiceInput, SendInvoiceOutput } from "@kerniflow/contracts";
 import { InvoiceRepoPort } from "../../ports/invoice-repo.port";
-import { NotificationPort } from "../../ports/notification.port";
-import { toInvoiceDto } from "../shared/invoice-dto.mapper";
+import { InvoiceEmailDeliveryRepoPort } from "../../ports/invoice-email-delivery-repo.port";
+import { OutboxPort } from "../../ports/outbox.port";
+import { createHash } from "crypto";
 
 type Deps = {
   logger: LoggerPort;
   invoiceRepo: InvoiceRepoPort;
-  notification: NotificationPort;
-  clock: ClockPort;
+  deliveryRepo: InvoiceEmailDeliveryRepoPort;
+  outbox: OutboxPort;
+  idGenerator: IdGeneratorPort;
 };
 
 export class SendInvoiceUseCase extends BaseUseCase<SendInvoiceInput, SendInvoiceOutput> {
@@ -36,24 +38,76 @@ export class SendInvoiceUseCase extends BaseUseCase<SendInvoiceInput, SendInvoic
       return err(new ValidationError("tenantId is required"));
     }
 
+    // 1. Validate invoice exists + belongs to tenantId
     const invoice = await this.useCaseDeps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Invoice not found"));
     }
 
-    try {
-      const now = this.useCaseDeps.clock.now();
-      invoice.markSent(now, now);
-    } catch (error) {
-      return err(new ConflictError((error as Error).message));
+    // 2. Confirm invoice is in a sendable state (ISSUED or SENT allowed, DRAFT not allowed)
+    if (invoice.status === "DRAFT") {
+      return err(new ConflictError("Cannot send a draft invoice. Please finalize it first."));
     }
 
-    await this.useCaseDeps.notification.sendInvoiceEmail(ctx.tenantId, {
-      invoiceId: invoice.id,
-      to: input.emailTo,
+    if (invoice.status === "CANCELED") {
+      return err(new ConflictError("Cannot send a canceled invoice."));
+    }
+
+    // 3. Compute idempotency key
+    const idempotencyKey =
+      input.idempotencyKey ?? this.generateIdempotencyKey(input.invoiceId, input.to);
+
+    // 4. Check for existing delivery (idempotency)
+    const existingDelivery = await this.useCaseDeps.deliveryRepo.findByIdempotencyKey(
+      ctx.tenantId,
+      idempotencyKey
+    );
+
+    if (existingDelivery) {
+      // Already queued or sent
+      return ok({
+        deliveryId: existingDelivery.id,
+        status: existingDelivery.status,
+      });
+    }
+
+    // 5. Create delivery record with status QUEUED
+    const deliveryId = this.useCaseDeps.idGenerator.newId();
+    await this.useCaseDeps.deliveryRepo.create({
+      id: deliveryId,
+      tenantId: ctx.tenantId,
+      invoiceId: input.invoiceId,
+      to: input.to,
+      status: "QUEUED",
+      provider: "resend",
+      idempotencyKey,
     });
 
-    await this.useCaseDeps.invoiceRepo.save(ctx.tenantId, invoice);
-    return ok({ invoice: toInvoiceDto(invoice) });
+    // 6. Write outbox event
+    const payload = {
+      deliveryId,
+      invoiceId: input.invoiceId,
+      to: input.to,
+      cc: input.cc,
+      bcc: input.bcc,
+      message: input.message,
+      attachPdf: input.attachPdf,
+      locale: input.locale,
+      idempotencyKey,
+    };
+
+    await this.useCaseDeps.outbox.enqueue({
+      tenantId: ctx.tenantId,
+      eventType: "invoice.email.requested",
+      payloadJson: JSON.stringify(payload),
+      correlationId: ctx.correlationId,
+    });
+
+    return ok({ deliveryId, status: "QUEUED" });
+  }
+
+  private generateIdempotencyKey(invoiceId: string, to: string): string {
+    const hash = createHash("sha256").update(to).digest("hex").slice(0, 16);
+    return `invoice-send/${invoiceId}/${hash}`;
   }
 }

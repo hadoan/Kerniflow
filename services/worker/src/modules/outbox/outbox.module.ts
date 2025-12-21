@@ -1,13 +1,21 @@
 import { Module } from "@nestjs/common";
 import { OutboxPollerService } from "./OutboxPollerService";
 import { OutboxRepository } from "@kerniflow/data";
+import { InvoiceEmailRequestedHandler } from "../invoices/invoice-email-requested.handler";
 
 @Module({
   providers: [
-    OutboxPollerService,
+    InvoiceEmailRequestedHandler,
     {
       provide: OutboxRepository,
-      useValue: new OutboxRepository(), // Explicit instance to avoid DI token resolution issues
+      useValue: new OutboxRepository(),
+    },
+    {
+      provide: OutboxPollerService,
+      useFactory: (repo: OutboxRepository, invoiceHandler: InvoiceEmailRequestedHandler) => {
+        return new OutboxPollerService(repo, [invoiceHandler]);
+      },
+      inject: [OutboxRepository, InvoiceEmailRequestedHandler],
     },
   ],
 })

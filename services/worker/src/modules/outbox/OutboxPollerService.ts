@@ -1,11 +1,20 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import { OutboxRepository } from "@kerniflow/data";
+import { EventHandler } from "./event-handler.interface";
 
 @Injectable()
 export class OutboxPollerService implements OnModuleInit {
   private intervalId: NodeJS.Timeout | undefined;
+  private handlers = new Map<string, EventHandler>();
 
-  constructor(private readonly outboxRepo: OutboxRepository) {}
+  constructor(
+    private readonly outboxRepo: OutboxRepository,
+    handlers: EventHandler[]
+  ) {
+    for (const handler of handlers) {
+      this.handlers.set(handler.eventType, handler);
+    }
+  }
 
   onModuleInit() {
     this.startPolling();
@@ -16,8 +25,12 @@ export class OutboxPollerService implements OnModuleInit {
       const events = await this.outboxRepo.fetchPending(10);
       for (const event of events) {
         try {
-          // Placeholder: publish by logging
-          console.log("Publishing outbox event:", event.eventType, event.payloadJson);
+          const handler = this.handlers.get(event.eventType);
+          if (handler) {
+            await handler.handle(event);
+          } else {
+            console.warn(`No handler found for event type: ${event.eventType}`);
+          }
           await this.outboxRepo.markSent(event.id);
         } catch (error) {
           console.error("Failed to publish event:", event.id, error);
