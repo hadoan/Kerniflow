@@ -62,16 +62,15 @@ export class ResendWebhookController {
     try {
       // Verify webhook signature if secret is configured
       if (this.webhookSecret) {
-        const verifyOptions: any = {
-          body: rawBody,
+        const event = this.resend.webhooks.verify({
+          payload: rawBody,
           headers: {
             "svix-id": svixId,
             "svix-timestamp": svixTimestamp,
             "svix-signature": svixSignature,
           },
           secret: this.webhookSecret,
-        };
-        const event = (this.resend.webhooks.verify as any)(verifyOptions) as ResendWebhookEvent;
+        }) as ResendWebhookEvent;
 
         await this.processEvent(event);
       } else {
