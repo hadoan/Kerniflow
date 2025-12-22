@@ -9,7 +9,7 @@ import { ToolRegistry } from "./infrastructure/tools/tool-registry";
 import { AiSdkModelAdapter } from "./infrastructure/model/ai-sdk.model-adapter";
 import { PrismaAuditAdapter } from "./infrastructure/audit/prisma.audit.adapter";
 import { PrismaOutboxAdapter } from "./infrastructure/outbox/prisma.outbox.adapter";
-import { InMemoryIdempotencyAdapter } from "./infrastructure/idempotency/in-memory-idempotency.adapter";
+import { PrismaIdempotencyAdapter } from "./infrastructure/idempotency/prisma-idempotency.adapter";
 import { TenantGuard } from "./adapters/http/guards/tenant.guard";
 import { COPILOT_TOOLS } from "./application/ports/tool-registry.port";
 import { AuditPort } from "./application/ports/audit.port";
@@ -17,6 +17,7 @@ import { OutboxPort } from "./application/ports/outbox.port";
 import { ClockPort } from "@kerniflow/kernel/ports/clock.port";
 import { IdentityModule } from "../identity/identity.module";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
+import { IdempotencyService } from "../../shared/idempotency/idempotency.service";
 import { InvoicesModule } from "../invoices/invoices.module";
 import { InvoicesApplication } from "../invoices/application/invoices.application";
 import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
@@ -34,7 +35,8 @@ import { buildCustomerTools } from "../party-crm/adapters/tools/customer.tools";
     ToolRegistry,
     PrismaAuditAdapter,
     PrismaOutboxAdapter,
-    InMemoryIdempotencyAdapter,
+    IdempotencyService,
+    PrismaIdempotencyAdapter,
     TenantGuard,
     { provide: "COPILOT_LOGGER", useClass: NestLoggerAdapter },
     {
@@ -77,7 +79,7 @@ import { buildCustomerTools } from "../party-crm/adapters/tools/customer.tools";
         model: AiSdkModelAdapter,
         audit: PrismaAuditAdapter,
         outbox: PrismaOutboxAdapter,
-        idem: InMemoryIdempotencyAdapter,
+        idem: PrismaIdempotencyAdapter,
         clock: ClockPort,
         logger: NestLoggerAdapter
       ) => {
@@ -102,7 +104,7 @@ import { buildCustomerTools } from "../party-crm/adapters/tools/customer.tools";
         AiSdkModelAdapter,
         PrismaAuditAdapter,
         PrismaOutboxAdapter,
-        InMemoryIdempotencyAdapter,
+        PrismaIdempotencyAdapter,
         "COPILOT_CLOCK",
         "COPILOT_LOGGER",
       ],

@@ -1,0 +1,27 @@
+# Idempotency & Replay
+
+- **Schema (`IdempotencyKey` table)**
+  - Fields: `tenantId`, `actionKey`, `key`, `userId?`, `requestHash?`, `status` (`IN_PROGRESS|COMPLETED|FAILED`), `responseStatus?`, `responseJson?`, `createdAt`, `updatedAt`, `expiresAt?`.
+  - Unique constraint: `(tenantId, actionKey, key)`. Migration: `20250319000000_idempotency_replay`.
+- **Server behavior (`IdempotencyService`)**
+  - `startOrReplay({tenantId, userId, actionKey, idempotencyKey, requestHash})` returns:
+    - `STARTED` when no record exists or an expired in-progress lock is reclaimed.
+    - `REPLAY` with stored `responseStatus/body` when status is `COMPLETED` (sets `Idempotency-Replayed: true` header at callers).
+    - `IN_PROGRESS` with optional `retryAfterMs` when another request is active.
+    - `MISMATCH` when the same key is reused with a different `requestHash` (400 `IDEMPOTENCY_MISMATCH`).
+    - `FAILED` echoes stored failure.
+  - `complete(...)` stores response status/body and marks `COMPLETED`; `fail(...)` stores failure and marks `FAILED`.
+  - Lock timeout: 2 minutes before another worker can take over an `IN_PROGRESS` key.
+- **Copilot streaming**
+  - Endpoint `/copilot/chat` now uses `startOrReplay`:
+    - Duplicate matching key returns stored success with `Idempotency-Replayed: true`.
+    - In-progress returns `202` + `Retry-After` guidance.
+    - Mismatch returns `400 IDEMPOTENCY_MISMATCH`.
+  - Stored response for streams is a lightweight `{ status: "STREAMED", runId }` payload; the live stream still flows on first processing.
+- **Scope**
+  - Idempotency is tenant-scoped; `userId` is recorded when provided.
+  - TTL field exists for cleanup; current TTL default is 24h (can be tuned per call).
+- **Error codes**
+  - `IDEMPOTENCY_MISMATCH` for key/hash conflicts.
+  - `Idempotency-Replayed: true` response header signals replay.
+  - `Retry-After` header is respected by the client retry policy.

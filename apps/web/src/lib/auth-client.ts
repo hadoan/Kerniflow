@@ -1,8 +1,9 @@
 /**
  * Auth Client
- * Handles HTTP calls to API auth endpoints
+ * Handles HTTP calls to API auth endpoints using the shared retrying request wrapper
  */
 
+import { request, createIdempotencyKey, HttpError } from "@kerniflow/api-client";
 import { setActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
 
 // Vite exposes env via import.meta.env, so avoid process.env on the client
@@ -98,20 +99,12 @@ class AuthClient {
    * Sign up
    */
   async signup(data: SignUpData): Promise<AuthResponse> {
-    const response = await fetch(`${API_URL}/auth/signup`, {
+    const result = await request<AuthResponse>({
+      url: `${API_URL}/auth/signup`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Idempotency-Key": this.generateIdempotencyKey(),
-      },
-      body: JSON.stringify(data),
+      body: data,
+      idempotencyKey: createIdempotencyKey(),
     });
-
-    if (!response.ok) {
-      throw new Error("Signup failed");
-    }
-
-    const result = (await response.json()) as AuthResponse;
     this.storeTokens(result.accessToken, result.refreshToken);
     const workspaceId = result.workspaceId ?? result.tenantId;
     if (workspaceId) setActiveWorkspaceId(workspaceId);
@@ -123,19 +116,11 @@ class AuthClient {
    * Sign in
    */
   async signin(data: SignInData): Promise<AuthResponse> {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const result = await request<AuthResponse>({
+      url: `${API_URL}/auth/login`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+      body: data,
     });
-
-    if (!response.ok) {
-      throw new Error("Sign in failed");
-    }
-
-    const result = (await response.json()) as AuthResponse;
     this.storeTokens(result.accessToken, result.refreshToken);
     const workspaceId = result.workspaceId ?? result.tenantId ?? data.workspaceId ?? data.tenantId;
     if (workspaceId) setActiveWorkspaceId(workspaceId);
@@ -151,22 +136,19 @@ class AuthClient {
       throw new Error("No access token");
     }
 
-    const response = await fetch(`${API_URL}/auth/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
+    try {
+      return await request<CurrentUserResponse>({
+        url: `${API_URL}/auth/me`,
+        method: "GET",
+        accessToken: this.accessToken,
+      });
+    } catch (error) {
+      if (error instanceof HttpError && error.status === 401) {
         await this.refreshAccessToken();
-        return this.getCurrentUser(); // Retry
+        return this.getCurrentUser(); // Retry once after refresh
       }
-      throw new Error("Failed to fetch user");
+      throw error;
     }
-
-    return (await response.json()) as CurrentUserResponse;
   }
 
   /**
@@ -177,23 +159,11 @@ class AuthClient {
       throw new Error("No refresh token");
     }
 
-    const response = await fetch(`${API_URL}/auth/refresh`, {
+    const result = await request<{ accessToken: string; refreshToken: string }>({
+      url: `${API_URL}/auth/refresh`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refreshToken: this.refreshToken }),
+      body: { refreshToken: this.refreshToken },
     });
-
-    if (!response.ok) {
-      this.clearTokens();
-      throw new Error("Token refresh failed");
-    }
-
-    const result = (await response.json()) as {
-      accessToken: string;
-      refreshToken: string;
-    };
 
     this.storeTokens(result.accessToken, result.refreshToken);
   }
@@ -204,13 +174,11 @@ class AuthClient {
   async signout(): Promise<void> {
     if (this.accessToken) {
       try {
-        await fetch(`${API_URL}/auth/logout`, {
+        await request({
+          url: `${API_URL}/auth/logout`,
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ refreshToken: this.refreshToken }),
+          accessToken: this.accessToken,
+          body: { refreshToken: this.refreshToken },
         });
       } catch (error) {
         // Ignore errors on logout
@@ -229,20 +197,12 @@ class AuthClient {
       throw new Error("No access token");
     }
 
-    const response = await fetch(`${API_URL}/auth/switch-tenant`, {
+    const result = await request<AuthResponse>({
+      url: `${API_URL}/auth/switch-tenant`,
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ tenantId }),
+      accessToken: this.accessToken,
+      body: { tenantId },
     });
-
-    if (!response.ok) {
-      throw new Error("Failed to switch tenant");
-    }
-
-    const result = (await response.json()) as AuthResponse;
     this.storeTokens(result.accessToken, result.refreshToken);
     setActiveWorkspaceId(result.workspaceId ?? result.tenantId ?? tenantId);
 
@@ -253,7 +213,7 @@ class AuthClient {
    * Generate idempotency key
    */
   private generateIdempotencyKey(): string {
-    return `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    return createIdempotencyKey();
   }
 }
 

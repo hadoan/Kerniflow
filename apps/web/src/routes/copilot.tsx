@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { nanoid } from "nanoid";
+import { createIdempotencyKey } from "@kerniflow/api-client";
 import { Button } from "@/shared/ui/button";
 
 type MessagePart =
@@ -57,7 +58,7 @@ export const CopilotPage: React.FC = () => {
         headers: {
           Authorization: accessToken ? `Bearer ${accessToken}` : "",
           "X-Tenant-Id": tenantId,
-          "X-Idempotency-Key": crypto.randomUUID ? crypto.randomUUID() : nanoid(),
+          "X-Idempotency-Key": createIdempotencyKey(),
         },
         body: {
           requestData: {

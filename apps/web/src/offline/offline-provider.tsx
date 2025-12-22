@@ -8,6 +8,7 @@ import {
   createIndexedDbPersister,
 } from "@kerniflow/offline-web";
 import { Clock, IdGenerator, Logger, SyncEngine, SyncTransport } from "@kerniflow/offline-core";
+import { computeBackoffDelayMs, defaultRetryPolicy } from "@kerniflow/api-client";
 import { useAuth } from "@/lib/auth-provider";
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";
 
@@ -110,7 +111,18 @@ export const useOffline = (): OfflineContextValue => useContext(OfflineContext);
 
 export const withOffline = (Component: React.ComponentType): React.FC => {
   return function OfflineWrapper(props) {
-    const queryClient = useMemo(() => new QueryClient(), []);
+    const queryClient = useMemo(
+      () =>
+        new QueryClient({
+          defaultOptions: {
+            queries: {
+              retry: 2,
+              retryDelay: (attempt) => computeBackoffDelayMs(attempt, defaultRetryPolicy),
+            },
+          },
+        }),
+      []
+    );
     return (
       <QueryClientProvider client={queryClient}>
         <OfflineProvider queryClient={queryClient}>

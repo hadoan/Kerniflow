@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@kerniflow/api-client": path.resolve(__dirname, "../packages/api-client/src"),
     },
   },
 }));

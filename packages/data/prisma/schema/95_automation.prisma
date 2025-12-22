@@ -42,9 +42,15 @@ model IdempotencyKey {
   tenantId     String?
   actionKey    String
   key          String
+  userId       String?
+  requestHash  String?
+  status       String   @default("IN_PROGRESS")
   responseJson String?
+  responseStatus Int?
   statusCode   Int?
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  expiresAt    DateTime?
 
   @@unique([tenantId, actionKey, key])
   @@index([tenantId, actionKey])

@@ -1,0 +1,21 @@
+# Retry Policy
+
+- **Defaults**
+  - `maxAttempts = 3` (initial attempt + up to 2 retries)
+  - `baseDelayMs = 250`, `maxDelayMs = 5000`, jitter `0-100ms`
+  - Backoff: `min(maxDelayMs, baseDelayMs * 2^(attempt-1)) + jitter`
+- **Retryable conditions**
+  - Network errors/timeouts
+  - HTTP `408`, `429`, `502`, `503`, `504`
+  - HTTP `500` only when request is idempotent (GET/HEAD/OPTIONS or carries an idempotency key)
+  - Respect `Retry-After` header when present (uses the larger of Retry-After vs backoff)
+- **Non-retryable**
+  - `400`, `401`, `403`, `404`, `410`, `422`, `409` (conflict) unless endpoint explicitly signals `IN_PROGRESS`
+- **Method rules**
+  - `GET/HEAD/OPTIONS`: retry allowed by default.
+  - `POST/PATCH/PUT/DELETE`: retry only when an `Idempotency-Key` header is present or the endpoint is explicitly idempotent; the same key is reused across attempts.
+- **Streaming**
+  - No mid-stream retries; only the initial connection uses the retry gate. Copilot chat replays use stored responses rather than 409s.
+- **Implementation**
+  - Shared policy + request wrapper lives in `packages/api-client/src/retry/retryPolicy.ts` and `packages/api-client/src/http/request.ts`.
+  - Web QueryClient defaults set `retry: 2` (max 3 attempts) with the shared backoff.
