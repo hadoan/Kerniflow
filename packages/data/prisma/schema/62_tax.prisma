@@ -1,0 +1,144 @@
+// ============================================================================
+// Tax Module Models
+// ============================================================================
+
+// Tax Profile
+// Defines tenant's tax configuration for a jurisdiction
+model TaxProfile {
+  id              String              @id @default(cuid())
+  tenantId        String
+  country         String              // ISO 2-letter code (e.g., "DE")
+  regime          TaxRegime
+  vatId           String?
+  currency        String              @default("EUR")
+  filingFrequency VatFilingFrequency
+  effectiveFrom   DateTime            @db.Timestamptz(6)
+  effectiveTo     DateTime?           @db.Timestamptz(6)
+  createdAt       DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime            @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenantId, effectiveFrom])
+  @@index([tenantId, country])
+}
+
+enum TaxRegime {
+  SMALL_BUSINESS // Kleinunternehmer (§19 UStG) - no VAT charged
+  STANDARD_VAT   // Regular VAT
+}
+
+enum VatFilingFrequency {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+// Tax Code
+// Defines tax classifications (e.g., "STANDARD_VAT_19", "REDUCED_VAT_7")
+model TaxCode {
+  id        String       @id @default(cuid())
+  tenantId  String
+  code      String       // e.g., "STANDARD_19", "REDUCED_7"
+  kind      TaxCodeKind
+  label     String       // human-readable label
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime     @updatedAt @db.Timestamptz(6)
+
+  rates TaxRate[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, isActive])
+}
+
+enum TaxCodeKind {
+  STANDARD       // Standard VAT rate (19% in DE)
+  REDUCED        // Reduced VAT rate (7% in DE)
+  REVERSE_CHARGE // B2B cross-border (no VAT charged, customer self-assesses)
+  EXEMPT         // Exempt from VAT
+  ZERO           // 0% VAT rate
+}
+
+// Tax Rate
+// Effective-dated rate for a tax code
+model TaxRate {
+  id            String    @id @default(cuid())
+  tenantId      String
+  taxCodeId     String
+  rateBps       Int       // basis points (e.g., 1900 = 19.00%)
+  effectiveFrom DateTime  @db.Timestamptz(6)
+  effectiveTo   DateTime? @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(6)
+
+  taxCode TaxCode @relation(fields: [taxCodeId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, taxCodeId])
+  @@index([effectiveFrom])
+}
+
+// Tax Snapshot
+// Immutable tax calculation for finalized documents (invoices, expenses)
+model TaxSnapshot {
+  id                   String         @id @default(cuid())
+  tenantId             String
+  sourceType           TaxSourceType  // INVOICE or EXPENSE
+  sourceId             String         // invoice.id or expense.id
+  jurisdiction         String         // e.g., "DE"
+  regime               TaxRegime
+  roundingMode         TaxRoundingMode
+  currency             String
+  calculatedAt         DateTime       @db.Timestamptz(6)
+
+  // Totals (denormalized for performance)
+  subtotalAmountCents  Int
+  taxTotalAmountCents  Int
+  totalAmountCents     Int
+
+  // Full breakdown stored as JSON
+  breakdownJson        String         @db.Text // stringified TaxBreakdownDto
+
+  version              Int            @default(1)
+  createdAt            DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenantId, sourceType, sourceId]) // Idempotency key
+  @@index([tenantId, sourceType])
+  @@index([calculatedAt])
+}
+
+enum TaxSourceType {
+  INVOICE
+  EXPENSE
+}
+
+enum TaxRoundingMode {
+  PER_LINE      // Round tax on each line item
+  PER_DOCUMENT  // Round total tax at document level
+}
+
+// VAT Period Summary
+// Aggregated tax data for reporting periods
+model VatPeriodSummary {
+  id             String            @id @default(cuid())
+  tenantId       String
+  periodStart    DateTime          @db.Timestamptz(6)
+  periodEnd      DateTime          @db.Timestamptz(6)
+  currency       String
+
+  // Totals by kind (stored as JSON)
+  totalsByKindJson String          @db.Text // stringified TaxTotalsByKind
+
+  generatedAt    DateTime          @db.Timestamptz(6)
+  status         VatPeriodStatus   @default(OPEN)
+  createdAt      DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime          @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenantId, periodStart, periodEnd])
+  @@index([tenantId, status])
+  @@index([periodStart])
+}
+
+enum VatPeriodStatus {
+  OPEN      // Period is still being aggregated
+  FINALIZED // Period is locked for reporting
+}

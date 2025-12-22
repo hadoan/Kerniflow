@@ -11,6 +11,7 @@ import { AiCopilotModule } from "./modules/ai-copilot/ai-copilot.module";
 import { CustomizationModule } from "./modules/customization/customization.module";
 import { PartyCrmModule } from "./modules/party-crm";
 import { DocumentsModule } from "./modules/documents";
+import { TaxModule } from "./modules/tax/tax.module";
 
 @Module({
   controllers: [AppController],
@@ -20,6 +21,7 @@ import { DocumentsModule } from "./modules/documents";
     ExpensesModule,
     InvoicesModule,
     DocumentsModule,
+    TaxModule,
     WorkflowModule,
     AutomationModule,
     ReportingModule,

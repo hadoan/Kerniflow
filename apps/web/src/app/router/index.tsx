@@ -3,10 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppShell } from "../AppShell";
 import { DashboardPage } from "../../modules/core";
 import { AssistantPage } from "../../modules/assistant";
-import { ExpensesPage } from "../../modules/expenses";
+import { ExpensesPage, NewExpensePage } from "../../modules/expenses";
 import { InvoicesPage, NewInvoicePage } from "../../modules/invoices";
 import { ClientsPage } from "../../modules/clients";
 import { SettingsPage } from "../../modules/settings";
+import { TaxSettingsPage } from "../../modules/tax";
 import NotFound from "../../shared/components/NotFound";
 import { LoginPage } from "../../routes/auth/login";
 import SignupPage from "../../routes/auth/signup";
@@ -26,11 +27,13 @@ export const Router = () => (
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/expenses" element={<ExpensesPage />} />
+          <Route path="/expenses/new" element={<NewExpensePage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/new" element={<NewInvoicePage />} />
           <Route path="/clients" element={<ClientsPage />} />
           <Route path="/copilot" element={<CopilotPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings/tax" element={<TaxSettingsPage />} />
         </Route>
       </Route>
 

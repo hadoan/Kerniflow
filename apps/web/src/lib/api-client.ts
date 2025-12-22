@@ -118,7 +118,11 @@ class ApiClient {
   /**
    * PUT request
    */
-  async put<T>(endpoint: string, body?: unknown, opts?: { correlationId?: string }): Promise<T> {
+  async put<T>(
+    endpoint: string,
+    body?: unknown,
+    opts?: { idempotencyKey?: string; correlationId?: string }
+  ): Promise<T> {
     return this.request<T>(
       endpoint,
       {
@@ -132,7 +136,11 @@ class ApiClient {
   /**
    * PATCH request
    */
-  async patch<T>(endpoint: string, body?: unknown, opts?: { correlationId?: string }): Promise<T> {
+  async patch<T>(
+    endpoint: string,
+    body?: unknown,
+    opts?: { idempotencyKey?: string; correlationId?: string }
+  ): Promise<T> {
     return this.request<T>(
       endpoint,
       {

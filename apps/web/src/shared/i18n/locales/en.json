@@ -3,6 +3,8 @@
     "appName": "Bizflow",
     "tagline": "Run your business, end-to-end.",
     "loading": "Loading...",
+    "select": "Select",
+    "optional": "Optional",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",

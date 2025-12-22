@@ -2,7 +2,7 @@ model Expense {
   id             String         @id @default(cuid())
   tenantId       String
   status         ExpenseStatus  @default(DRAFT)
-  expenseDate    Date
+  expenseDate    DateTime       @db.Date
   merchantName   String?
   supplierPartyId String?
   currency       String

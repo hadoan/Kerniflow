@@ -3,6 +3,8 @@
     "appName": "Bizflow",
     "tagline": "Quản lý doanh nghiệp của bạn, toàn diện.",
     "loading": "Đang tải...",
+    "select": "Chọn",
+    "optional": "Tùy chọn",
     "save": "Lưu",
     "cancel": "Hủy",
     "delete": "Xóa",

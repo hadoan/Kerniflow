@@ -23,8 +23,8 @@ test.describe("Expenses", () => {
     await page.fill(selectors.expenses.amountInput, "49.99");
     await page.fill(selectors.expenses.descriptionInput, "E2E Test Expense");
 
-    // Select category (assuming it's a select element)
-    await page.selectOption(selectors.expenses.categorySelect, "office-supplies");
+    // Select category (native select)
+    await page.selectOption(selectors.expenses.categorySelect, "office_supplies");
 
     // Submit form
     await page.click(selectors.expenses.submitButton);
