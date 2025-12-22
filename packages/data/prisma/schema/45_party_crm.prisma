@@ -22,6 +22,7 @@ model Party {
   notes       String?
   tags        String[]  @default([])
   archivedAt  DateTime? @db.Timestamptz(6)
+  archivedByUserId String?
   createdAt   DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime  @updatedAt @db.Timestamptz(6)
 
@@ -30,6 +31,7 @@ model Party {
   roles         PartyRole[]
 
   @@index([tenantId, displayName])
+  @@index([tenantId, archivedAt])
   @@index([tenantId])
 }
 

@@ -56,6 +56,8 @@ export class CreateExpenseUseCase {
         new Date(body.issuedAt),
         body.createdByUserId,
         new Date(body.createdAt),
+        body.archivedAt ? new Date(body.archivedAt) : null,
+        body.archivedByUserId ?? null,
         (body.custom ?? null) as Record<string, unknown> | null
       );
     }
@@ -76,6 +78,8 @@ export class CreateExpenseUseCase {
       input.issuedAt,
       input.createdByUserId,
       this.clock.now(),
+      null,
+      null,
       Object.keys(normalizedCustom).length ? normalizedCustom : null
     );
 
@@ -133,6 +137,8 @@ export class CreateExpenseUseCase {
       category: expense.category,
       issuedAt: expense.issuedAt.toISOString(),
       createdByUserId: expense.createdByUserId,
+      archivedAt: expense.archivedAt?.toISOString(),
+      archivedByUserId: expense.archivedByUserId,
       createdAt: expense.createdAt.toISOString(),
       custom: expense.custom,
     };

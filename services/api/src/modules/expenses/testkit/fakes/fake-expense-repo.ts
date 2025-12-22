@@ -13,7 +13,19 @@ export class FakeExpenseRepository implements ExpenseRepositoryPort {
     }
   }
 
-  async findById(id: string): Promise<Expense | null> {
-    return this.expenses.find((e) => e.id === id) ?? null;
+  async findById(tenantId: string, id: string): Promise<Expense | null> {
+    return (
+      this.expenses.find((e) => e.id === id && e.tenantId === tenantId && !e.archivedAt) ?? null
+    );
+  }
+
+  async findByIdIncludingArchived(tenantId: string, id: string): Promise<Expense | null> {
+    return this.expenses.find((e) => e.id === id && e.tenantId === tenantId) ?? null;
+  }
+
+  async list(tenantId: string, params?: { includeArchived?: boolean }): Promise<Expense[]> {
+    return this.expenses.filter(
+      (e) => e.tenantId === tenantId && (params?.includeArchived ? true : !e.archivedAt)
+    );
   }
 }

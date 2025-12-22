@@ -11,6 +11,7 @@ model Expense {
   totalAmountCents Int
   taxAmountCents Int?
   archivedAt     DateTime?      @db.Timestamptz(6)
+  archivedByUserId String?
   custom         Json?
   createdAt      DateTime       @default(now()) @db.Timestamptz(6)
   updatedAt      DateTime       @updatedAt @db.Timestamptz(6)
@@ -20,6 +21,7 @@ model Expense {
   @@index([tenantId])
   @@index([tenantId, expenseDate])
   @@index([tenantId, status])
+  @@index([tenantId, archivedAt])
 }
 
 model ExpenseLine {

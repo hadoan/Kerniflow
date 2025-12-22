@@ -14,9 +14,14 @@ export class InMemoryDocumentRepo implements DocumentRepoPort {
     this.documents.set(document.id, document);
   }
 
-  async findById(tenantId: string, documentId: string): Promise<DocumentAggregate | null> {
+  async findById(
+    tenantId: string,
+    documentId: string,
+    opts?: { includeArchived?: boolean }
+  ): Promise<DocumentAggregate | null> {
     const doc = this.documents.get(documentId);
     if (!doc || doc.tenantId !== tenantId) return null;
+    if (!opts?.includeArchived && doc.archivedAt) return null;
     return doc;
   }
 
@@ -30,7 +35,7 @@ export class InMemoryDocumentRepo implements DocumentRepoPort {
     const docId = this.links.get(key);
     if (!docId) return null;
     const doc = this.documents.get(docId);
-    if (!doc || doc.type !== type) return null;
+    if (!doc || doc.type !== type || doc.archivedAt) return null;
     return doc;
   }
 

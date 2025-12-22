@@ -30,6 +30,8 @@ const mapDocument = (row: any): DocumentAggregate =>
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     errorMessage: row.errorMessage,
+    archivedAt: row.archivedAt,
+    archivedByUserId: row.archivedByUserId,
     files: (row.files ?? []).map(mapFile),
   });
 
@@ -44,9 +46,11 @@ export class PrismaDocumentRepoAdapter implements DocumentRepoPort {
         status: document.status as any,
         title: document.title,
         errorMessage: document.errorMessage,
+        archivedAt: document.archivedAt,
+        archivedByUserId: document.archivedByUserId,
         createdAt: document.createdAt,
         updatedAt: document.updatedAt,
-      },
+      } as any,
     });
   }
 
@@ -57,16 +61,26 @@ export class PrismaDocumentRepoAdapter implements DocumentRepoPort {
         status: document.status as any,
         title: document.title,
         errorMessage: document.errorMessage,
+        archivedAt: document.archivedAt,
+        archivedByUserId: document.archivedByUserId,
         updatedAt: document.updatedAt,
-      },
+      } as any,
     });
   }
 
-  async findById(tenantId: string, documentId: string): Promise<DocumentAggregate | null> {
+  async findById(
+    tenantId: string,
+    documentId: string,
+    opts?: { includeArchived?: boolean }
+  ): Promise<DocumentAggregate | null> {
     const doc = await prisma.document.findFirst({
-      where: { id: documentId, tenantId },
+      where: {
+        id: documentId,
+        tenantId,
+        ...(opts?.includeArchived ? {} : { archivedAt: null }),
+      } as any,
       include: { files: true },
-    });
+    } as any);
     if (!doc) return null;
     return mapDocument(doc);
   }
@@ -81,7 +95,7 @@ export class PrismaDocumentRepoAdapter implements DocumentRepoPort {
       where: { tenantId, entityType: entityType as any, entityId },
       include: { document: { include: { files: true } } },
     });
-    if (!link || link.document.type !== type) {
+    if (!link || link.document.type !== type || (link.document as any).archivedAt) {
       return null;
     }
     return mapDocument(link.document);

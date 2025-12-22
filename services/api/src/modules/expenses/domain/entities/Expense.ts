@@ -9,6 +9,19 @@ export class Expense {
     public readonly issuedAt: Date,
     public readonly createdByUserId: string,
     public readonly createdAt: Date,
+    public archivedAt: Date | null = null,
+    public archivedByUserId: string | null = null,
     public readonly custom: Record<string, unknown> | null = null
   ) {}
+
+  archive(now: Date, userId: string) {
+    if (this.archivedAt) return;
+    this.archivedAt = now;
+    this.archivedByUserId = userId;
+  }
+
+  unarchive() {
+    this.archivedAt = null;
+    this.archivedByUserId = null;
+  }
 }

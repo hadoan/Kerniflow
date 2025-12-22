@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ExpensesController } from "./adapters/http/expenses.controller";
 import { CreateExpenseUseCase } from "./application/use-cases/CreateExpenseUseCase";
+import { ArchiveExpenseUseCase } from "./application/use-cases/ArchiveExpenseUseCase";
+import { UnarchiveExpenseUseCase } from "./application/use-cases/UnarchiveExpenseUseCase";
 import { PrismaExpenseRepository } from "./infrastructure/persistence/PrismaExpenseRepository";
 import { OutboxPort, OUTBOX_PORT_TOKEN } from "../../shared/ports/outbox.port";
 import { AuditPort, AUDIT_PORT_TOKEN } from "../../shared/ports/audit.port";
@@ -57,6 +59,17 @@ import { CustomFieldDefinitionRepository, CustomFieldIndexRepository } from "@ke
         CustomFieldDefinitionRepository,
         CustomFieldIndexRepository,
       ],
+    },
+    {
+      provide: ArchiveExpenseUseCase,
+      useFactory: (repo: PrismaExpenseRepository, clock: ClockPort) =>
+        new ArchiveExpenseUseCase(repo, clock),
+      inject: [PrismaExpenseRepository, CLOCK_PORT_TOKEN],
+    },
+    {
+      provide: UnarchiveExpenseUseCase,
+      useFactory: (repo: PrismaExpenseRepository) => new UnarchiveExpenseUseCase(repo),
+      inject: [PrismaExpenseRepository],
     },
     { provide: OUTBOX_PORT_TOKEN, useClass: PrismaOutboxAdapter },
     { provide: AUDIT_PORT_TOKEN, useClass: PrismaAuditAdapter },

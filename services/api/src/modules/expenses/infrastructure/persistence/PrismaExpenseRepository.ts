@@ -15,24 +15,44 @@ export class PrismaExpenseRepository implements ExpenseRepositoryPort {
         totalAmountCents: expense.totalCents,
         currency: expense.currency,
         category: expense.category,
+        archivedAt: expense.archivedAt ?? undefined,
+        archivedByUserId: expense.archivedByUserId ?? undefined,
         custom: expense.custom as any,
-      },
+      } as any,
     });
   }
 
-  async findById(id: string): Promise<Expense | null> {
-    const data = await prisma.expense.findUnique({ where: { id } });
-    if (!data) return null;
+  async findById(tenantId: string, id: string): Promise<Expense | null> {
+    const data = await prisma.expense.findFirst({ where: { id, tenantId, archivedAt: null } });
+    return data ? this.mapExpense(data) : null;
+  }
+
+  async findByIdIncludingArchived(tenantId: string, id: string): Promise<Expense | null> {
+    const data = await prisma.expense.findFirst({ where: { id, tenantId } });
+    return data ? this.mapExpense(data) : null;
+  }
+
+  async list(tenantId: string, params?: { includeArchived?: boolean }): Promise<Expense[]> {
+    const data = await prisma.expense.findMany({
+      where: { tenantId, archivedAt: params?.includeArchived ? undefined : null },
+      orderBy: { expenseDate: "desc" },
+    });
+    return data.map((row) => this.mapExpense(row));
+  }
+
+  private mapExpense(data: any): Expense {
     return new Expense(
       data.id,
       data.tenantId,
-      (data as any).merchantName ?? "",
+      data.merchantName ?? "",
       data.totalAmountCents,
       data.currency,
       data.category,
       data.expenseDate,
-      (data as any).createdByUserId ?? "",
+      data.createdByUserId ?? "",
       data.createdAt,
+      data.archivedAt ?? null,
+      data.archivedByUserId ?? null,
       data.custom as any
     );
   }

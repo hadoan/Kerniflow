@@ -6,6 +6,8 @@ model Document {
   title        String?
   errorMessage String?
   metadataJson Json?
+  archivedAt   DateTime?       @db.Timestamptz(6)
+  archivedByUserId String?
   createdAt    DateTime        @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime        @updatedAt @db.Timestamptz(6)
 
@@ -14,6 +16,7 @@ model Document {
 
   @@index([tenantId])
   @@index([tenantId, type])
+  @@index([tenantId, archivedAt])
 }
 
 model File {

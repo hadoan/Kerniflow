@@ -10,6 +10,8 @@ type DocumentProps = {
   createdAt: Date;
   updatedAt: Date;
   errorMessage?: string | null;
+  archivedAt?: Date | null;
+  archivedByUserId?: string | null;
   files?: FileEntity[];
 };
 
@@ -22,6 +24,8 @@ export class DocumentAggregate {
   createdAt: Date;
   updatedAt: Date;
   errorMessage?: string | null;
+  archivedAt?: Date | null;
+  archivedByUserId?: string | null;
   files: FileEntity[];
 
   constructor(props: DocumentProps) {
@@ -33,6 +37,8 @@ export class DocumentAggregate {
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
     this.errorMessage = props.errorMessage ?? null;
+    this.archivedAt = props.archivedAt ?? null;
+    this.archivedByUserId = props.archivedByUserId ?? null;
     this.files = props.files ?? [];
   }
 
@@ -80,8 +86,23 @@ export class DocumentAggregate {
       title: params.title ?? null,
       createdAt: params.createdAt,
       updatedAt: params.createdAt,
+      archivedAt: null,
+      archivedByUserId: null,
       files,
     });
+  }
+
+  archive(now: Date, userId: string) {
+    if (this.archivedAt) return;
+    this.archivedAt = now;
+    this.archivedByUserId = userId;
+    this.touch(now);
+  }
+
+  unarchive(now: Date) {
+    this.archivedAt = null;
+    this.archivedByUserId = null;
+    this.touch(now);
   }
 
   addFile(file: FileEntity, now: Date) {
