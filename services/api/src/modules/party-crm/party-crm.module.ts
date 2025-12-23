@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { CustomersHttpController } from "./adapters/http/customers.controller";
-import { PrismaPartyRepoAdapter } from "./infra/prisma/prisma-party-repo.adapter";
-import { PrismaCustomerQueryAdapter } from "./infra/prisma/prisma-customer-query.adapter";
+import { PrismaPartyRepoAdapter } from "./infrastructure/prisma/prisma-party-repo.adapter";
+import { PrismaCustomerQueryAdapter } from "./infrastructure/prisma/prisma-customer-query.adapter";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
