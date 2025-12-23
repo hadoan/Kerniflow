@@ -16,9 +16,9 @@
     "dist"
   ],
   "dependencies": {
-    "@nestjs/common": "^11.1.9",
-    "dotenv": "^17.2.3",
-    "zod": "^3.23.8"
+    "@nestjs/common": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
   },
   "scripts": {
     "build": "tsdown",

@@ -1,12 +1,7 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import config from "@kerniflow/eslint-config";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config(
   { ignores: ["dist"] },

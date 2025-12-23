@@ -31,8 +31,8 @@
     "dist"
   ],
   "dependencies": {
-    "date-fns": "^3.6.0",
-    "date-fns-tz": "^3.2.0"
+    "date-fns": "catalog:",
+    "date-fns-tz": "catalog:"
   },
   "scripts": {
     "build": "tsdown",

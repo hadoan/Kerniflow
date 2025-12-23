@@ -28,6 +28,6 @@
     "@react-native-community/netinfo": "^11.3.1"
   },
   "devDependencies": {
-    "vitest": "^2.1.4"
+    "vitest": "catalog:"
   }
 }

@@ -26,9 +26,9 @@
     "vitest": "^2.0.0"
   },
   "devDependencies": {
-    "tsdown": "^0.18.0",
-    "typescript": "^5.9.3",
-    "vite": "^6.0.0",
-    "vitest": "^2.1.4"
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
   }
 }

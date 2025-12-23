@@ -3,6 +3,107 @@ packages:
   - "services/*"
   - "packages/*"
   - "packages/tooling/*"
+
+catalog:
+  # TypeScript toolchain
+  typescript: ^5.9.3
+  tsdown: ^0.18.0
+  ts-node: ^10.9.2
+  tsconfig-paths: ^4.2.0
+  tsx: ^4.21.0
+
+  # Type definitions
+  "@types/node": ^22.19.3
+  "@types/react": ^18.3.23
+  "@types/react-dom": ^18.3.7
+  "@types/bcrypt": ^5.0.2
+  "@types/express": ^5.0.6
+  "@types/jsonwebtoken": ^9.0.5
+  "@types/pg": ^8.16.0
+  "@types/supertest": ^6.0.3
+
+  # Build & dev tools
+  vite: ^5.4.19
+  vitest: ^2.1.4
+  "@vitest/coverage-v8": ^2.1.4
+  "@vitejs/plugin-react-swc": ^3.11.0
+
+  # Linting & formatting
+  eslint: ^9.32.0
+  "@eslint/js": ^9.32.0
+  typescript-eslint: ^8.38.0
+  globals: ^15.15.0
+  prettier: ^3.3.3
+
+  # React ecosystem
+  react: ^18.3.1
+  react-dom: ^18.3.1
+
+  # NestJS framework
+  "@nestjs/common": ^11.1.9
+  "@nestjs/core": ^11.1.9
+  "@nestjs/platform-express": ^11.1.9
+  "@nestjs/swagger": ^8.0.0
+  "@nestjs/testing": ^11.1.9
+
+  # Database & ORM
+  "@prisma/client": ^7.2.0
+  "@prisma/adapter-pg": ^7.2.0
+  prisma: ^7.2.0
+  pg: ^8.13.1
+
+  # Validation & utilities
+  zod: ^3.25.76
+  nanoid: ^5.1.6
+  date-fns: ^3.6.0
+  date-fns-tz: ^3.2.0
+
+  # AI SDKs
+  ai: ^5.0.0
+  "@ai-sdk/anthropic": ^1.0.0
+  "@ai-sdk/openai": ^1.0.0
+  "@ai-sdk/react": ^1.0.0
+
+  # TanStack Query
+  "@tanstack/react-query": ^5.83.0
+  "@tanstack/query-core": ^5.83.0
+  "@tanstack/query-persist-client-core": ^5.83.0
+  "@tanstack/react-query-persist-client": ^5.83.0
+
+  # NestJS utilities
+  reflect-metadata: ^0.2.2
+  rxjs: ^7.8.2
+  class-validator: ^0.14.3
+
+  # Email & communication
+  resend: ^6.6.0
+
+  # Authentication & security
+  bcrypt: ^5.1.1
+  jsonwebtoken: ^9.0.2
+
+  # Utilities
+  dotenv: ^17.2.3
+  execa: ^9.5.2
+
+  # Testing tools
+  "@playwright/test": ^1.48.0
+  supertest: ^7.0.0
+  msw: ^2.6.6
+  testcontainers: ^10.11.0
+  "@testcontainers/postgresql": ^10.8.3
+
+  # Tailwind ecosystem
+  tailwindcss: ^3.4.17
+  tailwindcss-animate: ^1.0.7
+  autoprefixer: ^10.4.21
+  postcss: ^8.5.6
+  "@tailwindcss/typography": ^0.5.16
+
+  # Husky & Git hooks
+  husky: ^9.1.7
+  lint-staged: ^15.2.10
+
 onlyBuiltDependencies:
   - bcrypt
   - "@prisma/client"

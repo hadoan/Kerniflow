@@ -22,6 +22,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "zod": "^3.22.0"
+    "zod": "catalog:"
   }
 }

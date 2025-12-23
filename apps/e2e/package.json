@@ -10,7 +10,7 @@
     "e2e:debug": "playwright test --debug"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
-    "@types/node": "^22.19.3"
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:"
   }
 }
