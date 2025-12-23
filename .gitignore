@@ -16,3 +16,4 @@ test-results/
 playwright-report/
 storageState.json
 .claude/settings.local.json
+.env.test

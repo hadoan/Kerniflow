@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { EnvModule, EnvService } from "@kerniflow/config";
 import { AppController } from "./app.controller";
 import { IdentityModule } from "./modules/identity";
 import { ExpensesModule } from "./modules/expenses";
@@ -16,6 +17,8 @@ import { TaxModule } from "./modules/tax/tax.module";
 @Module({
   controllers: [AppController],
   imports: [
+    // Config must be first to validate env before other modules use it
+    EnvModule.forRoot(),
     IdentityModule,
     PartyCrmModule,
     ExpensesModule,
@@ -27,7 +30,13 @@ import { TaxModule } from "./modules/tax/tax.module";
     ReportingModule,
     // CustomizationModule,
     // AiCopilotModule,
-    ...(process.env.NODE_ENV === "test" ? [TestHarnessModule] : []),
+    // Conditional imports based on env
+    ...(function () {
+      // We need to access EnvService here, but it's not available yet
+      // Fall back to process.env for now (this is the only allowed usage)
+      const isTest = process.env.NODE_ENV === "test";
+      return isTest ? [TestHarnessModule] : [];
+    })(),
   ],
 })
 export class AppModule {}

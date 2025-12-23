@@ -5,13 +5,13 @@ import {
   createTestDb,
   stopSharedContainer,
 } from "@kerniflow/testkit";
-import type { PrismaClient } from "@prisma/client";
+import { PrismaService, resetPrisma } from "@kerniflow/data";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 
 describe("Idempotency adapter (Prisma + Postgres)", () => {
   let db: PostgresTestDb;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let adapter: import("../infrastructure/persistence/prisma-idempotency.adapter").PrismaIdempotencyAdapter;
 
   beforeAll(async () => {

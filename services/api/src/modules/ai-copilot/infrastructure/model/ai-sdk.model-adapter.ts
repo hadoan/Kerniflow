@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { EnvService } from "@kerniflow/config";
 import { streamText, convertToCoreMessages, pipeUIMessageStreamToResponse } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
@@ -11,18 +12,22 @@ import { OutboxPort } from "../../application/ports/outbox.port";
 
 @Injectable()
 export class AiSdkModelAdapter implements LanguageModelPort {
-  private readonly openai = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY || "",
-  });
-  private readonly anthropic = createAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY || "",
-  });
+  private readonly openai: ReturnType<typeof createOpenAI>;
+  private readonly anthropic: ReturnType<typeof createAnthropic>;
 
   constructor(
     private readonly toolExecutions: ToolExecutionRepositoryPort,
     private readonly audit: AuditPort,
-    private readonly outbox: OutboxPort
-  ) {}
+    private readonly outbox: OutboxPort,
+    private readonly env: EnvService
+  ) {
+    this.openai = createOpenAI({
+      apiKey: this.env.OPENAI_API_KEY || "",
+    });
+    this.anthropic = createAnthropic({
+      apiKey: this.env.ANTHROPIC_API_KEY || "",
+    });
+  }
 
   async streamChat(params: {
     messages: any[];
@@ -41,10 +46,8 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       userId: params.userId,
     });
 
-    const provider = process.env.AI_MODEL_PROVIDER || "openai";
-    const modelId =
-      process.env.AI_MODEL_ID ||
-      (provider === "anthropic" ? "claude-3-haiku-20240307" : "gpt-4o-mini");
+    const provider = this.env.AI_MODEL_PROVIDER;
+    const modelId = this.env.AI_MODEL_ID;
 
     const model = provider === "anthropic" ? this.anthropic(modelId) : this.openai(modelId);
 

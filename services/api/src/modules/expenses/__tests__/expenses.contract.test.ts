@@ -1,6 +1,6 @@
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   PostgresTestDb,
   createApiTestApp,
@@ -9,6 +9,8 @@ import {
   stopSharedContainer,
 } from "@kerniflow/testkit";
 import { CreateExpenseOutputSchema } from "@kerniflow/contracts";
+
+vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 
 describe("Expense contract responses", () => {
   let app: INestApplication;

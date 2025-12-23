@@ -1,8 +1,9 @@
 import { Storage } from "@google-cloud/storage";
+import type { Env } from "@kerniflow/config";
 
-export const createGcsClient = () => {
-  const projectId = process.env.GOOGLE_CLOUD_PROJECT;
-  const keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+export const createGcsClient = (config?: { projectId?: string; keyFilename?: string }) => {
+  const projectId = config?.projectId;
+  const keyFilename = config?.keyFilename;
   return new Storage({
     projectId,
     ...(keyFilename ? { keyFilename } : {}),

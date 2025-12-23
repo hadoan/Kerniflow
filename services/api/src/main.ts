@@ -1,9 +1,12 @@
-import "./load-env";
 import "reflect-metadata";
+import { loadEnv } from "@kerniflow/config";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+
+// Load env files before anything else
+loadEnv();
 
 async function bootstrap() {
   const logger = new Logger("Bootstrap");
@@ -13,6 +16,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ["log", "error", "warn", "debug", "verbose"],
   });
+
+  // Get EnvService from the app context
+  const { EnvService } = await import("@kerniflow/config");
+  const env = app.get(EnvService);
+
   logger.log(
     `Nest application created in ${Date.now() - startedAt}ms; configuring CORS and Swagger`
   );
@@ -34,11 +42,12 @@ async function bootstrap() {
   logger.log("Initializing Nest application");
   await app.init();
 
-  logger.log("Starting HTTP server on port 3000");
-  await app.listen(3000);
+  const port = env.API_PORT;
+  logger.log(`Starting HTTP server on port ${port}`);
+  await app.listen(port, "0.0.0.0");
 
-  logger.log("[api] listening on http://localhost:3000");
-  logger.log("[api] swagger docs at http://localhost:3000/docs");
+  logger.log(`[api] listening on http://localhost:${port}`);
+  logger.log(`[api] swagger docs at http://localhost:${port}/docs`);
 }
 
 bootstrap().catch((err) => {

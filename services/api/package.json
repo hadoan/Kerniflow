@@ -5,6 +5,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.0",
     "@ai-sdk/openai": "^1.0.0",
+    "@kerniflow/config": "workspace:*",
     "@kerniflow/contracts": "workspace:*",
     "@kerniflow/data": "workspace:*",
     "@kerniflow/domain": "workspace:*",

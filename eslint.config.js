@@ -17,6 +17,8 @@ export default tseslint.config(
       "**/dist/**",
       "**/build/**",
       "pnpm-lock.yaml",
+      "apps/e2e/playwright-report/",
+      "apps/e2e/test-results/",
     ],
   },
   {

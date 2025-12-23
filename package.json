@@ -2,6 +2,7 @@
   "name": "kerniflow",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "packageManager": "pnpm@10.26.0",
   "engines": {
     "node": ">=22.19.0"
@@ -10,7 +11,7 @@
     "prepare": "husky",
     "dev": "pnpm build:packages && pnpm -r --parallel dev",
     "build": "pnpm -r build",
-    "build:packages": "pnpm --filter '@kerniflow/kernel' --filter '@kerniflow/contracts' --filter '@kerniflow/domain' --filter '@kerniflow/data' --filter '@kerniflow/offline-core' --filter '@kerniflow/offline-web' --filter '@kerniflow/offline-rn' --filter '@kerniflow/testkit' build",
+    "build:packages": "pnpm --filter '@kerniflow/config' --filter '@kerniflow/kernel' --filter '@kerniflow/contracts' --filter '@kerniflow/domain' --filter '@kerniflow/data' --filter '@kerniflow/offline-core' --filter '@kerniflow/offline-web' --filter '@kerniflow/offline-rn' --filter '@kerniflow/testkit' build",
     "typecheck": "pnpm -r typecheck",
     "dev:web": "pnpm --filter @kerniflow/web dev",
     "dev:api": "pnpm build:packages && pnpm --filter @kerniflow/api dev",

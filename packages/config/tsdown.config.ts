@@ -1,9 +1,8 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["./src/index.ts"],
-  cleanDist: true,
+  entry: ["src/index.ts"],
   format: ["cjs", "esm"],
+  clean: true,
   dts: true,
-  splitting: true,
 });

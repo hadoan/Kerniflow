@@ -7,15 +7,15 @@ import {
   createTestDb,
   stopSharedContainer,
 } from "@kerniflow/testkit";
+import { PrismaService, resetPrisma } from "@kerniflow/data";
 import { buildRequestContext } from "../../../shared/context/request-context";
 import { CreateExpenseUseCase } from "../application/use-cases/CreateExpenseUseCase";
-import type { PrismaClient } from "@prisma/client";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 
 describe("Expenses integration (Postgres)", () => {
   let db: PostgresTestDb;
-  let prisma: PrismaClient;
+  let prisma: PrismaService;
   let useCase: CreateExpenseUseCase;
   let ExpenseRepo: typeof import("../infrastructure/persistence/PrismaExpenseRepository").PrismaExpenseRepository;
 
@@ -42,14 +42,14 @@ describe("Expenses integration (Postgres)", () => {
 
     ExpenseRepo = PrismaExpenseRepository;
     useCase = new CreateExpenseUseCase(
-      new PrismaExpenseRepository(),
-      new PrismaOutboxAdapter(),
-      new PrismaAuditAdapter(),
-      new PrismaIdempotencyAdapter(),
+      new PrismaExpenseRepository(prisma),
+      new PrismaOutboxAdapter(prisma),
+      new PrismaAuditAdapter(prisma),
+      new PrismaIdempotencyAdapter(prisma),
       new SystemIdGenerator(),
       new SystemClock(),
-      new CustomFieldDefinitionRepository(),
-      new CustomFieldIndexRepository()
+      new CustomFieldDefinitionRepository(prisma),
+      new CustomFieldIndexRepository(prisma)
     );
   });
 
@@ -61,6 +61,7 @@ describe("Expenses integration (Postgres)", () => {
     if (db) {
       await db.down();
     }
+    await resetPrisma();
     await stopSharedContainer();
   });
 
@@ -83,7 +84,7 @@ describe("Expenses integration (Postgres)", () => {
       context: ctxA,
     });
 
-    const repo = new ExpenseRepo();
+    const repo = new ExpenseRepo(prisma);
     const crossTenantResult = await repo.findById(tenantB.id, expense.id);
     expect(crossTenantResult).toBeNull();
 

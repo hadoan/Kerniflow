@@ -304,6 +304,18 @@ importers:
         specifier: ^1.5.0
         version: 1.6.1(@types/node@22.19.3)(jsdom@24.1.3)(lightningcss@1.30.2)(terser@5.44.1)
 
+  packages/config:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^11.1.9
+        version: 11.1.9(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+
   packages/contracts:
     dependencies:
       zod:
@@ -486,6 +498,9 @@ importers:
       '@google-cloud/storage':
         specifier: ^7.14.0
         version: 7.18.0
+      '@kerniflow/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@kerniflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -577,6 +592,9 @@ importers:
 
   services/worker:
     dependencies:
+      '@kerniflow/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@kerniflow/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

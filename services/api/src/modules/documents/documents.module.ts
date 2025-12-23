@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { EnvService } from "@kerniflow/config";
 import { DocumentsController } from "./adapters/http/documents.controller";
 import { InvoicePdfController } from "./adapters/http/invoice-pdf.controller";
 import { DocumentsApplication } from "./application/documents.application";
@@ -28,14 +29,6 @@ import {
   InvoicePdfModelPort,
 } from "../invoices/application/ports/invoice-pdf-model.port";
 
-const uploadTtlSeconds = Number(process.env.SIGNED_URL_UPLOAD_TTL_SECONDS ?? 600);
-const downloadTtlSeconds = Number(process.env.SIGNED_URL_DOWNLOAD_TTL_SECONDS ?? 600);
-const storageBucket = process.env.STORAGE_BUCKET ?? "uploads";
-const keyPrefix = process.env.STORAGE_KEY_PREFIX;
-const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
-  ? Number(process.env.MAX_UPLOAD_BYTES)
-  : undefined;
-
 @Module({
   imports: [IdentityModule],
   controllers: [DocumentsController, InvoicePdfController],
@@ -49,10 +42,14 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
     PdfLibRendererAdapter,
     {
       provide: GcsObjectStorageAdapter,
-      useFactory: () => {
-        const client = createGcsClient();
-        return new GcsObjectStorageAdapter(client, storageBucket);
+      useFactory: (env: EnvService) => {
+        const client = createGcsClient({
+          projectId: env.GOOGLE_CLOUD_PROJECT,
+          keyFilename: env.GOOGLE_APPLICATION_CREDENTIALS,
+        });
+        return new GcsObjectStorageAdapter(client, env.STORAGE_BUCKET);
       },
+      inject: [EnvService],
     },
     { provide: OUTBOX_PORT_TOKEN, useExisting: PrismaOutboxAdapter },
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
@@ -65,7 +62,8 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
         fileRepo: PrismaFileRepoAdapter,
         storage: GcsObjectStorageAdapter,
         idGen: SystemIdGenerator,
-        clock: SystemClock
+        clock: SystemClock,
+        env: EnvService
       ) =>
         new CreateUploadIntentUseCase({
           logger: new NestLoggerAdapter(),
@@ -74,9 +72,9 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
           objectStorage: storage,
           idGenerator: idGen,
           clock,
-          uploadTtlSeconds,
-          keyPrefix,
-          maxUploadBytes,
+          uploadTtlSeconds: env.SIGNED_URL_UPLOAD_TTL_SECONDS,
+          keyPrefix: env.STORAGE_KEY_PREFIX,
+          maxUploadBytes: env.MAX_UPLOAD_BYTES,
         }),
       inject: [
         PrismaDocumentRepoAdapter,
@@ -84,6 +82,7 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
         GcsObjectStorageAdapter,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
+        EnvService,
       ],
     },
     {
@@ -113,16 +112,22 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
       useFactory: (
         documentRepo: PrismaDocumentRepoAdapter,
         fileRepo: PrismaFileRepoAdapter,
-        storage: GcsObjectStorageAdapter
+        storage: GcsObjectStorageAdapter,
+        env: EnvService
       ) =>
         new GetDownloadUrlUseCase({
           logger: new NestLoggerAdapter(),
           documentRepo,
           fileRepo,
           objectStorage: storage,
-          downloadTtlSeconds,
+          downloadTtlSeconds: env.SIGNED_URL_DOWNLOAD_TTL_SECONDS,
         }),
-      inject: [PrismaDocumentRepoAdapter, PrismaFileRepoAdapter, GcsObjectStorageAdapter],
+      inject: [
+        PrismaDocumentRepoAdapter,
+        PrismaFileRepoAdapter,
+        GcsObjectStorageAdapter,
+        EnvService,
+      ],
     },
     {
       provide: LinkDocumentUseCase,
@@ -143,7 +148,8 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
         storage: GcsObjectStorageAdapter,
         outbox: OutboxPort,
         idGen: SystemIdGenerator,
-        clock: SystemClock
+        clock: SystemClock,
+        env: EnvService
       ) =>
         new RequestInvoicePdfUseCase({
           logger: new NestLoggerAdapter(),
@@ -154,8 +160,8 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
           outbox,
           idGenerator: idGen,
           clock,
-          downloadTtlSeconds,
-          keyPrefix,
+          downloadTtlSeconds: env.SIGNED_URL_DOWNLOAD_TTL_SECONDS,
+          keyPrefix: env.STORAGE_KEY_PREFIX,
         }),
       inject: [
         PrismaDocumentRepoAdapter,
@@ -165,6 +171,7 @@ const maxUploadBytes = process.env.MAX_UPLOAD_BYTES
         OUTBOX_PORT_TOKEN,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
+        EnvService,
       ],
     },
     {

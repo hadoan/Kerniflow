@@ -1,22 +1,22 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { execa } from "execa";
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { fileURLToPath } from "url";
 import path from "path";
+import { PrismaService } from "@kerniflow/data";
 
 let sharedContainer: StartedPostgreSqlContainer | null = null;
 
 export class PostgresTestDb {
-  private prisma: PrismaClient | null = null;
+  private prisma: PrismaService | null = null;
   private connectionString: string | null = null;
 
   /**
    * Starts (or reuses) a Postgres testcontainer and connects Prisma to it.
    * Must be called before importing modules that read process.env.DATABASE_URL.
    */
-  async up(): Promise<PrismaClient> {
+  async up(): Promise<PrismaService> {
     if (!sharedContainer) {
       sharedContainer = await new PostgreSqlContainer("postgres:16-alpine")
         .withDatabase("kerniflow_test")
@@ -29,8 +29,7 @@ export class PostgresTestDb {
     process.env.DATABASE_URL = this.connectionString;
     process.env.NODE_ENV = process.env.NODE_ENV || "test";
 
-    const pool = new Pool({ connectionString: this.connectionString });
-    this.prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+    this.prisma = new PrismaService();
     await this.prisma.$connect();
     return this.prisma;
   }
@@ -40,7 +39,7 @@ export class PostgresTestDb {
     return this.connectionString;
   }
 
-  get client(): PrismaClient {
+  get client(): PrismaService {
     if (!this.prisma) throw new Error("Test DB not started");
     return this.prisma;
   }

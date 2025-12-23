@@ -1,24 +1,25 @@
 import "reflect-metadata";
+import { loadEnv } from "@kerniflow/config";
 import { NestFactory } from "@nestjs/core";
 import { WorkerModule } from "./worker.module";
 import { CONTRACTS_HELLO } from "@kerniflow/contracts";
 
-async function bootstrap() {
-  await NestFactory.createApplicationContext(WorkerModule);
+// Load env files before anything else
+loadEnv();
 
-  // eslint-disable-next-line no-console
+async function bootstrap() {
+  const app = await NestFactory.createApplicationContext(WorkerModule);
+
   console.log("[worker] started");
-  // eslint-disable-next-line no-console
+
   console.log("[worker] " + CONTRACTS_HELLO);
 
   setInterval(() => {
-    // eslint-disable-next-line no-console
     console.log("[worker] tick " + new Date().toISOString());
   }, 10_000);
 }
 
 bootstrap().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 });

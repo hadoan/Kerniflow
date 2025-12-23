@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { getPrismaClient } from "../uow/prisma-unit-of-work.adapter";
+import type { TransactionContext } from "@kerniflow/kernel";
 
 export interface OutboxEventData {
   eventType: string;
@@ -15,6 +17,19 @@ export interface OutboxEventData {
 @Injectable()
 export class OutboxRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async enqueue(data: OutboxEventData, tx?: TransactionContext): Promise<void> {
+    const client = getPrismaClient(this.prisma, tx);
+
+    await client.outboxEvent.create({
+      data: {
+        tenantId: data.tenantId,
+        eventType: data.eventType,
+        payloadJson: data.payloadJson,
+        availableAt: data.availableAt ?? new Date(),
+      },
+    });
+  }
 
   async fetchPending(limit: number = 10) {
     return this.prisma.outboxEvent.findMany({

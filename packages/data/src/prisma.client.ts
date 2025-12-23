@@ -40,5 +40,7 @@ export { PrismaClient };
 /**
  * @deprecated Use PrismaService via dependency injection instead.
  * Exported for backward compatibility during migration.
+ * Removed eager initialization to avoid errors when DATABASE_URL is not set.
+ * Use getPrisma() function instead if you need the legacy singleton.
  */
-export const prisma = getPrisma();
+// export const prisma = getPrisma();

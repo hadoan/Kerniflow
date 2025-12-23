@@ -11,15 +11,12 @@ export class ResendEmailSenderAdapter implements EmailSenderPort {
   private replyTo: string;
 
   constructor(apiKey?: string, fromAddress?: string, replyTo?: string) {
-    const key: string | undefined = apiKey ?? process.env.RESEND_API_KEY;
-    if (!key) {
-      throw new Error("RESEND_API_KEY environment variable is required");
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY is required");
     }
-    this.resend = new Resend(key as string);
-    this.fromAddress = (fromAddress ??
-      process.env.RESEND_FROM ??
-      "Qansa Billing <billing@example.com>") as string;
-    this.replyTo = replyTo ?? process.env.RESEND_REPLY_TO ?? "";
+    this.resend = new Resend(apiKey);
+    this.fromAddress = fromAddress ?? "Qansa Billing <billing@example.com>";
+    this.replyTo = replyTo ?? "";
   }
 
   async sendEmail(request: SendEmailRequest): Promise<SendEmailResponse> {

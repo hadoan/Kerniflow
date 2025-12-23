@@ -9,7 +9,7 @@ const logger = new Logger("IdentityModule");
 import { AuthController } from "./adapters/http/auth.controller";
 
 // Repositories
-import { PrismaUserRepository } from "./infrastructure/persistence/prisma.user.repo";
+import { PrismaUserRepository } from "./infrastructure/persistence/PrismaUserRepository";
 import { PrismaTenantRepository } from "./infrastructure/persistence/prisma.tenant.repo";
 import { PrismaMembershipRepository } from "./infrastructure/persistence/prisma.membership.repo";
 import { PrismaRefreshTokenRepository } from "./infrastructure/persistence/prisma.refresh-token.repo";
