@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { prisma } from '@kerniflow/data';
-import { IOutboxPort } from '../../application/ports/outbox.port';
+import { Injectable } from "@nestjs/common";
+import { prisma } from "@kerniflow/data";
+import { IOutboxPort } from "../../application/ports/outbox.port";
 
 /**
  * Prisma Outbox Adapter Implementation
@@ -8,20 +8,16 @@ import { IOutboxPort } from '../../application/ports/outbox.port';
  */
 @Injectable()
 export class PrismaOutboxAdapter implements IOutboxPort {
-  async enqueue(data: {
-    tenantId: string;
-    eventType: string;
-    payloadJson: string;
-  }): Promise<void> {
+  async enqueue(data: { tenantId: string; eventType: string; payloadJson: string }): Promise<void> {
     await prisma.outboxEvent.create({
       data: {
         tenantId: data.tenantId,
         eventType: data.eventType,
         payloadJson: data.payloadJson,
-        status: 'PENDING',
+        status: "PENDING",
         attempts: 0,
-        availableAt: new Date()
-      }
+        availableAt: new Date(),
+      },
     });
   }
 }

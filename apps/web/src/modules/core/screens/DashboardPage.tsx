@@ -1,32 +1,32 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { 
-  TrendingUp, 
-  Clock, 
-  Receipt, 
-  ArrowUpRight, 
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import {
+  TrendingUp,
+  Clock,
+  Receipt,
+  ArrowUpRight,
   Plus,
   MessageSquare,
   FileText,
-  Sparkles
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Button } from '@/shared/ui/button';
-import { Badge } from '@/shared/ui/badge';
-import { getDashboard } from '@/shared/mock/mockApi';
-import { formatMoney, formatRelativeTime } from '@/shared/lib/formatters';
-import { CardSkeleton } from '@/shared/components/Skeleton';
-import { getDb } from '@/shared/mock/mockDb';
+  Sparkles,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
+import { getDashboard } from "@/shared/mock/mockApi";
+import { formatMoney, formatRelativeTime } from "@/shared/lib/formatters";
+import { CardSkeleton } from "@/shared/components/Skeleton";
+import { getDb } from "@/shared/mock/mockDb";
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'de' ? 'de-DE' : 'en-DE';
+  const locale = i18n.language === "de" ? "de-DE" : "en-DE";
   const db = getDb();
 
   const { data: dashboard, isLoading } = useQuery({
-    queryKey: ['dashboard'],
+    queryKey: ["dashboard"],
     queryFn: getDashboard,
   });
 
@@ -48,17 +48,15 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-h1 text-foreground">
-            {t('dashboard.welcome')}, {db.user.name.split(' ')[0]}
+            {t("dashboard.welcome")}, {db.user.name.split(" ")[0]}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            {t('common.tagline')}
-          </p>
+          <p className="text-muted-foreground mt-1">{t("common.tagline")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="accent" asChild>
             <Link to="/assistant">
               <Sparkles className="h-4 w-4" />
-              {t('dashboard.openAssistant')}
+              {t("dashboard.openAssistant")}
             </Link>
           </Button>
         </div>
@@ -71,7 +69,7 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-success/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('dashboard.revenueThisMonth')}
+              {t("dashboard.revenueThisMonth")}
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-success" />
           </CardHeader>
@@ -79,9 +77,7 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold text-foreground">
               {formatMoney(dashboard?.revenueThisMonthCents || 0, locale)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +12% from last month
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
           </CardContent>
         </Card>
 
@@ -90,7 +86,7 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-warning/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('dashboard.outstandingInvoices')}
+              {t("dashboard.outstandingInvoices")}
             </CardTitle>
             <Clock className="h-4 w-4 text-warning" />
           </CardHeader>
@@ -109,7 +105,7 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              {t('dashboard.expensesThisMonth')}
+              {t("dashboard.expensesThisMonth")}
             </CardTitle>
             <Receipt className="h-4 w-4 text-accent" />
           </CardHeader>
@@ -126,7 +122,7 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-h3 text-foreground mb-4">{t('dashboard.quickActions')}</h2>
+        <h2 className="text-h3 text-foreground mb-4">{t("dashboard.quickActions")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link to="/assistant">
             <Card variant="interactive" className="group">
@@ -135,7 +131,7 @@ export default function DashboardPage() {
                   <Receipt className="h-6 w-6 text-accent" />
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-foreground">{t('dashboard.addExpense')}</div>
+                  <div className="font-medium text-foreground">{t("dashboard.addExpense")}</div>
                   <div className="text-sm text-muted-foreground">Upload receipt with AI</div>
                 </div>
                 <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
@@ -150,7 +146,7 @@ export default function DashboardPage() {
                   <FileText className="h-6 w-6 text-success" />
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-foreground">{t('dashboard.createInvoice')}</div>
+                  <div className="font-medium text-foreground">{t("dashboard.createInvoice")}</div>
                   <div className="text-sm text-muted-foreground">Generate with AI</div>
                 </div>
                 <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-success transition-colors" />
@@ -165,7 +161,7 @@ export default function DashboardPage() {
                   <MessageSquare className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-foreground">{t('dashboard.openAssistant')}</div>
+                  <div className="font-medium text-foreground">{t("dashboard.openAssistant")}</div>
                   <div className="text-sm text-muted-foreground">Ask anything</div>
                 </div>
                 <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -180,9 +176,9 @@ export default function DashboardPage() {
         {/* Recent Invoices */}
         <Card variant="default">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">{t('invoices.title')}</CardTitle>
+            <CardTitle className="text-lg">{t("invoices.title")}</CardTitle>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/invoices">{t('common.viewAll')}</Link>
+              <Link to="/invoices">{t("common.viewAll")}</Link>
             </Button>
           </CardHeader>
           <CardContent>
@@ -202,7 +198,7 @@ export default function DashboardPage() {
                         {invoice.invoiceNumber}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {db.clients.find(c => c.id === invoice.clientId)?.company || 'Client'}
+                        {db.clients.find((c) => c.id === invoice.clientId)?.company || "Client"}
                       </div>
                     </div>
                   </div>
@@ -223,9 +219,9 @@ export default function DashboardPage() {
         {/* Recent Expenses */}
         <Card variant="default">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">{t('expenses.title')}</CardTitle>
+            <CardTitle className="text-lg">{t("expenses.title")}</CardTitle>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/expenses">{t('common.viewAll')}</Link>
+              <Link to="/expenses">{t("common.viewAll")}</Link>
             </Button>
           </CardHeader>
           <CardContent>
@@ -241,9 +237,7 @@ export default function DashboardPage() {
                       <Receipt className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-foreground">
-                        {expense.merchant}
-                      </div>
+                      <div className="text-sm font-medium text-foreground">{expense.merchant}</div>
                       <div className="text-xs text-muted-foreground">
                         {t(`expenses.categories.${expense.category}`)}
                       </div>

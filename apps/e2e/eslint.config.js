@@ -1,23 +1,19 @@
-import globals from "globals";
 import tseslint from "typescript-eslint";
+import config from "@kerniflow/eslint-config";
 
-export default [
+export default tseslint.config(
+  { ignores: ["playwright-report/", "test-results/"] },
+  config.base,
+  config.typescript,
+  config.node,
+  config.test,
   {
     files: ["**/*.ts"],
     languageOptions: {
-      globals: {
-        ...globals.node,
-      },
       parserOptions: {
         project: "./tsconfig.json",
         tsconfigRootDir: import.meta.dirname,
       },
     },
-  },
-  ...tseslint.configs.recommended,
-  {
-    rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
-    },
-  },
-];
+  }
+);

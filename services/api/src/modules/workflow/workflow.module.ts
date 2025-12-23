@@ -1,16 +1,16 @@
-import { Module } from '@nestjs/common';
-import { Controller, Get, Post } from '@nestjs/common';
+import { Module } from "@nestjs/common";
+import { Controller, Get, Post } from "@nestjs/common";
 
-@Controller('workflows')
+@Controller("workflows")
 class WorkflowController {
   @Get()
   hello() {
-    return { message: 'Workflow context - hello' };
+    return { message: "Workflow context - hello" };
   }
 
-  @Post('instances')
+  @Post("instances")
   createInstance() {
-    return { id: 'wf-instance-1', status: 'created' };
+    return { id: "wf-instance-1", status: "created" };
   }
 }
 

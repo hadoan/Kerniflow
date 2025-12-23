@@ -1,9 +1,3 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "forceConsistentCasingInFileNames": true,
-    "exactOptionalPropertyTypes": true
-  }
+  "extends": "@kerniflow/tsconfig/base.json"
 }

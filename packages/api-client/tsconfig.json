@@ -1,15 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kerniflow/tsconfig/lib.json",
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "Node",
     "lib": ["ES2020", "DOM"],
     "types": ["vitest/globals"],
-    "strict": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
     "baseUrl": "."
   },
   "include": ["src", "vitest.config.ts"]

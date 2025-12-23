@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // Type checking (balanced for gradual adoption)
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "exactOptionalPropertyTypes": true,
+    // Additional strictness (can be enabled per-project)
+    // "noUncheckedIndexedAccess": true,
+    // "noImplicitOverride": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noPropertyAccessFromIndexSignature": true,
+
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "importHelpers": true,
+    "noEmitOnError": true,
+
+    // Interop
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+
+    // Language
+    "useDefineForClassFields": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // Performance
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    // Output
+    "noEmit": true
+  }
+}

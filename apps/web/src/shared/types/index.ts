@@ -1,6 +1,6 @@
 // Core entity types for Bizflow
 
-export type Currency = 'EUR' | 'USD';
+export type Currency = "EUR" | "USD";
 export type VatRate = 0 | 7 | 19;
 
 export interface Tenant {
@@ -21,7 +21,7 @@ export interface User {
   tenantId: string;
   name: string;
   email: string;
-  role: 'owner' | 'admin' | 'member';
+  role: "owner" | "admin" | "member";
   avatarUrl?: string;
 }
 
@@ -47,21 +47,21 @@ export interface Project {
   name: string;
   description?: string;
   hourlyRate?: number;
-  status: 'active' | 'completed' | 'archived';
+  status: "active" | "completed" | "archived";
   createdAt: string;
   updatedAt: string;
 }
 
-export type ExpenseCategory = 
-  | 'office_supplies'
-  | 'software'
-  | 'travel'
-  | 'meals'
-  | 'home_office'
-  | 'education'
-  | 'hardware'
-  | 'phone_internet'
-  | 'other';
+export type ExpenseCategory =
+  | "office_supplies"
+  | "software"
+  | "travel"
+  | "meals"
+  | "home_office"
+  | "education"
+  | "hardware"
+  | "phone_internet"
+  | "other";
 
 export interface Expense {
   id: string;
@@ -80,7 +80,7 @@ export interface Expense {
   updatedAt: string;
 }
 
-export type InvoiceStatus = 'draft' | 'issued' | 'sent' | 'paid' | 'overdue';
+export type InvoiceStatus = "draft" | "issued" | "sent" | "paid" | "overdue";
 
 export interface InvoiceLineItem {
   id: string;
@@ -111,11 +111,11 @@ export interface Invoice {
 }
 
 // Chat/Assistant types
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type MessageRole = "user" | "assistant" | "system";
 
 export interface ChatAttachment {
   id: string;
-  type: 'receipt' | 'document' | 'image';
+  type: "receipt" | "document" | "image";
   url: string;
   name: string;
 }
@@ -123,7 +123,7 @@ export interface ChatAttachment {
 export interface ToolCall {
   id: string;
   name: string;
-  status: 'pending' | 'running' | 'completed' | 'error';
+  status: "pending" | "running" | "completed" | "error";
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
 }

@@ -5,5 +5,5 @@ export default defineConfig({
   format: ["esm", "cjs"],
   dts: true,
   outDir: "dist",
-  clean: process.argv.includes("--watch") ? false : true
+  clean: process.argv.includes("--watch") ? false : true,
 });

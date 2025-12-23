@@ -2,6 +2,7 @@ packages:
   - "apps/*"
   - "services/*"
   - "packages/*"
+  - "packages/tooling/*"
 onlyBuiltDependencies:
   - bcrypt
   - "@prisma/client"

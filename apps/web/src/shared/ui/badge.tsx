@@ -8,34 +8,21 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground",
-        destructive:
-          "border-transparent bg-destructive text-destructive-foreground",
+        default: "border-transparent bg-primary text-primary-foreground",
+        secondary: "border-transparent bg-secondary text-secondary-foreground",
+        destructive: "border-transparent bg-destructive text-destructive-foreground",
         outline: "text-foreground border-border",
-        success:
-          "border-transparent bg-success-muted text-success",
-        warning:
-          "border-transparent bg-warning-muted text-warning",
-        danger:
-          "border-transparent bg-danger-muted text-danger",
-        accent:
-          "border-transparent bg-accent-muted text-accent",
-        muted:
-          "border-transparent bg-muted text-muted-foreground",
+        success: "border-transparent bg-success-muted text-success",
+        warning: "border-transparent bg-warning-muted text-warning",
+        danger: "border-transparent bg-danger-muted text-danger",
+        accent: "border-transparent bg-accent-muted text-accent",
+        muted: "border-transparent bg-muted text-muted-foreground",
         // Invoice status variants
-        draft:
-          "border-transparent bg-muted text-muted-foreground",
-        issued:
-          "border-transparent bg-accent-muted text-accent",
-        sent:
-          "border-transparent bg-accent-muted text-accent",
-        paid:
-          "border-transparent bg-success-muted text-success",
-        overdue:
-          "border-transparent bg-danger-muted text-danger",
+        draft: "border-transparent bg-muted text-muted-foreground",
+        issued: "border-transparent bg-accent-muted text-accent",
+        sent: "border-transparent bg-accent-muted text-accent",
+        paid: "border-transparent bg-success-muted text-success",
+        overdue: "border-transparent bg-danger-muted text-danger",
       },
     },
     defaultVariants: {
@@ -45,13 +32,10 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  );
+  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
 export { Badge, badgeVariants };

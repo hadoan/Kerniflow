@@ -487,6 +487,53 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/tooling/eslint-config:
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.32.0
+        version: 9.39.2
+      eslint:
+        specifier: ^9.32.0
+        version: 9.39.2(jiti@2.6.1)
+      globals:
+        specifier: ^15.15.0
+        version: 15.15.0
+      typescript-eslint:
+        specifier: ^8.38.0
+        version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+
+  packages/tooling/prettier-config:
+    dependencies:
+      prettier:
+        specifier: ^3.0.0
+        version: 3.7.4
+
+  packages/tooling/tailwind-preset:
+    devDependencies:
+      tailwindcss:
+        specifier: ^3.4.0
+        version: 3.4.19(tsx@4.21.0)(yaml@2.8.2)
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.19(tsx@4.21.0)(yaml@2.8.2))
+
+  packages/tooling/tsconfig: {}
+
+  packages/tooling/vite-config:
+    devDependencies:
+      tsdown:
+        specifier: ^0.18.0
+        version: 0.18.0(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest:
+        specifier: ^2.1.4
+        version: 2.1.9(@types/node@22.19.3)(jsdom@24.1.3)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(terser@5.44.1)
+
   services/api:
     dependencies:
       '@ai-sdk/anthropic':
@@ -7026,6 +7073,46 @@ packages:
       sugarss:
         optional: true
       terser:
+        optional: true
+
+  vite@6.4.1:
+    resolution: {integrity: sha512-+Oxm7q9hDoLMyJOYfUYBuHQo+dkAloi33apOPP56pzj+vsdJDzr+j1NISE5pyaAuKL4A3UD34qd0lx5+kfKp2g==}
+    engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^18.0.0 || ^20.0.0 || >=22.0.0
+      jiti: '>=1.21.0'
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      sass-embedded: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.16.0
+      tsx: ^4.8.1
+      yaml: ^2.4.2
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      jiti:
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+      tsx:
+        optional: true
+      yaml:
         optional: true
 
   vitest@1.6.1:
@@ -14064,6 +14151,23 @@ snapshots:
       fsevents: 2.3.3
       lightningcss: 1.30.2
       terser: 5.44.1
+
+  vite@6.4.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+    dependencies:
+      esbuild: 0.25.12
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
+      postcss: 8.5.6
+      rollup: 4.53.5
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 22.19.3
+      fsevents: 2.3.3
+      jiti: 2.6.1
+      lightningcss: 1.30.2
+      terser: 5.44.1
+      tsx: 4.21.0
+      yaml: 2.8.2
 
   vitest@1.6.1(@types/node@22.19.3)(jsdom@24.1.3)(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:

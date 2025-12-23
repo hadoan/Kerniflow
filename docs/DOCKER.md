@@ -29,6 +29,7 @@ cp .env.example .env
 ```
 
 Default values in `.env.example` work for local development. Adjust as needed:
+
 - `POSTGRES_PASSWORD`: Change in production
 - `VITE_API_BASE_URL`: Backend URL the frontend connects to
 - `NODE_ENV`: Set to `production` for production builds
@@ -40,6 +41,7 @@ docker compose --profile demo up --build
 ```
 
 Services will be available at:
+
 - **Frontend**: http://localhost:5173
 - **Mock Server**: http://localhost:4000
 - **PostgreSQL**: localhost:5432
@@ -52,6 +54,7 @@ docker compose --profile full up --build
 ```
 
 Services will be available at:
+
 - **Frontend**: http://localhost:5173
 - **API**: http://localhost:3000
 - **PostgreSQL**: localhost:5432
@@ -198,10 +201,11 @@ docker compose --profile demo up
 ```
 
 **Services**:
+
 - `web` (Vite frontend)
 - `postgres` (database)
 - `redis` (cache/queue)
-- `mock-server` (mock backend) — *not yet implemented; stub only*
+- `mock-server` (mock backend) — _not yet implemented; stub only_
 
 **Use Case**: Development without full backend setup; frontend development.
 
@@ -212,6 +216,7 @@ docker compose --profile full up
 ```
 
 **Services**:
+
 - `web` (Vite frontend)
 - `api` (NestJS API)
 - `worker` (NestJS worker process)
@@ -229,6 +234,7 @@ docker compose --profile full up
 If you get `bind: address already in use`:
 
 **Find process using port**:
+
 ```bash
 # macOS/Linux
 lsof -i :5173
@@ -240,6 +246,7 @@ kill -9 <PID>
 ```
 
 **Or change ports** in `.env`:
+
 ```env
 WEB_PORT=5174
 API_PORT=3001
@@ -250,12 +257,14 @@ Then update frontend API URL if needed.
 ### Container fails to start
 
 **Check logs**:
+
 ```bash
 docker compose logs api
 docker compose logs web
 ```
 
 **Common issues**:
+
 - Missing environment variables → copy `.env.example` to `.env`
 - Port in use → change in `.env`
 - Database not ready → wait for healthcheck (30s usually)
@@ -288,11 +297,13 @@ docker compose exec redis redis-cli keys '*'
 ### Frontend can't reach API
 
 1. **Check API is running**:
+
    ```bash
    docker compose logs -f api
    ```
 
 2. **Verify endpoint in .env**:
+
    ```bash
    VITE_API_BASE_URL=http://localhost:3000  # Full profile
    VITE_API_BASE_URL=http://localhost:4000  # Demo profile (mock)
@@ -380,6 +391,7 @@ docker compose logs > logs.txt
 ### Do NOT use `--profile demo` in production
 
 Always use `--profile full` with:
+
 - A real backend API (`api` service)
 - A worker (`worker` service)
 
@@ -474,6 +486,7 @@ kerniflow/
 - **NestJS**: https://docs.nestjs.com/
 
 For project-specific issues, check:
+
 - Logs: `docker compose logs -f`
 - Database: `docker compose exec postgres psql -U kerniflow -d kerniflow`
 - Redis: `docker compose exec redis redis-cli`

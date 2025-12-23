@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { prisma } from '@kerniflow/data';
-import { IRoleRepository } from '../../application/ports/role.repo.port';
+import { Injectable } from "@nestjs/common";
+import { prisma } from "@kerniflow/data";
+import { IRoleRepository } from "../../application/ports/role.repo.port";
 
 /**
  * Prisma Role Repository Implementation
@@ -18,14 +18,12 @@ export class PrismaRoleRepository implements IRoleRepository {
         id: data.id,
         tenantId: data.tenantId,
         name: data.name,
-        systemKey: data.systemKey || null
-      }
+        systemKey: data.systemKey || null,
+      },
     });
   }
 
-  async findById(
-    id: string
-  ): Promise<{
+  async findById(id: string): Promise<{
     id: string;
     tenantId: string;
     name: string;
@@ -37,8 +35,8 @@ export class PrismaRoleRepository implements IRoleRepository {
         id: true,
         tenantId: true,
         name: true,
-        systemKey: true
-      }
+        systemKey: true,
+      },
     });
   }
 
@@ -57,8 +55,8 @@ export class PrismaRoleRepository implements IRoleRepository {
         id: true,
         tenantId: true,
         name: true,
-        systemKey: true
-      }
+        systemKey: true,
+      },
     });
   }
 
@@ -76,8 +74,8 @@ export class PrismaRoleRepository implements IRoleRepository {
         id: true,
         tenantId: true,
         name: true,
-        systemKey: true
-      }
+        systemKey: true,
+      },
     });
   }
 
@@ -85,8 +83,8 @@ export class PrismaRoleRepository implements IRoleRepository {
     const rolePermissions = await prisma.rolePermission.findMany({
       where: { roleId },
       include: {
-        permission: true
-      }
+        permission: true,
+      },
     });
 
     return rolePermissions.map((rp) => rp.permission.key);

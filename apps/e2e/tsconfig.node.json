@@ -1,10 +1,7 @@
 {
+  "extends": "@kerniflow/tsconfig/lib.json",
   "compilerOptions": {
-    "composite": true,
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "composite": true
   },
   "include": ["playwright.config.ts"]
 }

@@ -1,8 +1,8 @@
-import DashboardPage from './screens/DashboardPage';
+import DashboardPage from "./screens/DashboardPage";
 
 export const coreRoutes = [
   {
-    path: '/dashboard',
+    path: "/dashboard",
     element: <DashboardPage />,
   },
 ];

@@ -1,4 +1,4 @@
-import { Tenant } from '../../domain/entities/tenant.entity';
+import { Tenant } from "../../domain/entities/tenant.entity";
 
 /**
  * Tenant Repository Port (Interface)
@@ -30,4 +30,4 @@ export interface ITenantRepository {
   update(tenant: Tenant): Promise<Tenant>;
 }
 
-export const TENANT_REPOSITORY_TOKEN = Symbol('TENANT_REPOSITORY');
+export const TENANT_REPOSITORY_TOKEN = Symbol("TENANT_REPOSITORY");

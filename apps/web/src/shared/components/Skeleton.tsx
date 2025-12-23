@@ -1,27 +1,18 @@
-import React from 'react';
-import { cn } from '@/shared/lib/utils';
+import React from "react";
+import { cn } from "@/shared/lib/utils";
 
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'circular' | 'text';
+  variant?: "default" | "circular" | "text";
 }
 
-export function Skeleton({ className, variant = 'default', ...props }: SkeletonProps) {
+export function Skeleton({ className, variant = "default", ...props }: SkeletonProps) {
   const variants = {
-    default: 'rounded-lg',
-    circular: 'rounded-full',
-    text: 'rounded h-4',
+    default: "rounded-lg",
+    circular: "rounded-full",
+    text: "rounded h-4",
   };
 
-  return (
-    <div
-      className={cn(
-        'animate-pulse bg-muted',
-        variants[variant],
-        className
-      )}
-      {...props}
-    />
-  );
+  return <div className={cn("animate-pulse bg-muted", variants[variant], className)} {...props} />;
 }
 
 export function CardSkeleton() {

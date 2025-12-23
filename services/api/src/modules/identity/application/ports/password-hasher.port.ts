@@ -14,4 +14,4 @@ export interface IPasswordHasher {
   verify(password: string, hash: string): Promise<boolean>;
 }
 
-export const PASSWORD_HASHER_TOKEN = Symbol('PASSWORD_HASHER');
+export const PASSWORD_HASHER_TOKEN = Symbol("PASSWORD_HASHER");

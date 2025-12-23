@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
-import { Controller, Get } from '@nestjs/common';
+import { Module } from "@nestjs/common";
+import { Controller, Get } from "@nestjs/common";
 
-@Controller('automation')
+@Controller("automation")
 class AutomationController {
   @Get()
   hello() {
-    return { message: 'Automation context - hello' };
+    return { message: "Automation context - hello" };
   }
 }
 

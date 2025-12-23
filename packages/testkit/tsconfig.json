@@ -1,11 +1,6 @@
 {
-  "extends": "../../tsconfig.node.json",
+  "extends": "@kerniflow/tsconfig/node.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
-    "strict": true,
-    "strictNullChecks": true,
-    "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "paths": {
       "@kerniflow/testkit": ["./src/index.ts"],

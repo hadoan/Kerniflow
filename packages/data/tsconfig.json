@@ -1,11 +1,6 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kerniflow/tsconfig/lib.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "types": ["node"],
     "paths": {
       "@kerniflow/contracts": ["../contracts/src"],

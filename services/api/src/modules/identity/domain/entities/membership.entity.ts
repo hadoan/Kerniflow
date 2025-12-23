@@ -19,7 +19,7 @@ export class Membership {
     createdAt: Date = new Date()
   ): Membership {
     if (!tenantId || !userId || !roleId) {
-      throw new Error('Tenant ID, User ID, and Role ID are required');
+      throw new Error("Tenant ID, User ID, and Role ID are required");
     }
 
     return new Membership(id, tenantId, userId, roleId, createdAt);
@@ -32,13 +32,7 @@ export class Membership {
     roleId: string;
     createdAt: Date;
   }): Membership {
-    return new Membership(
-      data.id,
-      data.tenantId,
-      data.userId,
-      data.roleId,
-      data.createdAt
-    );
+    return new Membership(data.id, data.tenantId, data.userId, data.roleId, data.createdAt);
   }
 
   getId(): string {

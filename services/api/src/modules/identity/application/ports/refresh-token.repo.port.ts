@@ -16,15 +16,13 @@ export interface IRefreshTokenRepository {
   /**
    * Find valid refresh token by hash
    */
-  findValidByHash(hash: string): Promise<
-    {
-      id: string;
-      userId: string;
-      tenantId: string;
-      expiresAt: Date;
-      revokedAt: Date | null;
-    } | null
-  >;
+  findValidByHash(hash: string): Promise<{
+    id: string;
+    userId: string;
+    tenantId: string;
+    expiresAt: Date;
+    revokedAt: Date | null;
+  } | null>;
 
   /**
    * Revoke a refresh token
@@ -42,4 +40,4 @@ export interface IRefreshTokenRepository {
   deleteExpired(): Promise<number>;
 }
 
-export const REFRESH_TOKEN_REPOSITORY_TOKEN = Symbol('REFRESH_TOKEN_REPOSITORY');
+export const REFRESH_TOKEN_REPOSITORY_TOKEN = Symbol("REFRESH_TOKEN_REPOSITORY");

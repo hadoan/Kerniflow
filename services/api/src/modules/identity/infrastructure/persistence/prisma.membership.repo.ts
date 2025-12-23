@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { prisma } from '@kerniflow/data';
-import { Membership } from '../../domain/entities/membership.entity';
-import { IMembershipRepository } from '../../application/ports/membership.repo.port';
+import { Injectable } from "@nestjs/common";
+import { prisma } from "@kerniflow/data";
+import { Membership } from "../../domain/entities/membership.entity";
+import { IMembershipRepository } from "../../application/ports/membership.repo.port";
 
 /**
  * Prisma Membership Repository Implementation
@@ -15,8 +15,8 @@ export class PrismaMembershipRepository implements IMembershipRepository {
         tenantId: membership.getTenantId(),
         userId: membership.getUserId(),
         roleId: membership.getRoleId(),
-        createdAt: membership.getCreatedAt()
-      }
+        createdAt: membership.getCreatedAt(),
+      },
     });
 
     return Membership.restore(data);
@@ -24,7 +24,7 @@ export class PrismaMembershipRepository implements IMembershipRepository {
 
   async findById(id: string): Promise<Membership | null> {
     const data = await prisma.membership.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!data) return null;
@@ -35,8 +35,8 @@ export class PrismaMembershipRepository implements IMembershipRepository {
     const data = await prisma.membership.findMany({
       where: { userId },
       include: {
-        tenant: true
-      }
+        tenant: true,
+      },
     });
 
     return data.map((item) => Membership.restore(item));
@@ -44,30 +44,24 @@ export class PrismaMembershipRepository implements IMembershipRepository {
 
   async findByTenantId(tenantId: string): Promise<Membership[]> {
     const data = await prisma.membership.findMany({
-      where: { tenantId }
+      where: { tenantId },
     });
 
     return data.map((item) => Membership.restore(item));
   }
 
-  async findByTenantAndUser(
-    tenantId: string,
-    userId: string
-  ): Promise<Membership | null> {
+  async findByTenantAndUser(tenantId: string, userId: string): Promise<Membership | null> {
     const data = await prisma.membership.findUnique({
-      where: { tenantId_userId: { tenantId, userId } }
+      where: { tenantId_userId: { tenantId, userId } },
     });
 
     if (!data) return null;
     return Membership.restore(data);
   }
 
-  async existsByTenantAndUser(
-    tenantId: string,
-    userId: string
-  ): Promise<boolean> {
+  async existsByTenantAndUser(tenantId: string, userId: string): Promise<boolean> {
     const count = await prisma.membership.count({
-      where: { tenantId, userId }
+      where: { tenantId, userId },
     });
 
     return count > 0;
@@ -77,8 +71,8 @@ export class PrismaMembershipRepository implements IMembershipRepository {
     const data = await prisma.membership.update({
       where: { id: membership.getId() },
       data: {
-        roleId: membership.getRoleId()
-      }
+        roleId: membership.getRoleId(),
+      },
     });
 
     return Membership.restore(data);
@@ -86,7 +80,7 @@ export class PrismaMembershipRepository implements IMembershipRepository {
 
   async delete(id: string): Promise<void> {
     await prisma.membership.delete({
-      where: { id }
+      where: { id },
     });
   }
 }

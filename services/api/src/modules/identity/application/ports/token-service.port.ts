@@ -6,11 +6,7 @@ export interface ITokenService {
   /**
    * Generate access token (short-lived)
    */
-  generateAccessToken(data: {
-    userId: string;
-    email: string;
-    tenantId: string;
-  }): string;
+  generateAccessToken(data: { userId: string; email: string; tenantId: string }): string;
 
   /**
    * Generate refresh token (long-lived)
@@ -20,9 +16,7 @@ export interface ITokenService {
   /**
    * Verify and decode access token
    */
-  verifyAccessToken(
-    token: string
-  ): Promise<{
+  verifyAccessToken(token: string): Promise<{
     userId: string;
     email: string;
     tenantId: string;
@@ -39,4 +33,4 @@ export interface ITokenService {
   };
 }
 
-export const TOKEN_SERVICE_TOKEN = Symbol('TOKEN_SERVICE');
+export const TOKEN_SERVICE_TOKEN = Symbol("TOKEN_SERVICE");

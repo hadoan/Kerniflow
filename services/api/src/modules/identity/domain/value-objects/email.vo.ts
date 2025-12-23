@@ -7,11 +7,11 @@ export class Email {
 
   static create(email: string): Email {
     const normalized = email.toLowerCase().trim();
-    
+
     if (!this.isValid(normalized)) {
       throw new Error(`Invalid email format: ${email}`);
     }
-    
+
     return new Email(normalized);
   }
 

@@ -1,0 +1,20 @@
+{
+  "name": "@kerniflow/tailwind-preset",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Shared Tailwind CSS preset for Kerniflow monorepo",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "tailwindcss": "^3.0.0",
+    "tailwindcss-animate": "^1.0.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

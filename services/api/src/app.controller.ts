@@ -18,8 +18,8 @@ export class AppController {
       sample: {
         merchant: r.merchant,
         total: formatEUR(r.totalCents, "de-DE"),
-        vat: formatEUR(vatCents(r), "de-DE")
-      }
+        vat: formatEUR(vatCents(r), "de-DE"),
+      },
     };
   }
 }

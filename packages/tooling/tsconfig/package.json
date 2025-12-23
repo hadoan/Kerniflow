@@ -1,0 +1,10 @@
+{
+  "name": "@kerniflow/tsconfig",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Shared TypeScript configurations for Kerniflow monorepo",
+  "files": [
+    "*.json",
+    "README.md"
+  ]
+}

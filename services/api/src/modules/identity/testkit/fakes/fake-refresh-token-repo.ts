@@ -20,9 +20,7 @@ export class FakeRefreshTokenRepository implements IRefreshTokenRepository {
     this.tokens.push({ ...data, revokedAt: null });
   }
 
-  async findValidByHash(
-    hash: string
-  ): Promise<{
+  async findValidByHash(hash: string): Promise<{
     id: string;
     userId: string;
     tenantId: string;

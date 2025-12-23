@@ -20,6 +20,7 @@
     "prisma:migrate": "pnpm --filter @kerniflow/data exec prisma migrate dev",
     "migrate": "pnpm --filter @kerniflow/data exec tsx --env-file=../../.env ../../../node_modules/.bin/prisma migrate dev",
     "format": "prettier -w .",
+    "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "pnpm lint && pnpm typecheck",

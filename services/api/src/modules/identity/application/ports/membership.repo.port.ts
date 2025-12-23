@@ -1,4 +1,4 @@
-import { Membership } from '../../domain/entities/membership.entity';
+import { Membership } from "../../domain/entities/membership.entity";
 
 /**
  * Membership Repository Port (Interface)
@@ -27,10 +27,7 @@ export interface IMembershipRepository {
   /**
    * Find membership by tenant and user
    */
-  findByTenantAndUser(
-    tenantId: string,
-    userId: string
-  ): Promise<Membership | null>;
+  findByTenantAndUser(tenantId: string, userId: string): Promise<Membership | null>;
 
   /**
    * Check if membership exists
@@ -48,4 +45,4 @@ export interface IMembershipRepository {
   delete(id: string): Promise<void>;
 }
 
-export const MEMBERSHIP_REPOSITORY_TOKEN = Symbol('MEMBERSHIP_REPOSITORY');
+export const MEMBERSHIP_REPOSITORY_TOKEN = Symbol("MEMBERSHIP_REPOSITORY");

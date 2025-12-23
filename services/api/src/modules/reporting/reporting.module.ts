@@ -1,14 +1,14 @@
-import { Module } from '@nestjs/common';
-import { Controller, Get } from '@nestjs/common';
-import { prisma } from '@kerniflow/data';
+import { Module } from "@nestjs/common";
+import { Controller, Get } from "@nestjs/common";
+import { prisma } from "@kerniflow/data";
 
-@Controller('reports')
+@Controller("reports")
 class ReportingController {
-  @Get('dashboard')
+  @Get("dashboard")
   async dashboard() {
     // CQRS-lite: read from Prisma
     const expenseCount = await prisma.expense.count();
-    return { totalExpenses: expenseCount, message: 'Reporting context - dashboard' };
+    return { totalExpenses: expenseCount, message: "Reporting context - dashboard" };
   }
 }
 

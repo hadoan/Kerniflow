@@ -1,19 +1,9 @@
 {
+  "extends": "@kerniflow/tsconfig/lib.json",
   "compilerOptions": {
     "target": "ES2020",
-    "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true
+    "allowImportingTsExtensions": true
   },
   "include": ["playwright.config.ts", "tests/**/*.ts", "utils/**/*.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]

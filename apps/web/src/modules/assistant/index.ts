@@ -1,1 +1,1 @@
-export { default as AssistantPage } from './screens/AssistantPage';
+export { default as AssistantPage } from "./screens/AssistantPage";

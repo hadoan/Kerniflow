@@ -19,7 +19,7 @@ export class UserCreatedEvent extends DomainEvent {
     public readonly name: string | null,
     tenantId: string | null = null
   ) {
-    super('identity.user.created', tenantId, userId);
+    super("identity.user.created", tenantId, userId);
   }
 }
 
@@ -29,7 +29,7 @@ export class TenantCreatedEvent extends DomainEvent {
     public readonly name: string,
     public readonly slug: string
   ) {
-    super('identity.tenant.created', tenantId, tenantId);
+    super("identity.tenant.created", tenantId, tenantId);
   }
 }
 
@@ -39,7 +39,7 @@ export class UserLoggedInEvent extends DomainEvent {
     public readonly tenantId: string,
     public readonly email: string
   ) {
-    super('identity.user.logged_in', tenantId, userId);
+    super("identity.user.logged_in", tenantId, userId);
   }
 }
 
@@ -50,7 +50,7 @@ export class MembershipCreatedEvent extends DomainEvent {
     public readonly userId: string,
     public readonly roleId: string
   ) {
-    super('identity.membership.created', tenantId, membershipId);
+    super("identity.membership.created", tenantId, membershipId);
   }
 }
 
@@ -59,7 +59,7 @@ export class RefreshTokenIssuedEvent extends DomainEvent {
     public readonly userId: string,
     public readonly tenantId: string
   ) {
-    super('identity.refresh_token.issued', tenantId, userId);
+    super("identity.refresh_token.issued", tenantId, userId);
   }
 }
 
@@ -68,7 +68,7 @@ export class UserLoggedOutEvent extends DomainEvent {
     public readonly userId: string,
     public readonly tenantId: string
   ) {
-    super('identity.user.logged_out', tenantId, userId);
+    super("identity.user.logged_out", tenantId, userId);
   }
 }
 
@@ -78,6 +78,6 @@ export class TenantSwitchedEvent extends DomainEvent {
     public readonly fromTenantId: string,
     public readonly toTenantId: string
   ) {
-    super('identity.tenant.switched', toTenantId, userId);
+    super("identity.tenant.switched", toTenantId, userId);
   }
 }

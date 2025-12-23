@@ -1,4 +1,4 @@
-import { Email } from '../value-objects/email.vo';
+import { Email } from "../value-objects/email.vo";
 
 /**
  * User Entity
@@ -20,7 +20,7 @@ export class User {
     email: Email,
     passwordHash: string,
     name: string | null = null,
-    status: string = 'ACTIVE',
+    status: string = "ACTIVE",
     createdAt: Date = new Date()
   ): User {
     return new User(id, email, passwordHash, name, status, createdAt);
@@ -69,6 +69,6 @@ export class User {
   }
 
   isActive(): boolean {
-    return this.status === 'ACTIVE';
+    return this.status === "ACTIVE";
   }
 }

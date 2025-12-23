@@ -9,6 +9,7 @@ This document describes the complete authentication and identity management syst
 ### Bounded Context: Identity
 
 The Identity context owns all authentication, authorization, and user management concerns. It follows:
+
 - **Domain-Driven Design (DDD)**: Domain models, value objects, and events
 - **Hexagonal Architecture**: Ports (interfaces) separate domain from infrastructure
 - **Idempotency**: All write operations are idempotent
@@ -18,17 +19,20 @@ The Identity context owns all authentication, authorization, and user management
 ### Key Concepts
 
 #### Multi-Tenancy
+
 - Users belong to multiple tenants via **Membership**
 - Each tenant has independent roles, permissions, and data
 - All API requests are tenant-scoped via `X-Tenant-Id` header or JWT token
 
 #### RBAC (Role-Based Access Control)
+
 - **Roles**: Tenant-specific roles (OWNER, ADMIN, MEMBER)
 - **Permissions**: Global permissions that can be assigned to roles
 - **RolePermission**: Links roles to permissions
 - Default roles created automatically on tenant creation
 
 #### Sessions & Tokens
+
 - **Access Token**: Short-lived JWT (15 minutes default)
   - Contains: userId, email, tenantId
   - Used for API authentication
@@ -38,12 +42,14 @@ The Identity context owns all authentication, authorization, and user management
   - Can be revoked
 
 #### Outbox Pattern
+
 - Domain events written to `OutboxEvent` table
 - Worker service polls and publishes events
 - Enables eventual consistency across bounded contexts
 - Events: user.created, user.logged_in, tenant.created, membership.created, etc.
 
 #### Audit Logging
+
 - `AuditLog` records all security-relevant actions
 - Fields: action, tenantId, userId, targetType, targetId, IP, userAgent, metadata
 - Can be used for compliance and security analysis
@@ -53,9 +59,11 @@ The Identity context owns all authentication, authorization, and user management
 ### Public Endpoints
 
 #### `POST /auth/signup`
+
 Creates a new user and tenant.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -66,6 +74,7 @@ Creates a new user and tenant.
 ```
 
 **Response:**
+
 ```json
 {
   "userId": "uuid",
@@ -79,15 +88,18 @@ Creates a new user and tenant.
 ```
 
 **Idempotency:**
+
 - Header: `X-Idempotency-Key: <unique-key>`
 - Returns cached response if called with same key within 24 hours
 
 ---
 
 #### `POST /auth/login`
+
 Authenticates a user.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -97,6 +109,7 @@ Authenticates a user.
 ```
 
 **Response:**
+
 ```json
 {
   "userId": "uuid",
@@ -119,9 +132,11 @@ If user has multiple tenants and no tenantId provided, memberships are returned 
 ---
 
 #### `POST /auth/refresh`
+
 Refreshes access token using refresh token.
 
 **Request:**
+
 ```json
 {
   "refreshToken": "eyJhbGc..."
@@ -129,6 +144,7 @@ Refreshes access token using refresh token.
 ```
 
 **Response:**
+
 ```json
 {
   "accessToken": "eyJhbGc...",
@@ -143,14 +159,17 @@ Refresh token is rotated automatically.
 ### Authenticated Endpoints
 
 #### `GET /auth/me`
+
 Returns current user and memberships.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access-token>
 ```
 
 **Response:**
+
 ```json
 {
   "userId": "uuid",
@@ -170,14 +189,17 @@ Authorization: Bearer <access-token>
 ---
 
 #### `POST /auth/logout`
+
 Revokes refresh tokens.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access-token>
 ```
 
 **Request:**
+
 ```json
 {
   "refreshToken": "optional-specific-token-to-revoke"
@@ -185,6 +207,7 @@ Authorization: Bearer <access-token>
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Successfully logged out"
@@ -194,14 +217,17 @@ Authorization: Bearer <access-token>
 ---
 
 #### `POST /auth/switch-tenant`
+
 Changes active tenant for the user.
 
 **Headers:**
+
 ```
 Authorization: Bearer <access-token>
 ```
 
 **Request:**
+
 ```json
 {
   "tenantId": "uuid"
@@ -209,6 +235,7 @@ Authorization: Bearer <access-token>
 ```
 
 **Response:**
+
 ```json
 {
   "accessToken": "eyJhbGc...",
@@ -224,6 +251,7 @@ Authorization: Bearer <access-token>
 ### Core Models
 
 #### `Tenant`
+
 - id: String (PK)
 - name: String
 - slug: String (unique)
@@ -231,6 +259,7 @@ Authorization: Bearer <access-token>
 - createdAt: DateTime
 
 #### `User`
+
 - id: String (PK)
 - email: String (unique)
 - passwordHash: String
@@ -240,6 +269,7 @@ Authorization: Bearer <access-token>
 - updatedAt: DateTime
 
 #### `Membership`
+
 - id: String (PK)
 - tenantId: String (FK)
 - userId: String (FK)
@@ -248,6 +278,7 @@ Authorization: Bearer <access-token>
 - Unique constraint: (tenantId, userId)
 
 #### `Role`
+
 - id: String (PK)
 - tenantId: String (FK)
 - name: String
@@ -255,17 +286,20 @@ Authorization: Bearer <access-token>
 - createdAt: DateTime
 
 #### `Permission`
+
 - id: String (PK)
 - key: String (unique)
 - description: String
 - createdAt: DateTime
 
 #### `RolePermission`
+
 - roleId: String (FK)
 - permissionId: String (FK)
 - Unique constraint: (roleId, permissionId)
 
 #### `RefreshToken`
+
 - id: String (PK)
 - userId: String (FK)
 - tenantId: String (FK)
@@ -275,6 +309,7 @@ Authorization: Bearer <access-token>
 - createdAt: DateTime
 
 #### `ApiKey`
+
 - id: String (PK)
 - tenantId: String (FK)
 - name: String
@@ -283,6 +318,7 @@ Authorization: Bearer <access-token>
 - createdAt: DateTime
 
 #### `AuditLog`
+
 - id: String (PK)
 - tenantId: String (nullable, FK)
 - actorUserId: String (nullable, FK)
@@ -295,6 +331,7 @@ Authorization: Bearer <access-token>
 - createdAt: DateTime
 
 #### `OutboxEvent`
+
 - id: String (PK)
 - tenantId: String (FK)
 - eventType: String
@@ -404,12 +441,14 @@ The first user in a tenant automatically gets the OWNER role.
 ## Security Considerations
 
 ### Password Requirements
+
 - Minimum 8 characters
 - At least one uppercase letter
 - At least one lowercase letter
 - At least one digit
 
 ### Token Management
+
 - Access tokens are NOT stored; they're decoded in-memory
 - Refresh tokens are hashed in database
 - Refresh tokens can be individually revoked
@@ -417,13 +456,16 @@ The first user in a tenant automatically gets the OWNER role.
 - Tokens include expiration times
 
 ### HTTPS
+
 In production, ensure:
+
 - All auth endpoints use HTTPS
 - Set secure cookie flags (if using cookies)
 - Use strong JWT secrets (change from defaults)
 - Implement rate limiting on auth endpoints
 
 ### Cross-Tenant Access
+
 - All queries are scoped by tenantId
 - API guards verify user has membership in requested tenant
 - Audit logs track access attempts
@@ -447,6 +489,7 @@ API_PORT=3000
 ## Testing Workflows
 
 ### 1. Sign Up
+
 ```bash
 curl -X POST http://localhost:3000/auth/signup \
   -H "Content-Type: application/json" \
@@ -459,6 +502,7 @@ curl -X POST http://localhost:3000/auth/signup \
 ```
 
 ### 2. Sign In
+
 ```bash
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
@@ -469,12 +513,14 @@ curl -X POST http://localhost:3000/auth/login \
 ```
 
 ### 3. Get Current User
+
 ```bash
 curl -X GET http://localhost:3000/auth/me \
   -H "Authorization: Bearer <access-token>"
 ```
 
 ### 4. Refresh Token
+
 ```bash
 curl -X POST http://localhost:3000/auth/refresh \
   -H "Content-Type: application/json" \
@@ -484,6 +530,7 @@ curl -X POST http://localhost:3000/auth/refresh \
 ```
 
 ### 5. Logout
+
 ```bash
 curl -X POST http://localhost:3000/auth/logout \
   -H "Authorization: Bearer <access-token>" \
@@ -492,6 +539,7 @@ curl -X POST http://localhost:3000/auth/logout \
 ```
 
 ### 6. Switch Tenant
+
 ```bash
 curl -X POST http://localhost:3000/auth/switch-tenant \
   -H "Authorization: Bearer <access-token>" \
@@ -504,6 +552,7 @@ curl -X POST http://localhost:3000/auth/switch-tenant \
 ## Frontend Integration
 
 ### Setup
+
 ```typescript
 import { AuthProvider } from '@/lib/auth-provider';
 
@@ -517,6 +566,7 @@ function App() {
 ```
 
 ### Usage
+
 ```typescript
 import { useAuth } from '@/lib/auth-provider';
 
@@ -541,6 +591,7 @@ function MyComponent() {
 ## Next Steps
 
 ### To Implement
+
 1. Role-based access control UI
 2. User invitation system
 3. Permission management UI
@@ -551,6 +602,7 @@ function MyComponent() {
 8. Audit log viewer
 
 ### Future Enhancements
+
 - Social login (Google, GitHub, etc.)
 - LDAP/Active Directory integration
 - Single Sign-On (SSO)
@@ -561,20 +613,24 @@ function MyComponent() {
 ## Troubleshooting
 
 ### "Invalid email or password"
+
 - Verify credentials are correct
 - Check user is active in database
 - Check password hash matches
 
 ### "User has no memberships"
+
 - User must be added to a tenant
 - Check Membership records in database
 
 ### "Invalid or revoked refresh token"
+
 - Refresh token may have expired
 - Token may have been explicitly revoked
 - User may have signed out from other device
 
 ### JWT Token Errors
+
 - Check token format (should be Bearer token)
 - Verify JWT secrets match
 - Check token hasn't expired

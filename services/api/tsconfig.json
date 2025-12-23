@@ -1,8 +1,6 @@
 {
-  "extends": "../../tsconfig.node.json",
+  "extends": "@kerniflow/tsconfig/node.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
     "strict": false,
     "strictNullChecks": true,
     "exactOptionalPropertyTypes": false,

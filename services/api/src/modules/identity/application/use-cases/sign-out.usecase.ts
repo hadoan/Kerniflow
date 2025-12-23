@@ -1,7 +1,7 @@
-import { IRefreshTokenRepository } from '../ports/refresh-token.repo.port';
-import { IOutboxPort } from '../ports/outbox.port';
-import { IAuditPort } from '../ports/audit.port';
-import { UserLoggedOutEvent } from '../../domain/events/identity.events';
+import { IRefreshTokenRepository } from "../ports/refresh-token.repo.port";
+import { IOutboxPort } from "../ports/outbox.port";
+import { IAuditPort } from "../ports/audit.port";
+import { UserLoggedOutEvent } from "../../domain/events/identity.events";
 
 export interface SignOutInput {
   userId: string;
@@ -25,16 +25,10 @@ export class SignOutUseCase {
       // Revoke specific token
       // (Note: in practice, we'd need a method to find by hash and revoke)
       // For now, we revoke all tokens in the tenant
-      await this.refreshTokenRepo.revokeAllForUserInTenant(
-        input.userId,
-        input.tenantId
-      );
+      await this.refreshTokenRepo.revokeAllForUserInTenant(input.userId, input.tenantId);
     } else {
       // Revoke all sessions for user in tenant
-      await this.refreshTokenRepo.revokeAllForUserInTenant(
-        input.userId,
-        input.tenantId
-      );
+      await this.refreshTokenRepo.revokeAllForUserInTenant(input.userId, input.tenantId);
     }
 
     // 2. Emit event
@@ -42,16 +36,16 @@ export class SignOutUseCase {
     await this.outbox.enqueue({
       tenantId: input.tenantId,
       eventType: event.eventType,
-      payloadJson: JSON.stringify(event)
+      payloadJson: JSON.stringify(event),
     });
 
     // 3. Audit log
     await this.audit.write({
       tenantId: input.tenantId,
       actorUserId: input.userId,
-      action: 'user.logout',
-      targetType: 'User',
-      targetId: input.userId
+      action: "user.logout",
+      targetType: "User",
+      targetId: input.userId,
     });
   }
 }

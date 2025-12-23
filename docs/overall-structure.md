@@ -202,13 +202,14 @@ services/mock-server/
 ```
 
 ### Purpose of each folder
+
 - `routes/`: REST endpoints + tool endpoints (assistant gateway)
 - `db/`: in-memory store + seed + file persistence
 - `middleware/`: cross-cutting server behaviors (CORS, latency simulation, idempotency, error normalization)
 
 ---
 
-## Shared packages hierarchy (packages/*)
+## Shared packages hierarchy (packages/\*)
 
 ### contracts (recommended)
 
@@ -271,12 +272,14 @@ packages/ui/
 ## Dependency direction rules (keep it scalable)
 
 Allowed:
+
 - `apps/webs` → `packages/contracts`, `packages/domain`, `packages/ui`
 - `services/api` → `packages/contracts`, `packages/domain`, `packages/data`
 - `services/worker` → `packages/contracts`, `packages/domain`, `packages/data`
 - `packages/domain` → `packages/contracts`
 
 Forbidden:
+
 - `packages/contracts` importing anything else
 - frontend importing backend internals
 - backend importing frontend UI
