@@ -11,10 +11,7 @@ export * from "./adapters/prisma-audit.adapter";
 export * from "./adapters/prisma-idempotency.adapter";
 
 // Repositories
-export * from "./outbox/outbox.repo";
-export * from "./repositories/customFieldDefinition.repo";
-export * from "./repositories/customFieldIndex.repo";
-export * from "./repositories/entityLayout.repo";
-
-// Legacy exports (to be removed after migration)
-export * from "./prisma.client";
+export * from "./adapters/prisma-outbox-repository.adapter";
+export * from "./adapters/prisma-custom-field-definition-repository.adapter";
+export * from "./adapters/prisma-custom-field-index-repository.adapter";
+export * from "./adapters/prisma-entity-layout-repository.adapter";

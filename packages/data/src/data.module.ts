@@ -5,9 +5,9 @@ import { PrismaUnitOfWork } from "./uow/prisma-unit-of-work.adapter";
 import { PrismaOutboxAdapter } from "./adapters/prisma-outbox.adapter";
 import { PrismaAuditAdapter } from "./adapters/prisma-audit.adapter";
 import { PrismaIdempotencyAdapter } from "./adapters/prisma-idempotency.adapter";
-import { OutboxRepository } from "./outbox/outbox.repo";
-import { CustomFieldDefinitionRepository } from "./repositories/customFieldDefinition.repo";
-import { CustomFieldIndexRepository } from "./repositories/customFieldIndex.repo";
+import { OutboxRepository } from "./adapters/prisma-outbox-repository.adapter";
+import { CustomFieldDefinitionRepository } from "./adapters/prisma-custom-field-definition-repository.adapter";
+import { CustomFieldIndexRepository } from "./adapters/prisma-custom-field-index-repository.adapter";
 
 /**
  * Global DataModule that provides all data access infrastructure.

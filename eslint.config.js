@@ -18,6 +18,7 @@ export default tseslint.config(
       "pnpm-lock.yaml",
       "apps/e2e/playwright-report/",
       "apps/e2e/test-results/",
+      "**/tsdown.config.ts",
     ],
   },
   config.base,

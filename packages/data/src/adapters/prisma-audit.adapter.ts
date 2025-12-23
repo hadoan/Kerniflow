@@ -27,11 +27,11 @@ export class PrismaAuditAdapter implements AuditPort {
     await client.auditLog.create({
       data: {
         tenantId: entry.tenantId,
-        userId: entry.userId,
+        actorUserId: entry.userId,
         action: entry.action,
-        entityType: entry.entityType,
+        entity: entry.entityType,
         entityId: entry.entityId,
-        metadata: entry.metadata ? JSON.stringify(entry.metadata) : null,
+        details: entry.metadata ? JSON.stringify(entry.metadata) : null,
       },
     });
   }

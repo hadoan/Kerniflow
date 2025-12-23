@@ -28,7 +28,7 @@ export class PrismaOutboxAdapter implements OutboxPort {
         tenantId: event.tenantId,
         eventType: event.eventType,
         payloadJson: JSON.stringify(event.payload ?? {}),
-        correlationId: event.correlationId,
+        correlationId: event.correlationId ?? null,
         availableAt: event.availableAt ?? new Date(),
       },
     });

@@ -7,12 +7,4 @@ export default defineConfig({
   outDir: "dist",
   clean: process.argv.includes("--watch") ? false : true,
   treeshake: true,
-  esbuildOptions(options) {
-    options.tsconfigRaw = {
-      compilerOptions: {
-        experimentalDecorators: true,
-        emitDecoratorMetadata: true,
-      },
-    };
-  },
 });

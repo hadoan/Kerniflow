@@ -2,6 +2,7 @@
   "extends": "@kerniflow/tsconfig/lib.json",
   "compilerOptions": {
     "types": ["node"],
+    "composite": false,
     "paths": {
       "@kerniflow/contracts": ["../contracts/src"],
       "@kerniflow/domain": ["../domain/src"],
