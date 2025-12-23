@@ -17,10 +17,6 @@ async function bootstrap() {
     logger: ["log", "error", "warn", "debug", "verbose"],
   });
 
-  // Get EnvService from the app context
-  const { EnvService } = await import("@kerniflow/config");
-  const env = app.get(EnvService);
-
   logger.log(
     `Nest application created in ${Date.now() - startedAt}ms; configuring CORS and Swagger`
   );
@@ -42,7 +38,8 @@ async function bootstrap() {
   logger.log("Initializing Nest application");
   await app.init();
 
-  const port = env.API_PORT;
+  // Use process.env directly since env is already loaded
+  const port = parseInt(process.env.API_PORT || "3000", 10);
   logger.log(`Starting HTTP server on port ${port}`);
   await app.listen(port, "0.0.0.0");
 
@@ -53,5 +50,5 @@ async function bootstrap() {
 bootstrap().catch((err) => {
   const logger = new Logger("Bootstrap");
   logger.error("Bootstrap failed", err instanceof Error ? err.stack : `${err}`);
-  process.exit(1);
+  throw err;
 });

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
-import { EnvModule, EnvService } from "@kerniflow/config";
+import { EnvModule } from "@kerniflow/config";
+import { DataModule } from "@kerniflow/data";
 import { AppController } from "./app.controller";
 import { IdentityModule } from "./modules/identity";
 import { ExpensesModule } from "./modules/expenses";
@@ -8,8 +9,6 @@ import { WorkflowModule } from "./modules/workflow";
 import { AutomationModule } from "./modules/automation";
 import { ReportingModule } from "./modules/reporting";
 import { TestHarnessModule } from "./modules/test-harness";
-import { AiCopilotModule } from "./modules/ai-copilot/ai-copilot.module";
-import { CustomizationModule } from "./modules/customization/customization.module";
 import { PartyCrmModule } from "./modules/party-crm";
 import { DocumentsModule } from "./modules/documents";
 import { TaxModule } from "./modules/tax/tax.module";
@@ -19,6 +18,8 @@ import { TaxModule } from "./modules/tax/tax.module";
   imports: [
     // Config must be first to validate env before other modules use it
     EnvModule.forRoot(),
+    // DataModule must be imported for global providers (OUTBOX_PORT, AUDIT_PORT, etc.)
+    DataModule,
     IdentityModule,
     PartyCrmModule,
     ExpensesModule,

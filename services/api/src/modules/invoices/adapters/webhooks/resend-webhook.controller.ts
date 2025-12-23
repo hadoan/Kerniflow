@@ -1,6 +1,7 @@
 import { Controller, Post, Req, Res, HttpStatus, RawBodyRequest } from "@nestjs/common";
 import { Request, Response } from "express";
 import { Resend } from "resend";
+import { EnvService } from "@kerniflow/config";
 import { PrismaInvoiceEmailDeliveryRepoAdapter } from "../../infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
 
 type ResendWebhookEvent = {
@@ -20,15 +21,18 @@ export class ResendWebhookController {
   private resend: Resend;
   private webhookSecret: string;
 
-  constructor(private readonly deliveryRepo: PrismaInvoiceEmailDeliveryRepoAdapter) {
-    const apiKey = process.env.RESEND_API_KEY;
+  constructor(
+    private readonly deliveryRepo: PrismaInvoiceEmailDeliveryRepoAdapter,
+    private readonly envService: EnvService
+  ) {
+    const apiKey = this.envService.RESEND_API_KEY;
     if (!apiKey) {
       throw new Error("RESEND_API_KEY environment variable is required");
     }
 
     this.resend = new Resend(apiKey);
 
-    this.webhookSecret = process.env.RESEND_WEBHOOK_SECRET ?? "";
+    this.webhookSecret = this.envService.RESEND_WEBHOOK_SECRET ?? "";
     if (!this.webhookSecret) {
       console.warn("RESEND_WEBHOOK_SECRET not set - webhook verification disabled");
     }
@@ -70,7 +74,7 @@ export class ResendWebhookController {
             "svix-signature": svixSignature,
           },
           secret: this.webhookSecret,
-        } as any) as ResendWebhookEvent;
+        } as unknown) as ResendWebhookEvent;
 
         await this.processEvent(event);
       } else {
@@ -114,14 +118,13 @@ export class ResendWebhookController {
         status = "FAILED";
         break;
       default:
-        console.log(`Ignoring webhook event type: ${event.type}`);
+        // Ignore unhandled webhook event types
         return;
     }
 
     if (status) {
       try {
         await this.deliveryRepo.updateStatusByProviderMessageId(emailId, status);
-        console.log(`Updated delivery status for email ${emailId} to ${status}`);
       } catch (error) {
         console.error(`Failed to update delivery status for email ${emailId}:`, error);
       }

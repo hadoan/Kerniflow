@@ -56,6 +56,7 @@ export class EnvModule {
     const config = validateEnv(envToValidate);
 
     return {
+      global: true,
       module: EnvModule,
       providers: [
         {
