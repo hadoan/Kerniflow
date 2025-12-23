@@ -15,7 +15,8 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@types/react": "^18.3.12"
+    "@types/react": "^18.3.12",
+    "msw": "^2.6.6"
   },
   "scripts": {
     "dev": "node --watch -r ts-node/register/transpile-only src/main.ts",

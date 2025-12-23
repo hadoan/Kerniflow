@@ -1,0 +1,36 @@
+{
+  "name": "@kerniflow/testkit",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@kerniflow/contracts": "workspace:*",
+    "@kerniflow/data": "workspace:*",
+    "@kerniflow/domain": "workspace:*",
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "execa": "^9.5.2",
+    "nanoid": "^5.0.7",
+    "pg": "^8.13.1",
+    "testcontainers": "^10.11.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/testing": "^11.1.9",
+    "@types/node": "^22.19.3",
+    "tsdown": "^0.18.0",
+    "typescript": "^5.9.3"
+  }
+}
