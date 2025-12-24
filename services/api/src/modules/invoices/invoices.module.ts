@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { DataModule } from "@kerniflow/data";
 import { InvoicesHttpController } from "./adapters/http/invoices.controller";
 import { ResendWebhookController } from "./adapters/webhooks/resend-webhook.controller";
 import { PrismaInvoiceEmailDeliveryRepoAdapter } from "./infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
@@ -31,7 +32,7 @@ import { UpdateInvoiceUseCase } from "./application/use-cases/update-invoice/upd
 import { PrismaInvoiceRepoAdapter } from "./infrastructure/adapters/prisma-invoice-repository.adapter";
 
 @Module({
-  imports: [IdentityModule, PartyCrmModule],
+  imports: [DataModule, IdentityModule, PartyCrmModule],
   controllers: [InvoicesHttpController, ResendWebhookController],
   providers: [
     PrismaInvoiceRepoAdapter,

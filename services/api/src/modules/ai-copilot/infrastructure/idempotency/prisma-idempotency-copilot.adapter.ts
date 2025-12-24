@@ -1,9 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { IdempotencyDecision, IdempotencyPort } from "../../application/ports/idempotency.port";
+import {
+  IdempotencyDecision,
+  CopilotIdempotencyPort,
+} from "../../application/ports/copilot-idempotency.port";
 import { IdempotencyService } from "../../../../shared/idempotency/idempotency.service";
 
 @Injectable()
-export class PrismaIdempotencyAdapter implements IdempotencyPort {
+export class PrismaCopilotIdempotencyAdapter implements CopilotIdempotencyPort {
   constructor(private readonly service: IdempotencyService) {}
 
   async startOrReplay(params: {

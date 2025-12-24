@@ -2,6 +2,7 @@
 import { Module } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { Logger } from "@nestjs/common";
+import { DataModule } from "@kerniflow/data";
 
 const logger = new Logger("IdentityModule");
 
@@ -10,11 +11,14 @@ import { AuthController } from "./adapters/http/auth.controller";
 
 // Repositories
 import { PrismaOutboxAdapter } from "./infrastructure/persistence/prisma.outbox.adapter";
-import { PrismaIdempotencyAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency.adapter";
+import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { IdGeneratorPort, ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
-import { IdempotencyPort, IDEMPOTENCY_PORT_TOKEN } from "../../shared/ports/idempotency.port";
+import {
+  IdempotencyStoragePort,
+  IDEMPOTENCY_STORAGE_PORT_TOKEN,
+} from "../../shared/ports/idempotency-storage.port";
 import { CLOCK_PORT_TOKEN, ClockPort } from "../../shared/ports/clock.port";
 import { SignUpUseCase } from "./application/use-cases/sign-up.usecase";
 import { SignInUseCase } from "./application/use-cases/sign-in.usecase";
@@ -54,6 +58,7 @@ import {
 import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user-repository.port";
 
 @Module({
+  imports: [DataModule],
   controllers: [AuthController],
   providers: [
     // Repositories
@@ -64,7 +69,7 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
     PrismaRoleRepository,
     PrismaAuditRepository,
     PrismaOutboxAdapter,
-    PrismaIdempotencyAdapter,
+    PrismaIdempotencyStorageAdapter,
     AuthGuard,
 
     // Security
@@ -79,15 +84,15 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
     // Token bindings for DI
     {
       provide: USER_REPOSITORY_TOKEN,
-      useClass: PrismaUserRepository,
+      useExisting: PrismaUserRepository,
     },
     {
       provide: TENANT_REPOSITORY_TOKEN,
-      useClass: PrismaTenantRepository,
+      useExisting: PrismaTenantRepository,
     },
     {
       provide: MEMBERSHIP_REPOSITORY_TOKEN,
-      useClass: PrismaMembershipRepository,
+      useExisting: PrismaMembershipRepository,
     },
     {
       provide: REFRESH_TOKEN_REPOSITORY_TOKEN,
@@ -118,8 +123,8 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
       useExisting: SystemIdGenerator,
     },
     {
-      provide: IDEMPOTENCY_PORT_TOKEN,
-      useClass: PrismaIdempotencyAdapter,
+      provide: IDEMPOTENCY_STORAGE_PORT_TOKEN,
+      useExisting: PrismaIdempotencyStorageAdapter,
     },
     { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     {
@@ -134,7 +139,7 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
         refreshTokenRepo: IRefreshTokenRepository,
         outbox: IOutboxPort,
         audit: IAuditPort,
-        idempotency: IdempotencyPort,
+        idempotency: IdempotencyStoragePort,
         idGen: IdGeneratorPort,
         clock: ClockPort
       ) => {
@@ -164,7 +169,7 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
         REFRESH_TOKEN_REPOSITORY_TOKEN,
         OUTBOX_PORT_TOKEN,
         AUDIT_PORT_TOKEN,
-        IDEMPOTENCY_PORT_TOKEN,
+        IDEMPOTENCY_STORAGE_PORT_TOKEN,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
       ],
@@ -179,7 +184,7 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
         refreshTokenRepo: IRefreshTokenRepository,
         outbox: IOutboxPort,
         audit: IAuditPort,
-        idempotency: IdempotencyPort,
+        idempotency: IdempotencyStoragePort,
         idGen: IdGeneratorPort,
         clock: ClockPort
       ) => {
@@ -205,7 +210,7 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
         REFRESH_TOKEN_REPOSITORY_TOKEN,
         OUTBOX_PORT_TOKEN,
         AUDIT_PORT_TOKEN,
-        IDEMPOTENCY_PORT_TOKEN,
+        IDEMPOTENCY_STORAGE_PORT_TOKEN,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
       ],
@@ -293,7 +298,7 @@ import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user
     SwitchTenantUseCase,
     AuthGuard,
     ID_GENERATOR_TOKEN,
-    IDEMPOTENCY_PORT_TOKEN,
+    IDEMPOTENCY_STORAGE_PORT_TOKEN,
   ],
 })
 export class IdentityModule {}

@@ -1,9 +1,10 @@
-import { build, context } from "esbuild";
+#!/usr/bin/env node
+import { build } from "esbuild";
 import esbuildPluginTsc from "esbuild-plugin-tsc";
 
-const isWatch = process.argv.includes("--watch");
+console.log("🔨 Building with esbuild + tsc (preserves decorators)...");
 
-const config = {
+await build({
   entryPoints: ["src/main.ts"],
   bundle: true,
   platform: "node",
@@ -19,12 +20,9 @@ const config = {
       force: true, // Force use of tsc for decorator metadata
     }),
   ],
-};
-
-if (isWatch) {
-  const ctx = await context(config);
-  await ctx.watch();
-  console.log("Watching for changes...");
-} else {
-  await build(config);
-}
+}).then(() => {
+  console.log("✅ Build completed successfully");
+}).catch(() => {
+  console.error("❌ Build failed");
+  process.exit(1);
+});

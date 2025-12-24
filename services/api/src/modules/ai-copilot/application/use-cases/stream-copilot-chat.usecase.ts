@@ -1,15 +1,15 @@
 import { nanoid } from "nanoid";
-import { CopilotUIMessage } from "../../domain/types/ui-message";
-import { AgentRunRepositoryPort } from "../ports/agent-run.repo.port";
-import { MessageRepositoryPort } from "../ports/message.repo.port";
-import { ToolExecutionRepositoryPort } from "../ports/tool-execution.repo.port";
-import { ToolRegistryPort } from "../ports/tool-registry.port";
-import { LanguageModelPort } from "../ports/language-model.port";
-import { AuditPort } from "../ports/audit.port";
-import { OutboxPort } from "../ports/outbox.port";
-import { IdempotencyPort } from "../ports/idempotency.port";
-import { ClockPort } from "@kerniflow/kernel/ports/clock.port";
-import { Response } from "express";
+import { type CopilotUIMessage } from "../../domain/types/ui-message";
+import { type AgentRunRepositoryPort } from "../ports/agent-run.repo.port";
+import { type MessageRepositoryPort } from "../ports/message.repo.port";
+import { type ToolExecutionRepositoryPort } from "../ports/tool-execution.repo.port";
+import { type ToolRegistryPort } from "../ports/tool-registry.port";
+import { type LanguageModelPort } from "../ports/language-model.port";
+import { type AuditPort } from "../ports/audit.port";
+import { type OutboxPort } from "../ports/outbox.port";
+import { type CopilotIdempotencyPort } from "../ports/copilot-idempotency.port";
+import { type ClockPort } from "@kerniflow/kernel/ports/clock.port";
+import { type Response } from "express";
 import { createHash } from "crypto";
 
 const ACTION_KEY = "copilot.chat";
@@ -23,7 +23,7 @@ export class StreamCopilotChatUseCase {
     private readonly languageModel: LanguageModelPort,
     private readonly audit: AuditPort,
     private readonly outbox: OutboxPort,
-    private readonly idempotency: IdempotencyPort,
+    private readonly idempotency: CopilotIdempotencyPort,
     private readonly clock: ClockPort
   ) {}
 

@@ -1,14 +1,24 @@
 import { spawn } from "child_process";
 import { context } from "esbuild";
+import { decoratorPlugin } from "./esbuild-decorator-plugin.mjs";
 
 let nodeProcess = null;
+
+// Check if debug mode is enabled via CLI argument or environment variable
+const isDebugMode = process.argv.includes("--inspect") || process.env.NODE_DEBUG === "true";
+const debugPort = process.env.DEBUG_PORT || "9229";
 
 const startNode = () => {
   if (nodeProcess) {
     nodeProcess.kill();
   }
-  console.log("\n🚀 Starting server...\n");
-  nodeProcess = spawn("node", ["dist/main.js"], {
+  console.log(`\n🚀 Starting server${isDebugMode ? " (Debug Mode on port " + debugPort + ")" : ""}...\n`);
+  
+  const nodeArgs = isDebugMode 
+    ? [`--inspect=0.0.0.0:${debugPort}`, "dist/main.js"]
+    : ["dist/main.js"];
+  
+  nodeProcess = spawn("node", nodeArgs, {
     stdio: "inherit",
     env: { ...process.env, FORCE_COLOR: "1" },
   });
@@ -23,9 +33,9 @@ const buildContext = await context({
   outdir: "dist",
   sourcemap: true,
   packages: "external",
-  tsconfig: "tsconfig.json",
   logLevel: "info",
   plugins: [
+    decoratorPlugin,
     {
       name: "restart-server",
       setup(build) {

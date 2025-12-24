@@ -1,9 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "@kerniflow/data";
-import type { IdempotencyPort, StoredResponse } from "../../ports/idempotency.port";
+import type { IdempotencyStoragePort, StoredResponse } from "../../ports/idempotency-storage.port";
 
 @Injectable()
-export class PrismaIdempotencyAdapter implements IdempotencyPort {
+export class PrismaIdempotencyStorageAdapter implements IdempotencyStoragePort {
+  private readonly logger = new Logger(PrismaIdempotencyStorageAdapter.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async get(

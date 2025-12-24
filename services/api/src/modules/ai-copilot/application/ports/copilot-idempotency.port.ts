@@ -5,7 +5,7 @@ export type IdempotencyDecision =
   | { mode: "MISMATCH" }
   | { mode: "FAILED"; responseStatus: number; responseBody: unknown };
 
-export interface IdempotencyPort {
+export interface CopilotIdempotencyPort {
   startOrReplay(params: {
     actionKey: string;
     tenantId: string;

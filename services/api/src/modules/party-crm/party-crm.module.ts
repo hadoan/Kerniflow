@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { DataModule } from "@kerniflow/data";
 import { CustomersHttpController } from "./adapters/http/customers.controller";
 import { PrismaPartyRepoAdapter } from "./infrastructure/prisma/prisma-party-repo.adapter";
 import { PrismaCustomerQueryAdapter } from "./infrastructure/prisma/prisma-customer-query.adapter";
@@ -19,7 +20,7 @@ import { UnarchiveCustomerUseCase } from "./application/use-cases/unarchive-cust
 import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/update-customer.usecase";
 
 @Module({
-  imports: [IdentityModule],
+  imports: [DataModule, IdentityModule],
   controllers: [CustomersHttpController],
   providers: [
     PrismaPartyRepoAdapter,

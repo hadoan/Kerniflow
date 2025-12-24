@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService, getPrismaClient } from "@kerniflow/data";
 import { TransactionContext } from "@kerniflow/kernel";
 import { User } from "../../domain/entities/user.entity";
-import { IUserRepository } from "../../application/ports/user.repo.port";
+import { IUserRepository } from "../../application/ports/user-repository.port";
 
 /**
  * Prisma User Repository Implementation
@@ -36,7 +36,7 @@ export class PrismaUserRepository implements IUserRepository {
       where: { id },
     });
 
-    if (!data) return null;
+    if (!data) {return null;}
     return User.restore(data);
   }
 
@@ -47,7 +47,7 @@ export class PrismaUserRepository implements IUserRepository {
       where: { email },
     });
 
-    if (!data) return null;
+    if (!data) {return null;}
     return User.restore(data);
   }
 

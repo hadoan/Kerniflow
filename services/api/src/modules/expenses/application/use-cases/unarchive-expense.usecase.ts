@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { ExpenseRepositoryPort } from "../ports/ExpenseRepositoryPort";
+import { ExpenseRepositoryPort } from "../ports/expense-repository.port";
 
 export interface UnarchiveExpenseInput {
   tenantId: string;

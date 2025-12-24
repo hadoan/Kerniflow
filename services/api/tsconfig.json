@@ -4,13 +4,15 @@
     "strict": false,
     "strictNullChecks": true,
     "exactOptionalPropertyTypes": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./",
     "paths": {
-      "@shared/*": ["./src/shared/*"],
-      "@kerniflow/kernel": ["../../packages/kernel/src"],
-      "@kerniflow/kernel/*": ["../../packages/kernel/src/*"],
-      "@kerniflow/testkit": ["../../packages/testkit/src/index.ts"],
-      "@kerniflow/testkit/*": ["../../packages/testkit/src/*"]
+      "@shared/*": ["src/shared/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

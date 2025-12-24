@@ -9,19 +9,19 @@ import {
   TenantCreatedEvent,
   MembershipCreatedEvent,
 } from "../../domain/events/identity.events";
-import { IUserRepository } from "../ports/user.repo.port";
-import { ITenantRepository } from "../ports/tenant.repo.port";
-import { IMembershipRepository } from "../ports/membership.repo.port";
-import { IPasswordHasher } from "../ports/password-hasher.port";
-import { ITokenService } from "../ports/token-service.port";
-import { IOutboxPort } from "../ports/outbox.port";
-import { IAuditPort } from "../ports/audit.port";
-import { IRoleRepository } from "../ports/role.repo.port";
-import { ClockPort } from "../../../../shared/ports/clock.port";
-import { IRefreshTokenRepository } from "../ports/refresh-token.repo.port";
-import { IdempotencyPort } from "../../../../shared/ports/idempotency.port";
-import { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
-import { RequestContext } from "../../../../shared/context/request-context";
+import { type IUserRepository } from "../ports/user.repo.port";
+import { type ITenantRepository } from "../ports/tenant.repo.port";
+import { type IMembershipRepository } from "../ports/membership.repo.port";
+import { type IPasswordHasher } from "../ports/password-hasher.port";
+import { type ITokenService } from "../ports/token-service.port";
+import { type IOutboxPort } from "../ports/outbox.port";
+import { type IAuditPort } from "../ports/audit.port";
+import { type IRoleRepository } from "../ports/role.repo.port";
+import { type ClockPort } from "../../../../shared/ports/clock.port";
+import { type IRefreshTokenRepository } from "../ports/refresh-token.repo.port";
+import { type IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
+import { type IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
+import { type RequestContext } from "../../../../shared/context/request-context";
 import { ConflictError, ValidationError } from "../../../../shared/errors/domain-errors";
 
 export interface SignUpInput {
@@ -56,7 +56,7 @@ export class SignUpUseCase {
     private readonly refreshTokenRepo: IRefreshTokenRepository,
     private readonly outbox: IOutboxPort,
     private readonly audit: IAuditPort,
-    private readonly idempotency: IdempotencyPort,
+    private readonly idempotency: IdempotencyStoragePort,
     private readonly idGenerator: IdGeneratorPort,
     private readonly clock: ClockPort
   ) {}
@@ -170,7 +170,7 @@ export class SignUpUseCase {
 
   private async ensureOwnerRole(tenantId: string): Promise<string> {
     const existing = await this.roleRepo.findBySystemKey(tenantId, "OWNER");
-    if (existing) return existing.id;
+    if (existing) {return existing.id;}
     const id = this.idGenerator.newId();
     await this.roleRepo.create({ id, tenantId, name: "Owner", systemKey: "OWNER" });
     return id;

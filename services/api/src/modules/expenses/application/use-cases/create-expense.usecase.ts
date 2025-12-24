@@ -1,6 +1,6 @@
 import type { OutboxPort } from "../../../../shared/ports/outbox.port";
 import type { AuditPort } from "../../../../shared/ports/audit.port";
-import type { IdempotencyPort } from "../../../../shared/ports/idempotency.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import type { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
 import type { ClockPort } from "../../../../shared/ports/clock.port";
 import type { RequestContext } from "../../../../shared/context/request-context";
@@ -33,7 +33,7 @@ export class CreateExpenseUseCase {
     private readonly expenseRepo: ExpenseRepositoryPort,
     private readonly outbox: OutboxPort,
     private readonly audit: AuditPort,
-    private readonly idempotency: IdempotencyPort,
+    private readonly idempotency: IdempotencyStoragePort,
     private readonly idGenerator: IdGeneratorPort,
     private readonly clock: ClockPort,
     private readonly customFieldDefinitions: CustomFieldDefinitionPort,

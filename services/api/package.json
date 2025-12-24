@@ -2,15 +2,16 @@
   "name": "@kerniflow/api",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "dependencies": {
     "@ai-sdk/anthropic": "catalog:",
     "@ai-sdk/openai": "catalog:",
+    "@google-cloud/storage": "^7.14.0",
     "@kerniflow/config": "workspace:*",
     "@kerniflow/contracts": "workspace:*",
     "@kerniflow/data": "workspace:*",
     "@kerniflow/domain": "workspace:*",
     "@kerniflow/kernel": "workspace:*",
-    "@google-cloud/storage": "^7.14.0",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/platform-express": "catalog:",
@@ -32,17 +33,24 @@
   "devDependencies": {
     "@kerniflow/testkit": "workspace:*",
     "@nestjs/testing": "catalog:",
+    "@swc/cli": "^0.7.9",
+    "@swc/core": "^1.15.7",
     "@types/bcrypt": "catalog:",
     "@types/express": "catalog:",
     "@types/jsonwebtoken": "catalog:",
     "@types/node": "catalog:",
     "@types/supertest": "catalog:",
+    "esbuild-plugin-tsc": "^0.5.0",
     "supertest": "catalog:"
   },
   "scripts": {
-    "dev": "node dev.mjs",
-    "build": "node esbuild.config.mjs",
+    "dev": "node dev-tsc.mjs",
+    "dev:esbuild": "node dev.mjs",
+    "dev:debug": "node dev-tsc.mjs --inspect",
+    "build": "tsc -p tsconfig.json",
+    "build:esbuild": "node esbuild.config.mjs",
     "start": "node dist/main.js",
+    "start:debug": "node --inspect=0.0.0.0:9229 dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

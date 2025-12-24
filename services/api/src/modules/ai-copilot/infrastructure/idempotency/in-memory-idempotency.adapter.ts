@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { IdempotencyDecision, IdempotencyPort } from "../../application/ports/idempotency.port";
+import {
+  IdempotencyDecision,
+  CopilotIdempotencyPort,
+} from "../../application/ports/copilot-idempotency.port";
 
 type Stored = {
   status: "IN_PROGRESS" | "COMPLETED" | "FAILED";
@@ -9,7 +12,7 @@ type Stored = {
 };
 
 @Injectable()
-export class InMemoryIdempotencyAdapter implements IdempotencyPort {
+export class InMemoryIdempotencyAdapter implements CopilotIdempotencyPort {
   private readonly cache = new Map<string, Stored>();
 
   async startOrReplay(params: {

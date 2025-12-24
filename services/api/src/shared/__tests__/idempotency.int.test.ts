@@ -12,14 +12,14 @@ vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 describe("Idempotency adapter (Prisma + Postgres)", () => {
   let db: PostgresTestDb;
   let prisma: PrismaService;
-  let adapter: import("../infrastructure/persistence/prisma-idempotency.adapter").PrismaIdempotencyAdapter;
+  let adapter: import("../infrastructure/persistence/prisma-idempotency-storage.adapter").PrismaIdempotencyStorageAdapter;
 
   beforeAll(async () => {
     db = await createTestDb();
     prisma = db.client;
-    const { PrismaIdempotencyAdapter } =
-      await import("../infrastructure/persistence/prisma-idempotency.adapter");
-    adapter = new PrismaIdempotencyAdapter();
+    const { PrismaIdempotencyStorageAdapter } =
+      await import("../infrastructure/persistence/prisma-idempotency-storage.adapter");
+    adapter = new PrismaIdempotencyStorageAdapter();
   });
 
   beforeEach(async () => {

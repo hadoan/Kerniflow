@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UseInterceptors, Req, Param } from "@nestjs/common";
-import { CreateExpenseUseCase } from "../../application/use-cases/CreateExpenseUseCase";
-import { ArchiveExpenseUseCase } from "../../application/use-cases/ArchiveExpenseUseCase";
-import { UnarchiveExpenseUseCase } from "../../application/use-cases/UnarchiveExpenseUseCase";
+import { CreateExpenseUseCase } from "../../application/use-cases/create-expense.usecase";
+import { ArchiveExpenseUseCase } from "../../application/use-cases/archive-expense.usecase";
+import { UnarchiveExpenseUseCase } from "../../application/use-cases/unarchive-expense.usecase";
 import { CreateExpenseInputSchema } from "@kerniflow/contracts";
 import { IdempotencyInterceptor } from "../../../../shared/idempotency/IdempotencyInterceptor";
 import { buildRequestContext } from "../../../../shared/context/request-context";

@@ -1,17 +1,17 @@
 import { createHash } from "crypto";
 import { Email } from "../../domain/value-objects/email.vo";
 import { UserLoggedInEvent } from "../../domain/events/identity.events";
-import { IUserRepository } from "../ports/user.repo.port";
-import { IMembershipRepository } from "../ports/membership.repo.port";
-import { IPasswordHasher } from "../ports/password-hasher.port";
-import { ITokenService } from "../ports/token-service.port";
-import { IRefreshTokenRepository } from "../ports/refresh-token.repo.port";
-import { IOutboxPort } from "../ports/outbox.port";
-import { IAuditPort } from "../ports/audit.port";
-import { IdempotencyPort } from "../../../../shared/ports/idempotency.port";
-import { ClockPort } from "../../../../shared/ports/clock.port";
-import { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
-import { RequestContext } from "../../../../shared/context/request-context";
+import { type IUserRepository } from "../ports/user.repo.port";
+import { type IMembershipRepository } from "../ports/membership.repo.port";
+import { type IPasswordHasher } from "../ports/password-hasher.port";
+import { type ITokenService } from "../ports/token-service.port";
+import { type IRefreshTokenRepository } from "../ports/refresh-token.repo.port";
+import { type IOutboxPort } from "../ports/outbox.port";
+import { type IAuditPort } from "../ports/audit.port";
+import { type IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
+import { type ClockPort } from "../../../../shared/ports/clock.port";
+import { type IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
+import { type RequestContext } from "../../../../shared/context/request-context";
 import { ForbiddenError, ValidationError } from "../../../../shared/errors/domain-errors";
 
 export interface SignInInput {
@@ -46,7 +46,7 @@ export class SignInUseCase {
     private readonly refreshTokenRepo: IRefreshTokenRepository,
     private readonly outbox: IOutboxPort,
     private readonly audit: IAuditPort,
-    private readonly idempotency: IdempotencyPort,
+    private readonly idempotency: IdempotencyStoragePort,
     private readonly idGenerator: IdGeneratorPort,
     private readonly clock: ClockPort
   ) {}
@@ -55,7 +55,7 @@ export class SignInUseCase {
     const key = input.idempotencyKey;
     if (key) {
       const cached = await this.idempotency.get(SIGN_IN_ACTION, input.tenantId ?? null, key);
-      if (cached) return cached.body as SignInOutput;
+      if (cached) {return cached.body as SignInOutput;}
     }
 
     this.validate(input);

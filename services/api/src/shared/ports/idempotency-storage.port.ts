@@ -3,7 +3,7 @@ export interface StoredResponse {
   body: any;
 }
 
-export interface IdempotencyPort {
+export interface IdempotencyStoragePort {
   get(actionKey: string, tenantId: string | null, key: string): Promise<StoredResponse | null>;
   store(
     actionKey: string,
@@ -13,4 +13,4 @@ export interface IdempotencyPort {
   ): Promise<void>;
 }
 
-export const IDEMPOTENCY_PORT_TOKEN = Symbol("IDEMPOTENCY_PORT_TOKEN");
+export const IDEMPOTENCY_STORAGE_PORT_TOKEN = Symbol("IDEMPOTENCY_STORAGE_PORT_TOKEN");

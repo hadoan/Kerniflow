@@ -4,11 +4,14 @@ import {
   DataModule,
   CustomFieldDefinitionRepository,
   CustomFieldIndexRepository,
-  PrismaIdempotencyAdapter,
   PrismaAuditAdapter,
 } from "@kerniflow/data";
 import { ExpensesController } from "./adapters/http/expenses.controller";
-import { IdempotencyPort, IDEMPOTENCY_PORT_TOKEN } from "../../shared/ports/idempotency.port";
+import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
+import {
+  IdempotencyStoragePort,
+  IDEMPOTENCY_STORAGE_PORT_TOKEN,
+} from "../../shared/ports/idempotency-storage.port";
 import { IdGeneratorPort, ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { ClockPort, CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
@@ -33,6 +36,7 @@ import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expens
     SystemClock,
     PrismaOutboxAdapter,
     PrismaAuditAdapter,
+    PrismaIdempotencyStorageAdapter,
 
     // Use Cases
     {
@@ -41,7 +45,7 @@ import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expens
         repo: PrismaExpenseRepository,
         outbox,
         audit,
-        idempotency: IdempotencyPort,
+        idempotency: IdempotencyStoragePort,
         idGen: IdGeneratorPort,
         clock: ClockPort,
         customDefs: CustomFieldDefinitionRepository,
@@ -61,7 +65,7 @@ import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expens
         EXPENSE_REPOSITORY,
         OUTBOX_PORT,
         AUDIT_PORT,
-        IDEMPOTENCY_PORT_TOKEN,
+        IDEMPOTENCY_STORAGE_PORT_TOKEN,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
         CustomFieldDefinitionRepository,
@@ -83,7 +87,7 @@ import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expens
     // Token bindings for shared ports
     { provide: OUTBOX_PORT, useExisting: PrismaOutboxAdapter },
     { provide: AUDIT_PORT, useExisting: PrismaAuditAdapter },
-    { provide: IDEMPOTENCY_PORT_TOKEN, useExisting: PrismaIdempotencyAdapter },
+    { provide: IDEMPOTENCY_STORAGE_PORT_TOKEN, useExisting: PrismaIdempotencyStorageAdapter },
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
     { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
   ],
