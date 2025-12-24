@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { FileRepoPort } from "../../application/ports/file-repo.port";
 import { FileEntity } from "../../domain/file.entity";
 import { FileKind } from "../../domain/document.types";
@@ -21,6 +21,8 @@ const mapFile = (row: any): FileEntity =>
 
 @Injectable()
 export class PrismaFileRepoAdapter implements FileRepoPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(file: FileEntity): Promise<void> {
     await prisma.file.create({
       data: {

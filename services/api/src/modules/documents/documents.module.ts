@@ -18,16 +18,17 @@ import { OutboxPort, OUTBOX_PORT_TOKEN } from "../../shared/ports/outbox.port";
 import { PrismaOutboxAdapter } from "../../shared/infrastructure/persistence/prisma-outbox.adapter";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { IdentityModule } from "../identity";
-import { CreateUploadIntentUseCase } from "./application/use-cases/create-upload-intent/CreateUploadIntentUseCase";
-import { CompleteUploadUseCase } from "./application/use-cases/complete-upload/CompleteUploadUseCase";
-import { GetDownloadUrlUseCase } from "./application/use-cases/get-download-url/GetDownloadUrlUseCase";
-import { LinkDocumentUseCase } from "./application/use-cases/link-document/LinkDocumentUseCase";
-import { RequestInvoicePdfUseCase } from "./application/use-cases/request-invoice-pdf/RequestInvoicePdfUseCase";
-import { GenerateInvoicePdfWorker } from "./application/use-cases/generate-invoice-pdf-worker/GenerateInvoicePdfWorker";
+
 import {
   INVOICE_PDF_MODEL_PORT,
   InvoicePdfModelPort,
 } from "../invoices/application/ports/invoice-pdf-model.port";
+import { CompleteUploadUseCase } from "./application/use-cases/complete-upload/complete-upload.usecase";
+import { CreateUploadIntentUseCase } from "./application/use-cases/create-upload-intent/create-upload-intent.usecase";
+import { GenerateInvoicePdfWorker } from "./application/use-cases/generate-invoice-pdf-worker/generate-invoice-pdf.worker";
+import { GetDownloadUrlUseCase } from "./application/use-cases/get-download-url/get-download-url.usecase";
+import { LinkDocumentUseCase } from "./application/use-cases/link-document/link-document.usecase";
+import { RequestInvoicePdfUseCase } from "./application/use-cases/request-invoice-pdf/request-invoice-pdf.usecase";
 
 @Module({
   imports: [IdentityModule],

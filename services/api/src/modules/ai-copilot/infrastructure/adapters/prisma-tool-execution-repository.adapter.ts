@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { ToolExecutionRepositoryPort } from "../../application/ports/tool-execution.repo.port";
 import { ToolExecution } from "../../domain/entities/tool-execution.entity";
 
 @Injectable()
 export class PrismaToolExecutionRepository implements ToolExecutionRepositoryPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(execution: {
     id: string;
     tenantId: string;

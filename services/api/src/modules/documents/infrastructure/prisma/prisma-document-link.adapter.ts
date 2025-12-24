@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { DocumentLinkRepoPort } from "../../application/ports/document-link.port";
 import { DocumentLinkEntityType } from "../../domain/document.types";
 
 @Injectable()
 export class PrismaDocumentLinkAdapter implements DocumentLinkRepoPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async createLink(params: {
     tenantId: string;
     documentId: string;
@@ -19,7 +21,7 @@ export class PrismaDocumentLinkAdapter implements DocumentLinkRepoPort {
         entityId: params.entityId,
       },
     });
-    if (existing) return;
+    if (existing) {return;}
     await prisma.documentLink.create({
       data: {
         tenantId: params.tenantId,

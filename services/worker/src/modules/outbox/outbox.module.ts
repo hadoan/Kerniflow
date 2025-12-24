@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
 import { EnvService } from "@kerniflow/config";
-import { OutboxPollerService } from "./OutboxPollerService";
-import { OutboxRepository } from "@kerniflow/data";
+import { OutboxRepository, PrismaService } from "@kerniflow/data";
 import { InvoiceEmailRequestedHandler } from "../invoices/invoice-email-requested.handler";
 import { EMAIL_SENDER_PORT, EmailSenderPort } from "../notifications/ports/email-sender.port";
-import { ResendEmailSenderAdapter } from "../notifications/infra/resend/resend-email-sender.adapter";
+import { ResendEmailSenderAdapter } from "../notifications/infrastructure/resend/resend-email-sender.adapter";
+import { OutboxPollerService } from "./outbox-poller.service";
 
 @Module({
   providers: [
@@ -30,7 +30,8 @@ import { ResendEmailSenderAdapter } from "../notifications/infra/resend/resend-e
     },
     {
       provide: OutboxRepository,
-      useValue: new OutboxRepository(),
+      useFactory: (prisma: PrismaService) => new OutboxRepository(prisma),
+      inject: [PrismaService],
     },
     {
       provide: OutboxPollerService,

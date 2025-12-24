@@ -1,14 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { TaxRateRepoPort } from "../../domain/ports";
 import type { TaxRateEntity } from "../../domain/entities";
 
 @Injectable()
 export class PrismaTaxRateRepoAdapter extends TaxRateRepoPort {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
+
   async create(
     rate: Omit<TaxRateEntity, "id" | "createdAt" | "updatedAt">
   ): Promise<TaxRateEntity> {
-    const created = await prisma.taxRate.create({
+    const created = await this.prisma.taxRate.create({
       data: {
         tenantId: rate.tenantId,
         taxCodeId: rate.taxCodeId,
@@ -26,7 +30,7 @@ export class PrismaTaxRateRepoAdapter extends TaxRateRepoPort {
     tenantId: string,
     at: Date
   ): Promise<TaxRateEntity | null> {
-    const rate = await prisma.taxRate.findFirst({
+    const rate = await this.prisma.taxRate.findFirst({
       where: {
         tenantId,
         taxCodeId,
@@ -40,7 +44,7 @@ export class PrismaTaxRateRepoAdapter extends TaxRateRepoPort {
   }
 
   async findByTaxCode(taxCodeId: string, tenantId: string): Promise<TaxRateEntity[]> {
-    const rates = await prisma.taxRate.findMany({
+    const rates = await this.prisma.taxRate.findMany({
       where: { tenantId, taxCodeId },
       orderBy: { effectiveFrom: "desc" },
     });
@@ -53,7 +57,7 @@ export class PrismaTaxRateRepoAdapter extends TaxRateRepoPort {
     tenantId: string,
     updates: Partial<Pick<TaxRateEntity, "rateBps" | "effectiveTo">>
   ): Promise<TaxRateEntity> {
-    const updated = await prisma.taxRate.update({
+    const updated = await this.prisma.taxRate.update({
       where: { id, tenantId },
       data: updates,
     });

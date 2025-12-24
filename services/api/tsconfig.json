@@ -6,7 +6,7 @@
     "exactOptionalPropertyTypes": false,
     "paths": {
       "@shared/*": ["./src/shared/*"],
-      "@kerniflow/kernel": ["../../packages/kernel/src/index.ts"],
+      "@kerniflow/kernel": ["../../packages/kernel/src"],
       "@kerniflow/kernel/*": ["../../packages/kernel/src/*"],
       "@kerniflow/testkit": ["../../packages/testkit/src/index.ts"],
       "@kerniflow/testkit/*": ["../../packages/testkit/src/*"]

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { PartyAggregate } from "../../domain/party.aggregate";
 import {
   PartyRepoPort,
@@ -87,6 +87,8 @@ const toAggregate = (row: PartyWithRelations): PartyAggregate => {
 
 @Injectable()
 export class PrismaPartyRepoAdapter implements PartyRepoPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async createCustomer(tenantId: string, party: PartyAggregate): Promise<void> {
     if (tenantId !== party.tenantId) {
       throw new Error("Tenant mismatch when creating customer");
@@ -167,7 +169,7 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
       await tx.partyRole.upsert({
         where: {
           tenantId_partyId_role: {
-            tenantId: tenantId,
+            tenantId,
             partyId: party.id,
             role: "CUSTOMER",
           },
@@ -258,7 +260,7 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
       where: { id: partyId, tenantId, roles: { some: { role: "CUSTOMER" as const } } },
       include: { contactPoints: true, addresses: true, roles: true },
     })) as PartyWithRelations | null;
-    if (!row) return null;
+    if (!row) {return null;}
     return toAggregate(row);
   }
 

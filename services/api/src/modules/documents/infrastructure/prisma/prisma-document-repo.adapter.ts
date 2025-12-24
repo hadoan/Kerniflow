@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { DocumentRepoPort } from "../../application/ports/document-repo.port";
 import { DocumentAggregate } from "../../domain/document.aggregate";
 import { FileEntity } from "../../domain/file.entity";
@@ -37,6 +37,8 @@ const mapDocument = (row: any): DocumentAggregate =>
 
 @Injectable()
 export class PrismaDocumentRepoAdapter implements DocumentRepoPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(document: DocumentAggregate): Promise<void> {
     await prisma.document.create({
       data: {
@@ -81,7 +83,7 @@ export class PrismaDocumentRepoAdapter implements DocumentRepoPort {
       } as any,
       include: { files: true },
     } as any);
-    if (!doc) return null;
+    if (!doc) {return null;}
     return mapDocument(doc);
   }
 

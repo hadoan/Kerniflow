@@ -6,17 +6,17 @@ import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generat
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
-import { CreateCustomerUseCase } from "./application/use-cases/create-customer/CreateCustomerUseCase";
-import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/UpdateCustomerUseCase";
-import { ArchiveCustomerUseCase } from "./application/use-cases/archive-customer/ArchiveCustomerUseCase";
-import { UnarchiveCustomerUseCase } from "./application/use-cases/unarchive-customer/UnarchiveCustomerUseCase";
-import { GetCustomerByIdUseCase } from "./application/use-cases/get-customer-by-id/GetCustomerByIdUseCase";
-import { ListCustomersUseCase } from "./application/use-cases/list-customers/ListCustomersUseCase";
-import { SearchCustomersUseCase } from "./application/use-cases/search-customers/SearchCustomersUseCase";
 import { PartyCrmApplication } from "./application/party-crm.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { CUSTOMER_QUERY_PORT } from "./application/ports/customer-query.port";
 import { IdentityModule } from "../identity";
+import { ArchiveCustomerUseCase } from "./application/use-cases/archive-customer/archive-customer.usecase";
+import { CreateCustomerUseCase } from "./application/use-cases/create-customer/create-customer.usecase";
+import { GetCustomerByIdUseCase } from "./application/use-cases/get-customer-by-id/get-customer-by-id.usecase";
+import { ListCustomersUseCase } from "./application/use-cases/list-customers/list-customers.usecase";
+import { SearchCustomersUseCase } from "./application/use-cases/search-customers/search-customers.usecase";
+import { UnarchiveCustomerUseCase } from "./application/use-cases/unarchive-customer/unarchive-customer.usecase";
+import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/update-customer.usecase";
 
 @Module({
   imports: [IdentityModule],

@@ -1,18 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvoiceEmailRequestedHandler } from "./invoice-email-requested.handler";
-import { EmailSenderPort } from "../notifications/ports/email-sender.port";
-import { prisma } from "@kerniflow/data";
+import { type EmailSenderPort } from "../notifications/ports/email-sender.port";
+
+const prisma = {
+  invoiceEmailDelivery: {
+    findUnique: vi.fn(),
+    update: vi.fn(),
+  },
+  invoice: {
+    findFirst: vi.fn(),
+  },
+};
 
 vi.mock("@kerniflow/data", () => ({
-  prisma: {
-    invoiceEmailDelivery: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
-    },
-    invoice: {
-      findFirst: vi.fn(),
-    },
-  },
+  getPrisma: () => prisma,
 }));
 
 class FakeEmailSender implements EmailSenderPort {

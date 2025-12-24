@@ -9,12 +9,6 @@ const logger = new Logger("IdentityModule");
 import { AuthController } from "./adapters/http/auth.controller";
 
 // Repositories
-import { PrismaUserRepository } from "./infrastructure/persistence/PrismaUserRepository";
-import { PrismaTenantRepository } from "./infrastructure/persistence/prisma.tenant.repo";
-import { PrismaMembershipRepository } from "./infrastructure/persistence/prisma.membership.repo";
-import { PrismaRefreshTokenRepository } from "./infrastructure/persistence/prisma.refresh-token.repo";
-import { PrismaRoleRepository } from "./infrastructure/persistence/prisma.role.repo";
-import { PrismaAuditRepository } from "./infrastructure/persistence/prisma.audit.repo";
 import { PrismaOutboxAdapter } from "./infrastructure/persistence/prisma.outbox.adapter";
 import { PrismaIdempotencyAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency.adapter";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
@@ -34,21 +28,30 @@ import { BcryptPasswordHasher } from "./infrastructure/security/bcrypt.password-
 import { JwtTokenService } from "./infrastructure/security/jwt.token-service";
 
 // Ports / Tokens
-import { IUserRepository, USER_REPOSITORY_TOKEN } from "./application/ports/user.repo.port";
-import { ITenantRepository, TENANT_REPOSITORY_TOKEN } from "./application/ports/tenant.repo.port";
-import {
-  IMembershipRepository,
-  MEMBERSHIP_REPOSITORY_TOKEN,
-} from "./application/ports/membership.repo.port";
-import {
-  IRefreshTokenRepository,
-  REFRESH_TOKEN_REPOSITORY_TOKEN,
-} from "./application/ports/refresh-token.repo.port";
-import { IRoleRepository, ROLE_REPOSITORY_TOKEN } from "./application/ports/role.repo.port";
 import { IPasswordHasher, PASSWORD_HASHER_TOKEN } from "./application/ports/password-hasher.port";
 import { ITokenService, TOKEN_SERVICE_TOKEN } from "./application/ports/token-service.port";
 import { IOutboxPort, OUTBOX_PORT_TOKEN } from "./application/ports/outbox.port";
 import { IAuditPort, AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
+import { PrismaAuditRepository } from "./infrastructure/adapters/prisma-audit-repository.adapter";
+import { PrismaMembershipRepository } from "./infrastructure/adapters/prisma-membership-repository.adapter";
+import { PrismaRefreshTokenRepository } from "./infrastructure/adapters/prisma-refresh-token-repository.adapter";
+import { PrismaRoleRepository } from "./infrastructure/adapters/prisma-role-repository.adapter";
+import { PrismaTenantRepository } from "./infrastructure/adapters/prisma-tenant-repository.adapter";
+import { PrismaUserRepository } from "./infrastructure/adapters/prisma-user-repository.adapter";
+import {
+  MEMBERSHIP_REPOSITORY_TOKEN,
+  IMembershipRepository,
+} from "./application/ports/membership-repository.port";
+import {
+  REFRESH_TOKEN_REPOSITORY_TOKEN,
+  IRefreshTokenRepository,
+} from "./application/ports/refresh-token-repository.port";
+import { ROLE_REPOSITORY_TOKEN, IRoleRepository } from "./application/ports/role-repository.port";
+import {
+  TENANT_REPOSITORY_TOKEN,
+  ITenantRepository,
+} from "./application/ports/tenant-repository.port";
+import { USER_REPOSITORY_TOKEN, IUserRepository } from "./application/ports/user-repository.port";
 
 @Module({
   controllers: [AuthController],

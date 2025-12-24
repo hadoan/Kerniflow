@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { TaxProfileRepoPort } from "../../domain/ports";
 import type { TaxProfileEntity } from "../../domain/entities";
 
 @Injectable()
 export class PrismaTaxProfileRepoAdapter extends TaxProfileRepoPort {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
+
   async getActive(tenantId: string, at: Date): Promise<TaxProfileEntity | null> {
-    const profile = await prisma.taxProfile.findFirst({
+    const profile = await this.prisma.taxProfile.findFirst({
       where: {
         tenantId,
         effectiveFrom: { lte: at },
@@ -22,7 +26,7 @@ export class PrismaTaxProfileRepoAdapter extends TaxProfileRepoPort {
     profile: Omit<TaxProfileEntity, "id" | "createdAt" | "updatedAt">
   ): Promise<TaxProfileEntity> {
     // Check if profile exists for this tenant and effective date
-    const existing = await prisma.taxProfile.findFirst({
+    const existing = await this.prisma.taxProfile.findFirst({
       where: {
         tenantId: profile.tenantId,
         effectiveFrom: profile.effectiveFrom,
@@ -31,7 +35,7 @@ export class PrismaTaxProfileRepoAdapter extends TaxProfileRepoPort {
 
     if (existing) {
       // Update existing
-      const updated = await prisma.taxProfile.update({
+      const updated = await this.prisma.taxProfile.update({
         where: { id: existing.id },
         data: {
           country: profile.country,
@@ -46,7 +50,7 @@ export class PrismaTaxProfileRepoAdapter extends TaxProfileRepoPort {
     }
 
     // Create new
-    const created = await prisma.taxProfile.create({
+    const created = await this.prisma.taxProfile.create({
       data: {
         tenantId: profile.tenantId,
         country: profile.country,
@@ -63,7 +67,7 @@ export class PrismaTaxProfileRepoAdapter extends TaxProfileRepoPort {
   }
 
   async findById(id: string, tenantId: string): Promise<TaxProfileEntity | null> {
-    const profile = await prisma.taxProfile.findUnique({
+    const profile = await this.prisma.taxProfile.findUnique({
       where: { id, tenantId },
     });
 

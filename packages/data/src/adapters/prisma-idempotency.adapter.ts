@@ -9,10 +9,9 @@ import { getPrismaClient } from "../uow/prisma-unit-of-work.adapter";
  */
 @Injectable()
 export class PrismaIdempotencyAdapter implements IdempotencyPort {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly actionKey = "usecase"
-  ) {}
+  private readonly actionKey = "usecase";
+
+  constructor(private readonly prisma: PrismaService) {}
 
   async isProcessed(key: string, tx?: TransactionContext): Promise<boolean> {
     const client = getPrismaClient(this.prisma, tx);

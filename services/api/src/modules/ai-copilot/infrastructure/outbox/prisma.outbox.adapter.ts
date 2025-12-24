@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { OutboxPort } from "../../application/ports/outbox.port";
 
 @Injectable()
 export class PrismaOutboxAdapter implements OutboxPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async enqueue(event: {
     tenantId: string;
     eventType: string;

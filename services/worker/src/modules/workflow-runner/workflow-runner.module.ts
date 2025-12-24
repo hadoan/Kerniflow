@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { WorkflowRunnerService } from "./WorkflowRunnerService";
+import { WorkflowRunnerService } from "./workflow-runner.service";
 
 @Module({
   providers: [WorkflowRunnerService],

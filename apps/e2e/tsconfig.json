@@ -5,6 +5,5 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "allowImportingTsExtensions": true
   },
-  "include": ["playwright.config.ts", "tests/**/*.ts", "utils/**/*.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["playwright.config.ts", "tests/**/*.ts", "utils/**/*.ts"]
 }

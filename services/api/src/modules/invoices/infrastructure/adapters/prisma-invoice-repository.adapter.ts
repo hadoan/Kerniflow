@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import {
   InvoiceRepoPort,
   ListInvoicesFilters,
@@ -17,6 +17,8 @@ const fromPrismaDate = (value: Date | null | undefined): LocalDate | null =>
 
 @Injectable()
 export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async save(tenantId: string, invoice: InvoiceAggregate): Promise<void> {
     if (tenantId !== invoice.tenantId) {
       throw new Error("Tenant mismatch when saving invoice");
@@ -109,7 +111,7 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
       where: { id, tenantId },
       include: { lines: true },
     });
-    if (!data) return null;
+    if (!data) {return null;}
     const lineItems: InvoiceLine[] = data.lines.map((line) => ({
       id: line.id,
       description: line.description,
@@ -152,12 +154,12 @@ export class PrismaInvoiceRepoAdapter implements InvoiceRepoPort {
     cursor?: string
   ): Promise<ListInvoicesResult> {
     const where: any = { tenantId };
-    if (filters.status) where.status = filters.status;
-    if (filters.customerPartyId) where.customerPartyId = filters.customerPartyId;
+    if (filters.status) {where.status = filters.status;}
+    if (filters.customerPartyId) {where.customerPartyId = filters.customerPartyId;}
     if (filters.fromDate || filters.toDate) {
       where.createdAt = {};
-      if (filters.fromDate) where.createdAt.gte = filters.fromDate;
-      if (filters.toDate) where.createdAt.lte = filters.toDate;
+      if (filters.fromDate) {where.createdAt.gte = filters.fromDate;}
+      if (filters.toDate) {where.createdAt.lte = filters.toDate;}
     }
 
     const results = await prisma.invoice.findMany({

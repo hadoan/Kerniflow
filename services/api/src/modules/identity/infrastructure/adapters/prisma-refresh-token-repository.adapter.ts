@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { IRefreshTokenRepository } from "../../application/ports/refresh-token.repo.port";
 
 /**
@@ -7,6 +7,8 @@ import { IRefreshTokenRepository } from "../../application/ports/refresh-token.r
  */
 @Injectable()
 export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(data: {
     id: string;
     userId: string;
@@ -37,7 +39,7 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
       },
     });
 
-    if (!token) return null;
+    if (!token) {return null;}
     return token;
   }
 

@@ -8,13 +8,13 @@ import {
   isErr,
 } from "@kerniflow/kernel";
 import { InMemoryPartyRepo } from "../../testkit/in-memory-party-repo";
-import { CreateCustomerUseCase } from "./create-customer/CreateCustomerUseCase";
-import { UpdateCustomerUseCase } from "./update-customer/UpdateCustomerUseCase";
-import { ArchiveCustomerUseCase } from "./archive-customer/ArchiveCustomerUseCase";
-import { UnarchiveCustomerUseCase } from "./unarchive-customer/UnarchiveCustomerUseCase";
-import { GetCustomerByIdUseCase } from "./get-customer-by-id/GetCustomerByIdUseCase";
-import { ListCustomersUseCase } from "./list-customers/ListCustomersUseCase";
-import { SearchCustomersUseCase } from "./search-customers/SearchCustomersUseCase";
+import { ArchiveCustomerUseCase } from "./archive-customer/archive-customer.usecase";
+import { CreateCustomerUseCase } from "./create-customer/create-customer.usecase";
+import { GetCustomerByIdUseCase } from "./get-customer-by-id/get-customer-by-id.usecase";
+import { ListCustomersUseCase } from "./list-customers/list-customers.usecase";
+import { SearchCustomersUseCase } from "./search-customers/search-customers.usecase";
+import { UnarchiveCustomerUseCase } from "./unarchive-customer/unarchive-customer.usecase";
+import { UpdateCustomerUseCase } from "./update-customer/update-customer.usecase";
 
 describe("Party & CRM - Customers", () => {
   const ctx = { tenantId: "tenant-1" };

@@ -5,20 +5,20 @@ import {
   CustomFieldDefinitionRepository,
   CustomFieldIndexRepository,
   PrismaIdempotencyAdapter,
+  PrismaAuditAdapter,
 } from "@kerniflow/data";
 import { ExpensesController } from "./adapters/http/expenses.controller";
-import { CreateExpenseUseCase } from "./application/use-cases/CreateExpenseUseCase";
-import { ArchiveExpenseUseCase } from "./application/use-cases/ArchiveExpenseUseCase";
-import { UnarchiveExpenseUseCase } from "./application/use-cases/UnarchiveExpenseUseCase";
-import { PrismaExpenseRepository } from "./infrastructure/persistence/PrismaExpenseRepository";
-import { EXPENSE_REPOSITORY } from "./application/ports/ExpenseRepositoryPort";
 import { IdempotencyPort, IDEMPOTENCY_PORT_TOKEN } from "../../shared/ports/idempotency.port";
 import { IdGeneratorPort, ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { ClockPort, CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { PrismaOutboxAdapter } from "./infrastructure/outbox/prisma-outbox.adapter";
-import { PrismaAuditAdapter } from "./infrastructure/audit/prisma-audit.adapter";
+import { EXPENSE_REPOSITORY } from "./application/ports/expense-repository.port";
+import { ArchiveExpenseUseCase } from "./application/use-cases/archive-expense.usecase";
+import { CreateExpenseUseCase } from "./application/use-cases/create-expense.usecase";
+import { UnarchiveExpenseUseCase } from "./application/use-cases/unarchive-expense.usecase";
+import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expense-repository.adapter";
 
 @Module({
   imports: [DataModule],

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import type { PrismaService } from "@kerniflow/data";
 import { EventHandler, OutboxEvent } from "../outbox/event-handler.interface";
 import { renderEmail } from "@kerniflow/email-templates";
 import { InvoiceEmail, buildInvoiceEmailSubject } from "@kerniflow/email-templates/invoices";
@@ -22,13 +22,16 @@ type InvoiceEmailRequestedPayload = {
 export class InvoiceEmailRequestedHandler implements EventHandler {
   readonly eventType = "invoice.email.requested";
 
-  constructor(@Inject(EMAIL_SENDER_PORT) private readonly emailSender: EmailSenderPort) {}
+  constructor(
+    @Inject(EMAIL_SENDER_PORT) private readonly emailSender: EmailSenderPort,
+    private readonly prisma: PrismaService
+  ) {}
 
   async handle(event: OutboxEvent): Promise<void> {
     const payload: InvoiceEmailRequestedPayload = JSON.parse(event.payloadJson);
 
     // 1. Load delivery record
-    const delivery = await prisma.invoiceEmailDelivery.findUnique({
+    const delivery = await this.prisma.invoiceEmailDelivery.findUnique({
       where: { id: payload.deliveryId },
     });
 
@@ -37,7 +40,7 @@ export class InvoiceEmailRequestedHandler implements EventHandler {
     }
 
     // 2. Load invoice context
-    const invoice = await prisma.invoice.findFirst({
+    const invoice = await this.prisma.invoice.findFirst({
       where: {
         id: payload.invoiceId,
         tenantId: event.tenantId,
@@ -91,7 +94,7 @@ export class InvoiceEmailRequestedHandler implements EventHandler {
       const result = await this.emailSender.sendEmail(emailRequest);
 
       // 6. Update delivery record to SENT
-      await prisma.invoiceEmailDelivery.update({
+      await this.prisma.invoiceEmailDelivery.update({
         where: { id: payload.deliveryId },
         data: {
           status: "SENT",
@@ -102,7 +105,7 @@ export class InvoiceEmailRequestedHandler implements EventHandler {
     } catch (error) {
       // Update delivery record to FAILED
       const errorMessage = error instanceof Error ? error.message : String(error);
-      await prisma.invoiceEmailDelivery.update({
+      await this.prisma.invoiceEmailDelivery.update({
         where: { id: payload.deliveryId },
         data: {
           status: "FAILED",

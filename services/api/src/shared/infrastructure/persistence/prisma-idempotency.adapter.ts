@@ -1,7 +1,11 @@
-import { getPrisma } from "@kerniflow/data";
-import { IdempotencyPort, StoredResponse } from "../../ports/idempotency.port";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "@kerniflow/data";
+import type { IdempotencyPort, StoredResponse } from "../../ports/idempotency.port";
 
+@Injectable()
 export class PrismaIdempotencyAdapter implements IdempotencyPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async get(
     actionKey: string,
     tenantId: string | null,
@@ -9,9 +13,8 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
   ): Promise<StoredResponse | null> {
     // When tenantId is null, we can't use findUnique with the compound key
     // so we use findFirst instead
-    const prisma = getPrisma();
     const existing = tenantId
-      ? await prisma.idempotencyKey.findUnique({
+      ? await this.prisma.idempotencyKey.findUnique({
           where: {
             tenantId_actionKey_key: {
               tenantId,
@@ -20,7 +23,7 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
             },
           },
         })
-      : await prisma.idempotencyKey.findFirst({
+      : await this.prisma.idempotencyKey.findFirst({
           where: {
             tenantId: null,
             actionKey,
@@ -28,7 +31,9 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
           },
         });
 
-    if (!existing || !existing.responseJson) return null;
+    if (!existing || !existing.responseJson) {
+      return null;
+    }
     return {
       statusCode: existing.statusCode ?? undefined,
       body: JSON.parse(existing.responseJson),
@@ -44,8 +49,7 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
     // When tenantId is null, we can't use upsert with the compound key
     // so we need to handle it differently
     if (tenantId) {
-      const prisma = getPrisma();
-      await prisma.idempotencyKey.upsert({
+      await this.prisma.idempotencyKey.upsert({
         where: {
           tenantId_actionKey_key: {
             tenantId,
@@ -67,8 +71,7 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
       });
     } else {
       // For null tenantId, check if it exists first, then create or update
-      const prisma = getPrisma();
-      const existing = await prisma.idempotencyKey.findFirst({
+      const existing = await this.prisma.idempotencyKey.findFirst({
         where: {
           tenantId: null,
           actionKey,
@@ -77,7 +80,7 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
       });
 
       if (existing) {
-        await prisma.idempotencyKey.update({
+        await this.prisma.idempotencyKey.update({
           where: { id: existing.id },
           data: {
             responseJson: JSON.stringify(response.body ?? null),
@@ -85,7 +88,7 @@ export class PrismaIdempotencyAdapter implements IdempotencyPort {
           },
         });
       } else {
-        await prisma.idempotencyKey.create({
+        await this.prisma.idempotencyKey.create({
           data: {
             tenantId: null,
             actionKey,

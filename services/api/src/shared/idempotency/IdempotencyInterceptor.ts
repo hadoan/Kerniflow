@@ -1,10 +1,12 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from "@nestjs/common";
 import { Observable, of } from "rxjs";
 import { tap } from "rxjs/operators";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
+  constructor(private readonly prisma: PrismaService) {}
+
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
@@ -14,7 +16,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
     const actionKey = request.route.path;
 
     if (key && tenantId) {
-      const existing = await prisma.idempotencyKey.findUnique({
+      const existing = await this.prisma.idempotencyKey.findUnique({
         where: { tenantId_actionKey_key: { tenantId, actionKey, key } },
       });
 
@@ -26,7 +28,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
       // Proceed, and store response
       return next.handle().pipe(
         tap(async (data) => {
-          await prisma.idempotencyKey.create({
+          await this.prisma.idempotencyKey.create({
             data: {
               tenantId,
               key,

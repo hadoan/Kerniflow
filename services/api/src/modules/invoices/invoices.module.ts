@@ -1,21 +1,12 @@
 import { Module } from "@nestjs/common";
 import { InvoicesHttpController } from "./adapters/http/invoices.controller";
 import { ResendWebhookController } from "./adapters/webhooks/resend-webhook.controller";
-import { PrismaInvoiceRepoAdapter } from "./infrastructure/prisma/prisma-invoice-repo.adapter";
 import { PrismaInvoiceEmailDeliveryRepoAdapter } from "./infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
 import { PrismaOutboxAdapter } from "./infrastructure/outbox/prisma-outbox.adapter";
 import { InvoicesApplication } from "./application/invoices.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { CreateInvoiceUseCase } from "./application/use-cases/create-invoice/CreateInvoiceUseCase";
-import { UpdateInvoiceUseCase } from "./application/use-cases/update-invoice/UpdateInvoiceUseCase";
-import { FinalizeInvoiceUseCase } from "./application/use-cases/finalize-invoice/FinalizeInvoiceUseCase";
-import { SendInvoiceUseCase } from "./application/use-cases/send-invoice/SendInvoiceUseCase";
-import { RecordPaymentUseCase } from "./application/use-cases/record-payment/RecordPaymentUseCase";
-import { CancelInvoiceUseCase } from "./application/use-cases/cancel-invoice/CancelInvoiceUseCase";
-import { GetInvoiceByIdUseCase } from "./application/use-cases/get-invoice-by-id/GetInvoiceByIdUseCase";
-import { ListInvoicesUseCase } from "./application/use-cases/list-invoices/ListInvoicesUseCase";
 import {
   INVOICE_NUMBERING_PORT,
   InvoiceNumberingPort,
@@ -29,6 +20,15 @@ import { TimeService } from "@kerniflow/kernel";
 import { PrismaTenantTimeZoneAdapter } from "../../shared/time/prisma-tenant-timezone.adapter";
 import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
 import { PartyCrmModule } from "../party-crm";
+import { CancelInvoiceUseCase } from "./application/use-cases/cancel-invoice/cancel-invoice.usecase";
+import { CreateInvoiceUseCase } from "./application/use-cases/create-invoice/create-invoice.usecase";
+import { FinalizeInvoiceUseCase } from "./application/use-cases/finalize-invoice/finalize-invoice.usecase";
+import { GetInvoiceByIdUseCase } from "./application/use-cases/get-invoice-by-id/get-invoice-by-id.usecase";
+import { ListInvoicesUseCase } from "./application/use-cases/list-invoices/list-invoices.usecase";
+import { RecordPaymentUseCase } from "./application/use-cases/record-payment/record-payment.usecase";
+import { SendInvoiceUseCase } from "./application/use-cases/send-invoice/send-invoice.usecase";
+import { UpdateInvoiceUseCase } from "./application/use-cases/update-invoice/update-invoice.usecase";
+import { PrismaInvoiceRepoAdapter } from "./infrastructure/adapters/prisma-invoice-repository.adapter";
 
 @Module({
   imports: [IdentityModule, PartyCrmModule],

@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { MessageRepositoryPort } from "../../application/ports/message.repo.port";
 import { CopilotMessage } from "../../domain/entities/message.entity";
 
 @Injectable()
 export class PrismaMessageRepository implements MessageRepositoryPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(message: {
     id: string;
     tenantId: string;

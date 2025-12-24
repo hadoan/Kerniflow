@@ -21,8 +21,9 @@
     "msw": "catalog:"
   },
   "scripts": {
-    "dev": "node --watch -r ts-node/register/transpile-only src/main.ts",
-    "start": "node -r ts-node/register/transpile-only src/main.ts",
+    "dev": "node dev.mjs",
+    "build": "node esbuild.config.mjs",
+    "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

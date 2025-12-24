@@ -1,21 +1,22 @@
-import {
-  BaseUseCase,
+import type { UpdateCustomerInput, UpdateCustomerOutput } from "@kerniflow/contracts";
+import type {
   ClockPort,
-  ConflictError,
   IdGeneratorPort,
   LoggerPort,
-  NotFoundError,
   Result,
   UseCaseContext,
   UseCaseError,
+} from "@kerniflow/kernel";
+import {
+  BaseUseCase,
+  ConflictError,
+  NotFoundError,
   ValidationError,
   err,
   ok,
 } from "@kerniflow/kernel";
-import { UpdateCustomerInput, UpdateCustomerOutput } from "@kerniflow/contracts";
-import { PartyRepoPort } from "../../ports/party-repo.port";
 import { toCustomerDto } from "../../mappers/customer-dto.mapper";
-
+import type { PartyRepoPort } from "../../ports/party-repository.port";
 type Deps = {
   logger: LoggerPort;
   partyRepo: PartyRepoPort;

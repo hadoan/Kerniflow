@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { PrivacyRequestRepoPort } from "../../application/ports/privacy-request-repo.port";
 import { PrivacyRequest } from "../../domain/privacy-request.entity";
 
@@ -21,6 +21,8 @@ const mapRequest = (row: any): PrivacyRequest =>
 
 @Injectable()
 export class PrismaPrivacyRequestRepoAdapter implements PrivacyRequestRepoPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(request: PrivacyRequest): Promise<void> {
     await (prisma as any).privacyRequest.create({
       data: {

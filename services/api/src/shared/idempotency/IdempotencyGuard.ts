@@ -1,17 +1,19 @@
 import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 
 @Injectable()
 export class IdempotencyGuard implements CanActivate {
+  constructor(private readonly prisma: PrismaService) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const key = request.headers["x-idempotency-key"];
     const tenantId = request.body?.tenantId; // assume tenantId in body
     const actionKey = request.route.path; // e.g., /expenses
 
-    if (!key || !tenantId) return true; // allow if no key
+    if (!key || !tenantId) {return true;} // allow if no key
 
-    const existing = await prisma.idempotencyKey.findUnique({
+    const existing = await this.prisma.idempotencyKey.findUnique({
       where: { tenantId_actionKey_key: { tenantId, actionKey, key } },
     });
 

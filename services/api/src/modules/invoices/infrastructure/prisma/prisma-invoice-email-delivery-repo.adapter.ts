@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import {
   InvoiceEmailDeliveryRepoPort,
   InvoiceEmailDelivery,
@@ -8,6 +8,8 @@ import {
 
 @Injectable()
 export class PrismaInvoiceEmailDeliveryRepoAdapter implements InvoiceEmailDeliveryRepoPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async findByIdempotencyKey(
     tenantId: string,
     idempotencyKey: string

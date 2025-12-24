@@ -1,15 +1,18 @@
-import { getPrisma } from "@kerniflow/data";
-import { OutboxPort } from "../../ports/outbox.port";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "@kerniflow/data";
+import type { OutboxPort } from "../../ports/outbox.port";
 
+@Injectable()
 export class PrismaOutboxAdapter implements OutboxPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async enqueue(event: {
     eventType: string;
     payload: any;
     tenantId: string;
     correlationId?: string;
   }): Promise<void> {
-    const prisma = getPrisma();
-    await prisma.outboxEvent.create({
+    await this.prisma.outboxEvent.create({
       data: {
         tenantId: event.tenantId,
         eventType: event.eventType,

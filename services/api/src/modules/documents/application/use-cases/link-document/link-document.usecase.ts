@@ -1,17 +1,8 @@
-import {
-  BaseUseCase,
-  LoggerPort,
-  Result,
-  UseCaseContext,
-  UseCaseError,
-  ValidationError,
-  NotFoundError,
-  err,
-  ok,
-} from "@kerniflow/kernel";
-import { LinkDocumentInput, LinkDocumentOutput } from "@kerniflow/contracts";
-import { DocumentRepoPort } from "../../ports/document-repo.port";
-import { DocumentLinkRepoPort } from "../../ports/document-link.port";
+import type { LinkDocumentInput, LinkDocumentOutput } from "@kerniflow/contracts";
+import { BaseUseCase, ValidationError, NotFoundError, err, ok } from "@kerniflow/kernel";
+import type { LoggerPort, Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
+import type { DocumentLinkRepoPort } from "../../ports/document-link.port";
+import type { DocumentRepoPort } from "../../ports/document-repository.port";
 
 type Deps = {
   logger: LoggerPort;
@@ -25,8 +16,12 @@ export class LinkDocumentUseCase extends BaseUseCase<LinkDocumentInput, LinkDocu
   }
 
   protected validate(input: LinkDocumentInput): LinkDocumentInput {
-    if (!input.documentId) throw new ValidationError("documentId is required");
-    if (!input.entityId) throw new ValidationError("entityId is required");
+    if (!input.documentId) {
+      throw new ValidationError("documentId is required");
+    }
+    if (!input.entityId) {
+      throw new ValidationError("entityId is required");
+    }
     return input;
   }
 

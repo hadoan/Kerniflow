@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import {
   InvoiceEmailContextQueryPort,
   InvoiceEmailContext,
@@ -7,6 +7,8 @@ import {
 
 @Injectable()
 export class PrismaInvoiceEmailContextQueryAdapter implements InvoiceEmailContextQueryPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async getInvoiceEmailContext(
     tenantId: string,
     invoiceId: string

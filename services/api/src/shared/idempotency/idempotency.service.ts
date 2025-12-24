@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 
 export type IdempotencyStatus = "IN_PROGRESS" | "COMPLETED" | "FAILED";
 
@@ -14,7 +14,10 @@ const LOCK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 
 @Injectable()
 export class IdempotencyService {
-  constructor(private readonly now: () => Date = () => new Date()) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly now: () => Date = () => new Date()
+  ) {}
 
   async startOrReplay(params: {
     actionKey: string;
@@ -28,7 +31,7 @@ export class IdempotencyService {
     const ttlMs = params.ttlMs ?? 24 * 60 * 60 * 1000;
     const expiresAt = new Date(now.getTime() + ttlMs);
 
-    const existing = await prisma.idempotencyKey.findUnique({
+    const existing = await this.prisma.idempotencyKey.findUnique({
       where: {
         tenantId_actionKey_key: {
           tenantId: params.tenantId as any,
@@ -39,7 +42,7 @@ export class IdempotencyService {
     });
 
     if (!existing) {
-      await prisma.idempotencyKey.create({
+      await this.prisma.idempotencyKey.create({
         data: {
           tenantId: params.tenantId,
           actionKey: params.actionKey,
@@ -82,7 +85,7 @@ export class IdempotencyService {
 
     const updatedAt = existingRecord.updatedAt ?? existingRecord.createdAt;
     if (now.getTime() - updatedAt.getTime() > LOCK_TIMEOUT_MS) {
-      await prisma.idempotencyKey.update({
+      await this.prisma.idempotencyKey.update({
         where: {
           tenantId_actionKey_key: {
             tenantId: existing.tenantId as any,
@@ -109,7 +112,7 @@ export class IdempotencyService {
     responseStatus: number;
     responseBody: unknown;
   }): Promise<void> {
-    await prisma.idempotencyKey.update({
+    await this.prisma.idempotencyKey.update({
       where: {
         tenantId_actionKey_key: {
           tenantId: params.tenantId as any,
@@ -132,7 +135,7 @@ export class IdempotencyService {
     responseStatus?: number;
     responseBody?: unknown;
   }): Promise<void> {
-    await prisma.idempotencyKey.update({
+    await this.prisma.idempotencyKey.update({
       where: {
         tenantId_actionKey_key: {
           tenantId: params.tenantId as any,
@@ -149,7 +152,7 @@ export class IdempotencyService {
   }
 
   private parseJson(raw: string | null): unknown {
-    if (!raw) return null;
+    if (!raw) {return null;}
     try {
       return JSON.parse(raw);
     } catch {

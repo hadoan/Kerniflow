@@ -1,14 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { VatReportRepoPort } from "../../domain/ports";
 import type { VatPeriodSummaryEntity } from "../../domain/entities";
 
 @Injectable()
 export class PrismaVatReportRepoAdapter extends VatReportRepoPort {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
+
   async upsert(
     summary: Omit<VatPeriodSummaryEntity, "id" | "createdAt" | "updatedAt">
   ): Promise<VatPeriodSummaryEntity> {
-    const created = await prisma.vatPeriodSummary.upsert({
+    const created = await this.prisma.vatPeriodSummary.upsert({
       where: {
         tenantId_periodStart_periodEnd: {
           tenantId: summary.tenantId,
@@ -40,7 +44,7 @@ export class PrismaVatReportRepoAdapter extends VatReportRepoPort {
     periodStart: Date,
     periodEnd: Date
   ): Promise<VatPeriodSummaryEntity | null> {
-    const summary = await prisma.vatPeriodSummary.findUnique({
+    const summary = await this.prisma.vatPeriodSummary.findUnique({
       where: {
         tenantId_periodStart_periodEnd: { tenantId, periodStart, periodEnd },
       },
@@ -50,7 +54,7 @@ export class PrismaVatReportRepoAdapter extends VatReportRepoPort {
   }
 
   async findAll(tenantId: string, from?: Date, to?: Date): Promise<VatPeriodSummaryEntity[]> {
-    const summaries = await prisma.vatPeriodSummary.findMany({
+    const summaries = await this.prisma.vatPeriodSummary.findMany({
       where: {
         tenantId,
         ...(from ? { periodStart: { gte: from } } : {}),
@@ -63,7 +67,7 @@ export class PrismaVatReportRepoAdapter extends VatReportRepoPort {
   }
 
   async finalize(id: string, tenantId: string): Promise<VatPeriodSummaryEntity> {
-    const updated = await prisma.vatPeriodSummary.update({
+    const updated = await this.prisma.vatPeriodSummary.update({
       where: { id, tenantId },
       data: { status: "FINALIZED" },
     });

@@ -10,8 +10,8 @@
   "scripts": {
     "prepare": "husky",
     "dev": "pnpm build:packages && pnpm -r --parallel dev",
-    "build": "pnpm -r build",
-    "build:packages": "pnpm --filter './packages/config' --filter './packages/kernel' --filter './packages/contracts' --filter './packages/domain' --filter './packages/data' --filter './packages/offline-core' --filter './packages/offline-web' --filter './packages/offline-rn' --filter './packages/testkit' build",
+    "build": "pnpm build:packages && pnpm --filter './packages/tooling/**' build && pnpm --filter './services/**' build && pnpm --filter './apps/**' build",
+    "build:packages": "pnpm --filter './packages/config' --filter './packages/kernel' --filter './packages/contracts' --filter './packages/domain' --filter './packages/data' --filter './packages/offline-core' --filter './packages/offline-web' --filter './packages/offline-rn' --filter './packages/testkit' --filter './packages/tooling/vite-config' --filter './packages/email-templates' build",
     "typecheck": "pnpm -r typecheck",
     "dev:web": "pnpm --filter @kerniflow/web dev",
     "dev:api": "pnpm build:packages && pnpm --filter @kerniflow/api dev",

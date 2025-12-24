@@ -1,18 +1,17 @@
-import { Injectable } from "@nestjs/common";
-import { Expense } from "../../domain/entities/Expense";
-import { ExpenseRepositoryPort } from "../ports/ExpenseRepositoryPort";
-import { OutboxPort } from "../../../../shared/ports/outbox.port";
-import { AuditPort } from "../../../../shared/ports/audit.port";
-import { IdempotencyPort } from "../../../../shared/ports/idempotency.port";
-import { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
-import { ClockPort } from "../../../../shared/ports/clock.port";
-import { RequestContext } from "../../../../shared/context/request-context";
+import type { OutboxPort } from "../../../../shared/ports/outbox.port";
+import type { AuditPort } from "../../../../shared/ports/audit.port";
+import type { IdempotencyPort } from "../../../../shared/ports/idempotency.port";
+import type { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
+import type { ClockPort } from "../../../../shared/ports/clock.port";
+import type { RequestContext } from "../../../../shared/context/request-context";
 import {
-  CustomFieldDefinitionPort,
-  CustomFieldIndexPort,
+  type CustomFieldDefinitionPort,
+  type CustomFieldIndexPort,
   buildCustomFieldIndexes,
   validateAndNormalizeCustomValues,
 } from "@kerniflow/domain";
+import { Expense } from "../../domain/expense.entity";
+import type { ExpenseRepositoryPort } from "../ports/expense-repository.port";
 
 export interface CreateExpenseInput {
   tenantId: string;
@@ -27,7 +26,6 @@ export interface CreateExpenseInput {
   context: RequestContext;
 }
 
-@Injectable()
 export class CreateExpenseUseCase {
   private readonly actionKey = "expenses.create";
 

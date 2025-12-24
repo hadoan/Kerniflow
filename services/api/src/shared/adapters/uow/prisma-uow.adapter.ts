@@ -1,11 +1,13 @@
-import { prisma } from "@kerniflow/data";
-import { UnitOfWorkPort } from "@kerniflow/kernel";
+import { type PrismaService } from "@kerniflow/data";
+import { type UnitOfWorkPort } from "@kerniflow/kernel";
 
 /**
  * Wraps a PrismaClient $transaction. Nested calls reuse the outer scope.
  * Note: repositories must use the same Prisma client instance passed here.
  */
 export class PrismaUnitOfWorkAdapter implements UnitOfWorkPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   private depth = 0;
 
   async withinTransaction<T>(fn: () => Promise<T>): Promise<T> {

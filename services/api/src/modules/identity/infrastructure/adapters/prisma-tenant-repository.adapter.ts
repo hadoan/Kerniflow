@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { Tenant } from "../../domain/entities/tenant.entity";
 import { ITenantRepository } from "../../application/ports/tenant.repo.port";
 
@@ -8,8 +8,10 @@ import { ITenantRepository } from "../../application/ports/tenant.repo.port";
  */
 @Injectable()
 export class PrismaTenantRepository implements ITenantRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
   async create(tenant: Tenant): Promise<Tenant> {
-    const data = await prisma.tenant.create({
+    const data = await this.prisma.tenant.create({
       data: {
         id: tenant.getId(),
         name: tenant.getName(),
@@ -23,25 +25,25 @@ export class PrismaTenantRepository implements ITenantRepository {
   }
 
   async findById(id: string): Promise<Tenant | null> {
-    const data = await prisma.tenant.findUnique({
+    const data = await this.prisma.tenant.findUnique({
       where: { id },
     });
 
-    if (!data) return null;
+    if (!data) {return null;}
     return Tenant.restore(data);
   }
 
   async findBySlug(slug: string): Promise<Tenant | null> {
-    const data = await prisma.tenant.findUnique({
+    const data = await this.prisma.tenant.findUnique({
       where: { slug },
     });
 
-    if (!data) return null;
+    if (!data) {return null;}
     return Tenant.restore(data);
   }
 
   async slugExists(slug: string): Promise<boolean> {
-    const count = await prisma.tenant.count({
+    const count = await this.prisma.tenant.count({
       where: { slug },
     });
 
@@ -49,7 +51,7 @@ export class PrismaTenantRepository implements ITenantRepository {
   }
 
   async update(tenant: Tenant): Promise<Tenant> {
-    const data = await prisma.tenant.update({
+    const data = await this.prisma.tenant.update({
       where: { id: tenant.getId() },
       data: {
         name: tenant.getName(),

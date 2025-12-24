@@ -1,10 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { CustomerQueryPort } from "../../application/ports/customer-query.port";
 import { CustomerBillingSnapshotDTO } from "@kerniflow/contracts";
 
 @Injectable()
 export class PrismaCustomerQueryAdapter implements CustomerQueryPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async getCustomerBillingSnapshot(
     tenantId: string,
     partyId: string
@@ -13,7 +15,7 @@ export class PrismaCustomerQueryAdapter implements CustomerQueryPort {
       where: { id: partyId, tenantId, roles: { some: { role: "CUSTOMER" } } },
       include: { contactPoints: true, addresses: true },
     });
-    if (!party) return null;
+    if (!party) {return null;}
 
     const email = party.contactPoints.find((cp) => cp.type === "EMAIL" && cp.isPrimary)?.value;
     const billingAddress = party.addresses.find((addr) => addr.type === "BILLING");

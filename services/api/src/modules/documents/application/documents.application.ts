@@ -1,9 +1,9 @@
-import { CompleteUploadUseCase } from "./use-cases/complete-upload/CompleteUploadUseCase";
-import { CreateUploadIntentUseCase } from "./use-cases/create-upload-intent/CreateUploadIntentUseCase";
-import { GetDownloadUrlUseCase } from "./use-cases/get-download-url/GetDownloadUrlUseCase";
-import { LinkDocumentUseCase } from "./use-cases/link-document/LinkDocumentUseCase";
-import { RequestInvoicePdfUseCase } from "./use-cases/request-invoice-pdf/RequestInvoicePdfUseCase";
-import { GenerateInvoicePdfWorker } from "./use-cases/generate-invoice-pdf-worker/GenerateInvoicePdfWorker";
+import type { CompleteUploadUseCase } from "./use-cases/complete-upload/complete-upload.usecase";
+import type { CreateUploadIntentUseCase } from "./use-cases/create-upload-intent/create-upload-intent.usecase";
+import type { GenerateInvoicePdfWorker } from "./use-cases/generate-invoice-pdf-worker/generate-invoice-pdf.worker";
+import type { GetDownloadUrlUseCase } from "./use-cases/get-download-url/get-download-url.usecase";
+import type { LinkDocumentUseCase } from "./use-cases/link-document/link-document.usecase";
+import type { RequestInvoicePdfUseCase } from "./use-cases/request-invoice-pdf/request-invoice-pdf.usecase";
 
 export class DocumentsApplication {
   constructor(

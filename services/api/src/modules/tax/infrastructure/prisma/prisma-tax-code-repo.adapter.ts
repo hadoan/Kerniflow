@@ -1,15 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import type { TaxCodeKind } from "@kerniflow/contracts";
 import { TaxCodeRepoPort } from "../../domain/ports";
 import type { TaxCodeEntity } from "../../domain/entities";
 
 @Injectable()
 export class PrismaTaxCodeRepoAdapter extends TaxCodeRepoPort {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
+
   async create(
     code: Omit<TaxCodeEntity, "id" | "createdAt" | "updatedAt">
   ): Promise<TaxCodeEntity> {
-    const created = await prisma.taxCode.create({
+    const created = await this.prisma.taxCode.create({
       data: {
         tenantId: code.tenantId,
         code: code.code,
@@ -23,7 +27,7 @@ export class PrismaTaxCodeRepoAdapter extends TaxCodeRepoPort {
   }
 
   async findById(id: string, tenantId: string): Promise<TaxCodeEntity | null> {
-    const code = await prisma.taxCode.findUnique({
+    const code = await this.prisma.taxCode.findUnique({
       where: { id, tenantId },
     });
 
@@ -31,7 +35,7 @@ export class PrismaTaxCodeRepoAdapter extends TaxCodeRepoPort {
   }
 
   async findByCode(code: string, tenantId: string): Promise<TaxCodeEntity | null> {
-    const found = await prisma.taxCode.findUnique({
+    const found = await this.prisma.taxCode.findUnique({
       where: { tenantId_code: { tenantId, code } },
     });
 
@@ -39,7 +43,7 @@ export class PrismaTaxCodeRepoAdapter extends TaxCodeRepoPort {
   }
 
   async findByKind(kind: TaxCodeKind, tenantId: string): Promise<TaxCodeEntity[]> {
-    const codes = await prisma.taxCode.findMany({
+    const codes = await this.prisma.taxCode.findMany({
       where: { tenantId, kind },
       orderBy: { createdAt: "desc" },
     });
@@ -48,7 +52,7 @@ export class PrismaTaxCodeRepoAdapter extends TaxCodeRepoPort {
   }
 
   async findAll(tenantId: string, activeOnly = false): Promise<TaxCodeEntity[]> {
-    const codes = await prisma.taxCode.findMany({
+    const codes = await this.prisma.taxCode.findMany({
       where: {
         tenantId,
         ...(activeOnly ? { isActive: true } : {}),
@@ -64,7 +68,7 @@ export class PrismaTaxCodeRepoAdapter extends TaxCodeRepoPort {
     tenantId: string,
     updates: Partial<Pick<TaxCodeEntity, "label" | "isActive" | "kind">>
   ): Promise<TaxCodeEntity> {
-    const updated = await prisma.taxCode.update({
+    const updated = await this.prisma.taxCode.update({
       where: { id, tenantId },
       data: updates,
     });
@@ -73,7 +77,7 @@ export class PrismaTaxCodeRepoAdapter extends TaxCodeRepoPort {
   }
 
   async delete(id: string, tenantId: string): Promise<void> {
-    await prisma.taxCode.delete({
+    await this.prisma.taxCode.delete({
       where: { id, tenantId },
     });
   }

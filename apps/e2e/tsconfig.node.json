@@ -1,7 +1,10 @@
 {
   "extends": "@kerniflow/tsconfig/lib.json",
   "compilerOptions": {
-    "composite": true
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force"
   },
   "include": ["playwright.config.ts"]
 }

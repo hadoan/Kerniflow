@@ -1,15 +1,16 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  PostgresTestDb,
+  type PostgresTestDb,
   createCustomerParty,
   createTenant,
   createUser,
   createTestDb,
   stopSharedContainer,
 } from "@kerniflow/testkit";
-import { PrismaService, resetPrisma } from "@kerniflow/data";
-import { buildRequestContext } from "../../../shared/context/request-context";
-import { CreateExpenseUseCase } from "../application/use-cases/CreateExpenseUseCase";
+import type { PrismaService } from "@kerniflow/data";
+import { buildRequestContext } from "@shared/context/request-context";
+import { CreateExpenseUseCase } from "../application/use-cases/create-expense.usecase";
+import { MockAuditPort } from "@shared/testkit/mocks/mock-audit-port";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 
@@ -17,7 +18,7 @@ describe("Expenses integration (Postgres)", () => {
   let db: PostgresTestDb;
   let prisma: PrismaService;
   let useCase: CreateExpenseUseCase;
-  let ExpenseRepo: typeof import("../infrastructure/persistence/PrismaExpenseRepository").PrismaExpenseRepository;
+  let ExpenseRepo: any;
 
   beforeAll(async () => {
     db = await createTestDb();
@@ -25,15 +26,13 @@ describe("Expenses integration (Postgres)", () => {
     const [
       { PrismaExpenseRepository },
       { PrismaOutboxAdapter },
-      { PrismaAuditAdapter },
       { PrismaIdempotencyAdapter },
       { SystemIdGenerator },
       { SystemClock },
       { CustomFieldDefinitionRepository, CustomFieldIndexRepository },
     ] = await Promise.all([
-      import("../infrastructure/persistence/PrismaExpenseRepository"),
+      import("../infrastructure/adapters/prisma-expense-repository.adapter"),
       import("../../../shared/infrastructure/persistence/prisma-outbox.adapter"),
-      import("../../../shared/infrastructure/persistence/prisma-audit.adapter"),
       import("../../../shared/infrastructure/persistence/prisma-idempotency.adapter"),
       import("../../../shared/infrastructure/system-id-generator"),
       import("../../../shared/infrastructure/system-clock"),
@@ -43,9 +42,9 @@ describe("Expenses integration (Postgres)", () => {
     ExpenseRepo = PrismaExpenseRepository;
     useCase = new CreateExpenseUseCase(
       new PrismaExpenseRepository(prisma),
-      new PrismaOutboxAdapter(prisma),
-      new PrismaAuditAdapter(prisma),
-      new PrismaIdempotencyAdapter(prisma),
+      new PrismaOutboxAdapter(),
+      new MockAuditPort(),
+      new PrismaIdempotencyAdapter(),
       new SystemIdGenerator(),
       new SystemClock(),
       new CustomFieldDefinitionRepository(prisma),
@@ -61,7 +60,6 @@ describe("Expenses integration (Postgres)", () => {
     if (db) {
       await db.down();
     }
-    await resetPrisma();
     await stopSharedContainer();
   });
 

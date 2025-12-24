@@ -1,5 +1,5 @@
-import { Controller, Post, Req, Res, HttpStatus, RawBodyRequest } from "@nestjs/common";
-import { Request, Response } from "express";
+import { Controller, Post, Req, Res, HttpStatus, type RawBodyRequest } from "@nestjs/common";
+import { Request, type Response } from "express";
 import { Resend } from "resend";
 import { EnvService } from "@kerniflow/config";
 import { PrismaInvoiceEmailDeliveryRepoAdapter } from "../../infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
@@ -25,14 +25,14 @@ export class ResendWebhookController {
     private readonly deliveryRepo: PrismaInvoiceEmailDeliveryRepoAdapter,
     private readonly envService: EnvService
   ) {
-    const apiKey = this.envService.RESEND_API_KEY;
+    const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       throw new Error("RESEND_API_KEY environment variable is required");
     }
 
     this.resend = new Resend(apiKey);
 
-    this.webhookSecret = this.envService.RESEND_WEBHOOK_SECRET ?? "";
+    this.webhookSecret = process.env.RESEND_WEBHOOK_SECRET ?? "";
     if (!this.webhookSecret) {
       console.warn("RESEND_WEBHOOK_SECRET not set - webhook verification disabled");
     }
@@ -74,7 +74,7 @@ export class ResendWebhookController {
             "svix-signature": svixSignature,
           },
           secret: this.webhookSecret,
-        } as unknown) as ResendWebhookEvent;
+        } as any) as ResendWebhookEvent;
 
         await this.processEvent(event);
       } else {

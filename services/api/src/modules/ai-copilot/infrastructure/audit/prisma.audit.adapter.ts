@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { prisma } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { AuditPort } from "../../application/ports/audit.port";
 
 @Injectable()
 export class PrismaAuditAdapter implements AuditPort {
+  constructor(private readonly prisma: PrismaService) {}
+
   async write(data: {
     tenantId: string | null;
     actorUserId: string | null;
