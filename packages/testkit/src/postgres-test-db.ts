@@ -18,9 +18,9 @@ export class PostgresTestDb {
    * Starts (or reuses) a Postgres testcontainer and connects Prisma to it.
    * Must be called before importing modules that read process.env.DATABASE_URL.
    */
-  async up(): Promise<PrismaService> {
+  async up(): Promise<void> {
     if (this.started) {
-      return this.client;
+      return;
     }
 
     if (!sharedContainer) {
@@ -37,8 +37,17 @@ export class PostgresTestDb {
     process.env.DATABASE_URL = this.connectionString;
     process.env.NODE_ENV = process.env.NODE_ENV || "test";
 
-    this.prisma = new PrismaService();
-    await this.prisma.$connect();
+    // Note: Don't instantiate PrismaService yet - wait until after migrate() generates the client
+  }
+
+  /**
+   * Ensures the Prisma client is initialized (called internally after migrate)
+   */
+  private async ensureClient(): Promise<PrismaService> {
+    if (!this.prisma) {
+      this.prisma = new PrismaService();
+      await this.prisma.$connect();
+    }
     return this.prisma;
   }
 
@@ -92,6 +101,9 @@ export class PostgresTestDb {
         stderr: "inherit",
       }
     );
+
+    // Now that Prisma client is generated, create the PrismaService instance
+    await this.ensureClient();
   }
 
   /**

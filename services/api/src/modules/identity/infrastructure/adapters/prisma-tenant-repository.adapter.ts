@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { PrismaService } from "@kerniflow/data";
 import { Tenant } from "../../domain/entities/tenant.entity";
 import { TenantRepositoryPort } from "../../application/ports/tenant-repository.port";
@@ -8,7 +8,7 @@ import { TenantRepositoryPort } from "../../application/ports/tenant-repository.
  */
 @Injectable()
 export class PrismaTenantRepository implements TenantRepositoryPort {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(tenant: Tenant): Promise<Tenant> {
     const data = await this.prisma.tenant.create({

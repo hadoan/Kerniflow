@@ -4,6 +4,7 @@ import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+import { DomainExceptionFilter } from "./shared/filters/domain-exception.filter";
 
 // Load env files before anything else
 loadEnv();
@@ -20,6 +21,9 @@ async function bootstrap() {
   logger.log(
     `Nest application created in ${Date.now() - startedAt}ms; configuring CORS and Swagger`
   );
+
+  // Register global exception filter
+  app.useGlobalFilters(new DomainExceptionFilter());
 
   app.enableCors({ origin: true });
 

@@ -6,7 +6,7 @@ import { DataModule } from "@kerniflow/data";
 // Controllers
 import { AuthController } from "./adapters/http/auth.controller";
 
-// Repositories
+// Infrastructure adapters
 import { PrismaOutboxAdapter } from "./infrastructure/persistence/prisma.outbox.adapter";
 import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
@@ -46,7 +46,7 @@ import { USER_REPOSITORY_TOKEN } from "./application/ports/user-repository.port"
   imports: [DataModule],
   controllers: [AuthController],
   providers: [
-    // Repositories
+    // Repositories - NestJS will auto-inject PrismaService based on @Injectable() decorator
     PrismaUserRepository,
     PrismaTenantRepository,
     PrismaMembershipRepository,
@@ -54,16 +54,16 @@ import { USER_REPOSITORY_TOKEN } from "./application/ports/user-repository.port"
     PrismaRoleRepository,
     PrismaAuditRepository,
     PrismaOutboxAdapter,
-    PrismaIdempotencyStorageAdapter,
     AuthGuard,
 
     // Security
     BcryptPasswordHasher,
     JwtTokenService,
 
-    // System
+    // System infrastructure
     SystemClock,
     SystemIdGenerator,
+    PrismaIdempotencyStorageAdapter,
     Reflector,
 
     // Token bindings for DI

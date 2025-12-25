@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { PrismaService, getPrismaClient } from "@kerniflow/data";
 import { TransactionContext } from "@kerniflow/kernel";
 import { User } from "../../domain/entities/user.entity";
@@ -10,7 +10,7 @@ import { UserRepositoryPort } from "../../application/ports/user-repository.port
  */
 @Injectable()
 export class PrismaUserRepository implements UserRepositoryPort {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(user: User, tx?: TransactionContext): Promise<User> {
     const client = getPrismaClient(this.prisma, tx as any);
