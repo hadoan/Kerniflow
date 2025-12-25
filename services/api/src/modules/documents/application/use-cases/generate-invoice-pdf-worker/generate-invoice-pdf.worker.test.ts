@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GenerateInvoicePdfWorker } from "./GenerateInvoicePdfWorker";
+import { GenerateInvoicePdfWorker } from "./generate-invoice-pdf.worker";
 import { InMemoryDocumentRepo } from "../../../testkit/fakes/in-memory-document-repo";
 import { InMemoryFileRepo } from "../../../testkit/fakes/in-memory-file-repo";
 import { FakeObjectStoragePort } from "../../../testkit/fakes/fake-object-storage";

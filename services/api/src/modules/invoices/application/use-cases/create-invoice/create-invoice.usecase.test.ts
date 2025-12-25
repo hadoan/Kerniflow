@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { CreateInvoiceUseCase } from "./CreateInvoiceUseCase";
+import { CreateInvoiceUseCase } from "./create-invoice.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import {
   FakeIdGenerator,

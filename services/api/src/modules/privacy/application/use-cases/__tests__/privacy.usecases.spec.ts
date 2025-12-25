@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { RequestPersonalDataExportUseCase } from "../request-personal-data-export/RequestPersonalDataExportUseCase";
-import { RequestAccountErasureUseCase } from "../request-account-erasure/RequestAccountErasureUseCase";
+import { RequestPersonalDataExportUseCase } from "../request-personal-data-export/request-personal-data-export.usecase";
+import { RequestAccountErasureUseCase } from "../request-account-erasure/request-account-erasure.usecase";
 import { FakePrivacyRequestRepo } from "../../../testkit/fakes/fake-privacy-request-repo";
 import { FakeOutbox } from "../../../testkit/fakes/fake-outbox";
 import { FakeIdGenerator } from "../../../testkit/fakes/fake-id-generator";

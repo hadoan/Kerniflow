@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { RequestInvoicePdfUseCase } from "./RequestInvoicePdfUseCase";
+import { RequestInvoicePdfUseCase } from "./request-invoice-pdf.usecase";
 import { InMemoryDocumentRepo } from "../../../testkit/fakes/in-memory-document-repo";
 import { InMemoryFileRepo } from "../../../testkit/fakes/in-memory-file-repo";
 import { InMemoryDocumentLinkRepo } from "../../../testkit/fakes/in-memory-document-link-repo";

@@ -9,7 +9,7 @@ import { MockOutbox } from "../../../testkit/mocks/mock-outbox";
 import { MockAudit } from "../../../testkit/mocks/mock-audit";
 import { FakeIdGenerator } from "@shared/testkit/fakes/fake-id-generator";
 import { FakeClock } from "@shared/testkit/fakes/fake-clock";
-import { MockIdempotencyPort } from "@shared/testkit/mocks/mock-idempotency-port";
+import { MockIdempotencyStoragePort } from "@shared/testkit/mocks/mock-idempotency-port";
 import { buildSignInInput } from "../../../testkit/builders/build-signin-input";
 import { User } from "../../../domain/entities/user.entity";
 import { Email } from "../../../domain/value-objects/email.vo";
@@ -49,7 +49,7 @@ beforeEach(async () => {
     refreshTokenRepo,
     outbox,
     audit,
-    new MockIdempotencyPort(),
+    new MockIdempotencyStoragePort(),
     new FakeIdGenerator("id"),
     new FakeClock(new Date("2023-01-01T00:00:00.000Z"))
   );

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { ListInvoicesUseCase } from "./ListInvoicesUseCase";
+import { ListInvoicesUseCase } from "./list-invoices.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
 import { FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";

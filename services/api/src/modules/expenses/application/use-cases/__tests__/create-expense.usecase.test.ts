@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { CreateExpenseUseCase } from "../CreateExpenseUseCase";
+import { CreateExpenseUseCase } from "../create-expense.usecase";
 import { FakeExpenseRepository } from "../../../testkit/fakes/fake-expense-repo";
 import { MockAuditPort } from "@shared/testkit/mocks/mock-audit-port";
 import { MockOutboxPort } from "@shared/testkit/mocks/mock-outbox-port";
-import { MockIdempotencyPort } from "@shared/testkit/mocks/mock-idempotency-port";
+import { MockIdempotencyStoragePort } from "@shared/testkit/mocks/mock-idempotency-port";
 import { FakeIdGenerator } from "@shared/testkit/fakes/fake-id-generator";
 import { FakeClock } from "@shared/testkit/fakes/fake-clock";
 import { buildCreateExpenseInput } from "../../../testkit/builders/build-create-expense-input";
@@ -13,7 +13,7 @@ let useCase: CreateExpenseUseCase;
 let repo: FakeExpenseRepository;
 let audit: MockAuditPort;
 let outbox: MockOutboxPort;
-let idempotency: MockIdempotencyPort;
+let idempotency: MockIdempotencyStoragePort;
 let customDefs: CustomFieldDefinitionPort;
 let customIndexes: CustomFieldIndexPort;
 
@@ -21,7 +21,7 @@ beforeEach(() => {
   repo = new FakeExpenseRepository();
   audit = new MockAuditPort();
   outbox = new MockOutboxPort();
-  idempotency = new MockIdempotencyPort();
+  idempotency = new MockIdempotencyStoragePort();
   customDefs = {
     listActiveByEntityType: async () => [],
     getById: async () => null,

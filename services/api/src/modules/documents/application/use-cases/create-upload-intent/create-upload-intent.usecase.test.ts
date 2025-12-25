@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { CreateUploadIntentUseCase } from "./CreateUploadIntentUseCase";
+import { CreateUploadIntentUseCase } from "./create-upload-intent.usecase";
 import { InMemoryDocumentRepo } from "../../../testkit/fakes/in-memory-document-repo";
 import { InMemoryFileRepo } from "../../../testkit/fakes/in-memory-file-repo";
 import { FakeObjectStoragePort } from "../../../testkit/fakes/fake-object-storage";
-import { CompleteUploadUseCase } from "../complete-upload/CompleteUploadUseCase";
+import { CompleteUploadUseCase } from "../complete-upload/complete-upload.usecase";
 import { FixedClock, NoopLogger, unwrap, isErr } from "@kerniflow/kernel";
 
 class TestIdGenerator {

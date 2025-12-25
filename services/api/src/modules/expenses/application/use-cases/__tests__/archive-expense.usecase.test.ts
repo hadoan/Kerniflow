@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { FakeExpenseRepository } from "../../../testkit/fakes/fake-expense-repo";
-import { ArchiveExpenseUseCase } from "../ArchiveExpenseUseCase";
-import { UnarchiveExpenseUseCase } from "../UnarchiveExpenseUseCase";
+import { ArchiveExpenseUseCase } from "../archive-expense.usecase";
+import { UnarchiveExpenseUseCase } from "../unarchive-expense.usecase";
 import { Expense } from "../../../domain/expense.entity";
 import { FixedClock } from "@kerniflow/kernel";
 

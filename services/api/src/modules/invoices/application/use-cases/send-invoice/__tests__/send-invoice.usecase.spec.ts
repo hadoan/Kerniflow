@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { SendInvoiceUseCase } from "../SendInvoiceUseCase";
+import { SendInvoiceUseCase } from "../send-invoice.usecase";
 import { FakeInvoiceRepository } from "../../../../testkit/fakes/fake-invoice-repo";
 import { FakeInvoiceEmailDeliveryRepository } from "../../../../testkit/fakes/fake-invoice-email-delivery-repo";
 import { FakeOutbox } from "../../../../testkit/fakes/fake-outbox";

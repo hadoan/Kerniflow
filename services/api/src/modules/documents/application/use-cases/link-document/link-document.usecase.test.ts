@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { LinkDocumentUseCase } from "./LinkDocumentUseCase";
+import { LinkDocumentUseCase } from "./link-document.usecase";
 import { InMemoryDocumentRepo } from "../../../testkit/fakes/in-memory-document-repo";
 import { InMemoryDocumentLinkRepo } from "../../../testkit/fakes/in-memory-document-link-repo";
 import { DocumentAggregate } from "../../../domain/document.aggregate";

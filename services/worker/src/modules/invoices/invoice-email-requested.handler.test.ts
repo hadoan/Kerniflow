@@ -69,7 +69,7 @@ describe("InvoiceEmailRequestedHandler", () => {
 
   it("sends email via port and marks delivery sent", async () => {
     const sender = new FakeEmailSender();
-    const handler = new InvoiceEmailRequestedHandler(sender);
+    const handler = new InvoiceEmailRequestedHandler(sender, prisma as any);
 
     await handler.handle(baseEvent as any);
 
@@ -86,7 +86,7 @@ describe("InvoiceEmailRequestedHandler", () => {
 
   it("marks delivery failed when provider errors", async () => {
     const sender = new FakeEmailSender(true);
-    const handler = new InvoiceEmailRequestedHandler(sender);
+    const handler = new InvoiceEmailRequestedHandler(sender, prisma as any);
 
     await expect(handler.handle(baseEvent as any)).rejects.toThrow("send fail");
     expect(prisma.invoiceEmailDelivery.update).toHaveBeenCalledWith({

@@ -2,41 +2,44 @@ import { describe, expect, it, beforeEach, vi } from "vitest";
 
 type Key = { tenantId: string | null; actionKey: string; key: string };
 
-const store = new Map<string, any>();
-
 vi.mock("@kerniflow/data", () => {
+  const store = new Map<string, any>();
   const makeKey = (params: Key) =>
     `${params.tenantId ?? "public"}:${params.actionKey}:${params.key}`;
-  return {
-    prisma: {
-      idempotencyKey: {
-        async findUnique({ where }: { where: { tenantId_actionKey_key: Key } }) {
-          return store.get(makeKey(where.tenantId_actionKey_key)) ?? null;
-        },
-        async create({ data }: { data: any }) {
-          const key = makeKey(data);
-          const record = {
-            id: data.id ?? Math.random().toString(36).slice(2),
-            ...data,
-            createdAt: data.createdAt ?? new Date(),
-            updatedAt: data.updatedAt ?? new Date(),
-          };
-          store.set(key, record);
-          return record;
-        },
-        async update({ where, data }: { where: { tenantId_actionKey_key: Key }; data: any }) {
-          const key = makeKey(where.tenantId_actionKey_key);
-          const existing = store.get(key);
-          const record = {
-            ...existing,
-            ...data,
-            updatedAt: data.updatedAt ?? new Date(),
-          };
-          store.set(key, record);
-          return record;
-        },
+
+  const mockPrismaService = {
+    idempotencyKey: {
+      async findUnique({ where }: { where: { tenantId_actionKey_key: Key } }) {
+        return store.get(makeKey(where.tenantId_actionKey_key)) ?? null;
+      },
+      async create({ data }: { data: any }) {
+        const key = makeKey(data);
+        const record = {
+          id: data.id ?? Math.random().toString(36).slice(2),
+          ...data,
+          createdAt: data.createdAt ?? new Date(),
+          updatedAt: data.updatedAt ?? new Date(),
+        };
+        store.set(key, record);
+        return record;
+      },
+      async update({ where, data }: { where: { tenantId_actionKey_key: Key }; data: any }) {
+        const key = makeKey(where.tenantId_actionKey_key);
+        const existing = store.get(key);
+        const record = {
+          ...existing,
+          ...data,
+          updatedAt: data.updatedAt ?? new Date(),
+        };
+        store.set(key, record);
+        return record;
       },
     },
+  };
+
+  return {
+    PrismaService: vi.fn(() => mockPrismaService),
+    prisma: mockPrismaService,
     __resetIdempotencyMock() {
       store.clear();
     },
@@ -44,7 +47,7 @@ vi.mock("@kerniflow/data", () => {
 });
 
 // @ts-expect-error test-only mock export
-import { __resetIdempotencyMock } from "@kerniflow/data";
+import { __resetIdempotencyMock, prisma } from "@kerniflow/data";
 import { IdempotencyService } from "./idempotency.service";
 
 describe("IdempotencyService", () => {
@@ -53,7 +56,7 @@ describe("IdempotencyService", () => {
   });
 
   it("returns replay when completed response exists", async () => {
-    const service = new IdempotencyService(() => new Date(0));
+    const service = new IdempotencyService(prisma as any, () => new Date(0));
     const params = {
       actionKey: "copilot.chat",
       tenantId: "tenant-1",
@@ -82,7 +85,7 @@ describe("IdempotencyService", () => {
   });
 
   it("detects mismatched request hashes", async () => {
-    const service = new IdempotencyService(() => new Date(0));
+    const service = new IdempotencyService(prisma as any, () => new Date(0));
     const params = {
       actionKey: "copilot.chat",
       tenantId: "tenant-1",
@@ -97,7 +100,7 @@ describe("IdempotencyService", () => {
   });
 
   it("returns in-progress when duplicate arrives during processing", async () => {
-    const service = new IdempotencyService(() => new Date(0));
+    const service = new IdempotencyService(prisma as any, () => new Date(0));
     const params = {
       actionKey: "copilot.chat",
       tenantId: "tenant-1",

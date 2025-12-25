@@ -4,9 +4,9 @@ import { CopilotController } from "../adapters/http/copilot.controller";
 import { StreamCopilotChatUseCase } from "../application/use-cases/stream-copilot-chat.usecase";
 import { AiSdkModelAdapter } from "../infrastructure/model/ai-sdk.model-adapter";
 import { ToolRegistry } from "../infrastructure/tools/tool-registry";
-import { PrismaAgentRunRepository } from "../infrastructure/persistence/prisma.agent-run.repo";
-import { PrismaMessageRepository } from "../infrastructure/persistence/prisma.message.repo";
-import { PrismaToolExecutionRepository } from "../infrastructure/persistence/prisma.tool-execution.repo";
+import { PrismaAgentRunRepository } from "../infrastructure/adapters/prisma-agent-run-repository.adapter";
+import { PrismaMessageRepository } from "../infrastructure/adapters/prisma-message-repository.adapter";
+import { PrismaToolExecutionRepository } from "../infrastructure/adapters/prisma-tool-execution-repository.adapter";
 import { COPILOT_TOOLS } from "../application/ports/tool-registry.port";
 
 describe("AiCopilotModule", () => {

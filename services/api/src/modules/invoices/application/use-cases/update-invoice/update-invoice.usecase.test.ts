@@ -8,7 +8,7 @@ import {
   FixedClock,
   NotFoundError,
 } from "@kerniflow/kernel";
-import { UpdateInvoiceUseCase } from "./UpdateInvoiceUseCase";
+import { UpdateInvoiceUseCase } from "./update-invoice.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
 import { FakeCustomerQueryPort } from "../../../testkit/fakes/fake-customer-query";

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { RecordPaymentUseCase } from "./RecordPaymentUseCase";
+import { RecordPaymentUseCase } from "./record-payment.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { FakeIdGenerator, FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";

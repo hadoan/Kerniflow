@@ -9,7 +9,7 @@ import { MockPasswordHasher } from "../../../testkit/mocks/mock-password-hasher"
 import { MockTokenService } from "../../../testkit/mocks/mock-token-service";
 import { MockOutbox } from "../../../testkit/mocks/mock-outbox";
 import { MockAudit } from "../../../testkit/mocks/mock-audit";
-import { MockIdempotencyPort } from "@shared/testkit/mocks/mock-idempotency-port";
+import { MockIdempotencyStoragePort } from "@shared/testkit/mocks/mock-idempotency-port";
 import { FakeIdGenerator } from "@shared/testkit/fakes/fake-id-generator";
 import { FakeClock } from "@shared/testkit/fakes/fake-clock";
 import { buildSignUpInput } from "../../../testkit/builders/build-signup-input";
@@ -23,7 +23,7 @@ let roleRepo: FakeRoleRepository;
 let refreshTokenRepo: FakeRefreshTokenRepository;
 let outbox: MockOutbox;
 let audit: MockAudit;
-let idempotency: MockIdempotencyPort;
+let idempotency: MockIdempotencyStoragePort;
 
 const setup = () => {
   userRepo = new FakeUserRepository();
@@ -33,7 +33,7 @@ const setup = () => {
   refreshTokenRepo = new FakeRefreshTokenRepository();
   outbox = new MockOutbox();
   audit = new MockAudit();
-  idempotency = new MockIdempotencyPort();
+  idempotency = new MockIdempotencyStoragePort();
 
   useCase = new SignUpUseCase(
     userRepo,
