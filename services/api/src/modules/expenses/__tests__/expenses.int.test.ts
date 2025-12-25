@@ -42,9 +42,9 @@ describe("Expenses integration (Postgres)", () => {
     ExpenseRepo = PrismaExpenseRepository;
     useCase = new CreateExpenseUseCase(
       new PrismaExpenseRepository(prisma),
-      new PrismaOutboxAdapter(),
+      new PrismaOutboxAdapter(prisma),
       new MockAuditPort(),
-      new PrismaIdempotencyStorageAdapter(),
+      new PrismaIdempotencyStorageAdapter(prisma),
       new SystemIdGenerator(),
       new SystemClock(),
       new CustomFieldDefinitionRepository(prisma),

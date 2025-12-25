@@ -8,6 +8,11 @@ export class IdempotencyInterceptor implements NestInterceptor {
   constructor(private readonly prisma: PrismaService) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+    // If Prisma isn't available (e.g., interceptor used without provider binding), skip idempotency logic
+    if (!this.prisma) {
+      return next.handle();
+    }
+
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
 

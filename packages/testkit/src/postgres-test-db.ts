@@ -7,16 +7,22 @@ import path from "path";
 import { PrismaService } from "@kerniflow/data";
 
 let sharedContainer: StartedPostgreSqlContainer | null = null;
+let activeDbCount = 0;
 
 export class PostgresTestDb {
   private prisma: PrismaService | null = null;
   private connectionString: string | null = null;
+  private started = false;
 
   /**
    * Starts (or reuses) a Postgres testcontainer and connects Prisma to it.
    * Must be called before importing modules that read process.env.DATABASE_URL.
    */
   async up(): Promise<PrismaService> {
+    if (this.started) {
+      return this.client;
+    }
+
     if (!sharedContainer) {
       sharedContainer = await new PostgreSqlContainer("postgres:16-alpine")
         .withDatabase("kerniflow_test")
@@ -25,6 +31,8 @@ export class PostgresTestDb {
         .start();
     }
 
+    this.started = true;
+    activeDbCount += 1;
     this.connectionString = sharedContainer.getConnectionUri();
     process.env.DATABASE_URL = this.connectionString;
     process.env.NODE_ENV = process.env.NODE_ENV || "test";
@@ -106,8 +114,19 @@ export class PostgresTestDb {
   }
 
   async down(): Promise<void> {
+    if (!this.started) {
+      return;
+    }
+
+    this.started = false;
     if (this.prisma) {
       await this.prisma.$disconnect();
+    }
+
+    this.prisma = null;
+    this.connectionString = null;
+    if (activeDbCount > 0) {
+      activeDbCount -= 1;
     }
   }
 }
@@ -120,8 +139,15 @@ export async function createTestDb(): Promise<PostgresTestDb> {
   return db;
 }
 
-export async function stopSharedContainer(): Promise<void> {
-  if (sharedContainer) {
+export async function stopSharedContainer(force = false): Promise<void> {
+  // In parallel test runs we defer shutdown to Testcontainers' process exit hook
+  // to avoid terminating DB connections used by other suites. Allow an opt-in
+  // force stop for manual cleanup when needed.
+  if (!force) {
+    return;
+  }
+
+  if (sharedContainer && activeDbCount === 0) {
     await sharedContainer.stop();
     sharedContainer = null;
   }

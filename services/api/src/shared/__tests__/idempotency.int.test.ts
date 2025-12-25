@@ -19,7 +19,7 @@ describe("Idempotency adapter (Prisma + Postgres)", () => {
     prisma = db.client;
     const { PrismaIdempotencyStorageAdapter } =
       await import("../infrastructure/persistence/prisma-idempotency-storage.adapter");
-    adapter = new PrismaIdempotencyStorageAdapter();
+    adapter = new PrismaIdempotencyStorageAdapter(prisma);
   });
 
   beforeEach(async () => {

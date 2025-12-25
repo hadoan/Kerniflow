@@ -6,7 +6,8 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["src/**/*.{spec,test}.ts"],
-    exclude: ["**/node_modules/**", "**/dist/**", "**/*.int.test.ts"],
+    // Do not exclude *.int.test.ts so integration workspace can reuse this config
+    exclude: ["**/node_modules/**", "**/dist/**"],
     setupFiles: ["./src/test/setup.ts"],
   },
   resolve: {

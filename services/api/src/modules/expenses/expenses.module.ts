@@ -22,6 +22,7 @@ import { ArchiveExpenseUseCase } from "./application/use-cases/archive-expense.u
 import { CreateExpenseUseCase } from "./application/use-cases/create-expense.usecase";
 import { UnarchiveExpenseUseCase } from "./application/use-cases/unarchive-expense.usecase";
 import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expense-repository.adapter";
+import { IdempotencyInterceptor } from "../../shared/idempotency/IdempotencyInterceptor";
 
 @Module({
   imports: [DataModule],
@@ -37,6 +38,7 @@ import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expens
     PrismaOutboxAdapter,
     PrismaAuditAdapter,
     PrismaIdempotencyStorageAdapter,
+    IdempotencyInterceptor,
 
     // Use Cases
     {

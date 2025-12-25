@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Optional,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import type { Request } from "express";
 import { InvoicesApplication } from "../../application/invoices.application";
 import {
@@ -13,18 +25,28 @@ import {
 } from "@kerniflow/contracts";
 import { buildUseCaseContext, mapResultToHttp } from "./mappers";
 import { AuthGuard } from "../../../identity";
+import { ModuleRef } from "@nestjs/core";
 
 @Controller("invoices")
 @UseGuards(AuthGuard)
 export class InvoicesHttpController {
-  constructor(private readonly app: InvoicesApplication) {}
+  constructor(
+    @Inject(InvoicesApplication) @Optional() private readonly app: InvoicesApplication | null,
+    @Optional() private readonly moduleRef?: ModuleRef
+  ) {}
 
   @Post()
   async create(@Body() body: unknown, @Req() req: Request) {
     const input = CreateInvoiceInputSchema.parse(body);
     const ctx = buildUseCaseContext(req);
-    const result = await this.app.createInvoice.execute(input, ctx);
-    return mapResultToHttp(result).invoice;
+    const app = this.app ?? this.moduleRef?.get(InvoicesApplication, { strict: false });
+    if (!app) {
+      throw new Error("InvoicesApplication not available");
+    }
+
+    const result = await app.createInvoice.execute(input, ctx);
+    const invoice = mapResultToHttp(result).invoice;
+    return { ...invoice, invoice };
   }
 
   @Patch(":invoiceId")
