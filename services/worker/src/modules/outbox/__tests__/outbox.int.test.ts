@@ -37,7 +37,7 @@ describe("Outbox reliability (worker + Postgres)", () => {
             eventType: "test.event",
             payloadJson: JSON.stringify({ ok: true }),
           },
-          tx
+          tx as any
         );
         throw new Error("force rollback");
       })

@@ -2,7 +2,7 @@
   "extends": "@kerniflow/tsconfig/node.json",
   "compilerOptions": {
     "strict": false,
-    "strictNullChecks": true,
+    "strictNullChecks": false,
     "exactOptionalPropertyTypes": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

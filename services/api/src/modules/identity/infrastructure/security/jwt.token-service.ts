@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import jwt from "jsonwebtoken";
+import jwt, { type Secret } from "jsonwebtoken";
+import type { StringValue } from "ms";
 import { TokenServicePort } from "../../application/ports/token-service.port";
 
 /**
@@ -7,12 +8,14 @@ import { TokenServicePort } from "../../application/ports/token-service.port";
  */
 @Injectable()
 export class JwtTokenService implements TokenServicePort {
-  private readonly accessTokenSecret =
+  private readonly accessTokenSecret: Secret =
     process.env.JWT_ACCESS_SECRET || "your-access-secret-change-in-production";
-  private readonly refreshTokenSecret =
+  private readonly refreshTokenSecret: Secret =
     process.env.JWT_REFRESH_SECRET || "your-refresh-secret-change-in-production";
-  private readonly accessTokenExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN || "15m";
-  private readonly refreshTokenExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
+  private readonly accessTokenExpiresIn: StringValue =
+    (process.env.JWT_ACCESS_EXPIRES_IN as StringValue | undefined) || "15m";
+  private readonly refreshTokenExpiresIn: StringValue =
+    (process.env.JWT_REFRESH_EXPIRES_IN as StringValue | undefined) || "30d";
 
   generateAccessToken(data: { userId: string; email: string; tenantId: string }): string {
     return jwt.sign(
@@ -21,9 +24,9 @@ export class JwtTokenService implements TokenServicePort {
         email: data.email,
         tenantId: data.tenantId,
       },
-      this.accessTokenSecret as string,
+      this.accessTokenSecret,
       {
-        expiresIn: this.accessTokenExpiresIn as string,
+        expiresIn: this.accessTokenExpiresIn,
       }
     );
   }
@@ -34,9 +37,9 @@ export class JwtTokenService implements TokenServicePort {
         // Minimal payload - the actual data is looked up from DB
         jti: Math.random().toString(36).substring(7),
       },
-      this.refreshTokenSecret as string,
+      this.refreshTokenSecret,
       {
-        expiresIn: this.refreshTokenExpiresIn as string,
+        expiresIn: this.refreshTokenExpiresIn,
       }
     );
   }

@@ -1,6 +1,9 @@
 {
   "extends": "@kerniflow/tsconfig/node.json",
   "compilerOptions": {
+    "strict": false,
+    "strictNullChecks": false,
+    "exactOptionalPropertyTypes": false,
     "jsx": "react-jsx",
     "paths": {
       "@kerniflow/testkit": ["../../packages/testkit/src/index.ts"],

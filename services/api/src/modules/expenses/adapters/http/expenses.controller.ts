@@ -8,7 +8,10 @@ import {
   Inject,
   Optional,
 } from "@nestjs/common";
-import { CreateExpenseUseCase } from "../../application/use-cases/create-expense.usecase";
+import {
+  CreateExpenseUseCase,
+  type CreateExpenseInput,
+} from "../../application/use-cases/create-expense.usecase";
 import { ArchiveExpenseUseCase } from "../../application/use-cases/archive-expense.usecase";
 import { UnarchiveExpenseUseCase } from "../../application/use-cases/unarchive-expense.usecase";
 import { IdempotencyInterceptor } from "../../../../shared/idempotency/IdempotencyInterceptor";
@@ -45,12 +48,19 @@ export class ExpensesController {
       tenantId: input.tenantId,
       actorUserId: input.createdByUserId,
     });
-    const expense = await this.createExpenseUseCase.execute({
-      ...input,
+    const expenseInput: CreateExpenseInput = {
+      tenantId: input.tenantId,
+      merchant: input.merchant,
+      totalCents: input.totalCents,
+      currency: input.currency,
+      category: input.category,
+      createdByUserId: input.createdByUserId,
+      custom: input.custom,
       issuedAt: new Date(input.issuedAt),
       idempotencyKey: (req.headers["x-idempotency-key"] as string) ?? "default",
       context: ctx,
-    });
+    };
+    const expense = await this.createExpenseUseCase.execute(expenseInput);
     const payload = {
       id: expense.id,
       tenantId: expense.tenantId,

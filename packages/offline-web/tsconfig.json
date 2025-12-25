@@ -7,5 +7,5 @@
       "@kerniflow/offline-core": ["../offline-core/src"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../offline-core/src/**/*"]
 }

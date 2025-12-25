@@ -67,13 +67,12 @@ export function createBaseViteConfig(options: BaseViteConfigOptions = {}): UserC
     server: {
       host: "::",
       port,
-      watch: {
-        // Watch workspace packages for changes
-        ignored:
-          watchWorkspacePackages.length > 0
-            ? [`!**/node_modules/{${watchWorkspacePackages.join(",")}}/**`]
-            : undefined,
-      },
+      ...(watchWorkspacePackages.length > 0 && {
+        watch: {
+          // Watch workspace packages for changes
+          ignored: [`!**/node_modules/{${watchWorkspacePackages.join(",")}}/**`],
+        },
+      }),
     },
     optimizeDeps: {
       // Exclude workspace packages from pre-bundling so changes are picked up
@@ -126,8 +125,10 @@ export function createBaseVitestConfig(options: BaseVitestConfigOptions = {}): V
  * Merge Vite config with Vitest config
  */
 export function mergeViteAndVitest(viteConfig: UserConfig, vitestConfig: VitestConfig): UserConfig {
-  return {
-    ...viteConfig,
-    test: vitestConfig.test,
-  };
+  return vitestConfig.test
+    ? {
+        ...viteConfig,
+        test: vitestConfig.test,
+      }
+    : viteConfig;
 }

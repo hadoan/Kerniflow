@@ -4,7 +4,8 @@ import { EventHandler, OutboxEvent } from "../outbox/event-handler.interface";
 import { renderEmail } from "@kerniflow/email-templates";
 import { InvoiceEmail, buildInvoiceEmailSubject } from "@kerniflow/email-templates/invoices";
 import { mapToInvoiceEmailProps } from "./invoice-email-props.mapper";
-import { EMAIL_SENDER_PORT, EmailSenderPort } from "../notifications/ports/email-sender.port";
+import { EMAIL_SENDER_PORT } from "../notifications/ports/email-sender.port";
+import type { EmailSenderPort } from "../notifications/ports/email-sender.port";
 
 type InvoiceEmailRequestedPayload = {
   deliveryId: string;

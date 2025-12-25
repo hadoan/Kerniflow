@@ -1,6 +1,8 @@
 {
   "extends": "@kerniflow/tsconfig/node.json",
   "compilerOptions": {
+    "strict": false,
+    "exactOptionalPropertyTypes": false,
     "paths": {
       "@kerniflow/testkit": ["./src/index.ts"],
       "@kerniflow/testkit/*": ["./src/*"]

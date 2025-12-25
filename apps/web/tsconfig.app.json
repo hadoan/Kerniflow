@@ -13,6 +13,7 @@
     "noUnusedParameters": false,
     "noImplicitAny": false,
     "noFallthroughCasesInSwitch": false,
+    "exactOptionalPropertyTypes": false,
 
     "baseUrl": "..",
     "paths": {

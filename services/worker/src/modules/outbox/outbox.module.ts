@@ -25,8 +25,9 @@ import { OutboxPollerService } from "./outbox-poller.service";
     },
     {
       provide: InvoiceEmailRequestedHandler,
-      useFactory: (sender: EmailSenderPort) => new InvoiceEmailRequestedHandler(sender),
-      inject: [EMAIL_SENDER_PORT],
+      useFactory: (sender: EmailSenderPort, prisma: PrismaService) =>
+        new InvoiceEmailRequestedHandler(sender, prisma),
+      inject: [EMAIL_SENDER_PORT, PrismaService],
     },
     {
       provide: OutboxRepository,
