@@ -12,6 +12,7 @@ import { TestHarnessModule } from "./modules/test-harness";
 import { PartyCrmModule } from "./modules/party-crm";
 import { DocumentsModule } from "./modules/documents";
 import { TaxModule } from "./modules/tax/tax.module";
+import { WorkspacesModule } from "./modules/workspaces";
 
 @Module({
   controllers: [AppController],
@@ -22,6 +23,7 @@ import { TaxModule } from "./modules/tax/tax.module";
     DataModule,
     IdentityModule,
     PartyCrmModule,
+    WorkspacesModule,
     ExpensesModule,
     InvoicesModule,
     DocumentsModule,

@@ -49,7 +49,20 @@ export class EnvModule {
 
     // Merge overrides with process.env for validation
     const envToValidate = options.overrides
-      ? { ...process.env, ...options.overrides }
+      ? {
+          ...process.env,
+          // Normalize overrides to strings so they satisfy ProcessEnv typing
+          ...Object.entries(options.overrides).reduce<Record<string, string>>(
+            (acc, [key, value]) => {
+              if (value === undefined) {
+                return acc;
+              }
+              acc[key] = String(value);
+              return acc;
+            },
+            {}
+          ),
+        }
       : process.env;
 
     // Validate and parse environment

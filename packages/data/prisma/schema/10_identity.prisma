@@ -13,6 +13,8 @@ model Tenant {
   roles         Role[]
   apiKeys       ApiKey[]
   refreshTokens RefreshToken[]
+  workspaces    Workspace[]
+  legalEntities LegalEntity[]
 
   @@index([createdAt])
 }
@@ -29,8 +31,9 @@ model User {
   updatedAt    DateTime @updatedAt @db.Timestamptz(6)
 
   // Relations
-  memberships    Membership[]
-  refreshTokens  RefreshToken[]
+  memberships         Membership[]
+  refreshTokens       RefreshToken[]
+  workspaceMemberships WorkspaceMembership[]
 
   @@index([email])
   @@index([createdAt])

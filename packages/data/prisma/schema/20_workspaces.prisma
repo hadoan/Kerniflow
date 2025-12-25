@@ -1,0 +1,129 @@
+// === LEGAL ENTITIES ===
+// Legal entities represent companies or individuals (freelancers) with legal/tax identity.
+// They are reusable across different contexts (workspace, supplier, etc.)
+
+model LegalEntity {
+  id          String          @id @default(cuid())
+  tenantId    String
+  kind        String          // PERSONAL, COMPANY (stored as string for now, matches WorkspaceKind enum values)
+  legalName   String
+  countryCode String          @db.Char(2)
+  currency    String          @db.Char(3)
+  taxId       String?
+  createdAt   DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @db.Timestamptz(6)
+
+  // JSON fields for structured data
+  address     Json? // LegalEntityAddress: { line1, line2?, city, postalCode, countryCode }
+  bankAccount Json? // LegalEntityBankAccount: { iban?, bic?, bankName?, accountHolder?, accountNumber?, routingNumber? }
+
+  // Relations
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspaces Workspace[]
+
+  @@index([tenantId])
+  @@index([tenantId, kind])
+  @@index([tenantId, createdAt])
+}
+
+// === WORKSPACES ===
+// Workspaces represent operational contexts within a tenant, backed by a legal entity.
+// Each workspace has its own settings, members, and business data scope.
+
+model Workspace {
+  id                    String                    @id @default(cuid())
+  tenantId              String
+  legalEntityId         String
+  name                  String
+  onboardingStatus      WorkspaceOnboardingStatus @default(NEW)
+  onboardingCompletedAt DateTime?                 @db.Timestamptz(6)
+  createdAt             DateTime                  @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime                  @updatedAt @db.Timestamptz(6)
+
+  // JSON fields for workspace-specific settings
+  invoiceSettings Json? // WorkspaceInvoiceSettings: { prefix?, nextNumber?, defaultPaymentTermsDays? }
+
+  // Relations
+  tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  legalEntity LegalEntity           @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  memberships WorkspaceMembership[]
+  invites     WorkspaceInvite[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([legalEntityId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, onboardingStatus])
+}
+
+model WorkspaceMembership {
+  id          String                    @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceMembershipRole
+  status      WorkspaceMembershipStatus @default(ACTIVE)
+  createdAt   DateTime                  @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([workspaceId, status])
+  @@index([userId, status])
+}
+
+model WorkspaceInvite {
+  id              String                 @id @default(cuid())
+  workspaceId     String
+  email           String
+  role            WorkspaceMembershipRole
+  status          WorkspaceInviteStatus  @default(PENDING)
+  token           String                 @unique
+  expiresAt       DateTime               @db.Timestamptz(6)
+  acceptedAt      DateTime?              @db.Timestamptz(6)
+  createdByUserId String?
+  createdAt       DateTime               @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([email])
+  @@index([token])
+  @@index([status, expiresAt])
+  @@index([workspaceId, status])
+}
+
+// === ENUMS ===
+
+enum WorkspaceMembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+  ACCOUNTANT
+  VIEWER
+}
+
+enum WorkspaceMembershipStatus {
+  ACTIVE
+  INVITED
+  DISABLED
+}
+
+enum WorkspaceInviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELED
+}
+
+enum WorkspaceOnboardingStatus {
+  NEW
+  PROFILE
+  TAX
+  BANK
+  DONE
+}
