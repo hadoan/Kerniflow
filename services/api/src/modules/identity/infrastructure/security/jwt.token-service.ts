@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { TokenServicePort } from "../../application/ports/token-service.port";
 
 /**
@@ -24,7 +24,7 @@ export class JwtTokenService implements TokenServicePort {
       this.accessTokenSecret as string,
       {
         expiresIn: this.accessTokenExpiresIn as string,
-      } as jwt.SignOptions
+      }
     );
   }
 
@@ -37,7 +37,7 @@ export class JwtTokenService implements TokenServicePort {
       this.refreshTokenSecret as string,
       {
         expiresIn: this.refreshTokenExpiresIn as string,
-      } as jwt.SignOptions
+      }
     );
   }
 
