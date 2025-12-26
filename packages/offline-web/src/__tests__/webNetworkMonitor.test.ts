@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, it, expect } from "vitest";
 import { WebNetworkMonitor } from "../network/webNetworkMonitor";
 
