@@ -3,6 +3,18 @@ if [ "$HUSKY" = "0" ]; then
   exit 0
 fi
 
+# Run unit tests
+echo "Running unit tests..."
+pnpm test:unit
+
+if [ $? -ne 0 ]; then
+  echo "❌ Unit tests failed. Fix tests and try again."
+  echo "   To skip: HUSKY=0 git push"
+  exit 1
+fi
+
+echo "✅ Unit tests passed."
+
 # Run lightweight typecheck before push
 echo "Running typecheck before push..."
 pnpm typecheck
