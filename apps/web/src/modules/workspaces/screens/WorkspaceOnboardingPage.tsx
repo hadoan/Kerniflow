@@ -48,7 +48,32 @@ export const WorkspaceOnboardingPage: React.FC = () => {
     );
   }, [form]);
 
-  const goNext = () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
+  const canGoToNextStep = useMemo(() => {
+    if (currentStep === 0) {
+      return form.name.trim().length > 0;
+    }
+    if (currentStep === 1) {
+      return (
+        form.legalName.trim().length > 0 &&
+        form.address.line1.trim().length > 0 &&
+        form.address.city.trim().length > 0 &&
+        form.address.postalCode.trim().length > 0
+      );
+    }
+    return true;
+  }, [currentStep, form]);
+
+  const goNext = () => {
+    if (!canGoToNextStep) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in all required fields before continuing.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
+  };
   const goBack = () => setCurrentStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
@@ -137,7 +162,9 @@ export const WorkspaceOnboardingPage: React.FC = () => {
             {currentStep === 0 && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Workspace name</Label>
+                  <Label>
+                    Workspace name <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     placeholder="e.g. Kerniflow GmbH"
                     value={form.name}
@@ -197,7 +224,9 @@ export const WorkspaceOnboardingPage: React.FC = () => {
             {currentStep === 1 && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Legal name</Label>
+                  <Label>
+                    Legal name <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     value={form.legalName}
                     onChange={(e) => setForm((f) => ({ ...f, legalName: e.target.value }))}
@@ -214,7 +243,9 @@ export const WorkspaceOnboardingPage: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Address line</Label>
+                  <Label>
+                    Address line <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     value={form.address.line1}
                     onChange={(e) =>
@@ -225,7 +256,9 @@ export const WorkspaceOnboardingPage: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>City</Label>
+                  <Label>
+                    City <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     value={form.address.city}
                     onChange={(e) =>
@@ -236,7 +269,9 @@ export const WorkspaceOnboardingPage: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Postal code</Label>
+                  <Label>
+                    Postal code <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     value={form.address.postalCode}
                     onChange={(e) =>
@@ -295,7 +330,11 @@ export const WorkspaceOnboardingPage: React.FC = () => {
                 Back
               </Button>
               {currentStep < steps.length - 1 ? (
-                <Button onClick={goNext} disabled={isSubmitting} data-testid="onboarding-next">
+                <Button
+                  onClick={goNext}
+                  disabled={!canGoToNextStep || isSubmitting}
+                  data-testid="onboarding-next"
+                >
                   Continue <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               ) : (

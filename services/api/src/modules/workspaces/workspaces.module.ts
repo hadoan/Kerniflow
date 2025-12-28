@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
+import { IdentityModule } from "../identity";
 import { WorkspacesController } from "./adapters/http/workspaces.controller";
 import { PrismaWorkspaceRepository } from "./infrastructure/adapters/prisma-workspace-repository.adapter";
 import { WORKSPACE_REPOSITORY_PORT } from "./application/ports/workspace-repository.port";
@@ -16,7 +17,7 @@ import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generat
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 
 @Module({
-  imports: [DataModule],
+  imports: [DataModule, IdentityModule],
   controllers: [WorkspacesController],
   providers: [
     // Repository

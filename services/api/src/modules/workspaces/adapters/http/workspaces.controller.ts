@@ -8,6 +8,7 @@ import {
   Req,
   Inject,
   UseInterceptors,
+  UseGuards,
 } from "@nestjs/common";
 import type { Request } from "express";
 import { z } from "zod";
@@ -22,6 +23,7 @@ import { ListWorkspacesUseCase } from "../../application/use-cases/list-workspac
 import { GetWorkspaceUseCase } from "../../application/use-cases/get-workspace.usecase";
 import { UpdateWorkspaceUseCase } from "../../application/use-cases/update-workspace.usecase";
 import { IdempotencyInterceptor } from "../../../../shared/idempotency/IdempotencyInterceptor";
+import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
 
 // Auth context extraction - compatible with tests and production
 interface AuthUser {
@@ -32,21 +34,24 @@ interface AuthUser {
 function extractAuthUser(req: Request, bodyData?: any): AuthUser {
   // Extract from various sources (headers, user session, or body for tests)
   const user = (req as any).user;
+  const requestTenantId = (req as any).tenantId;
   const headerTenantId = req.headers["x-tenant-id"] as string | undefined;
   const headerUserId = req.headers["x-user-id"] as string | undefined;
-  const tenantId = headerTenantId || bodyData?.tenantId || user?.tenantId || "default-tenant";
+  const tenantId =
+    requestTenantId || headerTenantId || bodyData?.tenantId || user?.tenantId || "default-tenant";
   const userId =
     headerUserId ||
     bodyData?.createdByUserId ||
     bodyData?.userId ||
-    user?.id ||
     user?.userId ||
+    user?.id ||
     "default-user";
 
   return { id: userId, tenantId };
 }
 
 @Controller("workspaces")
+@UseGuards(AuthGuard)
 @UseInterceptors(IdempotencyInterceptor)
 export class WorkspacesController {
   constructor(
