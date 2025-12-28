@@ -57,12 +57,24 @@ export class UpdateWorkspaceUseCase {
 
     // Update legal entity fields
     const legalEntityUpdates: any = {};
-    if (command.legalName !== undefined) {legalEntityUpdates.legalName = command.legalName;}
-    if (command.countryCode !== undefined) {legalEntityUpdates.countryCode = command.countryCode;}
-    if (command.currency !== undefined) {legalEntityUpdates.currency = command.currency;}
-    if (command.taxId !== undefined) {legalEntityUpdates.taxId = command.taxId;}
-    if (command.address !== undefined) {legalEntityUpdates.address = command.address;}
-    if (command.bankAccount !== undefined) {legalEntityUpdates.bankAccount = command.bankAccount;}
+    if (command.legalName !== undefined) {
+      legalEntityUpdates.legalName = command.legalName;
+    }
+    if (command.countryCode !== undefined) {
+      legalEntityUpdates.countryCode = command.countryCode;
+    }
+    if (command.currency !== undefined) {
+      legalEntityUpdates.currency = command.currency;
+    }
+    if (command.taxId !== undefined) {
+      legalEntityUpdates.taxId = command.taxId;
+    }
+    if (command.address !== undefined) {
+      legalEntityUpdates.address = command.address;
+    }
+    if (command.bankAccount !== undefined) {
+      legalEntityUpdates.bankAccount = command.bankAccount;
+    }
 
     if (Object.keys(legalEntityUpdates).length > 0) {
       await this.workspaceRepo.updateLegalEntity(
@@ -74,7 +86,9 @@ export class UpdateWorkspaceUseCase {
 
     // Update workspace fields
     const workspaceUpdates: any = {};
-    if (command.name !== undefined) {workspaceUpdates.name = command.name;}
+    if (command.name !== undefined) {
+      workspaceUpdates.name = command.name;
+    }
     if (command.invoiceSettings !== undefined) {
       workspaceUpdates.invoiceSettings = command.invoiceSettings;
     }

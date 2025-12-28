@@ -11,7 +11,9 @@ export class IdempotencyGuard implements CanActivate {
     const tenantId = request.body?.tenantId; // assume tenantId in body
     const actionKey = request.route.path; // e.g., /expenses
 
-    if (!key || !tenantId) {return true;} // allow if no key
+    if (!key || !tenantId) {
+      return true;
+    } // allow if no key
 
     const existing = await this.prisma.idempotencyKey.findUnique({
       where: { tenantId_actionKey_key: { tenantId, actionKey, key } },

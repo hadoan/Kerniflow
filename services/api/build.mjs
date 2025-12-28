@@ -20,9 +20,11 @@ await build({
       force: true, // Force use of tsc for decorator metadata
     }),
   ],
-}).then(() => {
-  console.log("✅ Build completed successfully");
-}).catch(() => {
-  console.error("❌ Build failed");
-  process.exit(1);
-});
+})
+  .then(() => {
+    console.log("✅ Build completed successfully");
+  })
+  .catch(() => {
+    console.error("❌ Build failed");
+    process.exit(1);
+  });

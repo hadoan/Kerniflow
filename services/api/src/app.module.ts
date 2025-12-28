@@ -13,6 +13,7 @@ import { PartyCrmModule } from "./modules/party-crm";
 import { DocumentsModule } from "./modules/documents";
 import { TaxModule } from "./modules/tax/tax.module";
 import { WorkspacesModule } from "./modules/workspaces";
+import { AccountingModule } from "./modules/accounting";
 
 @Module({
   controllers: [AppController],
@@ -28,6 +29,7 @@ import { WorkspacesModule } from "./modules/workspaces";
     InvoicesModule,
     DocumentsModule,
     TaxModule,
+    AccountingModule,
     WorkflowModule,
     AutomationModule,
     ReportingModule,

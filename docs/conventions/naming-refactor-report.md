@@ -21,13 +21,13 @@ This report documents the successful implementation of consistent naming convent
 
 ### Impact
 
-| Metric | Count |
-|--------|-------|
-| **Files Renamed** | 85+ |
-| **Folders Renamed** | 4 |
-| **Imports Updated** | 300+ |
-| **Modules Affected** | 10 |
-| **Services Touched** | API + Worker |
+| Metric               | Count                           |
+| -------------------- | ------------------------------- |
+| **Files Renamed**    | 85+                             |
+| **Folders Renamed**  | 4                               |
+| **Imports Updated**  | 300+                            |
+| **Modules Affected** | 10                              |
+| **Services Touched** | API + Worker                    |
 | **Packages Updated** | domain, data, kernel, contracts |
 
 ---
@@ -56,17 +56,18 @@ This report documents the successful implementation of consistent naming convent
 
 **Files Renamed: 7**
 
-| Old Path | New Path |
-|----------|----------|
-| `application/use-cases/ArchiveExpenseUseCase.ts` | `application/use-cases/archive-expense.usecase.ts` |
-| `application/use-cases/CreateExpenseUseCase.ts` | `application/use-cases/create-expense.usecase.ts` |
-| `application/use-cases/UnarchiveExpenseUseCase.ts` | `application/use-cases/unarchive-expense.usecase.ts` |
-| `application/ports/ExpenseRepositoryPort.ts` | `application/ports/expense-repository.port.ts` |
+| Old Path                                                | New Path                                                       |
+| ------------------------------------------------------- | -------------------------------------------------------------- |
+| `application/use-cases/ArchiveExpenseUseCase.ts`        | `application/use-cases/archive-expense.usecase.ts`             |
+| `application/use-cases/CreateExpenseUseCase.ts`         | `application/use-cases/create-expense.usecase.ts`              |
+| `application/use-cases/UnarchiveExpenseUseCase.ts`      | `application/use-cases/unarchive-expense.usecase.ts`           |
+| `application/ports/ExpenseRepositoryPort.ts`            | `application/ports/expense-repository.port.ts`                 |
 | `infrastructure/persistence/PrismaExpenseRepository.ts` | `infrastructure/adapters/prisma-expense-repository.adapter.ts` |
-| `domain/entities/Expense.ts` | `domain/expense.entity.ts` |
-| `domain/events/ExpenseCreated.ts` | `domain/events/expense-created.event.ts` |
+| `domain/entities/Expense.ts`                            | `domain/expense.entity.ts`                                     |
+| `domain/events/ExpenseCreated.ts`                       | `domain/events/expense-created.event.ts`                       |
 
 **Test Files: 2**
+
 - `archive-expense.usecase.spec.ts` → `archive-expense.usecase.test.ts`
 - `create-expense.usecase.spec.ts` → `create-expense.usecase.test.ts`
 
@@ -75,6 +76,7 @@ This report documents the successful implementation of consistent naming convent
 **Files Renamed: 14**
 
 **UseCases (PascalCase → kebab-case):**
+
 - `CompleteUploadUseCase.ts` → `complete-upload.usecase.ts`
 - `CreateUploadIntentUseCase.ts` → `create-upload-intent.usecase.ts`
 - `GenerateInvoicePdfWorker.ts` → `generate-invoice-pdf.worker.ts`
@@ -84,10 +86,12 @@ This report documents the successful implementation of consistent naming convent
 - (+ corresponding `.test.ts` files for each)
 
 **Repository Ports:**
+
 - `document-repo.port.ts` → `document-repository.port.ts`
 - `file-repo.port.ts` → `file-repository.port.ts`
 
 **Folder Rename:**
+
 - `infra/` → `infrastructure/`
 
 ### 3. Invoices Module
@@ -95,6 +99,7 @@ This report documents the successful implementation of consistent naming convent
 **Files Renamed: 17**
 
 **UseCases:**
+
 - `CancelInvoiceUseCase.ts` → `cancel-invoice.usecase.ts`
 - `CreateInvoiceUseCase.ts` → `create-invoice.usecase.ts`
 - `FinalizeInvoiceUseCase.ts` → `finalize-invoice.usecase.ts`
@@ -106,10 +111,12 @@ This report documents the successful implementation of consistent naming convent
 - (+ corresponding `.test.ts` files)
 
 **Repository Ports:**
+
 - `invoice-repo.port.ts` → `invoice-repository.port.ts`
 - `invoice-email-delivery-repo.port.ts` → `invoice-email-delivery-repository.port.ts`
 
 **Repository Adapters:**
+
 - `prisma/prisma-invoice-repo.adapter.ts` → `adapters/prisma-invoice-repository.adapter.ts`
 
 ### 4. Party-CRM Module
@@ -117,6 +124,7 @@ This report documents the successful implementation of consistent naming convent
 **Files Renamed: 9**
 
 **UseCases:**
+
 - `ArchiveCustomerUseCase.ts` → `archive-customer.usecase.ts`
 - `CreateCustomerUseCase.ts` → `create-customer.usecase.ts`
 - `GetCustomerByIdUseCase.ts` → `get-customer-by-id.usecase.ts`
@@ -126,9 +134,11 @@ This report documents the successful implementation of consistent naming convent
 - `UpdateCustomerUseCase.ts` → `update-customer.usecase.ts`
 
 **Repository Port:**
+
 - `party-repo.port.ts` → `party-repository.port.ts`
 
 **Folder Rename:**
+
 - `infra/` → `infrastructure/`
 
 ### 5. Privacy Module
@@ -136,17 +146,21 @@ This report documents the successful implementation of consistent naming convent
 **Files Renamed: 5**
 
 **UseCases:**
+
 - `GetPrivacyRequestStatusUseCase.ts` → `get-privacy-request-status.usecase.ts`
 - `RequestAccountErasureUseCase.ts` → `request-account-erasure.usecase.ts`
 - `RequestPersonalDataExportUseCase.ts` → `request-personal-data-export.usecase.ts`
 
 **Repository Port:**
+
 - `privacy-request-repo.port.ts` → `privacy-request-repository.port.ts`
 
 **Test Files:**
+
 - `privacy.usecases.spec.ts` → `privacy.usecases.test.ts`
 
 **Folder Rename:**
+
 - `infra/` → `infrastructure/`
 
 ### 6. Identity Module
@@ -154,6 +168,7 @@ This report documents the successful implementation of consistent naming convent
 **Files Renamed: 11**
 
 **Repository Ports:**
+
 - `user.repo.port.ts` → `user-repository.port.ts`
 - `membership.repo.port.ts` → `membership-repository.port.ts`
 - `refresh-token.repo.port.ts` → `refresh-token-repository.port.ts`
@@ -161,6 +176,7 @@ This report documents the successful implementation of consistent naming convent
 - `tenant.repo.port.ts` → `tenant-repository.port.ts`
 
 **Repository Adapters:**
+
 - `persistence/PrismaUserRepository.ts` → `adapters/prisma-user-repository.adapter.ts`
 - `persistence/prisma.audit.repo.ts` → `adapters/prisma-audit-repository.adapter.ts`
 - `persistence/prisma.membership.repo.ts` → `adapters/prisma-membership-repository.adapter.ts`
@@ -173,11 +189,13 @@ This report documents the successful implementation of consistent naming convent
 **Files Renamed: 6**
 
 **Repository Ports:**
+
 - `agent-run.repo.port.ts` → `agent-run-repository.port.ts`
 - `message.repo.port.ts` → `message-repository.port.ts`
 - `tool-execution.repo.port.ts` → `tool-execution-repository.port.ts`
 
 **Repository Adapters:**
+
 - `persistence/prisma.agent-run.repo.ts` → `adapters/prisma-agent-run-repository.adapter.ts`
 - `persistence/prisma.message.repo.ts` → `adapters/prisma-message-repository.adapter.ts`
 - `persistence/prisma.tool-execution.repo.ts` → `adapters/prisma-tool-execution-repository.adapter.ts`
@@ -190,6 +208,7 @@ This report documents the successful implementation of consistent naming convent
 - `WorkflowRunnerService.ts` → `workflow-runner.service.ts`
 
 **Folder Rename:**
+
 - `notifications/infra/` → `notifications/infrastructure/`
 
 ### 9. Shared Packages
@@ -218,24 +237,24 @@ This report documents the successful implementation of consistent naming convent
 
 ### Before Refactor
 
-| Issue | Count | Examples |
-|-------|-------|----------|
-| PascalCase filenames | 32 | `CreateInvoiceUseCase.ts`, `Expense.ts` |
-| `repo` abbreviations | 20+ | `invoice-repo.port.ts` |
-| Mixed test suffixes | 26 | `.spec.ts` vs `.test.ts` |
-| `infra` abbreviations | 4 | `modules/*/infra/` |
-| Inconsistent adapter prefixes | 5+ | `prisma.audit.repo.ts` (dots vs hyphens) |
+| Issue                         | Count | Examples                                 |
+| ----------------------------- | ----- | ---------------------------------------- |
+| PascalCase filenames          | 32    | `CreateInvoiceUseCase.ts`, `Expense.ts`  |
+| `repo` abbreviations          | 20+   | `invoice-repo.port.ts`                   |
+| Mixed test suffixes           | 26    | `.spec.ts` vs `.test.ts`                 |
+| `infra` abbreviations         | 4     | `modules/*/infra/`                       |
+| Inconsistent adapter prefixes | 5+    | `prisma.audit.repo.ts` (dots vs hyphens) |
 
 ### After Refactor
 
-| Convention | Status | Pattern |
-|------------|--------|---------|
-| File naming | ✅ 100% kebab-case | `create-invoice.usecase.ts` |
-| Repository ports | ✅ Full words | `invoice-repository.port.ts` |
-| Repository adapters | ✅ Tech prefix | `prisma-invoice-repository.adapter.ts` |
-| Test suffixes | ✅ `.test.ts` standard | `create-invoice.usecase.test.ts` |
-| Infrastructure folders | ✅ Full word | `infrastructure/` |
-| Adapter folder location | ✅ Consistent | `infrastructure/adapters/` |
+| Convention              | Status                 | Pattern                                |
+| ----------------------- | ---------------------- | -------------------------------------- |
+| File naming             | ✅ 100% kebab-case     | `create-invoice.usecase.ts`            |
+| Repository ports        | ✅ Full words          | `invoice-repository.port.ts`           |
+| Repository adapters     | ✅ Tech prefix         | `prisma-invoice-repository.adapter.ts` |
+| Test suffixes           | ✅ `.test.ts` standard | `create-invoice.usecase.test.ts`       |
+| Infrastructure folders  | ✅ Full word           | `infrastructure/`                      |
+| Adapter folder location | ✅ Consistent          | `infrastructure/adapters/`             |
 
 ---
 
@@ -247,14 +266,14 @@ This report documents the successful implementation of consistent naming convent
 
 ```typescript
 // BEFORE
-import { CreateInvoiceUseCase } from '../use-cases/CreateInvoiceUseCase';
-import { InvoiceRepoPort } from '../ports/invoice-repo.port';
-import { PrismaInvoiceRepo } from '../infra/prisma/prisma-invoice-repo.adapter';
+import { CreateInvoiceUseCase } from "../use-cases/CreateInvoiceUseCase";
+import { InvoiceRepoPort } from "../ports/invoice-repo.port";
+import { PrismaInvoiceRepo } from "../infra/prisma/prisma-invoice-repo.adapter";
 
 // AFTER
-import { CreateInvoiceUseCase } from '../use-cases/create-invoice.usecase';
-import { InvoiceRepositoryPort } from '../ports/invoice-repository.port';
-import { PrismaInvoiceRepositoryAdapter } from '../infrastructure/adapters/prisma-invoice-repository.adapter';
+import { CreateInvoiceUseCase } from "../use-cases/create-invoice.usecase";
+import { InvoiceRepositoryPort } from "../ports/invoice-repository.port";
+import { PrismaInvoiceRepositoryAdapter } from "../infrastructure/adapters/prisma-invoice-repository.adapter";
 ```
 
 ---
@@ -311,6 +330,7 @@ bash scripts/fix-remaining-imports.sh
 ### Recommended Future Steps
 
 1. **ESLint Rule**: Add filename-case rule to enforce kebab-case
+
    ```json
    {
      "rules": {
@@ -320,6 +340,7 @@ bash scripts/fix-remaining-imports.sh
    ```
 
 2. **Pre-commit Hook**: Validate naming on commit
+
    ```bash
    #!/bin/bash
    # .git/hooks/pre-commit
@@ -330,6 +351,7 @@ bash scripts/fix-remaining-imports.sh
    ```
 
 3. **CI Pipeline Check**: Add naming validation to CI
+
    ```yaml
    - name: Validate naming conventions
      run: |
@@ -424,6 +446,7 @@ The following modules had no violations and required no changes:
 The Kerniflow naming conventions refactor has been **successfully completed**. All 85+ files now follow consistent kebab-case naming, all repository files use the full "repository" word (no abbreviations), and infrastructure folders use the complete "infrastructure" name.
 
 **The codebase is now:**
+
 - ✅ More discoverable (predictable file locations)
 - ✅ More maintainable (consistent patterns)
 - ✅ Team-friendly (no ambiguity in naming)
@@ -431,6 +454,7 @@ The Kerniflow naming conventions refactor has been **successfully completed**. A
 - ✅ Ready for automated enforcement (ESLint, pre-commit hooks)
 
 **Next steps:**
+
 1. Create git commit with all refactor changes
 2. Address pre-existing type errors (separate PR)
 3. Add linting rules to enforce conventions going forward

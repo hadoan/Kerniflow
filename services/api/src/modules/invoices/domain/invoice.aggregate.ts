@@ -159,10 +159,18 @@ export class InvoiceAggregate {
       }
     }
 
-    if (patch.customerPartyId !== undefined) {this.customerPartyId = patch.customerPartyId;}
-    if (patch.currency !== undefined) {this.currency = patch.currency;}
-    if (patch.notes !== undefined) {this.notes = patch.notes;}
-    if (patch.terms !== undefined) {this.terms = patch.terms;}
+    if (patch.customerPartyId !== undefined) {
+      this.customerPartyId = patch.customerPartyId;
+    }
+    if (patch.currency !== undefined) {
+      this.currency = patch.currency;
+    }
+    if (patch.notes !== undefined) {
+      this.notes = patch.notes;
+    }
+    if (patch.terms !== undefined) {
+      this.terms = patch.terms;
+    }
     this.touch(now);
   }
 
@@ -170,8 +178,12 @@ export class InvoiceAggregate {
     if (this.status !== "DRAFT") {
       throw new Error("Cannot change invoice dates unless draft");
     }
-    if (dates.invoiceDate !== undefined) {this.invoiceDate = dates.invoiceDate;}
-    if (dates.dueDate !== undefined) {this.dueDate = dates.dueDate;}
+    if (dates.invoiceDate !== undefined) {
+      this.invoiceDate = dates.invoiceDate;
+    }
+    if (dates.dueDate !== undefined) {
+      this.dueDate = dates.dueDate;
+    }
     this.touch(now);
   }
 
@@ -233,7 +245,9 @@ export class InvoiceAggregate {
     if (this.status === "PAID") {
       throw new Error("Cannot cancel a paid invoice");
     }
-    if (this.status === "CANCELED") {return;}
+    if (this.status === "CANCELED") {
+      return;
+    }
     this.status = "CANCELED";
     this.notes = reason ?? this.notes ?? null;
     this.sentAt = canceledAt ?? this.sentAt;
@@ -300,7 +314,9 @@ export class InvoiceAggregate {
   }
 
   isPdfStale(): boolean {
-    if (!this.pdfStorageKey || !this.pdfSourceVersion) {return true;}
+    if (!this.pdfStorageKey || !this.pdfSourceVersion) {
+      return true;
+    }
     return this.pdfSourceVersion !== this.updatedAt.toISOString();
   }
 

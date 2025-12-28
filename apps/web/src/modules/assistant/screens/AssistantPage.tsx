@@ -95,7 +95,9 @@ export default function AssistantPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() && !selectedFile) {return;}
+    if (!input.trim() && !selectedFile) {
+      return;
+    }
 
     const userMessage = input.trim();
     const hasFile = !!selectedFile;

@@ -45,7 +45,9 @@ export class RequestInvoicePdfUseCase extends BaseUseCase<
   }
 
   protected validate(input: RequestInvoicePdfInput): RequestInvoicePdfInput {
-    if (!input.invoiceId) {throw new ValidationError("invoiceId is required");}
+    if (!input.invoiceId) {
+      throw new ValidationError("invoiceId is required");
+    }
     return input;
   }
 

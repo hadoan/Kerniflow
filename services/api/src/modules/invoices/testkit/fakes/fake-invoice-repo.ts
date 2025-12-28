@@ -38,11 +38,18 @@ export class FakeInvoiceRepository implements InvoiceRepoPort {
   ): Promise<ListInvoicesResult> {
     const startIndex = cursor ? this.invoices.findIndex((i) => i.id === cursor) + 1 : 0;
     let items = this.invoices.filter((i) => i.tenantId === tenantId);
-    if (filters.status) {items = items.filter((i) => i.status === filters.status);}
-    if (filters.customerPartyId)
-      {items = items.filter((i) => i.customerPartyId === filters.customerPartyId);}
-    if (filters.fromDate) {items = items.filter((i) => i.createdAt >= filters.fromDate!);}
-    if (filters.toDate) {items = items.filter((i) => i.createdAt <= filters.toDate!);}
+    if (filters.status) {
+      items = items.filter((i) => i.status === filters.status);
+    }
+    if (filters.customerPartyId) {
+      items = items.filter((i) => i.customerPartyId === filters.customerPartyId);
+    }
+    if (filters.fromDate) {
+      items = items.filter((i) => i.createdAt >= filters.fromDate!);
+    }
+    if (filters.toDate) {
+      items = items.filter((i) => i.createdAt <= filters.toDate!);
+    }
 
     const slice = items.slice(startIndex, startIndex + pageSize);
     const nextCursor = slice.length === pageSize ? slice[slice.length - 1].id : null;

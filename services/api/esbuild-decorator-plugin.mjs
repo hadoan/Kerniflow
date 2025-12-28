@@ -1,11 +1,11 @@
-import { transform } from '@swc/core';
+import { transform } from "@swc/core";
 
 export const decoratorPlugin = {
-  name: 'decorator-plugin',
+  name: "decorator-plugin",
   setup(build) {
     build.onLoad({ filter: /\.ts$/ }, async (args) => {
-      const ts = await import('fs').then(fs => fs.promises.readFile(args.path, 'utf8'));
-      
+      const ts = await import("fs").then((fs) => fs.promises.readFile(args.path, "utf8"));
+
       // Transform TypeScript with decorator support using SWC
       const result = await transform(ts, {
         filename: args.path,
@@ -30,8 +30,8 @@ export const decoratorPlugin = {
 
       return {
         contents: result.code,
-        loader: 'js',
+        loader: "js",
       };
     });
-  }
+  },
 };

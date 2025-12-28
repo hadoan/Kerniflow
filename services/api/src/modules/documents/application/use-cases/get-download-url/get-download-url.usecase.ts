@@ -28,7 +28,9 @@ export class GetDownloadUrlUseCase extends BaseUseCase<GetDownloadUrlInput, GetD
   }
 
   protected validate(input: GetDownloadUrlInput): GetDownloadUrlInput {
-    if (!input.documentId) {throw new ValidationError("documentId is required");}
+    if (!input.documentId) {
+      throw new ValidationError("documentId is required");
+    }
     return input;
   }
 

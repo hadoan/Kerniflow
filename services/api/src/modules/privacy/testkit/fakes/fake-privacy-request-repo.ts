@@ -14,7 +14,9 @@ export class FakePrivacyRequestRepo implements PrivacyRequestRepoPort {
 
   async findById(tenantId: string, id: string): Promise<PrivacyRequest | null> {
     const req = this.requests.get(id);
-    if (!req || req.tenantId !== tenantId) {return null;}
+    if (!req || req.tenantId !== tenantId) {
+      return null;
+    }
     return req;
   }
 }

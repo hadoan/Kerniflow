@@ -13,7 +13,9 @@ export class MockTokenService implements TokenServicePort {
     token: string
   ): Promise<{ userId: string; email: string; tenantId: string; iat: number; exp: number } | null> {
     const parts = token.split(":");
-    if (parts[0] !== "access") {return null;}
+    if (parts[0] !== "access") {
+      return null;
+    }
     return {
       userId: parts[1],
       email: "",

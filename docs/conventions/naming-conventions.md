@@ -30,13 +30,14 @@ This document defines the **single, authoritative naming taxonomy** for all code
 
 ### File and Folder Naming
 
-| Rule | Pattern | Valid Examples | Invalid Examples |
-|------|---------|----------------|------------------|
-| **All files** | `kebab-case` only | `create-invoice.usecase.ts`<br>`expense-repository.port.ts` | `CreateInvoice.ts`<br>`ExpenseRepository.ts`<br>`createInvoice.ts` |
-| **Folders** | `kebab-case`, plural for collections | `use-cases/`<br>`adapters/`<br>`repositories/` | `UseCases/`<br>`use_cases/`<br>`Adapters/` |
-| **No abbreviations** | Use full words consistently | `repository` not `repo`<br>`configuration` not `config`<br>`infrastructure` not `infra` | `*.repo.ts`<br>`config/`<br>`infra/` |
+| Rule                 | Pattern                              | Valid Examples                                                                          | Invalid Examples                                                   |
+| -------------------- | ------------------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| **All files**        | `kebab-case` only                    | `create-invoice.usecase.ts`<br>`expense-repository.port.ts`                             | `CreateInvoice.ts`<br>`ExpenseRepository.ts`<br>`createInvoice.ts` |
+| **Folders**          | `kebab-case`, plural for collections | `use-cases/`<br>`adapters/`<br>`repositories/`                                          | `UseCases/`<br>`use_cases/`<br>`Adapters/`                         |
+| **No abbreviations** | Use full words consistently          | `repository` not `repo`<br>`configuration` not `config`<br>`infrastructure` not `infra` | `*.repo.ts`<br>`config/`<br>`infra/`                               |
 
 **Exception**: Common industry abbreviations are allowed when universally understood:
+
 - `dto` (Data Transfer Object)
 - `api` (Application Programming Interface)
 - `http` (HyperText Transfer Protocol)
@@ -45,15 +46,15 @@ This document defines the **single, authoritative naming taxonomy** for all code
 
 ### Class, Type, and Symbol Naming
 
-| Element | Casing | Example |
-|---------|--------|---------|
-| Classes | `PascalCase` | `CreateInvoiceUseCase`<br>`PrismaExpenseRepository` |
-| Interfaces | `PascalCase` | `ExpenseRepositoryPort`<br>`LoggerPort` |
-| Types | `PascalCase` | `InvoiceStatus`<br>`CreateExpenseDto` |
-| Functions | `camelCase` | `calculateTax`<br>`formatCurrency` |
-| Variables | `camelCase` | `invoiceDate`<br>`totalAmount` |
-| Constants | `SCREAMING_SNAKE_CASE` | `MAX_RETRIES`<br>`DEFAULT_CURRENCY` |
-| DI Tokens | `SCREAMING_SNAKE_CASE` | `EXPENSE_REPOSITORY_TOKEN`<br>`LOGGER_PORT` |
+| Element    | Casing                 | Example                                             |
+| ---------- | ---------------------- | --------------------------------------------------- |
+| Classes    | `PascalCase`           | `CreateInvoiceUseCase`<br>`PrismaExpenseRepository` |
+| Interfaces | `PascalCase`           | `ExpenseRepositoryPort`<br>`LoggerPort`             |
+| Types      | `PascalCase`           | `InvoiceStatus`<br>`CreateExpenseDto`               |
+| Functions  | `camelCase`            | `calculateTax`<br>`formatCurrency`                  |
+| Variables  | `camelCase`            | `invoiceDate`<br>`totalAmount`                      |
+| Constants  | `SCREAMING_SNAKE_CASE` | `MAX_RETRIES`<br>`DEFAULT_CURRENCY`                 |
+| DI Tokens  | `SCREAMING_SNAKE_CASE` | `EXPENSE_REPOSITORY_TOKEN`<br>`LOGGER_PORT`         |
 
 ### Export Naming Rules
 
@@ -69,41 +70,41 @@ This document defines the **single, authoritative naming taxonomy** for all code
 
 This table defines the **canonical suffix** for every architectural layer. All files must use exactly these suffixes.
 
-| Suffix | Layer | Purpose | File Example | Export Example |
-|--------|-------|---------|--------------|----------------|
-| `.port.ts` | Application boundary | Interface/contract for hexagonal ports | `expense-repository.port.ts` | `ExpenseRepositoryPort` |
-| `.adapter.ts` | Infrastructure implementation | Concrete implementation of a port | `prisma-expense-repository.adapter.ts` | `PrismaExpenseRepositoryAdapter` |
-| `.usecase.ts` | Application logic | Command-style use case (write operation) | `create-invoice.usecase.ts` | `CreateInvoiceUseCase` |
-| `.query.ts` | Application logic | Query-style handler (read operation) | `list-expenses.query.ts` | `ListExpensesQuery` |
-| `.service.ts` | Application/Domain | Orchestration service (reusable logic) | `tax-engine.service.ts` | `TaxEngineService` |
-| `.controller.ts` | HTTP presentation | NestJS REST controller | `invoices.controller.ts` | `InvoicesController` |
-| `.module.ts` | DI container | NestJS module definition | `expenses.module.ts` | `ExpensesModule` |
-| `.dto.ts` | Data transfer | HTTP request/response types | `create-invoice.dto.ts` | `CreateInvoiceDto` |
-| `.schema.ts` | Validation | Zod/validation schemas | `create-invoice.schema.ts` | `createInvoiceSchema` |
-| `.types.ts` | Domain model | Domain types and enums | `invoice.types.ts` | `InvoiceStatus` |
-| `.entity.ts` | Domain model | Rich domain entity/aggregate | `invoice.entity.ts` | `InvoiceEntity` |
-| `.aggregate.ts` | Domain model | DDD aggregate root | `invoice.aggregate.ts` | `InvoiceAggregate` |
-| `.event.ts` | Domain events | Domain event types | `invoice-created.event.ts` | `InvoiceCreatedEvent` |
-| `.policy.ts` | Domain logic | Domain policy/business rule | `rounding.policy.ts` | `RoundingPolicy` |
-| `.mapper.ts` | Infrastructure | Data transformation logic | `invoice-email-props.mapper.ts` | `mapInvoiceToEmailProps` |
-| `.guard.ts` | HTTP middleware | NestJS route guard | `tenant-scope.guard.ts` | `TenantScopeGuard` |
-| `.pipe.ts` | HTTP middleware | NestJS validation pipe | `zod-validation.pipe.ts` | `ZodValidationPipe` |
-| `.interceptor.ts` | HTTP middleware | NestJS interceptor | `logging.interceptor.ts` | `LoggingInterceptor` |
-| `.filter.ts` | HTTP middleware | NestJS exception filter | `http-exception.filter.ts` | `HttpExceptionFilter` |
-| `.decorator.ts` | Metadata | Custom TypeScript decorators | `current-user.decorator.ts` | `CurrentUser` |
-| `.tool.ts` | AI Copilot | AI tool definition for LLM | `invoice.tool.ts` | `createInvoiceTool` |
-| `.handler.ts` | Event processing | Domain event handler | `invoice-created.handler.ts` | `InvoiceCreatedHandler` |
-| `.consumer.ts` | Message queue | Queue consumer (worker) | `invoice-email.consumer.ts` | `InvoiceEmailConsumer` |
-| `.job.ts` | Background task | Scheduled job definition | `cleanup-expired-tokens.job.ts` | `CleanupExpiredTokensJob` |
+| Suffix            | Layer                         | Purpose                                  | File Example                           | Export Example                   |
+| ----------------- | ----------------------------- | ---------------------------------------- | -------------------------------------- | -------------------------------- |
+| `.port.ts`        | Application boundary          | Interface/contract for hexagonal ports   | `expense-repository.port.ts`           | `ExpenseRepositoryPort`          |
+| `.adapter.ts`     | Infrastructure implementation | Concrete implementation of a port        | `prisma-expense-repository.adapter.ts` | `PrismaExpenseRepositoryAdapter` |
+| `.usecase.ts`     | Application logic             | Command-style use case (write operation) | `create-invoice.usecase.ts`            | `CreateInvoiceUseCase`           |
+| `.query.ts`       | Application logic             | Query-style handler (read operation)     | `list-expenses.query.ts`               | `ListExpensesQuery`              |
+| `.service.ts`     | Application/Domain            | Orchestration service (reusable logic)   | `tax-engine.service.ts`                | `TaxEngineService`               |
+| `.controller.ts`  | HTTP presentation             | NestJS REST controller                   | `invoices.controller.ts`               | `InvoicesController`             |
+| `.module.ts`      | DI container                  | NestJS module definition                 | `expenses.module.ts`                   | `ExpensesModule`                 |
+| `.dto.ts`         | Data transfer                 | HTTP request/response types              | `create-invoice.dto.ts`                | `CreateInvoiceDto`               |
+| `.schema.ts`      | Validation                    | Zod/validation schemas                   | `create-invoice.schema.ts`             | `createInvoiceSchema`            |
+| `.types.ts`       | Domain model                  | Domain types and enums                   | `invoice.types.ts`                     | `InvoiceStatus`                  |
+| `.entity.ts`      | Domain model                  | Rich domain entity/aggregate             | `invoice.entity.ts`                    | `InvoiceEntity`                  |
+| `.aggregate.ts`   | Domain model                  | DDD aggregate root                       | `invoice.aggregate.ts`                 | `InvoiceAggregate`               |
+| `.event.ts`       | Domain events                 | Domain event types                       | `invoice-created.event.ts`             | `InvoiceCreatedEvent`            |
+| `.policy.ts`      | Domain logic                  | Domain policy/business rule              | `rounding.policy.ts`                   | `RoundingPolicy`                 |
+| `.mapper.ts`      | Infrastructure                | Data transformation logic                | `invoice-email-props.mapper.ts`        | `mapInvoiceToEmailProps`         |
+| `.guard.ts`       | HTTP middleware               | NestJS route guard                       | `tenant-scope.guard.ts`                | `TenantScopeGuard`               |
+| `.pipe.ts`        | HTTP middleware               | NestJS validation pipe                   | `zod-validation.pipe.ts`               | `ZodValidationPipe`              |
+| `.interceptor.ts` | HTTP middleware               | NestJS interceptor                       | `logging.interceptor.ts`               | `LoggingInterceptor`             |
+| `.filter.ts`      | HTTP middleware               | NestJS exception filter                  | `http-exception.filter.ts`             | `HttpExceptionFilter`            |
+| `.decorator.ts`   | Metadata                      | Custom TypeScript decorators             | `current-user.decorator.ts`            | `CurrentUser`                    |
+| `.tool.ts`        | AI Copilot                    | AI tool definition for LLM               | `invoice.tool.ts`                      | `createInvoiceTool`              |
+| `.handler.ts`     | Event processing              | Domain event handler                     | `invoice-created.handler.ts`           | `InvoiceCreatedHandler`          |
+| `.consumer.ts`    | Message queue                 | Queue consumer (worker)                  | `invoice-email.consumer.ts`            | `InvoiceEmailConsumer`           |
+| `.job.ts`         | Background task               | Scheduled job definition                 | `cleanup-expired-tokens.job.ts`        | `CleanupExpiredTokensJob`        |
 
 ### Test File Suffixes
 
-| Suffix | Test Type | Purpose | Example |
-|--------|-----------|---------|---------|
-| `.test.ts` | Unit test | Fast, isolated tests (default) | `create-invoice.usecase.test.ts` |
-| `.int.test.ts` | Integration test | Tests with DB/external services | `expenses.int.test.ts` |
-| `.e2e.test.ts` | End-to-end test | Full HTTP request/response tests | `invoices.e2e.test.ts` |
-| `.contract.test.ts` | Contract test | Shared schema validation tests | `invoices.contract.test.ts` |
+| Suffix              | Test Type        | Purpose                          | Example                          |
+| ------------------- | ---------------- | -------------------------------- | -------------------------------- |
+| `.test.ts`          | Unit test        | Fast, isolated tests (default)   | `create-invoice.usecase.test.ts` |
+| `.int.test.ts`      | Integration test | Tests with DB/external services  | `expenses.int.test.ts`           |
+| `.e2e.test.ts`      | End-to-end test  | Full HTTP request/response tests | `invoices.e2e.test.ts`           |
+| `.contract.test.ts` | Contract test    | Shared schema validation tests   | `invoices.contract.test.ts`      |
 
 **Rationale**: `.test.ts` is the default for unit tests (majority use case). Integration/e2e tests get explicit suffixes.
 
@@ -118,14 +119,16 @@ The repository pattern requires **strict separation** between contract (port) an
 **Location**: `application/ports/` or `domain/ports/`
 
 **Naming Convention**:
+
 - File: `{entity}-repository.port.ts`
 - Interface: `{Entity}RepositoryPort`
 - DI Token: `{ENTITY}_REPOSITORY_TOKEN` (co-located in same file)
 
 **Example**:
+
 ```typescript
 // File: application/ports/expense-repository.port.ts
-export const EXPENSE_REPOSITORY_TOKEN = Symbol('EXPENSE_REPOSITORY_TOKEN');
+export const EXPENSE_REPOSITORY_TOKEN = Symbol("EXPENSE_REPOSITORY_TOKEN");
 
 export interface ExpenseRepositoryPort {
   save(tenantId: string, expense: ExpenseAggregate): Promise<void>;
@@ -139,14 +142,16 @@ export interface ExpenseRepositoryPort {
 **Location**: `infrastructure/adapters/` or `infrastructure/persistence/`
 
 **Naming Convention**:
+
 - File: `{technology}-{entity}-repository.adapter.ts`
 - Class: `{Technology}{Entity}RepositoryAdapter`
 - Technology prefix: `prisma`, `memory`, `http`, `redis`, `file`, etc.
 
 **Example**:
+
 ```typescript
 // File: infrastructure/adapters/prisma-expense-repository.adapter.ts
-import { ExpenseRepositoryPort } from '../../application/ports/expense-repository.port';
+import { ExpenseRepositoryPort } from "../../application/ports/expense-repository.port";
 
 @Injectable()
 export class PrismaExpenseRepositoryAdapter implements ExpenseRepositoryPort {
@@ -158,15 +163,15 @@ export class PrismaExpenseRepositoryAdapter implements ExpenseRepositoryPort {
 
 ### Technology Prefixes for Adapters
 
-| Prefix | Technology | Example |
-|--------|------------|---------|
+| Prefix    | Technology            | Example                                |
+| --------- | --------------------- | -------------------------------------- |
 | `prisma-` | Prisma ORM (database) | `prisma-expense-repository.adapter.ts` |
-| `memory-` | In-memory (testing) | `memory-expense-repository.adapter.ts` |
-| `http-` | HTTP client | `http-payment-gateway.adapter.ts` |
-| `redis-` | Redis cache | `redis-session-store.adapter.ts` |
-| `s3-` | AWS S3 storage | `s3-file-storage.adapter.ts` |
-| `resend-` | Resend email service | `resend-email-sender.adapter.ts` |
-| `stripe-` | Stripe payment API | `stripe-payment-processor.adapter.ts` |
+| `memory-` | In-memory (testing)   | `memory-expense-repository.adapter.ts` |
+| `http-`   | HTTP client           | `http-payment-gateway.adapter.ts`      |
+| `redis-`  | Redis cache           | `redis-session-store.adapter.ts`       |
+| `s3-`     | AWS S3 storage        | `s3-file-storage.adapter.ts`           |
+| `resend-` | Resend email service  | `resend-email-sender.adapter.ts`       |
+| `stripe-` | Stripe payment API    | `stripe-payment-processor.adapter.ts`  |
 
 ---
 
@@ -227,17 +232,18 @@ export class PrismaExpenseRepositoryAdapter implements ExpenseRepositoryPort {
 
 ### Folder Naming Rules
 
-| Folder Type | Naming | Example |
-|-------------|--------|---------|
-| **Layer folders** | Plural, kebab-case | `use-cases/`, `adapters/`, `controllers/` |
-| **Domain folders** | Singular, kebab-case | `events/`, `policies/` |
-| **Module folders** | Singular, kebab-case | `expenses/`, `invoices/`, `party-crm/` |
+| Folder Type        | Naming               | Example                                   |
+| ------------------ | -------------------- | ----------------------------------------- |
+| **Layer folders**  | Plural, kebab-case   | `use-cases/`, `adapters/`, `controllers/` |
+| **Domain folders** | Singular, kebab-case | `events/`, `policies/`                    |
+| **Module folders** | Singular, kebab-case | `expenses/`, `invoices/`, `party-crm/`    |
 
 ### Infrastructure Folder Naming
 
 **Standardize on**: `infrastructure/` (full word, not `infra/`)
 
 **Subfolders**:
+
 - `infrastructure/adapters/` - Port implementations (repositories, gateways, services)
 - `infrastructure/persistence/` - Alternative name, use if preferred for clarity
 - `infrastructure/http/` - HTTP clients (if not in adapters/)
@@ -254,11 +260,11 @@ export class PrismaExpenseRepositoryAdapter implements ExpenseRepositoryPort {
 
 ```typescript
 // File: di/expenses.module.ts
-import { Module } from '@nestjs/common';
-import { EXPENSE_REPOSITORY_TOKEN } from '../application/ports/expense-repository.port';
-import { PrismaExpenseRepositoryAdapter } from '../infrastructure/adapters/prisma-expense-repository.adapter';
-import { CreateExpenseUseCase } from '../application/use-cases/create-expense.usecase';
-import { ExpensesController } from '../http/expenses.controller';
+import { Module } from "@nestjs/common";
+import { EXPENSE_REPOSITORY_TOKEN } from "../application/ports/expense-repository.port";
+import { PrismaExpenseRepositoryAdapter } from "../infrastructure/adapters/prisma-expense-repository.adapter";
+import { CreateExpenseUseCase } from "../application/use-cases/create-expense.usecase";
+import { ExpensesController } from "../http/expenses.controller";
 
 @Module({
   controllers: [ExpensesController],
@@ -282,7 +288,7 @@ export class ExpensesModule {}
 
 ```typescript
 // File: http/invoices.controller.ts
-@Controller('invoices')
+@Controller("invoices")
 export class InvoicesController {
   @Post()
   async create(@Body() dto: CreateInvoiceDto): Promise<InvoiceDto> {
@@ -296,14 +302,16 @@ export class InvoicesController {
 **Token Naming**: `{ENTITY}_{TYPE}_TOKEN`
 
 **Pattern**:
+
 ```typescript
 // Co-located with port interface
-export const EXPENSE_REPOSITORY_TOKEN = Symbol('EXPENSE_REPOSITORY_TOKEN');
-export const LOGGER_PORT = Symbol('LOGGER_PORT');
-export const EMAIL_SENDER_PORT = Symbol('EMAIL_SENDER_PORT');
+export const EXPENSE_REPOSITORY_TOKEN = Symbol("EXPENSE_REPOSITORY_TOKEN");
+export const LOGGER_PORT = Symbol("LOGGER_PORT");
+export const EMAIL_SENDER_PORT = Symbol("EMAIL_SENDER_PORT");
 ```
 
 **Provider Registration**:
+
 ```typescript
 {
   provide: EXPENSE_REPOSITORY_TOKEN,
@@ -312,6 +320,7 @@ export const EMAIL_SENDER_PORT = Symbol('EMAIL_SENDER_PORT');
 ```
 
 **Injection**:
+
 ```typescript
 constructor(
   @Inject(EXPENSE_REPOSITORY_TOKEN)
@@ -350,7 +359,7 @@ export class InvoiceCreatedEvent {
   constructor(
     public readonly invoiceId: string,
     public readonly tenantId: string,
-    public readonly occurredAt: Date,
+    public readonly occurredAt: Date
   ) {}
 }
 ```
@@ -361,7 +370,7 @@ export class InvoiceCreatedEvent {
 
 ```typescript
 // File: application/ports/invoice-repository.port.ts
-export const INVOICE_REPOSITORY_TOKEN = Symbol('INVOICE_REPOSITORY_TOKEN');
+export const INVOICE_REPOSITORY_TOKEN = Symbol("INVOICE_REPOSITORY_TOKEN");
 
 export interface InvoiceRepositoryPort {
   save(tenantId: string, invoice: InvoiceAggregate): Promise<void>;
@@ -381,8 +390,12 @@ export class PrismaInvoiceRepositoryAdapter implements InvoiceRepositoryPort {
   async save(tenantId: string, invoice: InvoiceAggregate): Promise<void> {
     await prisma.invoice.upsert({
       where: { id: invoice.id },
-      update: { /* ... */ },
-      create: { /* ... */ },
+      update: {
+        /* ... */
+      },
+      create: {
+        /* ... */
+      },
     });
   }
 }
@@ -430,7 +443,7 @@ export function InvoiceList({ invoices }: InvoiceListProps) {
 // File: hooks/use-invoice-query.ts
 export function useInvoiceQuery(id: string) {
   return useQuery({
-    queryKey: ['invoice', id],
+    queryKey: ["invoice", id],
     queryFn: () => fetchInvoice(id),
   });
 }
@@ -457,6 +470,7 @@ export function InvoiceDetailScreen() {
 **Purpose**: Shared schemas, types, enums between frontend and backend
 
 **Structure**:
+
 ```
 contracts/
 └── src/
@@ -474,6 +488,7 @@ contracts/
 ```
 
 **Naming**:
+
 - Schemas: `{action}-{entity}.schema.ts` (Zod schemas)
 - Types: `{entity}.types.ts` (TypeScript types/enums)
 
@@ -482,6 +497,7 @@ contracts/
 **Purpose**: Pure domain logic (no framework dependencies)
 
 **Structure**:
+
 ```
 domain/
 └── src/
@@ -500,6 +516,7 @@ domain/
 **Purpose**: Prisma client + repository implementations (backend-only)
 
 **Structure**:
+
 ```
 data/
 ├── prisma/
@@ -523,6 +540,7 @@ data/
 **Purpose**: Framework-agnostic application utilities (ports, base classes, testing)
 
 **Structure**:
+
 ```
 kernel/
 └── src/
@@ -667,13 +685,13 @@ expenses/
 
 ### Test Naming Examples
 
-| Test Type | File Name | Tests |
-|-----------|-----------|-------|
-| Unit | `create-invoice.usecase.test.ts` | `CreateInvoiceUseCase` |
-| Unit | `prisma-expense-repository.adapter.test.ts` | `PrismaExpenseRepositoryAdapter` |
-| Integration | `expenses.int.test.ts` | Full expense flow with DB |
-| E2E | `invoices.e2e.test.ts` | HTTP API endpoints |
-| Contract | `invoices.contract.test.ts` | Zod schema validation |
+| Test Type   | File Name                                   | Tests                            |
+| ----------- | ------------------------------------------- | -------------------------------- |
+| Unit        | `create-invoice.usecase.test.ts`            | `CreateInvoiceUseCase`           |
+| Unit        | `prisma-expense-repository.adapter.test.ts` | `PrismaExpenseRepositoryAdapter` |
+| Integration | `expenses.int.test.ts`                      | Full expense flow with DB        |
+| E2E         | `invoices.e2e.test.ts`                      | HTTP API endpoints               |
+| Contract    | `invoices.contract.test.ts`                 | Zod schema validation            |
 
 ---
 
@@ -728,16 +746,19 @@ fi
 ## Migration Strategy
 
 ### Phase 1: Document and Freeze (Completed)
+
 - ✅ Document naming conventions (this file)
 - ✅ Get team alignment and approval
 
 ### Phase 2: Automated Refactor (In Progress)
+
 - Use `git mv` for all file renames to preserve history
 - Update all imports via find-and-replace
 - Update NestJS provider registrations
 - Run `pnpm -r lint && pnpm -r typecheck && pnpm -r test` to validate
 
 ### Phase 3: Enforcement (Future)
+
 - Add ESLint rules for filename validation
 - Configure pre-commit hooks
 - Update project generators/scaffolding tools

@@ -14,13 +14,15 @@ const startNode = () => {
     console.log("🔄 Restarting server...");
     nodeProcess.kill();
   }
-  
-  console.log(`\n🚀 Starting server${isDebugMode ? " (Debug Mode on port " + debugPort + ")" : ""}...\n`);
-  
-  const nodeArgs = isDebugMode 
+
+  console.log(
+    `\n🚀 Starting server${isDebugMode ? " (Debug Mode on port " + debugPort + ")" : ""}...\n`
+  );
+
+  const nodeArgs = isDebugMode
     ? [`--inspect=0.0.0.0:${debugPort}`, "dist/main.js"]
     : ["dist/main.js"];
-  
+
   nodeProcess = spawn("node", nodeArgs, {
     stdio: "inherit",
     env: { ...process.env, FORCE_COLOR: "1" },
@@ -41,7 +43,7 @@ let initialBuildComplete = false;
 buildProcess.stdout.on("data", (data) => {
   const output = data.toString();
   console.log(output);
-  
+
   // Check if initial compilation is complete or if a rebuild happened
   if (output.includes("Watching for file changes") || output.includes("Found 0 errors")) {
     if (!initialBuildComplete) {

@@ -151,7 +151,9 @@ export async function createExpense(
 
   if (idempotencyKey) {
     const cached = idempotencyCache.get(idempotencyKey);
-    if (cached) {return cached as Expense;}
+    if (cached) {
+      return cached as Expense;
+    }
     idempotencyCache.set(idempotencyKey, expense);
   }
 
@@ -173,7 +175,9 @@ export async function updateExpense(
 
   updateDb((db) => {
     const index = db.expenses.findIndex((exp) => exp.id === id);
-    if (index === -1) {return db;}
+    if (index === -1) {
+      return db;
+    }
 
     const existing = db.expenses[index];
     const amountCents = patch.amountCents ?? existing.amountCents;
@@ -305,7 +309,9 @@ export async function issueInvoice(id: string, idempotencyKey?: string): Promise
 
   updateDb((db) => {
     const index = db.invoices.findIndex((inv) => inv.id === id);
-    if (index === -1) {return db;}
+    if (index === -1) {
+      return db;
+    }
 
     updatedInvoice = {
       ...db.invoices[index],
@@ -334,7 +340,9 @@ export async function markInvoicePaid(id: string, paidDate: string): Promise<Inv
 
   updateDb((db) => {
     const index = db.invoices.findIndex((inv) => inv.id === id);
-    if (index === -1) {return db;}
+    if (index === -1) {
+      return db;
+    }
 
     updatedInvoice = {
       ...db.invoices[index],
@@ -429,7 +437,9 @@ export async function generateInvoiceDraftFromPrompt(
   const db = getDb();
 
   const customer = db.customers.find((c) => c.id === customerId);
-  if (!customer) {throw new Error("Customer not found");}
+  if (!customer) {
+    throw new Error("Customer not found");
+  }
 
   // Find projects for this customer
   const customerProjects = db.projects.filter((p) => p.customerId === customerId);

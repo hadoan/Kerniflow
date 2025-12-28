@@ -6,6 +6,13 @@ import { AssistantPage } from "../../modules/assistant";
 import { ExpensesPage, NewExpensePage } from "../../modules/expenses";
 import { InvoicesPage, NewInvoicePage, InvoiceDetailPage } from "../../modules/invoices";
 import { CustomersPage, NewCustomerPage, EditCustomerPage } from "../../modules/customers";
+import {
+  AccountingDashboard,
+  SetupWizard,
+  ChartOfAccountsList,
+  JournalEntriesList,
+  ReportsHub,
+} from "../../modules/accounting/screens";
 import { SettingsPage } from "../../modules/settings";
 import { TaxSettingsPage } from "../../modules/tax";
 import NotFound from "../../shared/components/NotFound";
@@ -40,6 +47,11 @@ export const Router = () => (
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/customers/new" element={<NewCustomerPage />} />
           <Route path="/customers/:id" element={<EditCustomerPage />} />
+          <Route path="/accounting" element={<AccountingDashboard />} />
+          <Route path="/accounting/setup" element={<SetupWizard />} />
+          <Route path="/accounting/accounts" element={<ChartOfAccountsList />} />
+          <Route path="/accounting/journal-entries" element={<JournalEntriesList />} />
+          <Route path="/accounting/reports" element={<ReportsHub />} />
           <Route path="/copilot" element={<CopilotPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/settings/workspace" element={<WorkspaceSettingsPage />} />

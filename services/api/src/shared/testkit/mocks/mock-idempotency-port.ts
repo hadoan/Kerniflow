@@ -1,4 +1,7 @@
-import { type IdempotencyStoragePort, type StoredResponse } from "../../ports/idempotency-storage.port";
+import {
+  type IdempotencyStoragePort,
+  type StoredResponse,
+} from "../../ports/idempotency-storage.port";
 
 export class MockIdempotencyStoragePort implements IdempotencyStoragePort {
   private readonly records = new Map<string, StoredResponse>();

@@ -12,12 +12,14 @@ const startNode = () => {
   if (nodeProcess) {
     nodeProcess.kill();
   }
-  console.log(`\n🚀 Starting server${isDebugMode ? " (Debug Mode on port " + debugPort + ")" : ""}...\n`);
-  
-  const nodeArgs = isDebugMode 
+  console.log(
+    `\n🚀 Starting server${isDebugMode ? " (Debug Mode on port " + debugPort + ")" : ""}...\n`
+  );
+
+  const nodeArgs = isDebugMode
     ? [`--inspect=0.0.0.0:${debugPort}`, "dist/main.js"]
     : ["dist/main.js"];
-  
+
   nodeProcess = spawn("node", nodeArgs, {
     stdio: "inherit",
     env: { ...process.env, FORCE_COLOR: "1" },

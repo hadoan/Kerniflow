@@ -96,7 +96,9 @@ export class PrismaWorkspaceRepository implements WorkspaceRepositoryPort {
       include: { legalEntity: true },
     });
 
-    if (!workspace) {return null;}
+    if (!workspace) {
+      return null;
+    }
 
     const mapped = this.mapWorkspaceFromPrisma(workspace);
     if (workspace.legalEntity) {

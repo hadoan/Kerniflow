@@ -97,8 +97,8 @@ export const moduleRegistry: ModuleDefinition[] = [
     id: "accounting",
     name: "Accounting",
     description: "Full accounting and financial reports",
-    enabled: false,
-    comingSoon: true,
+    enabled: true,
+    comingSoon: false,
     navItems: [
       { id: "accounting", labelKey: "nav.accounting", icon: Calculator, path: "/accounting" },
     ],

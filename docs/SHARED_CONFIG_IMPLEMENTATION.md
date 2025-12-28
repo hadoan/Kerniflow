@@ -24,6 +24,7 @@ packages/
 **Purpose:** Centralized TypeScript configurations for all project types
 
 **Profiles:**
+
 - `base.json` - Strictness defaults with gradual adoption support
 - `node.json` - Node.js projects (NodeNext module resolution)
 - `react.json` - React projects (Bundler + JSX transform)
@@ -31,6 +32,7 @@ packages/
 - `test.json` - Test files (Vitest globals)
 
 **Usage:**
+
 ```json
 {
   "extends": "@kerniflow/tsconfig/node.json",
@@ -41,6 +43,7 @@ packages/
 ```
 
 **Key Features:**
+
 - Relaxed strictness options for gradual migration
 - Project references support
 - Consistent module resolution across workspace
@@ -50,12 +53,14 @@ packages/
 **Purpose:** Shareable Prettier configuration
 
 **Configuration:**
+
 - 100 char line width
 - 2 space indentation
 - Semicolons, double quotes, LF line endings
 - Trailing commas (es5)
 
 **Usage:**
+
 ```javascript
 // prettier.config.js
 export { default } from "@kerniflow/prettier-config";
@@ -66,6 +71,7 @@ export { default } from "@kerniflow/prettier-config";
 **Purpose:** Composable ESLint configs for flat config format
 
 **Modules:**
+
 - `base.js` - JavaScript best practices
 - `typescript.js` - TypeScript rules + type-aware linting (projectService)
 - `node.js` - Node.js globals
@@ -73,16 +79,14 @@ export { default } from "@kerniflow/prettier-config";
 - `test.js` - Relaxed rules for test files
 
 **Usage:**
+
 ```javascript
 import config from "@kerniflow/eslint-config";
-export default [
-  config.base,
-  config.typescript,
-  config.node,
-];
+export default [config.base, config.typescript, config.node];
 ```
 
 **Key Features:**
+
 - Flat config (ESLint v9+) compatible
 - TypeScript type-aware linting with auto-discovery
 - Composable - mix and match modules
@@ -93,22 +97,24 @@ export default [
 **Purpose:** Reusable Vite and Vitest configuration helpers
 
 **Exports:**
+
 - `createBaseViteConfig(options)` - Base Vite config factory
 - `createBaseVitestConfig(options)` - Base Vitest config factory
 - `mergeViteAndVitest()` - Merge function for combined configs
 
 **Usage:**
+
 ```typescript
 import { createBaseViteConfig, createBaseVitestConfig } from "@kerniflow/vite-config";
 
 export default {
   ...createBaseViteConfig({
     port: 3000,
-    serverProxy: { "/api": "http://localhost:4000" }
+    serverProxy: { "/api": "http://localhost:4000" },
   }),
   test: createBaseVitestConfig({
-    setupFiles: ["./src/test/setup.ts"]
-  })
+    setupFiles: ["./src/test/setup.ts"],
+  }),
 };
 ```
 
@@ -117,6 +123,7 @@ export default {
 **Purpose:** Shared Tailwind design system with Kerniflow brand
 
 **Includes:**
+
 - Full color palette (HSL CSS variables)
 - Typography (Inter + JetBrains Mono)
 - Spacing, border radius, shadows
@@ -124,6 +131,7 @@ export default {
 - Responsive breakpoints
 
 **Usage:**
+
 ```javascript
 export default {
   presets: [require("@kerniflow/tailwind-preset")],
@@ -137,6 +145,7 @@ export default {
 **Updated Files:** 16+ tsconfig.json files across all services, apps, and packages
 
 **Migrated Configurations:**
+
 - ✅ All TypeScript configs → `@kerniflow/tsconfig/*`
 - ✅ All ESLint configs → `@kerniflow/eslint-config`
 - ✅ Prettier config → `@kerniflow/prettier-config`
@@ -171,15 +180,17 @@ pnpm typecheck
 ### TypeScript Strictness
 
 **Issue:** 2 packages (`config`, `kernel`) have TypeScript errors due to strictness options in base.json:
+
 - `packages/config`: `exactOptionalPropertyTypes` issue with `API_PORT` type
 - `packages/kernel`: Function signature mismatch in tests
 
 **Workaround:** Per-package overrides can be added:
+
 ```json
 {
   "extends": "@kerniflow/tsconfig/lib.json",
   "compilerOptions": {
-    "strict": false  // For gradual migration
+    "strict": false // For gradual migration
   }
 }
 ```
@@ -216,12 +227,14 @@ pnpm typecheck
 ### Runtime vs Tooling Configs
 
 **Runtime Configs (`packages/config`):**
+
 - Environment variables
 - EnvService for runtime configuration
 - Zod schemas for validation
 - **Never import in browser bundles**
 
 **Tooling Configs (`packages/tooling/*`):**
+
 - Development-time only
 - TypeScript, ESLint, Prettier, Vite, Tailwind
 - Build tools and linters
@@ -249,6 +262,7 @@ pnpm typecheck
 ### Adding New Config Types
 
 Follow the pattern:
+
 ```
 packages/tooling/[tool-name]-config/
 ├── package.json          # ESM, private, peer deps
@@ -266,6 +280,7 @@ packages/tooling/[tool-name]-config/
 ## Conclusion
 
 Successfully implemented a scalable, maintainable shared-config strategy that:
+
 - ✅ Separates runtime and tooling concerns
 - ✅ Groups all dev tooling under `packages/tooling/*`
 - ✅ Provides 5 comprehensive tooling packages

@@ -35,11 +35,21 @@ export class PrismaInvoicePdfModelAdapter implements InvoicePdfModelPort {
 
     // Build bill-to address
     const addressParts: string[] = [];
-    if ((invoice as any).billToAddressLine1) {addressParts.push((invoice as any).billToAddressLine1);}
-    if ((invoice as any).billToAddressLine2) {addressParts.push((invoice as any).billToAddressLine2);}
-    if ((invoice as any).billToCity) {addressParts.push((invoice as any).billToCity);}
-    if ((invoice as any).billToPostalCode) {addressParts.push((invoice as any).billToPostalCode);}
-    if ((invoice as any).billToCountry) {addressParts.push((invoice as any).billToCountry);}
+    if ((invoice as any).billToAddressLine1) {
+      addressParts.push((invoice as any).billToAddressLine1);
+    }
+    if ((invoice as any).billToAddressLine2) {
+      addressParts.push((invoice as any).billToAddressLine2);
+    }
+    if ((invoice as any).billToCity) {
+      addressParts.push((invoice as any).billToCity);
+    }
+    if ((invoice as any).billToPostalCode) {
+      addressParts.push((invoice as any).billToPostalCode);
+    }
+    if ((invoice as any).billToCountry) {
+      addressParts.push((invoice as any).billToCountry);
+    }
     const billToAddress = addressParts.length > 0 ? addressParts.join(", ") : undefined;
 
     // Format dates

@@ -30,8 +30,12 @@ export class CompleteUploadUseCase extends BaseUseCase<CompleteUploadInput, Comp
   }
 
   protected validate(input: CompleteUploadInput): CompleteUploadInput {
-    if (!input.documentId) {throw new ValidationError("documentId is required");}
-    if (!input.fileId) {throw new ValidationError("fileId is required");}
+    if (!input.documentId) {
+      throw new ValidationError("documentId is required");
+    }
+    if (!input.fileId) {
+      throw new ValidationError("fileId is required");
+    }
     return input;
   }
 

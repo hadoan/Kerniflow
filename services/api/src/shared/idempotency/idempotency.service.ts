@@ -152,7 +152,9 @@ export class IdempotencyService {
   }
 
   private parseJson(raw: string | null): unknown {
-    if (!raw) {return null;}
+    if (!raw) {
+      return null;
+    }
     try {
       return JSON.parse(raw);
     } catch {

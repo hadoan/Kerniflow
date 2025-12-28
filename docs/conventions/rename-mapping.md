@@ -568,11 +568,11 @@ These require code changes, not file moves:
 ```typescript
 // In port files, standardize token naming:
 
-OLD: export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
-NEW: export const USER_REPOSITORY_TOKEN = Symbol('USER_REPOSITORY_TOKEN');
+OLD: export const USER_REPOSITORY = Symbol("USER_REPOSITORY");
+NEW: export const USER_REPOSITORY_TOKEN = Symbol("USER_REPOSITORY_TOKEN");
 
-OLD: export const EXPENSE_REPOSITORY = Symbol('EXPENSE_REPOSITORY');
-NEW: export const EXPENSE_REPOSITORY_TOKEN = Symbol('EXPENSE_REPOSITORY_TOKEN');
+OLD: export const EXPENSE_REPOSITORY = Symbol("EXPENSE_REPOSITORY");
+NEW: export const EXPENSE_REPOSITORY_TOKEN = Symbol("EXPENSE_REPOSITORY_TOKEN");
 
 // Apply pattern: {ENTITY}_{TYPE}_TOKEN
 ```
@@ -587,31 +587,31 @@ After file renames, all imports must be updated. Pattern:
 
 ```typescript
 // OLD IMPORTS
-import { ExpenseRepositoryPort } from '../ports/ExpenseRepositoryPort';
-import { PrismaExpenseRepository } from '../infrastructure/persistence/PrismaExpenseRepository';
-import { CreateExpenseUseCase } from './use-cases/CreateExpenseUseCase';
+import { ExpenseRepositoryPort } from "../ports/ExpenseRepositoryPort";
+import { PrismaExpenseRepository } from "../infrastructure/persistence/PrismaExpenseRepository";
+import { CreateExpenseUseCase } from "./use-cases/CreateExpenseUseCase";
 
 // NEW IMPORTS
-import { ExpenseRepositoryPort } from '../ports/expense-repository.port';
-import { PrismaExpenseRepositoryAdapter } from '../infrastructure/adapters/prisma-expense-repository.adapter';
-import { CreateExpenseUseCase } from './use-cases/create-expense.usecase';
+import { ExpenseRepositoryPort } from "../ports/expense-repository.port";
+import { PrismaExpenseRepositoryAdapter } from "../infrastructure/adapters/prisma-expense-repository.adapter";
+import { CreateExpenseUseCase } from "./use-cases/create-expense.usecase";
 ```
 
 ---
 
 ## Summary by Category
 
-| Category | Count | Examples |
-|----------|-------|----------|
-| **PascalCase UseCase fixes** | 28 | `CreateInvoiceUseCase.ts` → `create-invoice.usecase.ts` |
-| **PascalCase Repository fixes** | 2 | `PrismaExpenseRepository.ts` → `prisma-expense-repository.adapter.ts` |
-| **PascalCase Service fixes** | 2 | `OutboxPollerService.ts` → `outbox-poller.service.ts` |
-| **PascalCase Entity fixes** | 2 | `Expense.ts` → `expense.entity.ts` |
-| **repo → repository (ports)** | 20+ | `invoice-repo.port.ts` → `invoice-repository.port.ts` |
-| **repo → repository (adapters)** | 15+ | `prisma.audit.repo.ts` → `prisma-audit-repository.adapter.ts` |
-| **Test suffix (.spec → .test)** | 12 | `sign-in.usecase.spec.ts` → `sign-in.usecase.test.ts` |
-| **Folder renames (infra → infrastructure)** | 4 | `documents/infra/` → `documents/infrastructure/` |
-| **Adapter prefix consistency** | 5+ | `prisma.audit.adapter.ts` → `prisma-audit.adapter.ts` |
+| Category                                    | Count | Examples                                                              |
+| ------------------------------------------- | ----- | --------------------------------------------------------------------- |
+| **PascalCase UseCase fixes**                | 28    | `CreateInvoiceUseCase.ts` → `create-invoice.usecase.ts`               |
+| **PascalCase Repository fixes**             | 2     | `PrismaExpenseRepository.ts` → `prisma-expense-repository.adapter.ts` |
+| **PascalCase Service fixes**                | 2     | `OutboxPollerService.ts` → `outbox-poller.service.ts`                 |
+| **PascalCase Entity fixes**                 | 2     | `Expense.ts` → `expense.entity.ts`                                    |
+| **repo → repository (ports)**               | 20+   | `invoice-repo.port.ts` → `invoice-repository.port.ts`                 |
+| **repo → repository (adapters)**            | 15+   | `prisma.audit.repo.ts` → `prisma-audit-repository.adapter.ts`         |
+| **Test suffix (.spec → .test)**             | 12    | `sign-in.usecase.spec.ts` → `sign-in.usecase.test.ts`                 |
+| **Folder renames (infra → infrastructure)** | 4     | `documents/infra/` → `documents/infrastructure/`                      |
+| **Adapter prefix consistency**              | 5+    | `prisma.audit.adapter.ts` → `prisma-audit.adapter.ts`                 |
 
 **Total estimated renames:** ~85 files + 4 folders
 
