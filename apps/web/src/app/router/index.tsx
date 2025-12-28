@@ -4,7 +4,7 @@ import { AppShell } from "../AppShell";
 import { DashboardPage } from "../../modules/core";
 import { AssistantPage } from "../../modules/assistant";
 import { ExpensesPage, NewExpensePage } from "../../modules/expenses";
-import { InvoicesPage, NewInvoicePage } from "../../modules/invoices";
+import { InvoicesPage, NewInvoicePage, InvoiceDetailPage } from "../../modules/invoices";
 import { CustomersPage, NewCustomerPage, EditCustomerPage } from "../../modules/customers";
 import { SettingsPage } from "../../modules/settings";
 import { TaxSettingsPage } from "../../modules/tax";
@@ -36,6 +36,7 @@ export const Router = () => (
           <Route path="/expenses/new" element={<NewExpensePage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/new" element={<NewInvoicePage />} />
+          <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/customers/new" element={<NewCustomerPage />} />
           <Route path="/customers/:id" element={<EditCustomerPage />} />

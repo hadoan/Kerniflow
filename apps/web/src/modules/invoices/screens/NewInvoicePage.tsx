@@ -34,7 +34,7 @@ import { cn } from "@/shared/lib/utils";
 import { customersApi } from "@/lib/customers-api";
 import { invoicesApi } from "@/lib/invoices-api";
 import { toast } from "sonner";
-import { CustomerFormFields } from "@/modules/customers/components/CustomerFormFields";
+import CustomerFormFields from "@/modules/customers/components/CustomerFormFields";
 import {
   customerFormSchema,
   getDefaultCustomerFormValues,

@@ -55,10 +55,13 @@ export class InvoicesApi {
    * Get invoice by ID
    */
   async getInvoice(id: string): Promise<InvoiceDto> {
-    const result = await apiClient.get<{ invoice: InvoiceDto }>(`/invoices/${id}`, {
+    const result = await apiClient.get<unknown>(`/invoices/${id}`, {
       correlationId: apiClient.generateCorrelationId(),
     });
-    return result.invoice;
+    if (result && typeof result === "object" && "invoice" in (result as any)) {
+      return (result as { invoice: InvoiceDto }).invoice;
+    }
+    return result as InvoiceDto;
   }
 
   /**

@@ -15,7 +15,7 @@ import {
   getDefaultCustomerFormValues,
   type CustomerFormData,
 } from "../schemas/customer-form.schema";
-import { CustomerFormFields } from "../components/CustomerFormFields";
+import CustomerFormFields from "../components/CustomerFormFields";
 
 export default function NewCustomerPage() {
   const { t } = useTranslation();

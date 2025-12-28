@@ -140,3 +140,5 @@ export function CustomerFormFields({ form, className }: CustomerFormFieldsProps)
     </div>
   );
 }
+
+export default CustomerFormFields;
