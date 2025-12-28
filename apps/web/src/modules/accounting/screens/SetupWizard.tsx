@@ -78,7 +78,13 @@ export const SetupWizard: FC = () => {
   });
 
   const onSubmit = async (data: SetupFormData) => {
-    await setupMutation.mutateAsync(data);
+    await setupMutation.mutateAsync({
+      baseCurrency: data.baseCurrency,
+      fiscalYearStartMonthDay: data.fiscalYearStartMonthDay,
+      periodLockingEnabled: data.periodLockingEnabled,
+      entryNumberPrefix: data.entryNumberPrefix,
+      template: data.template,
+    });
     navigate("/accounting");
   };
 
