@@ -1,6 +1,9 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { PrismaService } from "@kerniflow/data";
 import * as bcrypt from "bcrypt";
+import { CreateWorkspaceUseCase } from "../workspaces/application/use-cases/create-workspace.usecase";
+import type { WorkspaceRepositoryPort } from "../workspaces/application/ports/workspace-repository.port";
+import { WORKSPACE_REPOSITORY_PORT } from "../workspaces/application/ports/workspace-repository.port";
 
 export interface SeedResult {
   tenantId: string;
@@ -17,10 +20,18 @@ export interface DrainResult {
 
 @Injectable()
 export class TestHarnessService {
-  constructor(@Inject("PRISMA_CLIENT") private prisma: PrismaService) {}
+  constructor(
+    @Inject("PRISMA_CLIENT") private prisma: PrismaService,
+    private readonly createWorkspaceUseCase: CreateWorkspaceUseCase,
+    @Inject(WORKSPACE_REPOSITORY_PORT)
+    private readonly workspaceRepo: WorkspaceRepositoryPort
+  ) {}
 
   /**
-   * Create a test tenant with user, roles, and permissions
+   * Create a test tenant with user, roles, permissions, and workspace
+   *
+   * Note: We use workspace use cases for workspace creation, then directly
+   * update onboardingStatus to "DONE" via repository for test data setup.
    */
   async seedTestData(params: {
     email: string;
@@ -30,108 +41,140 @@ export class TestHarnessService {
     // Use bcrypt to hash password (should match API's password hasher)
     const passwordHash = await bcrypt.hash(params.password, 10);
 
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Create tenant
-      const tenant = await tx.tenant.create({
-        data: {
-          name: params.tenantName,
-          slug: `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          status: "ACTIVE",
-        },
-      });
-
-      // 2. Create user
-      // Allow repeated seeds with the same email by upserting the user
-      const user = await tx.user.upsert({
-        where: { email: params.email },
-        update: {
-          name: "Test User",
-          passwordHash,
-          status: "ACTIVE",
-        },
-        create: {
-          email: params.email,
-          name: "Test User",
-          passwordHash,
-          status: "ACTIVE",
-        },
-      });
-
-      // 3. Create default roles (OWNER, ADMIN, MEMBER)
-      const ownerRole = await tx.role.create({
-        data: {
-          tenantId: tenant.id,
-          name: "Owner",
-          systemKey: "OWNER",
-        },
-      });
-
-      const _adminRole = await tx.role.create({
-        data: {
-          tenantId: tenant.id,
-          name: "Admin",
-          systemKey: "ADMIN",
-        },
-      });
-
-      const _memberRole = await tx.role.create({
-        data: {
-          tenantId: tenant.id,
-          name: "Member",
-          systemKey: "MEMBER",
-        },
-      });
-
-      // 4. Create default permissions
-      const permissionKeys = [
-        "tenant.manage",
-        "user.invite",
-        "user.remove",
-        "expense.write",
-        "expense.read",
-        "invoice.write",
-        "invoice.read",
-        "workflow.write",
-        "workflow.read",
-      ];
-
-      const permissions = await Promise.all(
-        permissionKeys.map((key) =>
-          tx.permission.upsert({
-            where: { key },
-            update: {},
-            create: { key, description: `Permission: ${key}` },
-          })
-        )
-      );
-
-      // 5. Assign all permissions to OWNER role
-      for (const permission of permissions) {
-        await tx.rolePermission.create({
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        // 1. Create tenant
+        const tenant = await tx.tenant.create({
           data: {
-            roleId: ownerRole.id,
-            permissionId: permission.id,
+            name: params.tenantName,
+            slug: `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            status: "ACTIVE",
           },
         });
-      }
 
-      // 6. Create membership: user = OWNER of tenant
-      await tx.membership.create({
-        data: {
+        // 2. Create user
+        // Allow repeated seeds with the same email by upserting the user
+        const user = await tx.user.upsert({
+          where: { email: params.email },
+          update: {
+            name: "Test User",
+            passwordHash,
+            status: "ACTIVE",
+          },
+          create: {
+            email: params.email,
+            name: "Test User",
+            passwordHash,
+            status: "ACTIVE",
+          },
+        });
+
+        // 3. Create default roles (OWNER, ADMIN, MEMBER)
+        const ownerRole = await tx.role.create({
+          data: {
+            tenantId: tenant.id,
+            name: "Owner",
+            systemKey: "OWNER",
+          },
+        });
+
+        const _adminRole = await tx.role.create({
+          data: {
+            tenantId: tenant.id,
+            name: "Admin",
+            systemKey: "ADMIN",
+          },
+        });
+
+        const _memberRole = await tx.role.create({
+          data: {
+            tenantId: tenant.id,
+            name: "Member",
+            systemKey: "MEMBER",
+          },
+        });
+
+        // 4. Create default permissions
+        const permissionKeys = [
+          "tenant.manage",
+          "user.invite",
+          "user.remove",
+          "expense.write",
+          "expense.read",
+          "invoice.write",
+          "invoice.read",
+          "workflow.write",
+          "workflow.read",
+        ];
+
+        const permissions = await Promise.all(
+          permissionKeys.map((key) =>
+            tx.permission.upsert({
+              where: { key },
+              update: {},
+              create: { key, description: `Permission: ${key}` },
+            })
+          )
+        );
+
+        // 5. Assign all permissions to OWNER role
+        for (const permission of permissions) {
+          await tx.rolePermission.create({
+            data: {
+              roleId: ownerRole.id,
+              permissionId: permission.id,
+            },
+          });
+        }
+
+        // 6. Create membership: user = OWNER of tenant
+        await tx.membership.create({
+          data: {
+            tenantId: tenant.id,
+            userId: user.id,
+            roleId: ownerRole.id,
+          },
+        });
+
+        return {
           tenantId: tenant.id,
+          tenantName: tenant.name,
           userId: user.id,
-          roleId: ownerRole.id,
+          userName: user.name || "Test User",
+          email: user.email,
+        };
+      });
+
+      // 7. Create workspace with completed onboarding using use case
+      const workspaceResult = await this.createWorkspaceUseCase.execute({
+        tenantId: result.tenantId,
+        userId: result.userId,
+        name: "Default Workspace",
+        kind: "PERSONAL",
+        legalName: params.tenantName,
+        countryCode: "DE",
+        currency: "EUR",
+        taxId: `TEST-${Date.now()}`,
+        address: {
+          line1: "123 Test Street",
+          line2: undefined,
+          city: "Test City",
+          postalCode: "12345",
+          countryCode: "DE",
         },
       });
 
-      return {
-        tenantId: tenant.id,
-        tenantName: tenant.name,
-        userId: user.id,
-        userName: user.name || "Test User",
-        email: user.email,
-      };
-    });
+      // 8. Update workspace to completed onboarding status using repository
+      await this.workspaceRepo.updateWorkspace(result.tenantId, workspaceResult.workspace.id, {
+        onboardingStatus: "DONE",
+        onboardingCompletedAt: new Date(),
+      });
+
+      return result;
+    } catch (error) {
+      console.error("Error seeding test data:", error);
+      throw error;
+    }
   }
 
   /**
@@ -152,6 +195,11 @@ export class TestHarnessService {
         where: { definition: { tenantId } },
       });
       await tx.workflowDefinition.deleteMany({ where: { tenantId } });
+      // Delete party-related data (customers/suppliers)
+      await tx.partyRole.deleteMany({ where: { tenantId } });
+      await tx.contactPoint.deleteMany({ where: { party: { tenantId } } });
+      await tx.address.deleteMany({ where: { party: { tenantId } } });
+      await tx.party.deleteMany({ where: { tenantId } });
     });
   }
 

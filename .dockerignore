@@ -13,6 +13,7 @@ node_modules
 
 # Ignore build artifacts (we rebuild in Docker)
 build
+**/dist
 *.tsbuildinfo
 
 # Ignore logs
