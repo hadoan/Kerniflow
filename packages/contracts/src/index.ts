@@ -7,6 +7,7 @@ export * from "./workspaces";
 export * from "./shared/local-date.schema";
 export * from "./expenses";
 export * from "./tax";
+export * from "./accounting";
 
 export const CONTRACTS_HELLO = "Kerniflow contracts loaded ✅";
 

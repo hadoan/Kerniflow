@@ -1,0 +1,188 @@
+// ===========================
+// Accounting Core Schema
+// ===========================
+
+// Accounting Settings (one per tenant)
+model AccountingSettings {
+  id                      String   @id @default(cuid())
+  tenantId                String   @unique
+  baseCurrency            String
+  fiscalYearStartMonthDay String   // Format: "MM-DD" e.g., "01-01"
+  periodLockingEnabled    Boolean  @default(false)
+  entryNumberPrefix       String   @default("JE")
+  nextEntryNumber         Int      @default(1)
+  createdAt               DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt               DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([tenantId])
+}
+
+// Accounting Periods
+model AccountingPeriod {
+  id            String       @id @default(cuid())
+  tenantId      String
+  fiscalYearId  String
+  name          String       // e.g., "Jan 2025", "Q1 2025"
+  startDate     DateTime     @db.Date
+  endDate       DateTime     @db.Date
+  status        PeriodStatus @default(Open)
+  closedAt      DateTime?    @db.Timestamptz(6)
+  closedBy      String?
+  createdAt     DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@index([tenantId, status])
+  @@index([tenantId, fiscalYearId])
+  @@index([tenantId, startDate])
+  @@unique([tenantId, fiscalYearId, name])
+}
+
+// Ledger Accounts (Chart of Accounts)
+model LedgerAccount {
+  id               String      @id @default(cuid())
+  tenantId         String
+  code             String
+  name             String
+  type             AccountType
+  isActive         Boolean     @default(true)
+  description      String?
+  systemAccountKey String?     // Special keys like "Cash", "Bank", "AR", "Revenue", etc.
+  createdAt        DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime    @updatedAt @db.Timestamptz(6)
+
+  lines JournalLine[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, type])
+  @@index([tenantId, isActive])
+  @@index([tenantId, systemAccountKey])
+}
+
+// Journal Entries
+model JournalEntry {
+  id              String      @id @default(cuid())
+  tenantId        String
+  entryNumber     String?     @unique // Allocated on post
+  status          EntryStatus @default(Draft)
+  postingDate     DateTime    @db.Date
+  memo            String
+  sourceType      SourceType?
+  sourceId        String?
+  sourceRef       String?
+  reversesEntryId String?     // Points to entry being reversed
+  reversedByEntryId String?   // Points to reversing entry
+  createdBy       String
+  createdAt       DateTime    @default(now()) @db.Timestamptz(6)
+  postedBy        String?
+  postedAt        DateTime?   @db.Timestamptz(6)
+  updatedAt       DateTime    @updatedAt @db.Timestamptz(6)
+
+  lines JournalLine[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, postingDate])
+  @@index([tenantId, createdBy])
+  @@index([tenantId, reversesEntryId])
+  @@index([tenantId, reversedByEntryId])
+  @@index([tenantId, sourceType, sourceId])
+}
+
+// Journal Lines
+model JournalLine {
+  id               String        @id @default(cuid())
+  tenantId         String
+  journalEntryId   String
+  ledgerAccountId  String
+  direction        LineDirection
+  amountCents      Int
+  currency         String
+  lineMemo         String?
+  reference        String?
+  tags             String?       // JSON array of tags
+
+  journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  ledgerAccount LedgerAccount @relation(fields: [ledgerAccountId], references: [id])
+
+  @@index([journalEntryId])
+  @@index([ledgerAccountId])
+  @@index([tenantId, ledgerAccountId])
+}
+
+// AI Interaction Audit Log
+model AiInteraction {
+  id              String         @id @default(cuid())
+  tenantId        String
+  actorUserId     String
+  contextType     AiContextType
+  inputSummary    String
+  outputSummary   String
+  confidence      ConfidenceLevel?
+  confidenceScore Float?
+  referencedData  String?        // JSON string of provenance
+  acceptedAction  AcceptedAction @default(none)
+  createdAt       DateTime       @default(now()) @db.Timestamptz(6)
+
+  @@index([tenantId, contextType])
+  @@index([tenantId, actorUserId])
+  @@index([tenantId, createdAt])
+}
+
+// ===========================
+// Enums
+// ===========================
+
+enum AccountType {
+  Asset
+  Liability
+  Equity
+  Income
+  Expense
+}
+
+enum EntryStatus {
+  Draft
+  Posted
+  Reversed
+}
+
+enum LineDirection {
+  Debit
+  Credit
+}
+
+enum PeriodStatus {
+  Open
+  Closed
+}
+
+enum SourceType {
+  Manual
+  Invoice
+  Payment
+  Expense
+  Migration
+  Adjustment
+}
+
+enum AiContextType {
+  AccountingCopilotChat
+  SuggestAccounts
+  GenerateJournalDraft
+  ExplainJournalEntry
+  ExplainReport
+  AnomalyScan
+  CloseChecklist
+}
+
+enum ConfidenceLevel {
+  High
+  Medium
+  Low
+}
+
+enum AcceptedAction {
+  none
+  savedDraft
+  appliedSuggestion
+  dismissed
+}
