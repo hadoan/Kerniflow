@@ -22,10 +22,33 @@ export class InvoicesApi {
    * Get all invoices
    */
   async listInvoices(): Promise<InvoiceDto[]> {
-    const result = await apiClient.get<{ invoices: InvoiceDto[] }>("/invoices", {
+    const result = await apiClient.get<unknown>("/invoices", {
       correlationId: apiClient.generateCorrelationId(),
     });
-    return result.invoices;
+
+    if (Array.isArray(result)) {
+      return result as InvoiceDto[];
+    }
+
+    if (
+      typeof result === "object" &&
+      result !== null &&
+      "items" in result &&
+      Array.isArray((result as { items: unknown }).items)
+    ) {
+      return (result as { items: InvoiceDto[] }).items;
+    }
+
+    if (
+      typeof result === "object" &&
+      result !== null &&
+      "invoices" in result &&
+      Array.isArray((result as { invoices: unknown }).invoices)
+    ) {
+      return (result as { invoices: InvoiceDto[] }).invoices;
+    }
+
+    return [];
   }
 
   /**

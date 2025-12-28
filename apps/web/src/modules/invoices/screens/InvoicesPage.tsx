@@ -2,12 +2,20 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, Plus } from "lucide-react";
+import { FileText, MoreHorizontal, Plus } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { getCustomers } from "@/shared/mock/mockApi";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 import { invoicesApi } from "@/lib/invoices-api";
+import { customersApi } from "@/lib/customers-api";
 import { formatMoney, formatDate } from "@/shared/lib/formatters";
 import { EmptyState } from "@/shared/components/EmptyState";
 import type { InvoiceStatus } from "@/shared/types";
@@ -21,10 +29,14 @@ export default function InvoicesPage() {
     queryKey: ["invoices"],
     queryFn: () => invoicesApi.listInvoices(),
   });
-  const { data: customers } = useQuery({ queryKey: ["customers"], queryFn: getCustomers });
+  const { data: customersData } = useQuery({
+    queryKey: ["customers"],
+    queryFn: () => customersApi.listCustomers(),
+  });
+  const customers = customersData?.customers ?? [];
 
   const getCustomerName = (customerPartyId: string) =>
-    customers?.find((c) => c.id === customerPartyId)?.company || "Unknown";
+    customers.find((c) => c.id === customerPartyId)?.displayName || "Unknown";
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">

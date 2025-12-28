@@ -14,10 +14,33 @@ import { Label } from "@/shared/ui/label";
 import { Calendar } from "@/shared/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/shared/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
 import { cn } from "@/shared/lib/utils";
-import { getCustomers } from "@/shared/mock/mockApi";
+import { customersApi } from "@/lib/customers-api";
 import { invoicesApi } from "@/lib/invoices-api";
 import { toast } from "sonner";
+import { CustomerFormFields } from "@/modules/customers/components/CustomerFormFields";
+import {
+  customerFormSchema,
+  getDefaultCustomerFormValues,
+  toCreateCustomerInput,
+  type CustomerFormData,
+} from "@/modules/customers/schemas/customer-form.schema";
 import {
   invoiceFormSchema,
   toCreateInvoiceInput,
@@ -39,24 +62,65 @@ const FREELANCER_INFO = {
   country: "Germany",
 };
 
+const generateInvoiceNumber = () => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const prefix = `${y}${m}${d}`;
+
+  try {
+    if (typeof window === "undefined" || !window.localStorage) {
+      throw new Error("no window");
+    }
+    const key = "invoice-number-seq";
+    const stored = window.localStorage.getItem(key);
+    const [storedPrefix, storedCounter] = stored?.split("-") ?? [];
+    const counter = storedPrefix === prefix ? Math.max(Number(storedCounter) + 1, 1) : 1;
+    const next = `${prefix}-${String(counter).padStart(3, "0")}`;
+    window.localStorage.setItem(key, `${prefix}-${counter}`);
+    return next;
+  } catch {
+    const fallback = String(now.getTime()).slice(-5);
+    return `${prefix}-${fallback}`;
+  }
+};
+
 export default function NewInvoicePage() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const locale = i18n.language === "de" ? "de-DE" : "en-DE";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: customers = [] } = useQuery({
+  const { data: customersData } = useQuery({
     queryKey: ["customers"],
-    queryFn: getCustomers,
+    queryFn: () => customersApi.listCustomers(),
   });
+  const customers = customersData?.customers ?? [];
 
-  const defaultValues = getDefaultInvoiceFormValues();
+  const defaultValues = {
+    ...getDefaultInvoiceFormValues(),
+    invoiceNumber: generateInvoiceNumber(),
+  };
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
+  const [newCustomerDialogOpen, setNewCustomerDialogOpen] = useState(false);
   const [lineItems, setLineItems] = useState<InvoiceLineFormData[]>(defaultValues.lineItems || []);
 
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues,
   });
+
+  const customerForm = useForm<CustomerFormData>({
+    resolver: zodResolver(customerFormSchema),
+    defaultValues: getDefaultCustomerFormValues(),
+  });
+
+  useEffect(() => {
+    if (!newCustomerDialogOpen) {
+      customerForm.reset(getDefaultCustomerFormValues());
+    }
+  }, [customerForm, newCustomerDialogOpen]);
 
   // Calculate totals
   const calculateTotals = () => {
@@ -123,10 +187,32 @@ export default function NewInvoicePage() {
     setLineItems(updated);
   };
 
+  const createCustomerMutation = useMutation({
+    mutationFn: async (data: CustomerFormData) => {
+      const input = toCreateCustomerInput(data);
+      return customersApi.createCustomer(input);
+    },
+    onSuccess: (customer) => {
+      if (customer?.id) {
+        void queryClient.invalidateQueries({ queryKey: ["customers"] });
+        form.setValue("customerPartyId", customer.id, { shouldValidate: true, shouldDirty: true });
+        toast.success("Customer created successfully!");
+        setNewCustomerDialogOpen(false);
+        setCustomerDialogOpen(false);
+      } else {
+        toast.error("Customer was created but no ID was returned.");
+      }
+    },
+    onError: (error) => {
+      console.error("Error creating customer:", error);
+      toast.error("Failed to create customer. Please try again.");
+    },
+  });
+
   // Submit mutation
   const createInvoiceMutation = useMutation({
     mutationFn: async (data: InvoiceFormData) => {
-      // Transform form data (Date → ISO strings) to match API contract
+      // Transform form data (Date -> ISO strings) to match API contract
       const input = toCreateInvoiceInput(data);
       return invoicesApi.createInvoice(input);
     },
@@ -148,6 +234,13 @@ export default function NewInvoicePage() {
 
   // Get selected customer
   const selectedCustomer = customers.find((c) => c.id === form.watch("customerPartyId"));
+  const selectedCustomerAddress = [
+    selectedCustomer?.billingAddress?.line1,
+    selectedCustomer?.billingAddress?.city,
+    selectedCustomer?.billingAddress?.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
@@ -192,50 +285,175 @@ export default function NewInvoicePage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left column - Billed to */}
                 <div className="space-y-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground uppercase">Billed to</Label>
-                    <Select
-                      value={form.watch("customerPartyId")}
-                      onValueChange={(value) => form.setValue("customerPartyId", value)}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-xs text-muted-foreground uppercase">Billed to</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => {
+                          setCustomerDialogOpen(false);
+                          setNewCustomerDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add customer
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-between text-left"
+                      onClick={() => setCustomerDialogOpen(true)}
+                      data-testid="invoice-customer-select"
                     >
-                      <SelectTrigger className="mt-2" data-testid="invoice-customer-select">
-                        <SelectValue placeholder="Select a customer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers.map((customer) => (
-                          <SelectItem
-                            key={customer.id}
-                            value={customer.id}
-                            data-testid={`invoice-customer-option-${customer.id}`}
-                          >
-                            {customer.company || customer.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-medium">
+                          {selectedCustomer ? selectedCustomer.displayName : "Select a customer"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {selectedCustomerAddress ||
+                            selectedCustomer?.email ||
+                            "Search customers or add a new one"}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">Search</span>
+                    </Button>
                     {form.formState.errors.customerPartyId && (
-                      <p className="text-sm text-destructive mt-1">
+                      <p className="text-sm text-destructive">
                         {form.formState.errors.customerPartyId.message}
                       </p>
                     )}
                   </div>
 
                   {selectedCustomer && (
-                    <div className="space-y-1">
-                      <div className="text-2xl font-semibold">
-                        {selectedCustomer.company || selectedCustomer.name}
-                      </div>
-                      {selectedCustomer.address && (
-                        <div className="text-sm">{selectedCustomer.address}</div>
+                    <div className="space-y-1 rounded-md border border-dashed border-border p-3">
+                      <div className="text-lg font-semibold">{selectedCustomer.displayName}</div>
+                      {selectedCustomerAddress && (
+                        <div className="text-sm text-muted-foreground">
+                          {selectedCustomerAddress}
+                        </div>
                       )}
-                      {selectedCustomer.city && (
-                        <div className="text-sm">
-                          {selectedCustomer.city}
-                          {selectedCustomer.country && `, ${selectedCustomer.country}`}
+                      {selectedCustomer.email && (
+                        <div className="text-sm text-muted-foreground">
+                          {selectedCustomer.email}
+                        </div>
+                      )}
+                      {selectedCustomer.vatId && (
+                        <div className="text-sm text-muted-foreground">
+                          VAT: {selectedCustomer.vatId}
                         </div>
                       )}
                     </div>
                   )}
+
+                  <CommandDialog
+                    open={customerDialogOpen}
+                    onOpenChange={setCustomerDialogOpen}
+                    contentClassName="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none"
+                  >
+                    <DialogHeader className="sr-only">
+                      <DialogTitle>Select customer</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex items-center justify-between border-b px-4 py-3">
+                      <div>
+                        <div className="text-base font-semibold">Select customer</div>
+                        <p className="text-sm text-muted-foreground">
+                          Search existing clients or create a new one.
+                        </p>
+                      </div>
+                    </div>
+                    <CommandInput placeholder="Search by name, email, or VAT..." />
+                    <CommandList>
+                      <CommandEmpty>No customers found.</CommandEmpty>
+                      <CommandGroup heading="Customers">
+                        {customers.map((customer) => {
+                          const address = [
+                            customer.billingAddress?.line1,
+                            customer.billingAddress?.city,
+                            customer.billingAddress?.country,
+                          ]
+                            .filter(Boolean)
+                            .join(", ");
+
+                          return (
+                            <CommandItem
+                              key={customer.id}
+                              value={customer.id}
+                              data-testid={`invoice-customer-option-${customer.id}`}
+                              onSelect={() => {
+                                form.setValue("customerPartyId", customer.id, {
+                                  shouldValidate: true,
+                                  shouldDirty: true,
+                                });
+                                setCustomerDialogOpen(false);
+                              }}
+                            >
+                              <div className="flex flex-col gap-1 py-1">
+                                <span className="font-medium">{customer.displayName}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {address || customer.email || "No contact details"}
+                                </span>
+                              </div>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                    <div className="flex justify-end border-t px-4 py-3">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="accent"
+                        className="gap-2"
+                        onClick={() => {
+                          setCustomerDialogOpen(false);
+                          setNewCustomerDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add New Customer
+                      </Button>
+                    </div>
+                  </CommandDialog>
+
+                  <Dialog open={newCustomerDialogOpen} onOpenChange={setNewCustomerDialogOpen}>
+                    <DialogContent className="max-w-3xl">
+                      <DialogHeader className="space-y-2">
+                        <DialogTitle>Add new client</DialogTitle>
+                        <DialogDescription>
+                          Capture a new billing contact without leaving the invoice.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <form
+                        onSubmit={customerForm.handleSubmit((data) =>
+                          createCustomerMutation.mutate(data)
+                        )}
+                        className="space-y-6"
+                      >
+                        <CustomerFormFields form={customerForm} />
+                        <DialogFooter className="gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setNewCustomerDialogOpen(false)}
+                            disabled={createCustomerMutation.isPending}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            variant="accent"
+                            disabled={createCustomerMutation.isPending}
+                          >
+                            {createCustomerMutation.isPending ? "Saving..." : "Save"}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 {/* Right column - Invoice metadata */}
@@ -277,10 +495,17 @@ export default function NewInvoicePage() {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-start text-left font-normal text-accent"
+                          className="w-full justify-start text-left font-normal"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          Select date range
+                          {form.watch("serviceDateStart") && form.watch("serviceDateEnd") ? (
+                            <>
+                              {format(form.watch("serviceDateStart"), "dd.MM.yyyy")} →{" "}
+                              {format(form.watch("serviceDateEnd"), "dd.MM.yyyy")}
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">Select date range</span>
+                          )}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -304,11 +529,20 @@ export default function NewInvoicePage() {
                     <Label className="text-xs text-muted-foreground uppercase">
                       Invoice number
                     </Label>
-                    <Input
-                      {...form.register("invoiceNumber")}
-                      data-testid="invoice-number-input"
-                      className="font-medium"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        {...form.register("invoiceNumber")}
+                        data-testid="invoice-number-input"
+                        className="font-medium"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => form.setValue("invoiceNumber", generateInvoiceNumber())}
+                      >
+                        Generate
+                      </Button>
+                    </div>
                     {form.formState.errors.invoiceNumber && (
                       <p className="text-sm text-destructive">
                         {form.formState.errors.invoiceNumber.message}

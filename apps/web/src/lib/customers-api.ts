@@ -9,8 +9,12 @@ import type {
 
 export const customersApi = {
   async createCustomer(input: CreateCustomerInput): Promise<CustomerDto> {
-    const response = await apiClient.post<CreateCustomerOutput>("/customers", input);
-    return response.customer;
+    const response = await apiClient.post<unknown>("/customers", input);
+    // Support both wrapped `{ customer }` responses and raw DTO bodies
+    if (typeof response === "object" && response !== null && "customer" in response) {
+      return (response as CreateCustomerOutput).customer;
+    }
+    return response as CustomerDto;
   },
 
   async updateCustomer(id: string, patch: UpdateCustomerInput["patch"]): Promise<CustomerDto> {
@@ -28,7 +32,22 @@ export const customersApi = {
     pageSize?: number;
     includeArchived?: boolean;
   }): Promise<{ customers: CustomerDto[]; nextCursor?: string }> {
-    return apiClient.get("/customers", params);
+    const response = await apiClient.get<unknown>("/customers", params);
+    if (Array.isArray(response)) {
+      return { customers: response as CustomerDto[] };
+    }
+
+    if (
+      typeof response === "object" &&
+      response !== null &&
+      "items" in response &&
+      Array.isArray((response as { items: unknown }).items)
+    ) {
+      const { items, nextCursor } = response as { items: CustomerDto[]; nextCursor?: string };
+      return { customers: items, nextCursor };
+    }
+
+    return response as { customers: CustomerDto[]; nextCursor?: string };
   },
 
   async archiveCustomer(id: string): Promise<CustomerDto> {
