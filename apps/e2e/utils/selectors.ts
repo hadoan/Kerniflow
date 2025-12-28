@@ -91,4 +91,21 @@ export const selectors = {
     onboardingSubmit: 'button[data-testid="onboarding-submit"]',
     createShortcut: 'button[data-testid="workspace-create-shortcut"]',
   },
+
+  customers: {
+    listContainer: 'div[data-testid="customers-list"]',
+    createButton: 'button[data-testid="add-customer-button"]',
+    customerForm: 'form[data-testid="customer-form"]',
+    displayNameInput: 'input[data-testid="customer-displayName-input"]',
+    emailInput: 'input[data-testid="customer-email-input"]',
+    phoneInput: 'input[data-testid="customer-phone-input"]',
+    vatIdInput: 'input[data-testid="customer-vatId-input"]',
+    addressLine1Input: 'input[data-testid="customer-address-line1-input"]',
+    addressLine2Input: 'input[data-testid="customer-address-line2-input"]',
+    addressCityInput: 'input[data-testid="customer-address-city-input"]',
+    addressPostalCodeInput: 'input[data-testid="customer-address-postalCode-input"]',
+    addressCountryInput: 'input[data-testid="customer-address-country-input"]',
+    notesInput: 'textarea[data-testid="customer-notes-input"]',
+    submitButton: 'button[data-testid="submit-customer-button"]',
+  },
 };

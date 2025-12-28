@@ -5,7 +5,7 @@ import { DashboardPage } from "../../modules/core";
 import { AssistantPage } from "../../modules/assistant";
 import { ExpensesPage, NewExpensePage } from "../../modules/expenses";
 import { InvoicesPage, NewInvoicePage } from "../../modules/invoices";
-import { CustomersPage } from "../../modules/customers";
+import { CustomersPage, NewCustomerPage, EditCustomerPage } from "../../modules/customers";
 import { SettingsPage } from "../../modules/settings";
 import { TaxSettingsPage } from "../../modules/tax";
 import NotFound from "../../shared/components/NotFound";
@@ -37,6 +37,8 @@ export const Router = () => (
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/new" element={<NewInvoicePage />} />
           <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/customers/new" element={<NewCustomerPage />} />
+          <Route path="/customers/:id" element={<EditCustomerPage />} />
           <Route path="/copilot" element={<CopilotPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/settings/workspace" element={<WorkspaceSettingsPage />} />

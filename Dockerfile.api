@@ -41,8 +41,7 @@ RUN pnpm --filter @kerniflow/config build \
 
 EXPOSE 3000
 
-# Default envs (set by docker-compose)
-ENV NODE_ENV=development
-# DATABASE_URL, REDIS_URL, LOG_LEVEL are set by docker-compose or .env files
+# Environment variables are set by docker-compose or .env files
+# NODE_ENV, DATABASE_URL, REDIS_URL, LOG_LEVEL, etc.
 
 CMD ["pnpm", "--filter", "@kerniflow/api", "dev"]
