@@ -41,6 +41,12 @@
     "projects": "Projects",
     "accounting": "Accounting",
     "inventory": "Inventory",
+    "inventoryProducts": "Inventory - Products",
+    "inventoryWarehouses": "Inventory - Warehouses",
+    "inventoryStock": "Inventory - Stock",
+    "inventoryDocuments": "Inventory - Documents",
+    "inventoryReorder": "Inventory - Reorder",
+    "inventoryCopilot": "Inventory - Copilot",
     "automation": "Automation",
     "documents": "Documents",
     "hr": "HR"

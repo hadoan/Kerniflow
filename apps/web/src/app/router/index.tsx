@@ -38,6 +38,16 @@ import {
   PurchasingSettingsPage,
   PurchasingCopilotPage,
 } from "../../modules/purchasing";
+import {
+  ProductsPage,
+  ProductDetailPage,
+  WarehousesPage,
+  StockOverviewPage,
+  DocumentsPage,
+  DocumentDetailPage,
+  ReorderDashboardPage,
+  InventoryCopilotPage,
+} from "../../modules/inventory";
 import { SettingsPage } from "../../modules/settings";
 import { TaxSettingsPage } from "../../modules/tax";
 import NotFound from "../../shared/components/NotFound";
@@ -100,6 +110,14 @@ export const Router = () => (
           <Route path="/purchasing/vendor-bills/:id/pay" element={<RecordBillPaymentPage />} />
           <Route path="/purchasing/settings" element={<PurchasingSettingsPage />} />
           <Route path="/purchasing/copilot" element={<PurchasingCopilotPage />} />
+          <Route path="/inventory/products" element={<ProductsPage />} />
+          <Route path="/inventory/products/:id" element={<ProductDetailPage />} />
+          <Route path="/inventory/warehouses" element={<WarehousesPage />} />
+          <Route path="/inventory/stock" element={<StockOverviewPage />} />
+          <Route path="/inventory/documents" element={<DocumentsPage />} />
+          <Route path="/inventory/documents/:id" element={<DocumentDetailPage />} />
+          <Route path="/inventory/reorder" element={<ReorderDashboardPage />} />
+          <Route path="/inventory/copilot" element={<InventoryCopilotPage />} />
           <Route path="/copilot" element={<CopilotPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/settings/workspace" element={<WorkspaceSettingsPage />} />

@@ -1,0 +1,222 @@
+enum ProductType {
+  STOCKABLE
+  CONSUMABLE
+  SERVICE
+}
+
+enum LocationType {
+  INTERNAL
+  RECEIVING
+  SHIPPING
+  VIRTUAL
+}
+
+enum InventoryDocumentType {
+  RECEIPT
+  DELIVERY
+  TRANSFER
+  ADJUSTMENT
+}
+
+enum InventoryDocumentStatus {
+  DRAFT
+  CONFIRMED
+  POSTED
+  CANCELED
+}
+
+enum StockMoveReason {
+  RECEIPT
+  SHIPMENT
+  TRANSFER
+  ADJUSTMENT
+}
+
+enum ReservationStatus {
+  ACTIVE
+  RELEASED
+  FULFILLED
+}
+
+enum NegativeStockPolicy {
+  DISALLOW
+  ALLOW
+}
+
+enum ReservationPolicy {
+  FULL_ONLY
+}
+
+model InventoryProduct {
+  id                       String     @id @default(cuid())
+  tenantId                 String
+  sku                      String
+  name                     String
+  productType              ProductType
+  unitOfMeasure            String
+  barcode                  String?
+  defaultSalesPriceCents   Int?
+  defaultPurchaseCostCents Int?
+  isActive                 Boolean    @default(true)
+  tags                     String[]   @default([])
+  createdByUserId          String?
+  updatedByUserId          String?
+  createdAt                DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt                DateTime   @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, productType])
+  @@index([tenantId, isActive])
+}
+
+model InventoryWarehouse {
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  isDefault       Boolean  @default(false)
+  address         String?
+  createdByUserId String?
+  updatedByUserId String?
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+
+  locations InventoryLocation[]
+
+  @@index([tenantId, isDefault])
+}
+
+model InventoryLocation {
+  id              String       @id @default(cuid())
+  tenantId        String
+  warehouseId     String
+  name            String
+  locationType    LocationType
+  isActive        Boolean      @default(true)
+  createdByUserId String?
+  updatedByUserId String?
+  createdAt       DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime     @updatedAt @db.Timestamptz(6)
+
+  warehouse InventoryWarehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, warehouseId])
+}
+
+model InventoryDocument {
+  id              String                  @id @default(cuid())
+  tenantId        String
+  documentType    InventoryDocumentType
+  documentNumber  String?
+  status          InventoryDocumentStatus @default(DRAFT)
+  reference       String?
+  scheduledDate   DateTime?               @db.Date
+  postingDate     DateTime?               @db.Date
+  notes           String?
+  partyId         String?
+  sourceType      String?
+  sourceId        String?
+  confirmedAt     DateTime?               @db.Timestamptz(6)
+  postedAt        DateTime?               @db.Timestamptz(6)
+  canceledAt      DateTime?               @db.Timestamptz(6)
+  createdByUserId String?
+  updatedByUserId String?
+  createdAt       DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime                @updatedAt @db.Timestamptz(6)
+
+  lines InventoryDocumentLine[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, documentType])
+  @@index([tenantId, partyId])
+  @@index([tenantId, createdAt])
+  @@unique([tenantId, documentNumber])
+}
+
+model InventoryDocumentLine {
+  id              String   @id @default(cuid())
+  documentId      String
+  productId       String
+  quantity        Int
+  unitCostCents   Int?
+  fromLocationId  String?
+  toLocationId    String?
+  notes           String?
+  reservedQuantity Int?
+
+  document InventoryDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([productId])
+}
+
+model StockMove {
+  id           String           @id @default(cuid())
+  tenantId     String
+  postingDate  DateTime         @db.Date
+  productId    String
+  quantityDelta Int
+  locationId   String
+  documentType InventoryDocumentType
+  documentId   String
+  lineId       String
+  reasonCode   StockMoveReason
+  createdByUserId String?
+  createdAt    DateTime         @default(now()) @db.Timestamptz(6)
+
+  @@index([tenantId, productId])
+  @@index([tenantId, locationId])
+  @@index([tenantId, postingDate])
+}
+
+model StockReservation {
+  id           String            @id @default(cuid())
+  tenantId     String
+  productId    String
+  locationId   String
+  documentId   String
+  reservedQty  Int
+  status       ReservationStatus @default(ACTIVE)
+  createdByUserId String?
+  createdAt    DateTime          @default(now()) @db.Timestamptz(6)
+  releasedAt   DateTime?         @db.Timestamptz(6)
+  fulfilledAt  DateTime?         @db.Timestamptz(6)
+
+  @@index([tenantId, documentId])
+  @@index([tenantId, productId])
+}
+
+model ReorderPolicy {
+  id                      String   @id @default(cuid())
+  tenantId                String
+  productId               String
+  warehouseId             String
+  minQty                  Int
+  maxQty                  Int?
+  reorderPoint            Int?
+  preferredSupplierPartyId String?
+  leadTimeDays            Int?
+  isActive                Boolean  @default(true)
+  createdAt               DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt               DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([tenantId, productId, warehouseId])
+  @@index([tenantId, warehouseId])
+}
+
+model InventorySettings {
+  id                 String             @id @default(cuid())
+  tenantId           String             @unique
+  receiptPrefix      String             @default("RCPT-")
+  receiptNextNumber  Int                @default(1)
+  deliveryPrefix     String             @default("DLV-")
+  deliveryNextNumber Int                @default(1)
+  transferPrefix     String             @default("TRF-")
+  transferNextNumber Int                @default(1)
+  adjustmentPrefix   String             @default("ADJ-")
+  adjustmentNextNumber Int              @default(1)
+  negativeStockPolicy NegativeStockPolicy @default(DISALLOW)
+  reservationPolicy  ReservationPolicy  @default(FULL_ONLY)
+  defaultWarehouseId String?
+  createdAt          DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime           @updatedAt @db.Timestamptz(6)
+}

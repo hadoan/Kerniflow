@@ -16,6 +16,7 @@ import { WorkspacesModule } from "./modules/workspaces";
 import { AccountingModule } from "./modules/accounting";
 import { SalesModule } from "./modules/sales";
 import { PurchasingModule } from "./modules/purchasing";
+import { InventoryModule } from "./modules/inventory";
 
 @Module({
   controllers: [AppController],
@@ -34,6 +35,7 @@ import { PurchasingModule } from "./modules/purchasing";
     AccountingModule,
     SalesModule,
     PurchasingModule,
+    InventoryModule,
     WorkflowModule,
     AutomationModule,
     ReportingModule,

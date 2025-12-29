@@ -41,6 +41,12 @@
     "projects": "Dự án",
     "accounting": "Kế toán",
     "inventory": "Kho",
+    "inventoryProducts": "Kho - Sản phẩm",
+    "inventoryWarehouses": "Kho - Kho hàng",
+    "inventoryStock": "Kho - Tồn kho",
+    "inventoryDocuments": "Kho - Chứng từ",
+    "inventoryReorder": "Kho - Đặt hàng",
+    "inventoryCopilot": "Kho - Trợ lý",
     "automation": "Tự động hóa",
     "documents": "Tài liệu",
     "hr": "Nhân sự"

@@ -13,6 +13,8 @@ export * from "./sales";
 export * from "./sales-ai";
 export * from "./purchasing";
 export * from "./purchasing-ai";
+export * from "./inventory";
+export * from "./inventory-ai";
 
 export const CONTRACTS_HELLO = "Kerniflow contracts loaded ✅";
 

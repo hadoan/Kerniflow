@@ -41,6 +41,12 @@
     "projects": "Projekte",
     "accounting": "Buchhaltung",
     "inventory": "Inventar",
+    "inventoryProducts": "Inventar - Produkte",
+    "inventoryWarehouses": "Inventar - Lager",
+    "inventoryStock": "Inventar - Bestand",
+    "inventoryDocuments": "Inventar - Belege",
+    "inventoryReorder": "Inventar - Nachbestellung",
+    "inventoryCopilot": "Inventar - Copilot",
     "automation": "Automatisierung",
     "documents": "Dokumente",
     "hr": "Personal"

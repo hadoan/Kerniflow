@@ -32,6 +32,9 @@ import { buildSalesTools } from "../sales/adapters/tools/sales.tools";
 import { PurchasingModule } from "../purchasing";
 import { PurchasingApplication } from "../purchasing/application/purchasing.application";
 import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.tools";
+import { InventoryModule } from "../inventory";
+import { InventoryApplication } from "../inventory/application/inventory.application";
+import { buildInventoryTools } from "../inventory/adapters/tools/inventory.tools";
 
 @Module({
   imports: [
@@ -41,6 +44,7 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
     PartyCrmModule,
     SalesModule,
     PurchasingModule,
+    InventoryModule,
   ],
   controllers: [CopilotController],
   providers: [
@@ -84,14 +88,22 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
         invoices: InvoicesApplication,
         partyCrm: PartyCrmApplication,
         sales: SalesApplication,
-        purchasing: PurchasingApplication
+        purchasing: PurchasingApplication,
+        inventory: InventoryApplication
       ) => [
         ...buildInvoiceTools(invoices),
         ...buildCustomerTools(partyCrm),
         ...buildSalesTools(sales),
         ...buildPurchasingTools(purchasing),
+        ...buildInventoryTools(inventory),
       ],
-      inject: [InvoicesApplication, PartyCrmApplication, SalesApplication, PurchasingApplication],
+      inject: [
+        InvoicesApplication,
+        PartyCrmApplication,
+        SalesApplication,
+        PurchasingApplication,
+        InventoryApplication,
+      ],
     },
     {
       provide: StreamCopilotChatUseCase,
