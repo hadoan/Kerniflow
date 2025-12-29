@@ -26,12 +26,22 @@ import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
 import { PartyCrmModule } from "../party-crm";
 import { PartyCrmApplication } from "../party-crm/application/party-crm.application";
 import { buildCustomerTools } from "../party-crm/adapters/tools/customer.tools";
+import { SalesModule } from "../sales";
+import { SalesApplication } from "../sales/application/sales.application";
+import { buildSalesTools } from "../sales/adapters/tools/sales.tools";
 import { PurchasingModule } from "../purchasing";
 import { PurchasingApplication } from "../purchasing/application/purchasing.application";
 import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.tools";
 
 @Module({
-  imports: [DataModule, IdentityModule, InvoicesModule, PartyCrmModule, PurchasingModule],
+  imports: [
+    DataModule,
+    IdentityModule,
+    InvoicesModule,
+    PartyCrmModule,
+    SalesModule,
+    PurchasingModule,
+  ],
   controllers: [CopilotController],
   providers: [
     PrismaAgentRunRepository,
@@ -73,13 +83,15 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
       useFactory: (
         invoices: InvoicesApplication,
         partyCrm: PartyCrmApplication,
+        sales: SalesApplication,
         purchasing: PurchasingApplication
       ) => [
         ...buildInvoiceTools(invoices),
         ...buildCustomerTools(partyCrm),
+        ...buildSalesTools(sales),
         ...buildPurchasingTools(purchasing),
       ],
-      inject: [InvoicesApplication, PartyCrmApplication, PurchasingApplication],
+      inject: [InvoicesApplication, PartyCrmApplication, SalesApplication, PurchasingApplication],
     },
     {
       provide: StreamCopilotChatUseCase,

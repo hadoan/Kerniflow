@@ -8,6 +8,19 @@ import { InvoicesPage, NewInvoicePage, InvoiceDetailPage } from "../../modules/i
 import { CustomersPage, NewCustomerPage, EditCustomerPage } from "../../modules/customers";
 import { DealsPage, DealDetailPage, ActivitiesPage } from "../../modules/crm";
 import {
+  QuotesPage as SalesQuotesPage,
+  NewQuotePage,
+  QuoteDetailPage,
+  OrdersPage as SalesOrdersPage,
+  NewOrderPage,
+  OrderDetailPage,
+  InvoicesPage as SalesInvoicesPage,
+  NewInvoicePage as SalesNewInvoicePage,
+  InvoiceDetailPage as SalesInvoiceDetailPage,
+  SalesSettingsPage,
+  SalesCopilotPage,
+} from "../../modules/sales";
+import {
   AccountingDashboard,
   SetupWizard,
   ChartOfAccountsList,
@@ -56,6 +69,17 @@ export const Router = () => (
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/new" element={<NewInvoicePage />} />
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
+          <Route path="/sales/quotes" element={<SalesQuotesPage />} />
+          <Route path="/sales/quotes/new" element={<NewQuotePage />} />
+          <Route path="/sales/quotes/:quoteId" element={<QuoteDetailPage />} />
+          <Route path="/sales/orders" element={<SalesOrdersPage />} />
+          <Route path="/sales/orders/new" element={<NewOrderPage />} />
+          <Route path="/sales/orders/:orderId" element={<OrderDetailPage />} />
+          <Route path="/sales/invoices" element={<SalesInvoicesPage />} />
+          <Route path="/sales/invoices/new" element={<SalesNewInvoicePage />} />
+          <Route path="/sales/invoices/:invoiceId" element={<SalesInvoiceDetailPage />} />
+          <Route path="/sales/settings" element={<SalesSettingsPage />} />
+          <Route path="/sales/copilot" element={<SalesCopilotPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/customers/new" element={<NewCustomerPage />} />
           <Route path="/customers/:id" element={<EditCustomerPage />} />

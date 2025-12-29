@@ -14,6 +14,7 @@ import { DocumentsModule } from "./modules/documents";
 import { TaxModule } from "./modules/tax/tax.module";
 import { WorkspacesModule } from "./modules/workspaces";
 import { AccountingModule } from "./modules/accounting";
+import { SalesModule } from "./modules/sales";
 import { PurchasingModule } from "./modules/purchasing";
 
 @Module({
@@ -31,6 +32,7 @@ import { PurchasingModule } from "./modules/purchasing";
     DocumentsModule,
     TaxModule,
     AccountingModule,
+    SalesModule,
     PurchasingModule,
     WorkflowModule,
     AutomationModule,
