@@ -1,36 +1,124 @@
+// Workflow Definition: Template for workflow processes
 model WorkflowDefinition {
-  id          String   @id @default(cuid())
+  id          String                    @id @default(cuid())
   tenantId    String
+  key         String                    // Stable identifier (e.g., "expense_approval", "onboarding")
+  version     Int                       @default(1)
   name        String
   description String?
-  createdAt   DateTime @default(now())
+  status      WorkflowDefinitionStatus  @default(ACTIVE)
+  spec        String                    // JSON: XState machine definition
+  createdBy   String?
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
 
   instances WorkflowInstance[]
 
-  @@index([tenantId])
+  @@unique([tenantId, key, version])
+  @@index([tenantId, status])
+  @@index([tenantId, key])
 }
 
+enum WorkflowDefinitionStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+// Workflow Instance: Runtime execution of a workflow definition
 model WorkflowInstance {
-  id         String   @id @default(cuid())
-  tenantId   String
-  definitionId String
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String                 @id @default(cuid())
+  tenantId      String
+  definitionId  String
+  businessKey   String?                // Optional deduplication key (e.g., expenseId, orderId)
+  status        WorkflowInstanceStatus @default(PENDING)
+  currentState  String?                // XState current state value
+  context       String?                // JSON: XState context snapshot
+  startedAt     DateTime?
+  completedAt   DateTime?
+  lastError     String?                // JSON: Last error details
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
 
   definition WorkflowDefinition @relation(fields: [definitionId], references: [id])
   tasks      Task[]
+  events     WorkflowEvent[]
 
+  @@unique([tenantId, definitionId, businessKey])
   @@index([tenantId, status])
+  @@index([tenantId, businessKey])
+  @@index([status, updatedAt])
 }
 
+enum WorkflowInstanceStatus {
+  PENDING     // Not yet started
+  RUNNING     // Currently executing
+  WAITING     // Waiting for external event (human task, timer, callback)
+  COMPLETED   // Successfully finished
+  FAILED      // Failed with error
+  CANCELLED   // Manually cancelled
+}
+
+// Task: Executable unit within a workflow instance
 model Task {
-  id           String   @id @default(cuid())
-  instanceId   String
-  name         String
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String     @id @default(cuid())
+  tenantId        String
+  instanceId      String
+  name            String
+  type            TaskType
+  status          TaskStatus @default(PENDING)
+  runAt           DateTime?  // For delayed/scheduled tasks
+  attempts        Int        @default(0)
+  maxAttempts     Int        @default(3)
+  lockedAt        DateTime?  // For preventing concurrent execution
+  lockedBy        String?    // Worker/process ID that claimed this task
+  idempotencyKey  String?    // Optional deduplication key
+  input           String?    // JSON: Task input parameters
+  output          String?    // JSON: Task execution result
+  error           String?    // JSON: Error details if failed
+  traceId         String?    // For distributed tracing
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status, runAt])
+  @@index([instanceId, status])
+  @@index([tenantId, idempotencyKey])
+  @@index([status, lockedAt])
+  @@index([runAt, status])
+}
+
+enum TaskType {
+  HUMAN    // Requires human interaction/approval
+  TIMER    // Delay/scheduled execution
+  HTTP     // HTTP API call
+  EMAIL    // Email sending
+  AI       // AI/LLM decision or tool execution
+  SYSTEM   // Internal system operation
+}
+
+enum TaskStatus {
+  PENDING    // Not yet started
+  RUNNING    // Currently executing
+  SUCCEEDED  // Completed successfully
+  FAILED     // Failed with error
+  CANCELLED  // Manually cancelled
+  SKIPPED    // Skipped due to workflow logic
+}
+
+// WorkflowEvent: Audit log for all workflow transitions and events
+model WorkflowEvent {
+  id          String   @id @default(cuid())
+  tenantId    String
+  instanceId  String
+  type        String   // INSTANCE_STARTED, TASK_CREATED, TASK_COMPLETED, STATE_TRANSITION, ERROR, etc.
+  payload     String   // JSON: Event-specific data
+  createdAt   DateTime @default(now())
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, instanceId, createdAt])
+  @@index([instanceId, type])
+  @@index([tenantId, type, createdAt])
 }

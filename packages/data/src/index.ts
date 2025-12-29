@@ -16,3 +16,7 @@ export * from "./adapters/prisma-outbox-repository.adapter";
 export * from "./adapters/prisma-custom-field-definition-repository.adapter";
 export * from "./adapters/prisma-custom-field-index-repository.adapter";
 export * from "./adapters/prisma-entity-layout-repository.adapter";
+export * from "./adapters/prisma-workflow-definition-repository.adapter";
+export * from "./adapters/prisma-workflow-instance-repository.adapter";
+export * from "./adapters/prisma-workflow-task-repository.adapter";
+export * from "./adapters/prisma-workflow-event-repository.adapter";

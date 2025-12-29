@@ -8,6 +8,10 @@ import { PrismaIdempotencyAdapter } from "./adapters/prisma-idempotency.adapter"
 import { OutboxRepository } from "./adapters/prisma-outbox-repository.adapter";
 import { CustomFieldDefinitionRepository } from "./adapters/prisma-custom-field-definition-repository.adapter";
 import { CustomFieldIndexRepository } from "./adapters/prisma-custom-field-index-repository.adapter";
+import { WorkflowDefinitionRepository } from "./adapters/prisma-workflow-definition-repository.adapter";
+import { WorkflowInstanceRepository } from "./adapters/prisma-workflow-instance-repository.adapter";
+import { WorkflowTaskRepository } from "./adapters/prisma-workflow-task-repository.adapter";
+import { WorkflowEventRepository } from "./adapters/prisma-workflow-event-repository.adapter";
 
 /**
  * Global DataModule that provides all data access infrastructure.
@@ -44,6 +48,10 @@ import { CustomFieldIndexRepository } from "./adapters/prisma-custom-field-index
     OutboxRepository,
     CustomFieldDefinitionRepository,
     CustomFieldIndexRepository,
+    WorkflowDefinitionRepository,
+    WorkflowInstanceRepository,
+    WorkflowTaskRepository,
+    WorkflowEventRepository,
   ],
   exports: [
     // Prisma client (for rare cases where direct access is needed)
@@ -62,6 +70,10 @@ import { CustomFieldIndexRepository } from "./adapters/prisma-custom-field-index
     OutboxRepository,
     CustomFieldDefinitionRepository,
     CustomFieldIndexRepository,
+    WorkflowDefinitionRepository,
+    WorkflowInstanceRepository,
+    WorkflowTaskRepository,
+    WorkflowEventRepository,
   ],
 })
 export class DataModule {}

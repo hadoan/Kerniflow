@@ -41,6 +41,19 @@ export default defineWorkspace([
     },
   },
   {
+    extends: "./packages/core/vitest.config.ts",
+    root: "./packages/core",
+    test: {
+      exclude: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/*.int.test.ts",
+        "**/e2e/**",
+        "**/apps/e2e/**",
+      ],
+    },
+  },
+  {
     extends: "./services/worker/vitest.config.ts",
     root: "./services/worker",
     test: {

@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { EnvModule } from "@kerniflow/config";
 import { DataModule } from "@kerniflow/data";
 import { OutboxModule } from "./modules/outbox/outbox.module";
-import { WorkflowRunnerModule } from "./modules/workflow-runner/workflow-runner.module";
+import { WorkflowsModule } from "./modules/workflows/workflows.module";
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { WorkflowRunnerModule } from "./modules/workflow-runner/workflow-runner.
     EnvModule.forRoot(),
     DataModule,
     OutboxModule,
-    WorkflowRunnerModule,
+    WorkflowsModule,
   ],
 })
 export class WorkerModule {}

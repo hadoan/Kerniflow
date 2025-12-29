@@ -1,0 +1,237 @@
+import { createMachine } from "xstate";
+import type { AnyEventObject, StateMachine } from "xstate";
+import type {
+  WorkflowActionSpec,
+  WorkflowEventInput,
+  WorkflowSpec,
+  WorkflowTaskCreateSpec,
+} from "@kerniflow/contracts";
+import type {
+  WorkflowSnapshot,
+  WorkflowStateValue,
+  WorkflowTransition,
+  WorkflowTransitionResult,
+} from "./types";
+
+function parseStateValue(value: string | null | undefined): WorkflowStateValue {
+  if (!value) {
+    return "";
+  }
+
+  try {
+    return JSON.parse(value) as WorkflowStateValue;
+  } catch {
+    return value;
+  }
+}
+
+function serializeStateValue(value: WorkflowStateValue): string {
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+function getContextPath(context: Record<string, unknown>, path: string): unknown {
+  return path.split(".").reduce<unknown>((acc, key) => {
+    if (acc && typeof acc === "object" && key in acc) {
+      return (acc as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, context);
+}
+
+function buildGuard(guard: WorkflowSpec["guards"][string]) {
+  if (guard.type === "always") {
+    return () => true;
+  }
+
+  if (guard.type === "contextEquals") {
+    return ({ context }: { context: Record<string, unknown> }) =>
+      getContextPath(context, guard.path) === guard.value;
+  }
+
+  if (guard.type === "eventEquals") {
+    return ({ event }: { event: Record<string, unknown> }) =>
+      getContextPath(event, guard.path) === guard.value;
+  }
+
+  return () => false;
+}
+
+function buildGuards(guards: WorkflowSpec["guards"] | undefined) {
+  if (!guards) {
+    return undefined;
+  }
+
+  const entries = Object.entries(guards).map(([name, guard]) => [name, buildGuard(guard)]);
+  return Object.fromEntries(entries);
+}
+
+function normalizeSpec(spec: WorkflowSpec) {
+  const guards: NonNullable<WorkflowSpec["guards"]> = { ...(spec.guards ?? {}) };
+  let guardIndex = 0;
+  const states = structuredClone(spec.states);
+
+  for (const state of Object.values(states)) {
+    if (!state.on) {
+      continue;
+    }
+
+    for (const transition of Object.values(state.on)) {
+      if (typeof transition.guard === "string" || !transition.guard) {
+        continue;
+      }
+
+      const guardName = `inline_guard_${(guardIndex += 1)}`;
+      guards[guardName] = transition.guard;
+      transition.guard = guardName;
+    }
+  }
+
+  return { guards, states };
+}
+
+export function buildWorkflowMachine(spec: WorkflowSpec): StateMachine<any, AnyEventObject> {
+  const normalized = normalizeSpec(spec);
+  return createMachine(
+    {
+      id: spec.id ?? "workflow",
+      initial: spec.initial,
+      context: spec.context ?? {},
+      states: normalized.states,
+    },
+    {
+      guards: buildGuards(normalized.guards),
+    }
+  );
+}
+
+export function getInitialSnapshot(
+  spec: WorkflowSpec,
+  inputContext?: Record<string, unknown>
+): WorkflowSnapshot {
+  const machine = buildWorkflowMachine(spec);
+  const snapshot = machine.getInitialSnapshot();
+  const mergedContext = {
+    ...(snapshot.context as Record<string, unknown>),
+    ...(inputContext ?? {}),
+  };
+
+  return {
+    value: snapshot.value as WorkflowStateValue,
+    context: mergedContext,
+  };
+}
+
+function collectTaskActions(actions: WorkflowActionSpec[]): WorkflowTaskCreateSpec[] {
+  return actions.filter((action) => action.type === "createTask").map((action) => action.task);
+}
+
+function applyAssignActions(
+  context: Record<string, unknown>,
+  actions: WorkflowActionSpec[]
+): Record<string, unknown> {
+  const next = { ...context };
+
+  for (const action of actions) {
+    if (action.type !== "assign") {
+      continue;
+    }
+
+    const parts = action.path.split(".");
+    let cursor: Record<string, unknown> = next;
+
+    while (parts.length > 1) {
+      const key = parts.shift();
+      if (!key) {
+        break;
+      }
+      if (typeof cursor[key] !== "object" || cursor[key] === null) {
+        cursor[key] = {};
+      }
+      cursor = cursor[key] as Record<string, unknown>;
+    }
+
+    const finalKey = parts.shift();
+    if (finalKey) {
+      cursor[finalKey] = action.value as unknown;
+    }
+  }
+
+  return next;
+}
+
+function normalizeSnapshot(machine: StateMachine<any, AnyEventObject>, snapshot: WorkflowSnapshot) {
+  const base = machine.getInitialSnapshot();
+
+  return {
+    ...base,
+    value: snapshot.value,
+    context: snapshot.context,
+  } as typeof base;
+}
+
+export function applyWorkflowEvents(
+  spec: WorkflowSpec,
+  snapshot: WorkflowSnapshot,
+  events: WorkflowEventInput[]
+): WorkflowTransitionResult {
+  const machine = buildWorkflowMachine(spec);
+  let current = normalizeSnapshot(machine, snapshot);
+  const transitions: WorkflowTransition[] = [];
+  const actions: WorkflowActionSpec[] = [];
+
+  for (const event of events) {
+    const next = machine.transition(current, event);
+
+    if (next.changed) {
+      transitions.push({
+        event,
+        from: current.value as WorkflowStateValue,
+        to: next.value as WorkflowStateValue,
+      });
+    }
+
+    if (next.actions?.length) {
+      actions.push(...(next.actions as WorkflowActionSpec[]));
+    }
+
+    current = {
+      ...next,
+      context: applyAssignActions(
+        (next.context ?? {}) as Record<string, unknown>,
+        next.actions as WorkflowActionSpec[]
+      ),
+    } as typeof next;
+  }
+
+  const tasks = collectTaskActions(actions);
+
+  return {
+    snapshot: {
+      value: current.value as WorkflowStateValue,
+      context: (current.context ?? {}) as Record<string, unknown>,
+    },
+    tasks,
+    transitions,
+    actions,
+  };
+}
+
+export function serializeSnapshot(snapshot: WorkflowSnapshot): {
+  currentState: string;
+  context: string;
+} {
+  return {
+    currentState: serializeStateValue(snapshot.value),
+    context: JSON.stringify(snapshot.context ?? {}),
+  };
+}
+
+export function restoreSnapshot(input: {
+  currentState?: string | null;
+  context?: string | null;
+}): WorkflowSnapshot {
+  return {
+    value: input.currentState ? parseStateValue(input.currentState) : "",
+    context: input.context ? (JSON.parse(input.context) as Record<string, unknown>) : {},
+  };
+}

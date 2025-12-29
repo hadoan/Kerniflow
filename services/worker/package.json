@@ -5,11 +5,13 @@
   "dependencies": {
     "@kerniflow/config": "workspace:*",
     "@kerniflow/contracts": "workspace:*",
+    "@kerniflow/core": "workspace:*",
     "@kerniflow/data": "workspace:*",
     "@kerniflow/email-templates": "workspace:*",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@prisma/client": "catalog:",
+    "bullmq": "catalog:",
     "react": "catalog:",
     "reflect-metadata": "catalog:",
     "resend": "catalog:",

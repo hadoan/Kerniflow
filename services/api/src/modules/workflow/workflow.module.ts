@@ -1,20 +1,16 @@
 import { Module } from "@nestjs/common";
-import { Controller, Get, Post } from "@nestjs/common";
-
-@Controller("workflows")
-class WorkflowController {
-  @Get()
-  hello() {
-    return { message: "Workflow context - hello" };
-  }
-
-  @Post("instances")
-  createInstance() {
-    return { id: "wf-instance-1", status: "created" };
-  }
-}
+import { WorkflowDefinitionsController } from "./adapters/http/workflow-definitions.controller";
+import { WorkflowInstancesController } from "./adapters/http/workflow-instances.controller";
+import { WorkflowTasksController } from "./adapters/http/workflow-tasks.controller";
+import { WorkflowService } from "./application/workflow.service";
+import { WorkflowQueueClient } from "./infrastructure/workflow-queue.client";
 
 @Module({
-  controllers: [WorkflowController],
+  controllers: [
+    WorkflowDefinitionsController,
+    WorkflowInstancesController,
+    WorkflowTasksController,
+  ],
+  providers: [WorkflowService, WorkflowQueueClient],
 })
 export class WorkflowModule {}
