@@ -8,6 +8,7 @@ import {
   type UseCaseError,
   ValidationError,
   NotFoundError,
+  type AuditPort,
   err,
   ok,
   parseLocalDate,
@@ -41,6 +42,7 @@ type PaymentDeps = {
   clock: ClockPort;
   idempotency: IdempotencyStoragePort;
   accounting: AccountingApplication;
+  audit: AuditPort;
 };
 
 export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, RecordPaymentOutput> {
@@ -153,6 +155,14 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
 
     await this.deps.paymentRepo.create(ctx.tenantId, payment);
     await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.payment.recorded",
+      entityType: "SalesPayment",
+      entityId: payment.id,
+      metadata: { invoiceId: invoice.id, amountCents: payment.amountCents },
+    });
 
     const result = { payment: toPaymentDto(payment), invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
@@ -235,6 +245,14 @@ export class ReversePaymentUseCase extends BaseUseCase<ReversePaymentInput, Reve
 
     await this.deps.paymentRepo.delete(ctx.tenantId, payment.id);
     await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.payment.reversed",
+      entityType: "SalesPayment",
+      entityId: payment.id,
+      metadata: { invoiceId: invoice.id, reason: input.reason ?? null },
+    });
 
     const result = { payment: toPaymentDto(payment), invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({

@@ -8,6 +8,7 @@ import {
   type UseCaseError,
   ValidationError,
   NotFoundError,
+  type AuditPort,
   err,
   ok,
   parseLocalDate,
@@ -81,6 +82,7 @@ type QuoteDeps = {
   clock: ClockPort;
   customerQuery: CustomerQueryPort;
   idempotency: IdempotencyStoragePort;
+  audit: AuditPort;
 };
 
 export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuoteOutput> {
@@ -258,6 +260,14 @@ export class SendQuoteUseCase extends BaseUseCase<SendQuoteInput, SendQuoteOutpu
 
     await this.deps.quoteRepo.save(ctx.tenantId, quote);
     await this.deps.settingsRepo.save(settings);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.quote.sent",
+      entityType: "SalesQuote",
+      entityId: quote.id,
+      metadata: { number: quote.number },
+    });
 
     const result = { quote: toQuoteDto(quote) };
     await storeIdempotentResult({
@@ -303,6 +313,14 @@ export class AcceptQuoteUseCase extends BaseUseCase<AcceptQuoteInput, AcceptQuot
     const now = this.deps.clock.now();
     quote.accept(now, now);
     await this.deps.quoteRepo.save(ctx.tenantId, quote);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.quote.accepted",
+      entityType: "SalesQuote",
+      entityId: quote.id,
+      metadata: { number: quote.number },
+    });
 
     const result = { quote: toQuoteDto(quote) };
     await storeIdempotentResult({
@@ -348,6 +366,14 @@ export class RejectQuoteUseCase extends BaseUseCase<RejectQuoteInput, RejectQuot
     const now = this.deps.clock.now();
     quote.reject(now, now);
     await this.deps.quoteRepo.save(ctx.tenantId, quote);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.quote.rejected",
+      entityType: "SalesQuote",
+      entityId: quote.id,
+      metadata: { number: quote.number },
+    });
 
     const result = { quote: toQuoteDto(quote) };
     await storeIdempotentResult({
@@ -411,6 +437,14 @@ export class ConvertQuoteToOrderUseCase extends BaseUseCase<
     await this.deps.orderRepo.create(ctx.tenantId, order);
     quote.markConverted({ orderId: order.id }, now);
     await this.deps.quoteRepo.save(ctx.tenantId, quote);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId ?? "system",
+      action: "sales.quote.converted_to_order",
+      entityType: "SalesQuote",
+      entityId: quote.id,
+      metadata: { orderId: order.id },
+    });
 
     const payload = { order: toOrderDto(order) };
 
@@ -477,6 +511,14 @@ export class ConvertQuoteToInvoiceUseCase extends BaseUseCase<
     await this.deps.invoiceRepo.create(ctx.tenantId, invoice);
     quote.markConverted({ invoiceId: invoice.id }, now);
     await this.deps.quoteRepo.save(ctx.tenantId, quote);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId ?? "system",
+      action: "sales.quote.converted_to_invoice",
+      entityType: "SalesQuote",
+      entityId: quote.id,
+      metadata: { invoiceId: invoice.id },
+    });
 
     const payload = { invoice: toInvoiceDto(invoice) };
 

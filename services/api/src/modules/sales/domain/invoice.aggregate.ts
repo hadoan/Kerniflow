@@ -45,7 +45,7 @@ export class SalesInvoiceAggregate {
     this.notes = props.notes ?? null;
     this.lineItems = props.lineItems;
     this.payments = props.payments ?? [];
-    this.totals = props.totals;
+    this.totals = calculateInvoiceTotals(this.lineItems, this.payments);
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
     this.issuedAt = props.issuedAt ?? null;

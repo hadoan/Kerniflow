@@ -8,6 +8,7 @@ import {
   type UseCaseError,
   ValidationError,
   NotFoundError,
+  type AuditPort,
   err,
   ok,
   parseLocalDate,
@@ -73,6 +74,7 @@ type InvoiceDeps = {
   customerQuery: CustomerQueryPort;
   idempotency: IdempotencyStoragePort;
   accounting: AccountingApplication;
+  audit: AuditPort;
 };
 
 export class CreateSalesInvoiceUseCase extends BaseUseCase<
@@ -335,6 +337,14 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
 
     await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
     await this.deps.settingsRepo.save(settings);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.invoice.issued",
+      entityType: "SalesInvoice",
+      entityId: invoice.id,
+      metadata: { number: invoice.number, journalEntryId: invoice.issuedJournalEntryId ?? null },
+    });
 
     const result = { invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
@@ -380,6 +390,14 @@ export class VoidSalesInvoiceUseCase extends BaseUseCase<VoidSalesInvoiceInput, 
     const now = this.deps.clock.now();
     invoice.void(input.reason, now, now);
     await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.invoice.voided",
+      entityType: "SalesInvoice",
+      entityId: invoice.id,
+      metadata: { reason: input.reason ?? null },
+    });
 
     const result = { invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({

@@ -8,6 +8,7 @@ import {
   type UseCaseError,
   ValidationError,
   NotFoundError,
+  type AuditPort,
   err,
   ok,
   parseLocalDate,
@@ -76,6 +77,7 @@ type OrderDeps = {
   clock: ClockPort;
   customerQuery: CustomerQueryPort;
   idempotency: IdempotencyStoragePort;
+  audit: AuditPort;
 };
 
 export class CreateSalesOrderUseCase extends BaseUseCase<
@@ -261,6 +263,14 @@ export class ConfirmSalesOrderUseCase extends BaseUseCase<
     order.confirm(number, now, now);
     await this.deps.orderRepo.save(ctx.tenantId, order);
     await this.deps.settingsRepo.save(settings);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.order.confirmed",
+      entityType: "SalesOrder",
+      entityId: order.id,
+      metadata: { number: order.number },
+    });
 
     const result = { order: toOrderDto(order) };
     await storeIdempotentResult({
@@ -309,6 +319,13 @@ export class FulfillSalesOrderUseCase extends BaseUseCase<
     const now = this.deps.clock.now();
     order.fulfill(now, now);
     await this.deps.orderRepo.save(ctx.tenantId, order);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.order.fulfilled",
+      entityType: "SalesOrder",
+      entityId: order.id,
+    });
 
     const result = { order: toOrderDto(order) };
     await storeIdempotentResult({
@@ -357,6 +374,13 @@ export class CancelSalesOrderUseCase extends BaseUseCase<
     const now = this.deps.clock.now();
     order.cancel(now, now);
     await this.deps.orderRepo.save(ctx.tenantId, order);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId,
+      action: "sales.order.canceled",
+      entityType: "SalesOrder",
+      entityId: order.id,
+    });
 
     const result = { order: toOrderDto(order) };
     await storeIdempotentResult({
@@ -422,6 +446,14 @@ export class CreateInvoiceFromOrderUseCase extends BaseUseCase<
     await this.deps.invoiceRepo.create(ctx.tenantId, invoice);
     order.markInvoiced(invoice.id, now);
     await this.deps.orderRepo.save(ctx.tenantId, order);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId ?? "system",
+      action: "sales.order.invoiced",
+      entityType: "SalesOrder",
+      entityId: order.id,
+      metadata: { invoiceId: invoice.id },
+    });
 
     const payload = { invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
