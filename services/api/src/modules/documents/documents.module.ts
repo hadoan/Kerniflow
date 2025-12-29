@@ -228,6 +228,6 @@ import { RequestInvoicePdfUseCase } from "./application/use-cases/request-invoic
       ],
     },
   ],
-  exports: [DocumentsApplication, GenerateInvoicePdfWorker],
+  exports: [DocumentsApplication, GenerateInvoicePdfWorker, GcsObjectStorageAdapter],
 })
 export class DocumentsModule {}

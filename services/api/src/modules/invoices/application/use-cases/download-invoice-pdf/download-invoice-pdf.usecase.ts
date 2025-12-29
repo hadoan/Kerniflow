@@ -6,6 +6,8 @@ import type { InvoicePdfRendererPort } from "../../ports/invoice-pdf-renderer.po
 import type { ObjectStoragePort } from "../../../../documents/application/ports/object-storage.port";
 import { INVOICE_PDF_MODEL_PORT } from "../../ports/invoice-pdf-model.port";
 import { INVOICE_PDF_RENDERER_PORT } from "../../ports/invoice-pdf-renderer.port";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 export type DownloadInvoicePdfInput = {
   invoiceId: string;
@@ -44,10 +46,10 @@ export class DownloadInvoicePdfUseCase {
       throw new Error(`Invoice not found: ${invoiceId}`);
     }
 
-    // 2. Validate status: only finalized invoices can have PDFs
-    if (invoice.status === "DRAFT") {
-      throw new Error("Cannot download PDF for draft invoice");
-    }
+    // // 2. Validate status: only finalized invoices can have PDFs
+    // if (invoice.status === "DRAFT") { 
+    //   throw new Error("Cannot download PDF for draft invoice");
+    // }
 
     // 3. Check if valid PDF exists
     const now = new Date();
@@ -81,13 +83,16 @@ export class DownloadInvoicePdfUseCase {
         model,
       });
 
-      // 4d. Upload to GCS
+      // 4d. Save to local folder first
       const storageKey = this.buildStorageKey(
         tenantId,
         invoiceId,
         invoice.number!,
         currentSourceVersion
       );
+      await this.savePdfToLocalFolder(tenantId, invoiceId, invoice.number!, pdfBytes);
+
+      // 4e. Upload to GCS
       await this.storagePort.putObject({
         tenantId,
         objectKey: storageKey,
@@ -113,6 +118,32 @@ export class DownloadInvoicePdfUseCase {
       invoice.markPdfFailed(error.message, new Date());
       await this.invoiceRepo.save(tenantId, invoice);
       throw error;
+    }
+  }
+
+  private async savePdfToLocalFolder(
+    tenantId: string,
+    invoiceId: string,
+    invoiceNumber: string,
+    pdfBytes: Uint8Array
+  ): Promise<void> {
+    try {
+      // Create pdfs directory in the current working directory
+      const pdfsDir = path.join(process.cwd(), "pdfs");
+      await fs.mkdir(pdfsDir, { recursive: true });
+
+      // Sanitize invoice number for filename
+      const sanitizedNumber = invoiceNumber.replace(/[^a-zA-Z0-9-_]/g, "-");
+      const filename = `invoice-${sanitizedNumber}-${invoiceId}.pdf`;
+      const filePath = path.join(pdfsDir, filename);
+
+      // Write the PDF to the local file
+      await fs.writeFile(filePath, pdfBytes);
+
+      this.logger.log(`PDF saved locally for tenant ${tenantId}, invoice ${invoiceId}: ${filePath}`);
+    } catch (error) {
+      this.logger.error(`Failed to save PDF locally for tenant ${tenantId}, invoice ${invoiceId}`, error);
+      // Don't throw - we still want to upload to GCS even if local save fails
     }
   }
 

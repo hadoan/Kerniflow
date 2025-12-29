@@ -34,7 +34,6 @@ import { cn } from "@/shared/lib/utils";
 import { customersApi } from "@/lib/customers-api";
 import { invoicesApi } from "@/lib/invoices-api";
 import { toast } from "sonner";
-import CustomerFormFields from "@/modules/customers/components/CustomerFormFields";
 import {
   customerFormSchema,
   getDefaultCustomerFormValues,
@@ -87,7 +86,7 @@ const generateInvoiceNumber = () => {
 };
 
 export default function NewInvoicePage() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const locale = i18n.language === "de" ? "de-DE" : "en-DE";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -196,16 +195,16 @@ export default function NewInvoicePage() {
       if (customer?.id) {
         void queryClient.invalidateQueries({ queryKey: ["customers"] });
         form.setValue("customerPartyId", customer.id, { shouldValidate: true, shouldDirty: true });
-        toast.success("Customer created successfully!");
+        toast.success(t("common.success"));
         setNewCustomerDialogOpen(false);
         setCustomerDialogOpen(false);
       } else {
-        toast.error("Customer was created but no ID was returned.");
+        toast.error(t("common.error"));
       }
     },
     onError: (error) => {
       console.error("Error creating customer:", error);
-      toast.error("Failed to create customer. Please try again.");
+      toast.error(t("common.error"));
     },
   });
 
@@ -218,12 +217,12 @@ export default function NewInvoicePage() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      toast.success("Invoice created successfully!");
+      toast.success(t("common.success"));
       navigate("/invoices");
     },
     onError: (error) => {
       console.error("Error creating invoice:", error);
-      toast.error("Failed to create invoice. Please try again.");
+      toast.error(t("common.error"));
     },
   });
 
@@ -249,7 +248,7 @@ export default function NewInvoicePage() {
           <Button variant="ghost" size="icon" onClick={() => navigate("/invoices")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-h1 text-foreground">Create New Invoice</h1>
+          <h1 className="text-h1 text-foreground">{t("invoices.createNewInvoice")}</h1>
         </div>
         <div className="flex gap-2">
           <Button
@@ -257,7 +256,7 @@ export default function NewInvoicePage() {
             onClick={() => navigate("/invoices")}
             disabled={createInvoiceMutation.isPending}
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="accent"
@@ -265,7 +264,7 @@ export default function NewInvoicePage() {
             data-testid="submit-invoice-button"
             disabled={createInvoiceMutation.isPending}
           >
-            {createInvoiceMutation.isPending ? "Creating..." : "Create Invoice"}
+            {createInvoiceMutation.isPending ? t("invoices.creating") : t("invoices.createInvoice")}
           </Button>
         </div>
       </div>
@@ -287,7 +286,7 @@ export default function NewInvoicePage() {
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-2">
-                      <Label className="text-xs text-muted-foreground uppercase">Billed to</Label>
+                      <Label className="text-xs text-muted-foreground uppercase">{t("invoices.billedTo")}</Label>
                       <Button
                         type="button"
                         variant="ghost"
@@ -299,7 +298,7 @@ export default function NewInvoicePage() {
                         }}
                       >
                         <Plus className="h-4 w-4" />
-                        Add customer
+                        {t("customers.addCustomer")}
                       </Button>
                     </div>
                     <Button
@@ -311,15 +310,15 @@ export default function NewInvoicePage() {
                     >
                       <div className="flex flex-col items-start">
                         <span className="text-sm font-medium">
-                          {selectedCustomer ? selectedCustomer.displayName : "Select a customer"}
+                          {selectedCustomer ? selectedCustomer.displayName : t("customers.selectCustomer")}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {selectedCustomerAddress ||
                             selectedCustomer?.email ||
-                            "Search customers or add a new one"}
+                            t("customers.searchOrAdd")}
                         </span>
                       </div>
-                      <span className="text-xs text-muted-foreground">Search</span>
+                      <span className="text-xs text-muted-foreground">{t("common.search")}</span>
                     </Button>
                     {form.formState.errors.customerPartyId && (
                       <p className="text-sm text-destructive">
@@ -355,20 +354,20 @@ export default function NewInvoicePage() {
                     contentClassName="animate-none data-[state=open]:animate-none data-[state=closed]:animate-none"
                   >
                     <DialogHeader className="sr-only">
-                      <DialogTitle>Select customer</DialogTitle>
+                      <DialogTitle>{t("customers.wizard.selectCustomer")}</DialogTitle>
                     </DialogHeader>
                     <div className="flex items-center justify-between border-b px-4 py-3">
                       <div>
-                        <div className="text-base font-semibold">Select customer</div>
+                        <div className="text-base font-semibold">{t("customers.wizard.selectCustomer")}</div>
                         <p className="text-sm text-muted-foreground">
-                          Search existing clients or create a new one.
+                          {t("customers.selectExisting")}
                         </p>
                       </div>
                     </div>
-                    <CommandInput placeholder="Search by name, email, or VAT..." />
+                    <CommandInput placeholder={t("customers.searchCustomers")} />
                     <CommandList>
-                      <CommandEmpty>No customers found.</CommandEmpty>
-                      <CommandGroup heading="Customers">
+                      <CommandEmpty>{t("customers.noCustomersFound")}</CommandEmpty>
+                      <CommandGroup heading={t("customers.title")}>
                         {customers.map((customer) => {
                           const address = [
                             customer.billingAddress?.line1,
@@ -414,17 +413,17 @@ export default function NewInvoicePage() {
                         }}
                       >
                         <Plus className="h-4 w-4" />
-                        Add New Customer
+                        {t("customers.addNewCustomer")}
                       </Button>
                     </div>
                   </CommandDialog>
 
                   <Dialog open={newCustomerDialogOpen} onOpenChange={setNewCustomerDialogOpen}>
-                    <DialogContent className="max-w-3xl">
+                    <DialogContent className="max-w-2xl">
                       <DialogHeader className="space-y-2">
-                        <DialogTitle>Add new client</DialogTitle>
+                        <DialogTitle>{t("customers.addNewClient")}</DialogTitle>
                         <DialogDescription>
-                          Capture a new billing contact without leaving the invoice.
+                          {t("customers.createDescription")}
                         </DialogDescription>
                       </DialogHeader>
                       <form
@@ -433,7 +432,109 @@ export default function NewInvoicePage() {
                         )}
                         className="space-y-6"
                       >
-                        <CustomerFormFields form={customerForm} />
+                        {/* Basic Information */}
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="displayName">
+                              {t("customers.displayName")} <span className="text-destructive">*</span>
+                            </Label>
+                            <Input
+                              id="displayName"
+                              {...customerForm.register("displayName")}
+                              placeholder={t("customers.placeholders.displayName")}
+                              data-testid="customer-displayName-input"
+                            />
+                            {customerForm.formState.errors.displayName && (
+                              <p className="text-sm text-destructive mt-1">
+                                {customerForm.formState.errors.displayName.message}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="email">{t("customers.email")}</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                {...customerForm.register("email")}
+                                placeholder={t("customers.placeholders.email")}
+                                data-testid="customer-email-input"
+                              />
+                              {customerForm.formState.errors.email && (
+                                <p className="text-sm text-destructive mt-1">
+                                  {customerForm.formState.errors.email.message}
+                                </p>
+                              )}
+                            </div>
+
+                            <div>
+                              <Label htmlFor="vatId">{t("customers.vatId")}</Label>
+                              <Input
+                                id="vatId"
+                                {...customerForm.register("vatId")}
+                                placeholder={t("customers.placeholders.vatId")}
+                                data-testid="customer-vatId-input"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Billing Address */}
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                              <Label htmlFor="billingAddress.line1">{t("customers.addressLine1")}</Label>
+                              <Input
+                                id="billingAddress.line1"
+                                {...customerForm.register("billingAddress.line1")}
+                                placeholder={t("customers.placeholders.addressLine1")}
+                                data-testid="customer-address-line1-input"
+                              />
+                            </div>
+
+                            <div className="md:col-span-2">
+                              <Label htmlFor="billingAddress.line2">{t("customers.addressLine2")}</Label>
+                              <Input
+                                id="billingAddress.line2"
+                                {...customerForm.register("billingAddress.line2")}
+                                placeholder={t("customers.placeholders.addressLine2")}
+                                data-testid="customer-address-line2-input"
+                              />
+                            </div>
+
+                            <div>
+                              <Label htmlFor="billingAddress.city">{t("customers.city")}</Label>
+                              <Input
+                                id="billingAddress.city"
+                                {...customerForm.register("billingAddress.city")}
+                                placeholder={t("customers.placeholders.city")}
+                                data-testid="customer-address-city-input"
+                              />
+                            </div>
+
+                            <div>
+                              <Label htmlFor="billingAddress.postalCode">{t("customers.postalCode")}</Label>
+                              <Input
+                                id="billingAddress.postalCode"
+                                {...customerForm.register("billingAddress.postalCode")}
+                                placeholder={t("customers.placeholders.postalCode")}
+                                data-testid="customer-address-postalCode-input"
+                              />
+                            </div>
+
+                            <div className="md:col-span-2">
+                              <Label htmlFor="billingAddress.country">{t("customers.country")}</Label>
+                              <Input
+                                id="billingAddress.country"
+                                {...customerForm.register("billingAddress.country")}
+                                placeholder={t("customers.placeholders.country")}
+                                data-testid="customer-address-country-input"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
                         <DialogFooter className="gap-2">
                           <Button
                             type="button"
@@ -441,14 +542,14 @@ export default function NewInvoicePage() {
                             onClick={() => setNewCustomerDialogOpen(false)}
                             disabled={createCustomerMutation.isPending}
                           >
-                            Cancel
+                            {t("common.cancel")}
                           </Button>
                           <Button
                             type="submit"
                             variant="accent"
                             disabled={createCustomerMutation.isPending}
                           >
-                            {createCustomerMutation.isPending ? "Saving..." : "Save"}
+                            {createCustomerMutation.isPending ? t("invoices.saving") : t("common.save")}
                           </Button>
                         </DialogFooter>
                       </form>
@@ -460,7 +561,7 @@ export default function NewInvoicePage() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Invoice date */}
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground uppercase">Invoice date</Label>
+                    <Label className="text-xs text-muted-foreground uppercase">{t("invoices.invoiceDate")}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -474,7 +575,7 @@ export default function NewInvoicePage() {
                           {form.watch("invoiceDate") ? (
                             format(form.watch("invoiceDate"), "dd/MM/yyyy")
                           ) : (
-                            <span>Select date</span>
+                            <span>{t("invoices.selectDate")}</span>
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -490,7 +591,7 @@ export default function NewInvoicePage() {
 
                   {/* Service date */}
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground uppercase">Service date</Label>
+                    <Label className="text-xs text-muted-foreground uppercase">{t("invoices.serviceDate")}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -504,7 +605,7 @@ export default function NewInvoicePage() {
                               {format(form.watch("serviceDateEnd"), "dd.MM.yyyy")}
                             </>
                           ) : (
-                            <span className="text-muted-foreground">Select date range</span>
+                            <span className="text-muted-foreground">{t("invoices.selectDateRange")}</span>
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -527,7 +628,7 @@ export default function NewInvoicePage() {
                   {/* Invoice number */}
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground uppercase">
-                      Invoice number
+                      {t("invoices.invoiceNumberLabel")}
                     </Label>
                     <div className="flex gap-2">
                       <Input
@@ -540,7 +641,7 @@ export default function NewInvoicePage() {
                         variant="outline"
                         onClick={() => form.setValue("invoiceNumber", generateInvoiceNumber())}
                       >
-                        Generate
+                        {t("invoices.generate")}
                       </Button>
                     </div>
                     {form.formState.errors.invoiceNumber && (
@@ -552,7 +653,7 @@ export default function NewInvoicePage() {
 
                   {/* Due date */}
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground uppercase">Due date</Label>
+                    <Label className="text-xs text-muted-foreground uppercase">{t("invoices.dueDate")}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -565,7 +666,7 @@ export default function NewInvoicePage() {
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {form.watch("dueDate")
                             ? format(form.watch("dueDate"), "dd/MM/yyyy")
-                            : "Select date"}
+                            : t("invoices.selectDate")}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -588,16 +689,16 @@ export default function NewInvoicePage() {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left text-xs font-medium text-muted-foreground uppercase px-4 py-3">
-                        Description
+                        {t("invoices.description")}
                       </th>
                       <th className="text-left text-xs font-medium text-muted-foreground uppercase px-4 py-3 w-32">
-                        Quantity
+                        {t("invoices.quantity")}
                       </th>
                       <th className="text-left text-xs font-medium text-muted-foreground uppercase px-4 py-3 w-32">
-                        Rate
+                        {t("invoices.rate")}
                       </th>
                       <th className="text-right text-xs font-medium text-muted-foreground uppercase px-4 py-3 w-32">
-                        Total
+                        {t("invoices.total")}
                       </th>
                       <th className="w-12"></th>
                     </tr>
@@ -695,7 +796,7 @@ export default function NewInvoicePage() {
                 className="w-full border-2 border-dashed border-accent rounded-lg py-3 px-4 text-accent hover:bg-accent/5 transition-colors flex items-center justify-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Add a line
+                {t("invoices.addLine")}
               </button>
             </div>
 
@@ -703,13 +804,13 @@ export default function NewInvoicePage() {
             <div className="flex justify-end">
               <div className="w-full lg:w-1/2 space-y-3">
                 <div className="flex justify-between items-center pb-3">
-                  <span className="text-sm font-medium">Total amount (Net)</span>
+                  <span className="text-sm font-medium">{t("invoices.totalAmountNet")}</span>
                   <span className="text-lg font-semibold">{formatMoney(subtotalCents)}</span>
                 </div>
 
                 <div className="flex justify-between items-center pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">VAT</span>
+                    <span className="text-sm">{t("invoices.vatAmount")}</span>
                     <Select
                       value={String(vatRate)}
                       onValueChange={(value) => form.setValue("vatRate", parseInt(value))}
@@ -730,7 +831,7 @@ export default function NewInvoicePage() {
                 </div>
 
                 <div className="flex justify-between items-center pt-3 border-t border-border">
-                  <span className="text-base font-semibold">Total amount (Gross)</span>
+                  <span className="text-base font-semibold">{t("invoices.totalAmountGross")}</span>
                   <span className="text-xl font-bold">{formatMoney(totalCents)}</span>
                 </div>
               </div>

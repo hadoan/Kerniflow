@@ -1,6 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@kerniflow/data";
 import { InvoicePdfModelPort } from "../../application/ports/invoice-pdf-model.port";
+import type { Prisma } from "@prisma/client";
+
+type InvoiceWithLines = Prisma.InvoiceGetPayload<{
+  include: { lines: true };
+}>;
 
 @Injectable()
 export class PrismaInvoicePdfModelAdapter implements InvoicePdfModelPort {
@@ -20,7 +25,7 @@ export class PrismaInvoicePdfModelAdapter implements InvoicePdfModelPort {
     totals: { subtotal: string; total: string };
     notes?: string;
   } | null> {
-    const invoice = await this.prisma.invoice.findFirst({
+    const invoice: InvoiceWithLines | null = await this.prisma.invoice.findFirst({
       where: { id: invoiceId, tenantId },
       include: { lines: true },
     });
@@ -35,20 +40,28 @@ export class PrismaInvoicePdfModelAdapter implements InvoicePdfModelPort {
 
     // Build bill-to address
     const addressParts: string[] = [];
-    if ((invoice as any).billToAddressLine1) {addressParts.push((invoice as any).billToAddressLine1);}
-    if ((invoice as any).billToAddressLine2) {addressParts.push((invoice as any).billToAddressLine2);}
-    if ((invoice as any).billToCity) {addressParts.push((invoice as any).billToCity);}
-    if ((invoice as any).billToPostalCode) {addressParts.push((invoice as any).billToPostalCode);}
-    if ((invoice as any).billToCountry) {addressParts.push((invoice as any).billToCountry);}
+    if (invoice.billToAddressLine1) {
+      addressParts.push(invoice.billToAddressLine1);
+    }
+    if (invoice.billToAddressLine2) {
+      addressParts.push(invoice.billToAddressLine2);
+    }
+    if (invoice.billToCity) {
+      addressParts.push(invoice.billToCity);
+    }
+    if (invoice.billToPostalCode) {
+      addressParts.push(invoice.billToPostalCode);
+    }
+    if (invoice.billToCountry) {
+      addressParts.push(invoice.billToCountry);
+    }
     const billToAddress = addressParts.length > 0 ? addressParts.join(", ") : undefined;
 
     // Format dates
     const issueDate = invoice.issuedAt
       ? invoice.issuedAt.toISOString().slice(0, 10)
       : new Date().toISOString().slice(0, 10);
-    const dueDate = (invoice as any).dueDate
-      ? new Date((invoice as any).dueDate).toISOString().slice(0, 10)
-      : undefined;
+    const dueDate = invoice.dueDate ? invoice.dueDate.toISOString().slice(0, 10) : undefined;
 
     // Calculate totals
     const subtotalCents = invoice.lines.reduce(
@@ -73,7 +86,7 @@ export class PrismaInvoicePdfModelAdapter implements InvoicePdfModelPort {
 
     return {
       invoiceNumber: invoice.number,
-      billToName: (invoice as any).billToName || "Unknown",
+      billToName: invoice.billToName || "Unknown",
       billToAddress,
       issueDate,
       dueDate,
@@ -83,7 +96,7 @@ export class PrismaInvoicePdfModelAdapter implements InvoicePdfModelPort {
         subtotal: formatCurrency(subtotalCents),
         total: formatCurrency(totalCents),
       },
-      notes: (invoice as any).notes || undefined,
+      notes: invoice.notes || undefined,
     };
   }
 }

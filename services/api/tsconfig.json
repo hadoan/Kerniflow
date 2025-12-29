@@ -8,13 +8,15 @@
     "emitDecoratorMetadata": true,
     "noEmit": false,
     "module": "commonjs",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node16",
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
       "@shared/*": ["src/shared/*"]
-    }
+    },
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]

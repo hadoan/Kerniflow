@@ -7,7 +7,6 @@ import {
   Clock,
   Receipt,
   ArrowUpRight,
-  Plus,
   MessageSquare,
   FileText,
   Sparkles,
@@ -15,20 +14,93 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
-import { getDashboard } from "@/shared/mock/mockApi";
 import { formatMoney, formatRelativeTime } from "@/shared/lib/formatters";
 import { CardSkeleton } from "@/shared/components/Skeleton";
-import { getDb } from "@/shared/mock/mockDb";
+import { invoicesApi } from "@/lib/invoices-api";
+import { customersApi } from "@/lib/customers-api";
+import { expensesApi } from "@/lib/expenses-api";
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "de" ? "de-DE" : "en-DE";
-  const db = getDb();
 
-  const { data: dashboard, isLoading } = useQuery({
-    queryKey: ["dashboard"],
-    queryFn: getDashboard,
+  // Fetch invoices
+  const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
+    queryKey: ["invoices"],
+    queryFn: () => invoicesApi.listInvoices(),
   });
+
+  // Fetch customers
+  const { data: customersData, isLoading: isLoadingCustomers } = useQuery({
+    queryKey: ["customers"],
+    queryFn: () => customersApi.listCustomers(),
+  });
+
+  // Fetch expenses
+  const { data: expenses = [], isLoading: isLoadingExpenses } = useQuery({
+    queryKey: ["expenses"],
+    queryFn: () => expensesApi.listExpenses(),
+  });
+
+  const customers = customersData?.customers || [];
+  const isLoading = isLoadingInvoices || isLoadingCustomers || isLoadingExpenses;
+
+  // Calculate dashboard metrics
+  const dashboard = React.useMemo(() => {
+    const now = new Date();
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+    // Revenue this month (paid invoices)
+    const revenueThisMonthCents = invoices
+      .filter((inv) => {
+        const paidAt = inv.payments?.[0]?.paidAt;
+        if (!paidAt || inv.status !== "PAID") return false;
+        const paidDate = new Date(paidAt);
+        return paidDate >= thisMonth && paidDate < nextMonth;
+      })
+      .reduce((sum, inv) => sum + (inv.totals?.totalCents || 0), 0);
+
+    // Outstanding invoices (issued/sent but not paid)
+    const outstandingInvoices = invoices.filter(
+      (inv) => inv.status === "ISSUED" || inv.status === "SENT"
+    );
+    const outstandingInvoicesCents = outstandingInvoices.reduce(
+      (sum, inv) => sum + (inv.totals?.totalCents || 0),
+      0
+    );
+
+    // Expenses this month
+    const expensesThisMonthCents = expenses
+      .filter((exp) => {
+        const expDate = new Date(exp.expenseDate || exp.createdAt);
+        return expDate >= thisMonth && expDate < nextMonth;
+      })
+      .reduce((sum, exp) => sum + (exp.totalAmountCents || 0), 0);
+
+    // Recent invoices (last 4)
+    const recentInvoices = [...invoices]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 4);
+
+    // Recent expenses (last 4)
+    const recentExpenses = [...expenses]
+      .sort((a, b) => {
+        const dateA = new Date(a.expenseDate || a.createdAt).getTime();
+        const dateB = new Date(b.expenseDate || b.createdAt).getTime();
+        return dateB - dateA;
+      })
+      .slice(0, 4);
+
+    return {
+      revenueThisMonthCents,
+      outstandingInvoicesCents,
+      outstandingInvoicesCount: outstandingInvoices.length,
+      expensesThisMonthCents,
+      recentInvoices,
+      recentExpenses,
+    };
+  }, [invoices, expenses]);
 
   if (isLoading) {
     return (
@@ -47,9 +119,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-h1 text-foreground">
-            {t("dashboard.welcome")}, {db.user.name.split(" ")[0]}
-          </h1>
+          <h1 className="text-h1 text-foreground">{t("dashboard.welcome")}</h1>
           <p className="text-muted-foreground mt-1">{t("common.tagline")}</p>
         </div>
         <div className="flex gap-2">
@@ -75,7 +145,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              {formatMoney(dashboard?.revenueThisMonthCents || 0, locale)}
+              {formatMoney(dashboard.revenueThisMonthCents, locale)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">+12% from last month</p>
           </CardContent>
@@ -92,10 +162,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              {formatMoney(dashboard?.outstandingInvoicesCents || 0, locale)}
+              {formatMoney(dashboard.outstandingInvoicesCents, locale)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {dashboard?.outstandingInvoicesCount || 0} invoices pending
+              {dashboard.outstandingInvoicesCount} invoices pending
             </p>
           </CardContent>
         </Card>
@@ -111,10 +181,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
-              {formatMoney(dashboard?.expensesThisMonthCents || 0, locale)}
+              {formatMoney(dashboard.expensesThisMonthCents, locale)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {dashboard?.recentExpenses?.length || 0} expenses this month
+              {dashboard.recentExpenses.length} expenses this month
             </p>
           </CardContent>
         </Card>
@@ -183,36 +253,44 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {dashboard?.recentInvoices?.slice(0, 4).map((invoice) => (
-                <Link
-                  key={invoice.id}
-                  to={`/invoices`}
-                  className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">
-                        {invoice.invoiceNumber}
+              {dashboard.recentInvoices.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No invoices yet
+                </p>
+              ) : (
+                dashboard.recentInvoices.map((invoice) => {
+                  const customer = customers.find((c) => c.id === invoice.customerPartyId);
+                  return (
+                    <Link
+                      key={invoice.id}
+                      to={`/invoices/${invoice.id}`}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            {invoice.number || "Draft"}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {customer?.displayName || "Unknown Customer"}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {db.customers.find((c) => c.id === invoice.customerId)?.company ||
-                          "Customer"}
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-foreground">
+                          {formatMoney(invoice.totals?.totalCents || 0, locale)}
+                        </div>
+                        <Badge variant={invoice.status.toLowerCase() as any} className="text-xs">
+                          {invoice.status}
+                        </Badge>
                       </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium text-foreground">
-                      {formatMoney(invoice.totalCents, locale)}
-                    </div>
-                    <Badge variant={invoice.status as any} className="text-xs">
-                      {t(`invoices.statuses.${invoice.status}`)}
-                    </Badge>
-                  </div>
-                </Link>
-              ))}
+                    </Link>
+                  );
+                })
+              )}
             </div>
           </CardContent>
         </Card>
@@ -227,33 +305,41 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {dashboard?.recentExpenses?.slice(0, 4).map((expense) => (
-                <Link
-                  key={expense.id}
-                  to={`/expenses`}
-                  className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                      <Receipt className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">{expense.merchant}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {t(`expenses.categories.${expense.category}`)}
+              {dashboard.recentExpenses.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No expenses yet
+                </p>
+              ) : (
+                dashboard.recentExpenses.map((expense) => (
+                  <Link
+                    key={expense.id}
+                    to={`/expenses`}
+                    className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
+                        <Receipt className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-foreground">
+                          {expense.merchantName || "Unknown Merchant"}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {expense.category || "Uncategorized"}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium text-foreground">
-                      {formatMoney(expense.amountCents, locale)}
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-foreground">
+                        {formatMoney(expense.totalAmountCents || 0, locale)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatRelativeTime(expense.expenseDate || expense.createdAt, locale)}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {formatRelativeTime(expense.date, locale)}
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
