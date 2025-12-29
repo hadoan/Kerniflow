@@ -14,6 +14,26 @@ enum AddressType {
   BILLING
 }
 
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum ActivityType {
+  NOTE
+  TASK
+  CALL
+  MEETING
+  EMAIL_DRAFT
+}
+
+enum ActivityStatus {
+  OPEN
+  COMPLETED
+  CANCELED
+}
+
 model Party {
   id          String    @id @default(cuid())
   tenantId    String
@@ -29,6 +49,8 @@ model Party {
   contactPoints ContactPoint[]
   addresses     Address[]
   roles         PartyRole[]
+  deals         Deal[]
+  activities    Activity[]
 
   @@index([tenantId, displayName])
   @@index([tenantId, archivedAt])
@@ -80,4 +102,82 @@ model Address {
 
   @@unique([tenantId, partyId, type], name: "tenantId_partyId_type_address")
   @@index([tenantId, type])
+}
+
+model Deal {
+  id                String     @id @default(cuid())
+  tenantId          String
+  title             String
+  partyId           String
+  stageId           String
+  amountCents       Int?
+  currency          String     @default("EUR")
+  expectedCloseDate DateTime?  @db.Date
+  probability       Int?
+  status            DealStatus @default(OPEN)
+  ownerUserId       String?
+  notes             String?
+  tags              String[]   @default([])
+  wonAt             DateTime?  @db.Timestamptz(6)
+  lostAt            DateTime?  @db.Timestamptz(6)
+  lostReason        String?
+  createdAt         DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime   @updatedAt @db.Timestamptz(6)
+
+  party             Party                 @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  activities        Activity[]
+  stageTransitions  DealStageTransition[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, partyId])
+  @@index([tenantId, ownerUserId])
+  @@index([tenantId, stageId])
+  @@index([tenantId, createdAt])
+}
+
+model Activity {
+  id               String         @id @default(cuid())
+  tenantId         String
+  type             ActivityType
+  subject          String
+  body             String?
+  partyId          String?
+  dealId           String?
+  dueAt            DateTime?      @db.Timestamptz(6)
+  completedAt      DateTime?      @db.Timestamptz(6)
+  status           ActivityStatus @default(OPEN)
+  assignedToUserId String?
+  createdByUserId  String?
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+
+  party Party? @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  deal  Deal?  @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, partyId, createdAt])
+  @@index([tenantId, dealId, createdAt])
+  @@index([tenantId, assignedToUserId, status])
+  @@index([tenantId, createdAt])
+}
+
+model DealStageTransition {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  dealId               String
+  fromStageId          String?
+  toStageId            String
+  transitionedByUserId String?
+  transitionedAt       DateTime @default(now()) @db.Timestamptz(6)
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, dealId, transitionedAt])
+}
+
+model PipelineConfig {
+  id         String   @id @default(cuid())
+  tenantId   String   @unique
+  stagesJson String
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(6)
 }

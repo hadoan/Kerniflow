@@ -1,8 +1,12 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
 import { CustomersHttpController } from "./adapters/http/customers.controller";
+import { DealsHttpController } from "./adapters/http/deals.controller";
+import { ActivitiesHttpController, TimelineHttpController } from "./adapters/http/activities.controller";
 import { PrismaPartyRepoAdapter } from "./infrastructure/prisma/prisma-party-repo.adapter";
 import { PrismaCustomerQueryAdapter } from "./infrastructure/prisma/prisma-customer-query.adapter";
+import { PrismaDealRepoAdapter } from "./infrastructure/prisma/prisma-deal-repo.adapter";
+import { PrismaActivityRepoAdapter } from "./infrastructure/prisma/prisma-activity-repo.adapter";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
@@ -10,6 +14,8 @@ import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { PartyCrmApplication } from "./application/party-crm.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { CUSTOMER_QUERY_PORT } from "./application/ports/customer-query.port";
+import { DEAL_REPO_PORT } from "./application/ports/deal-repository.port";
+import { ACTIVITY_REPO_PORT } from "./application/ports/activity-repository.port";
 import { IdentityModule } from "../identity";
 import { ArchiveCustomerUseCase } from "./application/use-cases/archive-customer/archive-customer.usecase";
 import { CreateCustomerUseCase } from "./application/use-cases/create-customer/create-customer.usecase";
@@ -18,18 +24,34 @@ import { ListCustomersUseCase } from "./application/use-cases/list-customers/lis
 import { SearchCustomersUseCase } from "./application/use-cases/search-customers/search-customers.usecase";
 import { UnarchiveCustomerUseCase } from "./application/use-cases/unarchive-customer/unarchive-customer.usecase";
 import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/update-customer.usecase";
+import { CreateDealUseCase } from "./application/use-cases/create-deal/create-deal.usecase";
+import { UpdateDealUseCase } from "./application/use-cases/update-deal/update-deal.usecase";
+import { MoveDealStageUseCase } from "./application/use-cases/move-deal-stage/move-deal-stage.usecase";
+import { MarkDealWonUseCase } from "./application/use-cases/mark-deal-won/mark-deal-won.usecase";
+import { MarkDealLostUseCase } from "./application/use-cases/mark-deal-lost/mark-deal-lost.usecase";
+import { ListDealsUseCase } from "./application/use-cases/list-deals/list-deals.usecase";
+import { GetDealByIdUseCase } from "./application/use-cases/get-deal-by-id/get-deal-by-id.usecase";
+import { CreateActivityUseCase } from "./application/use-cases/create-activity/create-activity.usecase";
+import { UpdateActivityUseCase } from "./application/use-cases/update-activity/update-activity.usecase";
+import { CompleteActivityUseCase } from "./application/use-cases/complete-activity/complete-activity.usecase";
+import { ListActivitiesUseCase } from "./application/use-cases/list-activities/list-activities.usecase";
+import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-timeline.usecase";
 
 @Module({
   imports: [DataModule, IdentityModule],
-  controllers: [CustomersHttpController],
+  controllers: [CustomersHttpController, DealsHttpController, ActivitiesHttpController, TimelineHttpController],
   providers: [
     PrismaPartyRepoAdapter,
     PrismaCustomerQueryAdapter,
+    PrismaDealRepoAdapter,
+    PrismaActivityRepoAdapter,
     SystemIdGenerator,
     SystemClock,
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
     { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     { provide: CUSTOMER_QUERY_PORT, useExisting: PrismaCustomerQueryAdapter },
+    { provide: DEAL_REPO_PORT, useExisting: PrismaDealRepoAdapter },
+    { provide: ACTIVITY_REPO_PORT, useExisting: PrismaActivityRepoAdapter },
     {
       provide: CreateCustomerUseCase,
       useFactory: (repo: PrismaPartyRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
@@ -90,6 +112,80 @@ import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/u
         new SearchCustomersUseCase({ logger: new NestLoggerAdapter(), partyRepo: repo }),
       inject: [PrismaPartyRepoAdapter],
     },
+    // Deal use cases
+    {
+      provide: CreateDealUseCase,
+      useFactory: (dealRepo: PrismaDealRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
+        new CreateDealUseCase(dealRepo, clock, idGen, new NestLoggerAdapter()),
+      inject: [DEAL_REPO_PORT, CLOCK_PORT_TOKEN, ID_GENERATOR_TOKEN],
+    },
+    {
+      provide: UpdateDealUseCase,
+      useFactory: (dealRepo: PrismaDealRepoAdapter, clock: SystemClock) =>
+        new UpdateDealUseCase(dealRepo, clock, new NestLoggerAdapter()),
+      inject: [DEAL_REPO_PORT, CLOCK_PORT_TOKEN],
+    },
+    {
+      provide: MoveDealStageUseCase,
+      useFactory: (dealRepo: PrismaDealRepoAdapter, clock: SystemClock) =>
+        new MoveDealStageUseCase(dealRepo, clock, new NestLoggerAdapter()),
+      inject: [DEAL_REPO_PORT, CLOCK_PORT_TOKEN],
+    },
+    {
+      provide: MarkDealWonUseCase,
+      useFactory: (dealRepo: PrismaDealRepoAdapter, clock: SystemClock) =>
+        new MarkDealWonUseCase(dealRepo, clock, new NestLoggerAdapter()),
+      inject: [DEAL_REPO_PORT, CLOCK_PORT_TOKEN],
+    },
+    {
+      provide: MarkDealLostUseCase,
+      useFactory: (dealRepo: PrismaDealRepoAdapter, clock: SystemClock) =>
+        new MarkDealLostUseCase(dealRepo, clock, new NestLoggerAdapter()),
+      inject: [DEAL_REPO_PORT, CLOCK_PORT_TOKEN],
+    },
+    {
+      provide: ListDealsUseCase,
+      useFactory: (dealRepo: PrismaDealRepoAdapter) =>
+        new ListDealsUseCase(dealRepo, new NestLoggerAdapter()),
+      inject: [DEAL_REPO_PORT],
+    },
+    {
+      provide: GetDealByIdUseCase,
+      useFactory: (dealRepo: PrismaDealRepoAdapter) =>
+        new GetDealByIdUseCase(dealRepo, new NestLoggerAdapter()),
+      inject: [DEAL_REPO_PORT],
+    },
+    // Activity use cases
+    {
+      provide: CreateActivityUseCase,
+      useFactory: (activityRepo: PrismaActivityRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
+        new CreateActivityUseCase(activityRepo, clock, idGen, new NestLoggerAdapter()),
+      inject: [ACTIVITY_REPO_PORT, CLOCK_PORT_TOKEN, ID_GENERATOR_TOKEN],
+    },
+    {
+      provide: UpdateActivityUseCase,
+      useFactory: (activityRepo: PrismaActivityRepoAdapter, clock: SystemClock) =>
+        new UpdateActivityUseCase(activityRepo, clock, new NestLoggerAdapter()),
+      inject: [ACTIVITY_REPO_PORT, CLOCK_PORT_TOKEN],
+    },
+    {
+      provide: CompleteActivityUseCase,
+      useFactory: (activityRepo: PrismaActivityRepoAdapter, clock: SystemClock) =>
+        new CompleteActivityUseCase(activityRepo, clock, new NestLoggerAdapter()),
+      inject: [ACTIVITY_REPO_PORT, CLOCK_PORT_TOKEN],
+    },
+    {
+      provide: ListActivitiesUseCase,
+      useFactory: (activityRepo: PrismaActivityRepoAdapter) =>
+        new ListActivitiesUseCase(activityRepo, new NestLoggerAdapter()),
+      inject: [ACTIVITY_REPO_PORT],
+    },
+    {
+      provide: GetTimelineUseCase,
+      useFactory: (activityRepo: PrismaActivityRepoAdapter) =>
+        new GetTimelineUseCase(activityRepo, new NestLoggerAdapter()),
+      inject: [ACTIVITY_REPO_PORT],
+    },
     {
       provide: PartyCrmApplication,
       useFactory: (
@@ -99,7 +195,19 @@ import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/u
         unarchiveCustomer: UnarchiveCustomerUseCase,
         getCustomerById: GetCustomerByIdUseCase,
         listCustomers: ListCustomersUseCase,
-        searchCustomers: SearchCustomersUseCase
+        searchCustomers: SearchCustomersUseCase,
+        createDeal: CreateDealUseCase,
+        updateDeal: UpdateDealUseCase,
+        moveDealStage: MoveDealStageUseCase,
+        markDealWon: MarkDealWonUseCase,
+        markDealLost: MarkDealLostUseCase,
+        listDeals: ListDealsUseCase,
+        getDealById: GetDealByIdUseCase,
+        createActivity: CreateActivityUseCase,
+        updateActivity: UpdateActivityUseCase,
+        completeActivity: CompleteActivityUseCase,
+        listActivities: ListActivitiesUseCase,
+        getTimeline: GetTimelineUseCase
       ) =>
         new PartyCrmApplication(
           createCustomer,
@@ -108,7 +216,19 @@ import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/u
           unarchiveCustomer,
           getCustomerById,
           listCustomers,
-          searchCustomers
+          searchCustomers,
+          createDeal,
+          updateDeal,
+          moveDealStage,
+          markDealWon,
+          markDealLost,
+          listDeals,
+          getDealById,
+          createActivity,
+          updateActivity,
+          completeActivity,
+          listActivities,
+          getTimeline
         ),
       inject: [
         CreateCustomerUseCase,
@@ -118,6 +238,18 @@ import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/u
         GetCustomerByIdUseCase,
         ListCustomersUseCase,
         SearchCustomersUseCase,
+        CreateDealUseCase,
+        UpdateDealUseCase,
+        MoveDealStageUseCase,
+        MarkDealWonUseCase,
+        MarkDealLostUseCase,
+        ListDealsUseCase,
+        GetDealByIdUseCase,
+        CreateActivityUseCase,
+        UpdateActivityUseCase,
+        CompleteActivityUseCase,
+        ListActivitiesUseCase,
+        GetTimelineUseCase,
       ],
     },
   ],

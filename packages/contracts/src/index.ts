@@ -8,6 +8,7 @@ export * from "./shared/local-date.schema";
 export * from "./expenses";
 export * from "./tax";
 export * from "./accounting";
+export * from "./crm";
 
 export const CONTRACTS_HELLO = "Kerniflow contracts loaded ✅";
 

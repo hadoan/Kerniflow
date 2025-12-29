@@ -60,6 +60,44 @@ export class PartyAggregate {
     this.roles = props.roles;
   }
 
+  static createParty(params: {
+    id: string;
+    tenantId: string;
+    displayName: string;
+    roles: PartyRoleType[];
+    email?: string | null;
+    phone?: string | null;
+    billingAddress?: Address | null;
+    vatId?: string | null;
+    notes?: string | null;
+    tags?: string[];
+    createdAt: Date;
+    generateId: () => string;
+  }) {
+    if (params.roles.length === 0) {
+      throw new Error("Party must have at least one role");
+    }
+
+    const aggregate = new PartyAggregate({
+      id: params.id,
+      tenantId: params.tenantId,
+      displayName: params.displayName,
+      contactPoints: [],
+      billingAddress: null,
+      vatId: params.vatId ?? null,
+      notes: params.notes ?? null,
+      tags: params.tags ?? [],
+      archivedAt: null,
+      createdAt: params.createdAt,
+      updatedAt: params.createdAt,
+      roles: params.roles,
+    });
+    aggregate.setContactPoint("EMAIL", params.email ?? null, params.generateId);
+    aggregate.setContactPoint("PHONE", params.phone ?? null, params.generateId);
+    aggregate.setBillingAddress(params.billingAddress ?? null, params.generateId);
+    return aggregate;
+  }
+
   static createCustomer(params: {
     id: string;
     tenantId: string;
@@ -73,24 +111,10 @@ export class PartyAggregate {
     createdAt: Date;
     generateId: () => string;
   }) {
-    const aggregate = new PartyAggregate({
-      id: params.id,
-      tenantId: params.tenantId,
-      displayName: params.displayName,
-      contactPoints: [],
-      billingAddress: null,
-      vatId: params.vatId ?? null,
-      notes: params.notes ?? null,
-      tags: params.tags ?? [],
-      archivedAt: null,
-      createdAt: params.createdAt,
-      updatedAt: params.createdAt,
+    return PartyAggregate.createParty({
+      ...params,
       roles: ["CUSTOMER"],
     });
-    aggregate.setContactPoint("EMAIL", params.email ?? null, params.generateId);
-    aggregate.setContactPoint("PHONE", params.phone ?? null, params.generateId);
-    aggregate.setBillingAddress(params.billingAddress ?? null, params.generateId);
-    return aggregate;
   }
 
   updateCustomer(patch: CustomerPatch, now: Date, generateId: () => string) {
@@ -134,6 +158,34 @@ export class PartyAggregate {
       this.archivedAt = null;
       this.touch(now);
     }
+  }
+
+  addRole(role: PartyRoleType, now: Date) {
+    if (this.archivedAt) {
+      throw new Error("Cannot add role to archived party");
+    }
+    if (!this.roles.includes(role)) {
+      this.roles.push(role);
+      this.touch(now);
+    }
+  }
+
+  removeRole(role: PartyRoleType, now: Date) {
+    if (this.archivedAt) {
+      throw new Error("Cannot remove role from archived party");
+    }
+    if (this.roles.length <= 1) {
+      throw new Error("Party must have at least one role");
+    }
+    const index = this.roles.indexOf(role);
+    if (index >= 0) {
+      this.roles.splice(index, 1);
+      this.touch(now);
+    }
+  }
+
+  hasRole(role: PartyRoleType): boolean {
+    return this.roles.includes(role);
   }
 
   get primaryEmail(): string | undefined {
