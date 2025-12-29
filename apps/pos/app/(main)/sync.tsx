@@ -1,24 +1,12 @@
-import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  RefreshControl,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useSyncEngine } from '@/hooks/useSyncEngine';
-import { format } from 'date-fns';
+import { useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useSyncEngine } from "@/hooks/useSyncEngine";
+import { format } from "date-fns";
 
 export default function SyncScreen() {
-  const {
-    pendingCommands,
-    syncStatus,
-    isOnline,
-    triggerSync,
-    retryFailedCommand,
-  } = useSyncEngine();
+  const { pendingCommands, syncStatus, isOnline, triggerSync, retryFailedCommand } =
+    useSyncEngine();
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -29,31 +17,18 @@ export default function SyncScreen() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'PENDING':
+      case "PENDING":
         return <Ionicons name="time-outline" size={24} color="#ff9800" />;
-      case 'SYNCING':
+      case "SYNCING":
         return <Ionicons name="sync-outline" size={24} color="#2196f3" />;
-      case 'SUCCEEDED':
+      case "SUCCEEDED":
         return <Ionicons name="checkmark-circle-outline" size={24} color="#4caf50" />;
-      case 'FAILED':
+      case "FAILED":
         return <Ionicons name="close-circle-outline" size={24} color="#d32f2f" />;
+      case "CONFLICT":
+        return <Ionicons name="alert-circle-outline" size={24} color="#ff5722" />;
       default:
         return <Ionicons name="help-circle-outline" size={24} color="#999" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return '#ff9800';
-      case 'SYNCING':
-        return '#2196f3';
-      case 'SUCCEEDED':
-        return '#4caf50';
-      case 'FAILED':
-        return '#d32f2f';
-      default:
-        return '#999';
     }
   };
 
@@ -63,20 +38,11 @@ export default function SyncScreen() {
         <View style={styles.statusRow}>
           <View style={styles.statusIndicator}>
             <View
-              style={[
-                styles.statusDot,
-                { backgroundColor: isOnline ? '#4caf50' : '#d32f2f' },
-              ]}
+              style={[styles.statusDot, { backgroundColor: isOnline ? "#4caf50" : "#d32f2f" }]}
             />
-            <Text style={styles.statusText}>
-              {isOnline ? 'Online' : 'Offline'}
-            </Text>
+            <Text style={styles.statusText}>{isOnline ? "Online" : "Offline"}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.syncButton}
-            onPress={handleRefresh}
-            disabled={!isOnline}
-          >
+          <TouchableOpacity style={styles.syncButton} onPress={handleRefresh} disabled={!isOnline}>
             <Ionicons name="sync-outline" size={20} color="#fff" />
             <Text style={styles.syncButtonText}>Sync Now</Text>
           </TouchableOpacity>
@@ -89,14 +55,12 @@ export default function SyncScreen() {
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>
-              {pendingCommands.filter((c) => c.status === 'FAILED').length}
+              {pendingCommands.filter((c) => c.status === "FAILED").length}
             </Text>
             <Text style={styles.statLabel}>Failed</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>
-              {syncStatus === 'syncing' ? '...' : '0'}
-            </Text>
+            <Text style={styles.statValue}>{syncStatus === "syncing" ? "..." : "0"}</Text>
             <Text style={styles.statLabel}>Syncing</Text>
           </View>
         </View>
@@ -105,9 +69,7 @@ export default function SyncScreen() {
       <FlatList
         data={pendingCommands}
         keyExtractor={(item) => item.commandId}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         renderItem={({ item }) => (
           <View style={styles.commandItem}>
             <View style={styles.commandHeader}>
@@ -115,10 +77,10 @@ export default function SyncScreen() {
               <View style={styles.commandInfo}>
                 <Text style={styles.commandType}>{item.type}</Text>
                 <Text style={styles.commandDate}>
-                  {format(new Date(item.createdAt), 'MMM d, h:mm a')}
+                  {format(new Date(item.createdAt), "MMM d, h:mm a")}
                 </Text>
               </View>
-              {item.status === 'FAILED' && (
+              {item.status === "FAILED" && (
                 <TouchableOpacity
                   style={styles.retryButton}
                   onPress={() => retryFailedCommand(item.commandId)}
@@ -128,19 +90,21 @@ export default function SyncScreen() {
               )}
             </View>
 
-            {item.status === 'FAILED' && item.error && (
+            {item.status === "FAILED" && item.error && (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{item.error.message}</Text>
-                {item.error.code && (
-                  <Text style={styles.errorCode}>Code: {item.error.code}</Text>
-                )}
+                {item.error.code && <Text style={styles.errorCode}>Code: {item.error.code}</Text>}
+              </View>
+            )}
+            {item.status === "CONFLICT" && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>Conflict detected</Text>
+                <Text style={styles.errorCode}>Review and retry</Text>
               </View>
             )}
 
             {item.attempts > 1 && (
-              <Text style={styles.attemptsText}>
-                Attempts: {item.attempts}
-              </Text>
+              <Text style={styles.attemptsText}>Attempts: {item.attempts}</Text>
             )}
           </View>
         )}
@@ -148,9 +112,7 @@ export default function SyncScreen() {
           <View style={styles.emptyState}>
             <Ionicons name="checkmark-done-outline" size={64} color="#999" />
             <Text style={styles.emptyTitle}>All Synced</Text>
-            <Text style={styles.emptyText}>
-              No pending commands to sync
-            </Text>
+            <Text style={styles.emptyText}>No pending commands to sync</Text>
           </View>
         }
       />
@@ -161,23 +123,23 @@ export default function SyncScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   statusRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   statusIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   statusDot: {
     width: 12,
@@ -187,48 +149,48 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   syncButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196f3',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2196f3",
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
   },
   syncButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 4,
   },
   stats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '600',
-    color: '#2196f3',
+    fontWeight: "600",
+    color: "#2196f3",
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   commandItem: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   commandHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   commandInfo: {
     flex: 1,
@@ -236,12 +198,12 @@ const styles = StyleSheet.create({
   },
   commandType: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 4,
   },
   commandDate: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   retryButton: {
     padding: 8,
@@ -249,36 +211,36 @@ const styles = StyleSheet.create({
   errorContainer: {
     marginTop: 12,
     padding: 12,
-    backgroundColor: '#ffebee',
+    backgroundColor: "#ffebee",
     borderRadius: 4,
   },
   errorText: {
     fontSize: 14,
-    color: '#d32f2f',
+    color: "#d32f2f",
     marginBottom: 4,
   },
   errorCode: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
   },
   attemptsText: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginTop: 8,
   },
   emptyState: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 48,
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
 });

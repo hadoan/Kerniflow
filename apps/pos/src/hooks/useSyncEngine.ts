@@ -1,110 +1,127 @@
-import { useState, useEffect, useRef } from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { SyncEngine } from '@kerniflow/offline-core';
-import { SqliteOutboxStore } from '@kerniflow/offline-rn';
-import * as SQLite from 'expo-sqlite';
-import type { OutboxCommand } from '@kerniflow/offline-core';
-import { useAuthStore } from '@/stores/authStore';
+import { useState, useEffect, useRef } from "react";
+import NetInfo from "@react-native-community/netinfo";
+import * as SQLite from "expo-sqlite";
+import { v4 as uuidv4 } from "@lukeed/uuid";
+import { SyncEngine, type OutboxCommand, type SyncEngineEvent } from "@kerniflow/offline-core";
+import { SqliteOutboxStore, ReactNativeNetworkMonitor } from "@kerniflow/offline-rn";
+import { useAuthStore } from "@/stores/authStore";
+import { InMemorySyncLock } from "@/lib/offline/syncLock";
+import { PosSyncTransport } from "@/lib/offline/posSyncTransport";
+import { useEngagementService } from "@/hooks/useEngagementService";
 
 let syncEngineInstance: SyncEngine | null = null;
 let outboxStoreInstance: SqliteOutboxStore | null = null;
 
 export function useSyncEngine() {
   const [pendingCommands, setPendingCommands] = useState<OutboxCommand[]>([]);
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing'>('idle');
+  const [syncStatus, setSyncStatus] = useState<"idle" | "syncing">("idle");
   const [isOnline, setIsOnline] = useState(true);
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
-  const previousOnlineState = useRef(false);
-  const { authClient, user } = useAuthStore();
+  const syncSubscriptionRef = useRef<(() => void) | null>(null);
+  const { apiClient, user } = useAuthStore();
+  const { engagementService } = useEngagementService();
 
-  // Monitor network connectivity and auto-sync when coming back online
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
-      const nowOnline = state.isConnected ?? false;
-      setIsOnline(nowOnline);
-
-      // Trigger sync when transitioning from offline to online
-      if (autoSyncEnabled && !previousOnlineState.current && nowOnline) {
-        console.log('Network restored, triggering auto-sync...');
-        triggerSync();
-      }
-
-      previousOnlineState.current = nowOnline;
+      setIsOnline(state.isConnected ?? false);
     });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [autoSyncEnabled]);
+    return () => unsubscribe();
+  }, []);
 
   const initializeSync = async () => {
     if (!outboxStoreInstance) {
-      const db = await SQLite.openDatabaseAsync('kerniflow-pos.db');
+      const db = await SQLite.openDatabaseAsync("kerniflow-pos.db");
       outboxStoreInstance = new SqliteOutboxStore(db as any);
       await outboxStoreInstance.initialize();
     }
 
-    if (!syncEngineInstance && authClient) {
-      syncEngineInstance = new SyncEngine(outboxStoreInstance, {
-        apiUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
-        getAccessToken: async () => {
-          return authClient.getAccessToken() ?? '';
+    if (!syncEngineInstance && apiClient) {
+      const lock = new InMemorySyncLock();
+      const networkMonitor = new ReactNativeNetworkMonitor(NetInfo as any);
+      const transport = new PosSyncTransport({
+        apiClient,
+        engagementService: engagementService ?? null,
+      });
+      syncEngineInstance = new SyncEngine(
+        {
+          store: outboxStoreInstance,
+          transport,
+          lock,
+          networkMonitor,
+          clock: { now: () => new Date() },
+          idGenerator: { newId: () => uuidv4() },
+          logger: {
+            debug: (message, meta) => console.debug("[offline]", message, meta),
+            info: (message, meta) => console.info("[offline]", message, meta),
+            warn: (message, meta) => console.warn("[offline]", message, meta),
+            error: (message, meta) => console.error("[offline]", message, meta),
+          },
         },
+        { flushIntervalMs: 30000, batchSize: 20 }
+      );
+      syncEngineInstance.start();
+    }
+
+    if (syncEngineInstance && user?.workspaceId) {
+      syncEngineInstance.trackWorkspace(user.workspaceId);
+    }
+
+    if (syncEngineInstance && !syncSubscriptionRef.current) {
+      syncSubscriptionRef.current = syncEngineInstance.subscribe((event: SyncEngineEvent) => {
+        if (event.type === "statusChanged" || event.type === "commandUpdated") {
+          void refreshPendingCommands();
+        }
       });
     }
 
-    // Load pending commands
     await refreshPendingCommands();
   };
 
   const refreshPendingCommands = async () => {
-    if (!outboxStoreInstance || !user) return;
-
+    if (!outboxStoreInstance || !user) {
+      return;
+    }
     try {
-      // Get pending commands from outbox
-      const commands = await outboxStoreInstance.findPending(user.workspaceId, 100);
+      const commands = await outboxStoreInstance.findByWorkspace(user.workspaceId);
       setPendingCommands(commands);
     } catch (error) {
-      console.error('Failed to refresh pending commands:', error);
+      console.error("Failed to refresh pending commands:", error);
     }
   };
 
   const triggerSync = async () => {
-    if (!syncEngineInstance || !isOnline || !user) {
-      console.log('Skipping sync:', {
-        hasEngine: !!syncEngineInstance,
-        isOnline,
-        hasUser: !!user
-      });
+    if (!syncEngineInstance || !user) {
+      return;
+    }
+    if (!isOnline && autoSyncEnabled) {
       return;
     }
 
-    setSyncStatus('syncing');
+    setSyncStatus("syncing");
     try {
-      await syncEngineInstance.processQueue(user.workspaceId);
+      await syncEngineInstance.flush(user.workspaceId);
       await refreshPendingCommands();
     } catch (error) {
-      console.error('Sync failed:', error);
+      console.error("Sync failed:", error);
     } finally {
-      setSyncStatus('idle');
+      setSyncStatus("idle");
     }
   };
 
   const retryFailedCommand = async (commandId: string) => {
-    if (!outboxStoreInstance) return;
-
+    if (!outboxStoreInstance) {
+      return;
+    }
     try {
-      // Reset command status to PENDING
-      await outboxStoreInstance.markForRetry(commandId);
-      // Trigger sync
+      await outboxStoreInstance.resetToPending(commandId);
       await triggerSync();
     } catch (error) {
-      console.error('Failed to retry command:', error);
+      console.error("Failed to retry command:", error);
     }
   };
 
   const toggleAutoSync = () => {
-    setAutoSyncEnabled((prev: boolean) => !prev);
+    setAutoSyncEnabled((prev) => !prev);
   };
 
   return {

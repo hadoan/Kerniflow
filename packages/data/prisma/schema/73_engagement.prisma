@@ -1,0 +1,100 @@
+enum CheckInStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+enum CheckInByType {
+  SELF_SERVICE
+  EMPLOYEE
+}
+
+enum LoyaltyAccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum LoyaltyEntryType {
+  EARN
+  REDEEM
+  ADJUST
+  EXPIRE
+}
+
+enum LoyaltyReasonCode {
+  VISIT_CHECKIN
+  MANUAL_ADJUSTMENT
+  REWARD_REDEMPTION
+  EXPIRATION
+}
+
+model CheckInEvent {
+  id                         String       @id @default(cuid())
+  tenantId                   String
+  customerPartyId            String
+  registerId                 String
+  kioskDeviceId              String?
+  checkedInAt                DateTime     @db.Timestamptz(6)
+  checkedInByType            CheckInByType
+  checkedInByEmployeePartyId String?
+  status                     CheckInStatus @default(ACTIVE)
+  visitReason                String?
+  assignedEmployeePartyId    String?
+  tags                       String[]     @default([])
+  posSaleId                  String?
+  notes                      String?
+  createdAt                  DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt                  DateTime     @updatedAt @db.Timestamptz(6)
+
+  @@index([tenantId, customerPartyId, checkedInAt])
+  @@index([tenantId, registerId, checkedInAt])
+  @@index([tenantId, status])
+}
+
+model LoyaltyAccount {
+  id                   String               @id @default(cuid())
+  tenantId             String
+  customerPartyId      String
+  status               LoyaltyAccountStatus @default(ACTIVE)
+  currentPointsBalance Int                  @default(0)
+  createdAt            DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt            DateTime             @updatedAt @db.Timestamptz(6)
+
+  ledgerEntries        LoyaltyLedgerEntry[]
+
+  @@unique([tenantId, customerPartyId], name: "tenantId_customerPartyId")
+  @@index([tenantId, status])
+}
+
+model LoyaltyLedgerEntry {
+  id                      String            @id @default(cuid())
+  tenantId                String
+  customerPartyId         String
+  entryType               LoyaltyEntryType
+  pointsDelta             Int
+  reasonCode              LoyaltyReasonCode
+  sourceType              String?
+  sourceId                String?
+  createdAt               DateTime          @default(now()) @db.Timestamptz(6)
+  createdByEmployeePartyId String?
+
+  account                 LoyaltyAccount? @relation(fields: [tenantId, customerPartyId], references: [tenantId, customerPartyId], onDelete: Cascade)
+
+  @@index([tenantId, customerPartyId, createdAt])
+  @@index([tenantId, entryType])
+  @@unique([tenantId, sourceType, sourceId, reasonCode], name: "tenantId_sourceType_sourceId_reasonCode")
+}
+
+model EngagementSettings {
+  id                          String   @id @default(cuid())
+  tenantId                    String   @unique
+  checkInModeEnabled          Boolean  @default(true)
+  checkInDuplicateWindowMinutes Int    @default(10)
+  loyaltyEnabled              Boolean  @default(true)
+  pointsPerVisit              Int      @default(1)
+  rewardRulesJson             String?
+  aiEnabled                   Boolean  @default(true)
+  kioskBrandingJson           String?
+  createdAt                   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt                   DateTime @updatedAt @db.Timestamptz(6)
+}

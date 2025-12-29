@@ -17,6 +17,8 @@ export * from "./inventory";
 export * from "./inventory-ai";
 export * from "./pos";
 export * from "./pos-ai";
+export * from "./engagement";
+export * from "./engagement-ai";
 export * from "./workflows";
 export * from "./approvals";
 

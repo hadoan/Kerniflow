@@ -110,6 +110,13 @@ export class SqliteOutboxStore implements OutboxStore {
   }
 
   /**
+   * List pending commands (compat with OutboxStore port)
+   */
+  async listPending(workspaceId: string, limit: number): Promise<OutboxCommand[]> {
+    return this.findPending(workspaceId, limit);
+  }
+
+  /**
    * Update command status
    */
   async updateStatus(
@@ -152,22 +159,26 @@ export class SqliteOutboxStore implements OutboxStore {
   /**
    * Mark command as succeeded
    */
-  async markSucceeded(commandId: string): Promise<void> {
-    await this.updateStatus(commandId, "SUCCEEDED");
+  async markSucceeded(commandId: string, meta?: unknown): Promise<void> {
+    await this.db.runAsync(
+      `UPDATE outbox_commands
+       SET status = ?, meta = ?
+       WHERE commandId = ?`,
+      ["SUCCEEDED", meta ? JSON.stringify(meta) : null, commandId]
+    );
   }
 
   /**
    * Mark command as failed with error
    */
-  async markFailed(commandId: string, error: OutboxError, nextAttemptAt?: Date): Promise<void> {
+  async markFailed(commandId: string, error: OutboxError): Promise<void> {
     await this.db.runAsync(
       `UPDATE outbox_commands
-       SET status = ?, attempts = attempts + 1, nextAttemptAt = ?,
+       SET status = ?, attempts = attempts + 1,
            errorMessage = ?, errorCode = ?, errorRetryable = ?, errorMeta = ?
        WHERE commandId = ?`,
       [
         "FAILED",
-        nextAttemptAt?.toISOString() || null,
         error.message,
         error.code || null,
         error.retryable ? 1 : 0,
@@ -204,7 +215,10 @@ export class SqliteOutboxStore implements OutboxStore {
   /**
    * Get all commands for a workspace (for debugging/UI)
    */
-  async findByWorkspace(workspaceId: string, status?: OutboxCommandStatus): Promise<OutboxCommand[]> {
+  async findByWorkspace(
+    workspaceId: string,
+    status?: OutboxCommandStatus
+  ): Promise<OutboxCommand[]> {
     let query = `SELECT * FROM outbox_commands WHERE workspaceId = ?`;
     const params: any[] = [workspaceId];
 
@@ -244,6 +258,18 @@ export class SqliteOutboxStore implements OutboxStore {
        SET status = 'PENDING', nextAttemptAt = NULL, errorMessage = NULL, errorCode = NULL
        WHERE commandId = ?`,
       [commandId]
+    );
+  }
+
+  /**
+   * Increment attempt counter and schedule next attempt
+   */
+  async incrementAttempt(commandId: string, nextAttemptAt: Date): Promise<void> {
+    await this.db.runAsync(
+      `UPDATE outbox_commands
+       SET attempts = attempts + 1, nextAttemptAt = ?
+       WHERE commandId = ?`,
+      [nextAttemptAt.toISOString(), commandId]
     );
   }
 

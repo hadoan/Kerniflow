@@ -36,6 +36,9 @@ import { InventoryModule } from "../inventory";
 import { InventoryApplication } from "../inventory/application/inventory.application";
 import { buildInventoryTools } from "../inventory/adapters/tools/inventory.tools";
 import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
+import { EngagementModule } from "../engagement/engagement.module";
+import { EngagementApplication } from "../engagement/application/engagement.application";
+import { buildEngagementTools } from "../engagement/adapters/tools/engagement.tools";
 
 @Module({
   imports: [
@@ -46,6 +49,7 @@ import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
     SalesModule,
     PurchasingModule,
     InventoryModule,
+    EngagementModule,
   ],
   controllers: [CopilotController],
   providers: [
@@ -89,7 +93,8 @@ import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
         partyCrm: PartyCrmApplication,
         sales: SalesApplication,
         purchasing: PurchasingApplication,
-        inventory: InventoryApplication
+        inventory: InventoryApplication,
+        engagement: EngagementApplication
       ) => [
         ...buildInvoiceTools(invoices),
         ...buildCustomerTools(partyCrm),
@@ -97,6 +102,7 @@ import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
         ...buildPurchasingTools(purchasing),
         ...buildInventoryTools(inventory),
         ...buildApprovalTools(),
+        ...buildEngagementTools(engagement, partyCrm),
       ],
       inject: [
         InvoicesApplication,
@@ -104,6 +110,7 @@ import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
         SalesApplication,
         PurchasingApplication,
         InventoryApplication,
+        EngagementApplication,
       ],
     },
     {
