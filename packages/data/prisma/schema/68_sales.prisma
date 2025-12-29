@@ -1,0 +1,224 @@
+enum SalesQuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  CONVERTED
+  EXPIRED
+}
+
+enum SalesOrderStatus {
+  DRAFT
+  CONFIRMED
+  FULFILLED
+  INVOICED
+  CANCELED
+}
+
+enum SalesInvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  VOID
+}
+
+enum SalesPaymentMethod {
+  BANK_TRANSFER
+  CASH
+  CARD
+  OTHER
+}
+
+model SalesQuote {
+  id                     String           @id @default(cuid())
+  tenantId               String
+  number                 String?
+  status                 SalesQuoteStatus @default(DRAFT)
+  customerPartyId        String
+  customerContactPartyId String?
+  issueDate              DateTime?        @db.Date
+  validUntilDate         DateTime?        @db.Date
+  currency               String
+  paymentTerms           String?
+  notes                  String?
+  subtotalCents          Int
+  discountCents          Int
+  taxCents               Int
+  totalCents             Int
+  sentAt                 DateTime?        @db.Timestamptz(6)
+  acceptedAt             DateTime?        @db.Timestamptz(6)
+  rejectedAt             DateTime?        @db.Timestamptz(6)
+  convertedToSalesOrderId String?
+  convertedToInvoiceId   String?
+  createdByUserId        String?
+  updatedByUserId        String?
+  createdAt              DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime         @updatedAt @db.Timestamptz(6)
+
+  lines SalesQuoteLine[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, customerPartyId])
+  @@index([tenantId, createdAt])
+  @@unique([tenantId, number])
+}
+
+model SalesQuoteLine {
+  id              String   @id @default(cuid())
+  quoteId         String
+  description     String
+  quantity        Int
+  unitPriceCents  Int
+  discountCents   Int?
+  taxCode         String?
+  revenueCategory String?
+  sortOrder       Int?
+
+  quote SalesQuote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([quoteId])
+}
+
+model SalesOrder {
+  id                     String           @id @default(cuid())
+  tenantId               String
+  number                 String?
+  status                 SalesOrderStatus @default(DRAFT)
+  customerPartyId        String
+  customerContactPartyId String?
+  orderDate              DateTime?        @db.Date
+  deliveryDate           DateTime?        @db.Date
+  currency               String
+  notes                  String?
+  subtotalCents          Int
+  discountCents          Int
+  taxCents               Int
+  totalCents             Int
+  confirmedAt            DateTime?        @db.Timestamptz(6)
+  fulfilledAt            DateTime?        @db.Timestamptz(6)
+  canceledAt             DateTime?        @db.Timestamptz(6)
+  sourceQuoteId          String?
+  sourceInvoiceId        String?
+  createdByUserId        String?
+  updatedByUserId        String?
+  createdAt              DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime         @updatedAt @db.Timestamptz(6)
+
+  lines SalesOrderLine[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, customerPartyId])
+  @@index([tenantId, createdAt])
+  @@unique([tenantId, number])
+}
+
+model SalesOrderLine {
+  id              String   @id @default(cuid())
+  orderId         String
+  description     String
+  quantity        Int
+  unitPriceCents  Int
+  discountCents   Int?
+  taxCode         String?
+  revenueCategory String?
+  sortOrder       Int?
+
+  order SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model SalesInvoice {
+  id                     String             @id @default(cuid())
+  tenantId               String
+  number                 String?
+  status                 SalesInvoiceStatus @default(DRAFT)
+  customerPartyId        String
+  customerContactPartyId String?
+  issueDate              DateTime?          @db.Date
+  dueDate                DateTime?          @db.Date
+  currency               String
+  paymentTerms           String?
+  notes                  String?
+  subtotalCents          Int
+  discountCents          Int
+  taxCents               Int
+  totalCents             Int
+  paidCents              Int
+  dueCents               Int
+  issuedAt               DateTime?          @db.Timestamptz(6)
+  voidedAt               DateTime?          @db.Timestamptz(6)
+  voidReason             String?
+  sourceSalesOrderId     String?
+  sourceQuoteId          String?
+  issuedJournalEntryId   String?
+  createdByUserId        String?
+  updatedByUserId        String?
+  createdAt              DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime           @updatedAt @db.Timestamptz(6)
+
+  lines     SalesInvoiceLine[]
+  payments  SalesPayment[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, customerPartyId])
+  @@index([tenantId, createdAt])
+  @@unique([tenantId, number])
+}
+
+model SalesInvoiceLine {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  description     String
+  quantity        Int
+  unitPriceCents  Int
+  discountCents   Int?
+  taxCode         String?
+  revenueCategory String?
+  sortOrder       Int?
+
+  invoice SalesInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model SalesPayment {
+  id               String             @id @default(cuid())
+  tenantId         String
+  invoiceId        String
+  amountCents      Int
+  currency         String
+  paymentDate      DateTime           @db.Date
+  method           SalesPaymentMethod
+  reference        String?
+  notes            String?
+  recordedAt       DateTime           @default(now()) @db.Timestamptz(6)
+  recordedByUserId String?
+  journalEntryId   String?
+
+  invoice SalesInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, invoiceId])
+  @@index([invoiceId])
+}
+
+model SalesSettings {
+  id                             String   @id @default(cuid())
+  tenantId                       String   @unique
+  defaultPaymentTerms            String?
+  defaultCurrency                String   @default("EUR")
+  quoteNumberPrefix              String   @default("Q-")
+  quoteNextNumber                Int      @default(1)
+  orderNumberPrefix              String   @default("SO-")
+  orderNextNumber                Int      @default(1)
+  invoiceNumberPrefix            String   @default("INV-")
+  invoiceNextNumber              Int      @default(1)
+  defaultRevenueAccountId        String?
+  defaultAccountsReceivableAccountId String?
+  defaultBankAccountId           String?
+  autoPostOnIssue                Boolean  @default(true)
+  autoPostOnPayment              Boolean  @default(true)
+  createdAt                      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt                      DateTime @updatedAt @db.Timestamptz(6)
+}
