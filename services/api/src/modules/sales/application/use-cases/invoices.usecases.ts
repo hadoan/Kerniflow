@@ -38,7 +38,7 @@ import { toInvoiceDto } from "../mappers/sales-dto.mapper";
 import { allocateUniqueNumber } from "./numbering";
 import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
-import type { CustomerQueryPort } from "../../party-crm/application/ports/customer-query.port";
+import type { CustomerQueryPort } from "../../../party-crm/application/ports/customer-query.port";
 import type { AccountingApplication } from "../../accounting/application/accounting.application";
 
 const buildLineItems = (params: {

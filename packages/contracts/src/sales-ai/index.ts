@@ -5,3 +5,4 @@ export * from "./message-draft-card.schema";
 export * from "./stalled-quotes-card.schema";
 export * from "./posting-explanation-card.schema";
 export * from "./summary-card.schema";
+export * from "./tool-inputs.schema";

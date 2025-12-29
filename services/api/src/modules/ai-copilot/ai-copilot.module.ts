@@ -26,9 +26,12 @@ import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
 import { PartyCrmModule } from "../party-crm";
 import { PartyCrmApplication } from "../party-crm/application/party-crm.application";
 import { buildCustomerTools } from "../party-crm/adapters/tools/customer.tools";
+import { SalesModule } from "../sales";
+import { SalesApplication } from "../sales/application/sales.application";
+import { buildSalesTools } from "../sales/adapters/tools/sales.tools";
 
 @Module({
-  imports: [DataModule, IdentityModule, InvoicesModule, PartyCrmModule],
+  imports: [DataModule, IdentityModule, InvoicesModule, PartyCrmModule, SalesModule],
   controllers: [CopilotController],
   providers: [
     PrismaAgentRunRepository,
@@ -67,11 +70,12 @@ import { buildCustomerTools } from "../party-crm/adapters/tools/customer.tools";
     },
     {
       provide: COPILOT_TOOLS,
-      useFactory: (invoices: InvoicesApplication, partyCrm: PartyCrmApplication) => [
-        ...buildInvoiceTools(invoices),
-        ...buildCustomerTools(partyCrm),
-      ],
-      inject: [InvoicesApplication, PartyCrmApplication],
+      useFactory: (
+        invoices: InvoicesApplication,
+        partyCrm: PartyCrmApplication,
+        sales: SalesApplication
+      ) => [...buildInvoiceTools(invoices), ...buildCustomerTools(partyCrm), ...buildSalesTools(sales)],
+      inject: [InvoicesApplication, PartyCrmApplication, SalesApplication],
     },
     {
       provide: StreamCopilotChatUseCase,

@@ -12,6 +12,10 @@ import {
   Zap,
   FileStack,
   UsersRound,
+  FileSignature,
+  ClipboardList,
+  Sparkles,
+  SlidersHorizontal,
 } from "lucide-react";
 
 export interface NavItem {
@@ -82,6 +86,26 @@ export const moduleRegistry: ModuleDefinition[] = [
     comingSoon: false,
     navItems: [{ id: "customers", labelKey: "nav.customers", icon: Users, path: "/customers" }],
     permissions: ["read:customers", "write:customers"],
+  },
+  {
+    id: "sales",
+    name: "Sales",
+    description: "Quotes, orders, invoices, and payments",
+    enabled: true,
+    comingSoon: false,
+    navItems: [
+      { id: "sales-quotes", labelKey: "nav.salesQuotes", icon: FileSignature, path: "/sales/quotes" },
+      { id: "sales-orders", labelKey: "nav.salesOrders", icon: ClipboardList, path: "/sales/orders" },
+      { id: "sales-invoices", labelKey: "nav.salesInvoices", icon: Receipt, path: "/sales/invoices" },
+      { id: "sales-copilot", labelKey: "nav.salesCopilot", icon: Sparkles, path: "/sales/copilot" },
+      { id: "sales-settings", labelKey: "nav.salesSettings", icon: SlidersHorizontal, path: "/sales/settings" },
+    ],
+    permissions: [
+      "sales.quotes.read",
+      "sales.orders.read",
+      "sales.invoices.read",
+      "sales.settings.manage",
+    ],
   },
   // Coming soon modules
   {

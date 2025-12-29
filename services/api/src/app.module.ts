@@ -14,6 +14,7 @@ import { DocumentsModule } from "./modules/documents";
 import { TaxModule } from "./modules/tax/tax.module";
 import { WorkspacesModule } from "./modules/workspaces";
 import { AccountingModule } from "./modules/accounting";
+import { SalesModule } from "./modules/sales";
 
 @Module({
   controllers: [AppController],
@@ -30,6 +31,7 @@ import { AccountingModule } from "./modules/accounting";
     DocumentsModule,
     TaxModule,
     AccountingModule,
+    SalesModule,
     WorkflowModule,
     AutomationModule,
     ReportingModule,

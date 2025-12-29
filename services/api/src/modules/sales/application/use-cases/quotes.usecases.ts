@@ -44,7 +44,7 @@ import { toQuoteDto, toOrderDto, toInvoiceDto } from "../mappers/sales-dto.mappe
 import { allocateUniqueNumber } from "./numbering";
 import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
-import type { CustomerQueryPort } from "../../party-crm/application/ports/customer-query.port";
+import type { CustomerQueryPort } from "../../../party-crm/application/ports/customer-query.port";
 import type { SalesOrderRepositoryPort } from "../ports/order-repository.port";
 import type { SalesInvoiceRepositoryPort } from "../ports/invoice-repository.port";
 
