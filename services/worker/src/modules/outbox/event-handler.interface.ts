@@ -2,7 +2,7 @@ export interface OutboxEvent {
   id: string;
   tenantId: string;
   eventType: string;
-  payloadJson: string;
+  payload: unknown;
   correlationId?: string | null;
 }
 

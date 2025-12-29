@@ -52,6 +52,9 @@ jobs:
       - name: Run ESLint
         run: pnpm lint
 
+      - name: Run Architecture Check
+        run: pnpm arch:check
+
       - name: Run Typecheck
         run: pnpm typecheck
 

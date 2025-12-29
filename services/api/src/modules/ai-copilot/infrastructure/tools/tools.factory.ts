@@ -58,7 +58,7 @@ export function buildAiTools(
             await deps.outbox.enqueue({
               tenantId: deps.tenantId,
               eventType: "copilot.tool.completed",
-              payloadJson: JSON.stringify({ runId: deps.runId, tool: t.name }),
+              payload: { runId: deps.runId, tool: t.name },
             });
             return result;
           } catch (error) {

@@ -1,4 +1,4 @@
-import { OutboxPort } from "../../ports/outbox.port";
+import type { OutboxPort } from "@kerniflow/kernel";
 
 export class MockOutboxPort implements OutboxPort {
   public events: Array<{

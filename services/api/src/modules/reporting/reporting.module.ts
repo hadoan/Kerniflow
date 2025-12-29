@@ -1,21 +1,21 @@
 import { Module } from "@nestjs/common";
-import { Controller, Get } from "@nestjs/common";
-import { PrismaService, DataModule } from "@kerniflow/data";
-
-@Controller("reports")
-class ReportingController {
-  constructor(private readonly prisma: PrismaService) {}
-
-  @Get("dashboard")
-  async dashboard() {
-    // CQRS-lite: read from Prisma
-    const expenseCount = await this.prisma.expense.count();
-    return { totalExpenses: expenseCount, message: "Reporting context - dashboard" };
-  }
-}
+import { DataModule } from "@kerniflow/data";
+import { ReportingController } from "./adapters/http/reporting.controller";
+import { REPORTING_QUERY_PORT } from "./application/ports/reporting-query.port";
+import { GetDashboardReportUseCase } from "./application/use-cases/get-dashboard-report.usecase";
+import { PrismaReportingQueryAdapter } from "./infrastructure/prisma/prisma-reporting-query.adapter";
 
 @Module({
   imports: [DataModule],
   controllers: [ReportingController],
+  providers: [
+    PrismaReportingQueryAdapter,
+    { provide: REPORTING_QUERY_PORT, useExisting: PrismaReportingQueryAdapter },
+    {
+      provide: GetDashboardReportUseCase,
+      useFactory: (query) => new GetDashboardReportUseCase(query),
+      inject: [REPORTING_QUERY_PORT],
+    },
+  ],
 })
 export class ReportingModule {}

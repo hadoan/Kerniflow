@@ -12,7 +12,7 @@ import { ROLE_REPOSITORY_TOKEN } from "../application/ports/role-repository.port
 import { REFRESH_TOKEN_REPOSITORY_TOKEN } from "../application/ports/refresh-token-repository.port";
 import { PASSWORD_HASHER_TOKEN } from "../application/ports/password-hasher.port";
 import { TOKEN_SERVICE_TOKEN } from "../application/ports/token-service.port";
-import { OUTBOX_PORT_TOKEN } from "../application/ports/outbox.port";
+import { OUTBOX_PORT } from "../application/ports/outbox.port";
 import { AUDIT_PORT_TOKEN } from "../application/ports/audit.port";
 import { IDEMPOTENCY_STORAGE_PORT_TOKEN } from "../../../shared/ports/idempotency-storage.port";
 import { ID_GENERATOR_TOKEN } from "../../../shared/ports/id-generator.port";
@@ -221,7 +221,7 @@ describe("Sign Up with Real NestJS DI (Production-like)", () => {
       const refreshTokenRepo = app.get(REFRESH_TOKEN_REPOSITORY_TOKEN);
       const passwordHasher = app.get(PASSWORD_HASHER_TOKEN);
       const tokenService = app.get(TOKEN_SERVICE_TOKEN);
-      const outbox = app.get(OUTBOX_PORT_TOKEN);
+      const outbox = app.get(OUTBOX_PORT);
       const audit = app.get(AUDIT_PORT_TOKEN);
       const idempotency = app.get(IDEMPOTENCY_STORAGE_PORT_TOKEN);
       const idGenerator = app.get(ID_GENERATOR_TOKEN);

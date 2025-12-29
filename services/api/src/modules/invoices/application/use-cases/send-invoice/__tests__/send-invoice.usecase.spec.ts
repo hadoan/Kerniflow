@@ -72,7 +72,7 @@ describe("SendInvoiceUseCase", () => {
       expect(events[0].tenantId).toBe("tenant-1");
       expect(events[0].correlationId).toBe("corr-123");
 
-      const payload = JSON.parse(events[0].payloadJson);
+      const payload = events[0].payload as any;
       expect(payload.deliveryId).toBe("delivery-1");
       expect(payload.invoiceId).toBe("inv-1");
       expect(payload.to).toBe("customer@example.com");
@@ -107,7 +107,7 @@ describe("SendInvoiceUseCase", () => {
 
       // Assert
       const events = outbox.getEventsByType("invoice.email.requested");
-      const payload = JSON.parse(events[0].payloadJson);
+      const payload = events[0].payload as any;
       expect(payload.cc).toEqual(["manager@example.com"]);
       expect(payload.bcc).toEqual(["archive@example.com"]);
       expect(payload.attachPdf).toBe(true);

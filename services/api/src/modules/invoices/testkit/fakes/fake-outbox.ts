@@ -1,9 +1,9 @@
-import { OutboxPort } from "../../application/ports/outbox.port";
+import type { OutboxPort } from "../../application/ports/outbox.port";
 
 export type OutboxEvent = {
   tenantId: string;
   eventType: string;
-  payloadJson: string;
+  payload: unknown;
   correlationId?: string;
 };
 
@@ -13,7 +13,7 @@ export class FakeOutbox implements OutboxPort {
   async enqueue(event: {
     tenantId: string;
     eventType: string;
-    payloadJson: string;
+    payload: unknown;
     correlationId?: string;
   }): Promise<void> {
     this.events.push({ ...event });

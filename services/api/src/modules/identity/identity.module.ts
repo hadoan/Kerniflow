@@ -7,7 +7,6 @@ import { DataModule } from "@kerniflow/data";
 import { AuthController } from "./adapters/http/auth.controller";
 
 // Infrastructure adapters
-import { PrismaOutboxAdapter } from "./infrastructure/persistence/prisma.outbox.adapter";
 import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
@@ -28,7 +27,7 @@ import { JwtTokenService } from "./infrastructure/security/jwt.token-service";
 // Ports / Tokens
 import { PASSWORD_HASHER_TOKEN } from "./application/ports/password-hasher.port";
 import { TOKEN_SERVICE_TOKEN } from "./application/ports/token-service.port";
-import { OUTBOX_PORT_TOKEN } from "./application/ports/outbox.port";
+import { OUTBOX_PORT } from "./application/ports/outbox.port";
 import { AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
 import { PrismaAuditRepository } from "./infrastructure/adapters/prisma-audit-repository.adapter";
 import { PrismaMembershipRepository } from "./infrastructure/adapters/prisma-membership-repository.adapter";
@@ -46,14 +45,13 @@ import { USER_REPOSITORY_TOKEN } from "./application/ports/user-repository.port"
   imports: [DataModule],
   controllers: [AuthController],
   providers: [
-    // Repositories - NestJS will auto-inject PrismaService based on @Injectable() decorator
+    // Repositories - NestJS will auto-inject Prisma adapters based on @Injectable()
     PrismaUserRepository,
     PrismaTenantRepository,
     PrismaMembershipRepository,
     PrismaRefreshTokenRepository,
     PrismaRoleRepository,
     PrismaAuditRepository,
-    PrismaOutboxAdapter,
     AuthGuard,
 
     // Security
@@ -96,10 +94,6 @@ import { USER_REPOSITORY_TOKEN } from "./application/ports/user-repository.port"
       useExisting: JwtTokenService,
     },
     {
-      provide: OUTBOX_PORT_TOKEN,
-      useExisting: PrismaOutboxAdapter,
-    },
-    {
       provide: AUDIT_PORT_TOKEN,
       useExisting: PrismaAuditRepository,
     },
@@ -129,7 +123,7 @@ import { USER_REPOSITORY_TOKEN } from "./application/ports/user-repository.port"
     ROLE_REPOSITORY_TOKEN,
     PASSWORD_HASHER_TOKEN,
     TOKEN_SERVICE_TOKEN,
-    OUTBOX_PORT_TOKEN,
+    OUTBOX_PORT,
     AUDIT_PORT_TOKEN,
     SignUpUseCase,
     SignInUseCase,

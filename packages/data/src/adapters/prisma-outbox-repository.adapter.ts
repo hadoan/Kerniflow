@@ -5,8 +5,9 @@ import type { TransactionContext } from "@kerniflow/kernel";
 
 export interface OutboxEventData {
   eventType: string;
-  payloadJson: string;
+  payload: unknown;
   tenantId: string;
+  correlationId?: string;
   availableAt?: Date;
 }
 
@@ -14,8 +15,19 @@ export interface OutboxEventData {
  * OutboxRepository for worker polling use cases.
  * This is separate from OutboxPort which is used by application layer.
  */
+function safeParsePayload(payloadJson: string): unknown {
+  try {
+    return JSON.parse(payloadJson);
+  } catch {
+    return null;
+  }
+}
+
 @Injectable()
 export class OutboxRepository {
+  private readonly maxAttempts = 3;
+  private readonly baseDelayMs = 5000;
+
   constructor(private readonly prisma: PrismaService) {}
 
   async enqueue(data: OutboxEventData, tx?: TransactionContext): Promise<void> {
@@ -25,14 +37,15 @@ export class OutboxRepository {
       data: {
         tenantId: data.tenantId,
         eventType: data.eventType,
-        payloadJson: data.payloadJson,
+        payloadJson: JSON.stringify(data.payload ?? {}),
+        correlationId: data.correlationId ?? null,
         availableAt: data.availableAt ?? new Date(),
       },
     });
   }
 
   async fetchPending(limit: number = 10) {
-    return this.prisma.outboxEvent.findMany({
+    const events = await this.prisma.outboxEvent.findMany({
       where: {
         status: "PENDING",
         availableAt: { lte: new Date() },
@@ -40,6 +53,11 @@ export class OutboxRepository {
       orderBy: { createdAt: "asc" },
       take: limit,
     });
+
+    return events.map((event) => ({
+      ...event,
+      payload: safeParsePayload(event.payloadJson ?? "{}"),
+    }));
   }
 
   async markSent(id: string) {
@@ -49,12 +67,28 @@ export class OutboxRepository {
     });
   }
 
-  async markFailed(id: string, error: string) {
-    return this.prisma.outboxEvent.update({
+  async markFailed(id: string, _error: string) {
+    const updated = await this.prisma.outboxEvent.update({
       where: { id },
       data: {
-        status: "FAILED",
         attempts: { increment: 1 },
+      },
+    });
+
+    if (updated.attempts >= this.maxAttempts) {
+      await this.prisma.outboxEvent.update({
+        where: { id },
+        data: { status: "FAILED" },
+      });
+      return;
+    }
+
+    const delayMs = this.baseDelayMs * Math.pow(2, updated.attempts - 1);
+    await this.prisma.outboxEvent.update({
+      where: { id },
+      data: {
+        status: "PENDING",
+        availableAt: new Date(Date.now() + delayMs),
       },
     });
   }

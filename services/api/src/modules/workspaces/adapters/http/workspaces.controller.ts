@@ -22,7 +22,7 @@ import { CreateWorkspaceUseCase } from "../../application/use-cases/create-works
 import { ListWorkspacesUseCase } from "../../application/use-cases/list-workspaces.usecase";
 import { GetWorkspaceUseCase } from "../../application/use-cases/get-workspace.usecase";
 import { UpdateWorkspaceUseCase } from "../../application/use-cases/update-workspace.usecase";
-import { IdempotencyInterceptor } from "../../../../shared/idempotency/IdempotencyInterceptor";
+import { IdempotencyInterceptor } from "../../../../shared/infrastructure/idempotency/IdempotencyInterceptor";
 import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
 
 // Auth context extraction - compatible with tests and production

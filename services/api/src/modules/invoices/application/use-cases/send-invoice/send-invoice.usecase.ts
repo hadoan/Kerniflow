@@ -8,6 +8,7 @@ import {
   type UseCaseContext,
   type UseCaseError,
   ValidationError,
+  buildIdempotencyKey,
   err,
   ok,
 } from "@kerniflow/kernel";
@@ -99,7 +100,7 @@ export class SendInvoiceUseCase extends BaseUseCase<SendInvoiceInput, SendInvoic
     await this.useCaseDeps.outbox.enqueue({
       tenantId: ctx.tenantId,
       eventType: "invoice.email.requested",
-      payloadJson: JSON.stringify(payload),
+      payload,
       correlationId: ctx.correlationId,
     });
 
@@ -108,6 +109,6 @@ export class SendInvoiceUseCase extends BaseUseCase<SendInvoiceInput, SendInvoic
 
   private generateIdempotencyKey(invoiceId: string, to: string): string {
     const hash = createHash("sha256").update(to).digest("hex").slice(0, 16);
-    return `invoice-send/${invoiceId}/${hash}`;
+    return buildIdempotencyKey("invoice-send", invoiceId, hash);
   }
 }

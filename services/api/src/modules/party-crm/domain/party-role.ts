@@ -1,1 +1,1 @@
-export type PartyRoleType = "CUSTOMER" | "SUPPLIER" | "EMPLOYEE" | "CONTACT";
+export { PartyRoleType } from "@kerniflow/kernel";

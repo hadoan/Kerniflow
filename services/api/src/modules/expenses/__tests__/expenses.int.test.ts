@@ -32,7 +32,7 @@ describe("Expenses integration (Postgres)", () => {
       { CustomFieldDefinitionRepository, CustomFieldIndexRepository },
     ] = await Promise.all([
       import("../infrastructure/adapters/prisma-expense-repository.adapter"),
-      import("../../../shared/infrastructure/persistence/prisma-outbox.adapter"),
+      import("@kerniflow/data"),
       import("../../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter"),
       import("../../../shared/infrastructure/system-id-generator"),
       import("../../../shared/infrastructure/system-clock"),

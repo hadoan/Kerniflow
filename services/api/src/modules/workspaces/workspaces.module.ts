@@ -8,7 +8,7 @@ import { CreateWorkspaceUseCase } from "./application/use-cases/create-workspace
 import { ListWorkspacesUseCase } from "./application/use-cases/list-workspaces.usecase";
 import { GetWorkspaceUseCase } from "./application/use-cases/get-workspace.usecase";
 import { UpdateWorkspaceUseCase } from "./application/use-cases/update-workspace.usecase";
-import { IdempotencyInterceptor } from "../../shared/idempotency/IdempotencyInterceptor";
+import { IdempotencyInterceptor } from "../../shared/infrastructure/idempotency/IdempotencyInterceptor";
 import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
 import { IDEMPOTENCY_STORAGE_PORT_TOKEN } from "../../shared/ports/idempotency-storage.port";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";

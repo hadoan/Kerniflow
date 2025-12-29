@@ -13,7 +13,7 @@ import {
   type RefreshTokenRepositoryPort,
   REFRESH_TOKEN_REPOSITORY_TOKEN,
 } from "../ports/refresh-token-repository.port";
-import { type OutboxPort, OUTBOX_PORT_TOKEN } from "../ports/outbox.port";
+import { type OutboxPort, OUTBOX_PORT } from "../ports/outbox.port";
 import { type AuditPort, AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import {
   type IdempotencyStoragePort,
@@ -59,7 +59,7 @@ export class SignInUseCase {
     @Inject(TOKEN_SERVICE_TOKEN) private readonly tokenService: TokenServicePort,
     @Inject(REFRESH_TOKEN_REPOSITORY_TOKEN)
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
-    @Inject(OUTBOX_PORT_TOKEN) private readonly outbox: OutboxPort,
+    @Inject(OUTBOX_PORT) private readonly outbox: OutboxPort,
     @Inject(AUDIT_PORT_TOKEN) private readonly audit: AuditPort,
     @Inject(IDEMPOTENCY_STORAGE_PORT_TOKEN) private readonly idempotency: IdempotencyStoragePort,
     @Inject(ID_GENERATOR_TOKEN) private readonly idGenerator: IdGeneratorPort,
@@ -117,7 +117,7 @@ export class SignInUseCase {
     await this.outbox.enqueue({
       tenantId: selectedTenantId,
       eventType: event.eventType,
-      payloadJson: JSON.stringify(event),
+      payload: event,
     });
 
     await this.audit.write({

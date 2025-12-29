@@ -3,7 +3,7 @@ import {
   type RefreshTokenRepositoryPort,
   REFRESH_TOKEN_REPOSITORY_TOKEN,
 } from "../ports/refresh-token-repository.port";
-import { type OutboxPort, OUTBOX_PORT_TOKEN } from "../ports/outbox.port";
+import { type OutboxPort, OUTBOX_PORT } from "../ports/outbox.port";
 import { type AuditPort, AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import { UserLoggedOutEvent } from "../../domain/events/identity.events";
 
@@ -21,7 +21,7 @@ export class SignOutUseCase {
   constructor(
     @Inject(REFRESH_TOKEN_REPOSITORY_TOKEN)
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
-    @Inject(OUTBOX_PORT_TOKEN) private readonly outbox: OutboxPort,
+    @Inject(OUTBOX_PORT) private readonly outbox: OutboxPort,
     @Inject(AUDIT_PORT_TOKEN) private readonly audit: AuditPort
   ) {}
 
@@ -42,7 +42,7 @@ export class SignOutUseCase {
     await this.outbox.enqueue({
       tenantId: input.tenantId,
       eventType: event.eventType,
-      payloadJson: JSON.stringify(event),
+      payload: event,
     });
 
     // 3. Audit log

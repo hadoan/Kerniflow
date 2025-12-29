@@ -1,4 +1,4 @@
-import { OutboxPort } from "@shared/ports/outbox.port";
+import type { OutboxPort } from "@kerniflow/kernel";
 
 export class FakeOutbox implements OutboxPort {
   events: any[] = [];

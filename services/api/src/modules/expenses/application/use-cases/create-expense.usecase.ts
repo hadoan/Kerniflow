@@ -1,4 +1,4 @@
-import type { OutboxPort } from "../../../../shared/ports/outbox.port";
+import type { OutboxPort } from "@kerniflow/kernel";
 import type { AuditPort } from "../../../../shared/ports/audit.port";
 import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import type { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";

@@ -18,14 +18,14 @@ import type {
   LedgerAccountRepoPort,
   JournalEntryRepoPort,
 } from "../ports/accounting-repository.port";
-import { PrismaService } from "@kerniflow/data";
+import type { AccountingReportQueryPort } from "../ports/accounting-report-query.port";
 
 type BaseDeps = {
   logger: LoggerPort;
   settingsRepo: AccountingSettingsRepoPort;
   accountRepo: LedgerAccountRepoPort;
   entryRepo: JournalEntryRepoPort;
-  prisma: PrismaService; // For complex queries
+  reportQuery: AccountingReportQueryPort;
 };
 
 // ===== Trial Balance =====
@@ -101,65 +101,16 @@ export class GetTrialBalanceUseCase extends BaseUseCase<
     fromDate: string,
     toDate: string
   ): Promise<{ debits: number; credits: number }> {
-    const result = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId,
-        ledgerAccountId: accountId,
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
-      _count: true,
-    });
-
-    // Get debits
-    const debitsResult = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId,
-        ledgerAccountId: accountId,
-        direction: "Debit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
-    });
-
-    // Get credits
-    const creditsResult = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId,
-        ledgerAccountId: accountId,
-        direction: "Credit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
+    const totals = await this.deps.reportQuery.getAccountActivityTotals({
+      tenantId,
+      accountId,
+      fromDate,
+      toDate,
     });
 
     return {
-      debits: debitsResult._sum.amountCents || 0,
-      credits: creditsResult._sum.amountCents || 0,
+      debits: totals.debitsCents,
+      credits: totals.creditsCents,
     };
   }
 }
@@ -192,81 +143,21 @@ export class GetGeneralLedgerUseCase extends BaseUseCase<
     }
 
     // Get lines for this account in date range
-    const lines = await this.deps.prisma.journalLine.findMany({
-      where: {
-        tenantId: ctx.tenantId,
-        ledgerAccountId: input.accountId,
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            gte: new Date(input.fromDate),
-            lte: new Date(input.toDate),
-          },
-        },
-      },
-      include: {
-        journalEntry: true,
-      },
-      orderBy: {
-        journalEntry: {
-          postingDate: "asc",
-        },
-      },
+    const lines = await this.deps.reportQuery.listLedgerLines({
+      tenantId: ctx.tenantId,
+      accountId: input.accountId,
+      fromDate: input.fromDate,
+      toDate: input.toDate,
     });
 
     // Calculate opening balance (before fromDate)
-    const openingActivity = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId: ctx.tenantId,
-        ledgerAccountId: input.accountId,
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            lt: new Date(input.fromDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
+    const openingTotals = await this.deps.reportQuery.getAccountActivityTotals({
+      tenantId: ctx.tenantId,
+      accountId: input.accountId,
+      toDateExclusive: input.fromDate,
     });
 
-    const openingDebits = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId: ctx.tenantId,
-        ledgerAccountId: input.accountId,
-        direction: "Debit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            lt: new Date(input.fromDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
-    });
-
-    const openingCredits = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId: ctx.tenantId,
-        ledgerAccountId: input.accountId,
-        direction: "Credit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            lt: new Date(input.fromDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
-    });
-
-    const openingBalanceCents =
-      (openingDebits._sum.amountCents || 0) - (openingCredits._sum.amountCents || 0);
+    const openingBalanceCents = openingTotals.debitsCents - openingTotals.creditsCents;
 
     // Build ledger entries with running balance
     let runningBalance = openingBalanceCents;
@@ -402,44 +293,15 @@ export class GetProfitLossUseCase extends BaseUseCase<GetProfitLossInput, GetPro
     fromDate: string,
     toDate: string
   ): Promise<number> {
-    const debits = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId,
-        ledgerAccountId: accountId,
-        direction: "Debit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
+    const totals = await this.deps.reportQuery.getAccountActivityTotals({
+      tenantId,
+      accountId,
+      fromDate,
+      toDate,
     });
 
-    const credits = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId,
-        ledgerAccountId: accountId,
-        direction: "Credit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
-    });
-
-    const debitSum = debits._sum.amountCents || 0;
-    const creditSum = credits._sum.amountCents || 0;
+    const debitSum = totals.debitsCents;
+    const creditSum = totals.creditsCents;
 
     // For Income accounts, credits increase balance (normal credit balance)
     // For Expense accounts, debits increase balance (normal debit balance)
@@ -557,42 +419,14 @@ export class GetBalanceSheetUseCase extends BaseUseCase<
     accountType: AccountType,
     asOfDate: string
   ): Promise<number> {
-    const debits = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId,
-        ledgerAccountId: accountId,
-        direction: "Debit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            lte: new Date(asOfDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
+    const totals = await this.deps.reportQuery.getAccountActivityTotals({
+      tenantId,
+      accountId,
+      toDate: asOfDate,
     });
 
-    const credits = await this.deps.prisma.journalLine.aggregate({
-      where: {
-        tenantId,
-        ledgerAccountId: accountId,
-        direction: "Credit",
-        journalEntry: {
-          status: "Posted",
-          postingDate: {
-            lte: new Date(asOfDate),
-          },
-        },
-      },
-      _sum: {
-        amountCents: true,
-      },
-    });
-
-    const debitSum = debits._sum.amountCents || 0;
-    const creditSum = credits._sum.amountCents || 0;
+    const debitSum = totals.debitsCents;
+    const creditSum = totals.creditsCents;
 
     // Assets have normal debit balance
     // Liabilities and Equity have normal credit balance

@@ -21,7 +21,7 @@ import {
 } from "../ports/membership-repository.port";
 import { type PasswordHasherPort, PASSWORD_HASHER_TOKEN } from "../ports/password-hasher.port";
 import { type TokenServicePort, TOKEN_SERVICE_TOKEN } from "../ports/token-service.port";
-import { type OutboxPort, OUTBOX_PORT_TOKEN } from "../ports/outbox.port";
+import { type OutboxPort, OUTBOX_PORT } from "../ports/outbox.port";
 import { type AuditPort, AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import { type RoleRepositoryPort, ROLE_REPOSITORY_TOKEN } from "../ports/role-repository.port";
 import { type ClockPort, CLOCK_PORT_TOKEN } from "../../../../shared/ports/clock.port";
@@ -72,7 +72,7 @@ export class SignUpUseCase {
     @Inject(TOKEN_SERVICE_TOKEN) private readonly tokenService: TokenServicePort,
     @Inject(REFRESH_TOKEN_REPOSITORY_TOKEN)
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
-    @Inject(OUTBOX_PORT_TOKEN) private readonly outbox: OutboxPort,
+    @Inject(OUTBOX_PORT) private readonly outbox: OutboxPort,
     @Inject(AUDIT_PORT_TOKEN) private readonly audit: AuditPort,
     @Inject(IDEMPOTENCY_STORAGE_PORT_TOKEN) private readonly idempotency: IdempotencyStoragePort,
     @Inject(ID_GENERATOR_TOKEN) private readonly idGenerator: IdGeneratorPort,
@@ -210,14 +210,14 @@ export class SignUpUseCase {
     await this.outbox.enqueue({
       tenantId,
       eventType: userCreatedEvent.eventType,
-      payloadJson: JSON.stringify(userCreatedEvent),
+      payload: userCreatedEvent,
     });
 
     const tenantCreatedEvent = new TenantCreatedEvent(tenantId, tenantName, slug);
     await this.outbox.enqueue({
       tenantId,
       eventType: tenantCreatedEvent.eventType,
-      payloadJson: JSON.stringify(tenantCreatedEvent),
+      payload: tenantCreatedEvent,
     });
 
     const membershipCreatedEvent = new MembershipCreatedEvent(
@@ -229,7 +229,7 @@ export class SignUpUseCase {
     await this.outbox.enqueue({
       tenantId,
       eventType: membershipCreatedEvent.eventType,
-      payloadJson: JSON.stringify(membershipCreatedEvent),
+      payload: membershipCreatedEvent,
     });
   }
 

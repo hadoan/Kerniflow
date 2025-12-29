@@ -1,5 +1,5 @@
 import { Global, Module } from "@nestjs/common";
-import { UNIT_OF_WORK, OUTBOX_PORT, AUDIT_PORT } from "@kerniflow/kernel";
+import { UNIT_OF_WORK, OUTBOX_PORT, AUDIT_PORT, IDEMPOTENCY_PORT } from "@kerniflow/kernel";
 import { PrismaService } from "./prisma/prisma.service";
 import { PrismaUnitOfWork } from "./uow/prisma-unit-of-work.adapter";
 import { PrismaOutboxAdapter } from "./adapters/prisma-outbox.adapter";
@@ -38,6 +38,7 @@ import { CustomFieldIndexRepository } from "./adapters/prisma-custom-field-index
     { provide: AUDIT_PORT, useExisting: PrismaAuditAdapter },
 
     PrismaIdempotencyAdapter,
+    { provide: IDEMPOTENCY_PORT, useExisting: PrismaIdempotencyAdapter },
 
     // Repositories
     OutboxRepository,
@@ -54,6 +55,7 @@ import { CustomFieldIndexRepository } from "./adapters/prisma-custom-field-index
     // Infrastructure port tokens
     OUTBOX_PORT,
     AUDIT_PORT,
+    IDEMPOTENCY_PORT,
 
     // Concrete implementations (for DI by class)
     PrismaIdempotencyAdapter,

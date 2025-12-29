@@ -35,7 +35,7 @@ describe("Outbox reliability (worker + Postgres)", () => {
           {
             tenantId: "tenant-rollback",
             eventType: "test.event",
-            payloadJson: JSON.stringify({ ok: true }),
+            payload: { ok: true },
           },
           tx as any
         );
@@ -51,7 +51,7 @@ describe("Outbox reliability (worker + Postgres)", () => {
     await repo.enqueue({
       tenantId: "tenant-1",
       eventType: "invoice.created",
-      payloadJson: "{}",
+      payload: {},
     });
 
     const pending = await repo.fetchPending(10);
@@ -67,7 +67,7 @@ describe("Outbox reliability (worker + Postgres)", () => {
     await repo.enqueue({
       tenantId: "tenant-1",
       eventType: "workflow.failed",
-      payloadJson: "{}",
+      payload: {},
     });
     const [event] = await repo.fetchPending(5);
 
@@ -83,13 +83,13 @@ describe("Outbox reliability (worker + Postgres)", () => {
     await repo.enqueue({
       tenantId: "tenant-1",
       eventType: "ready",
-      payloadJson: "{}",
+      payload: {},
       availableAt: now,
     });
     await repo.enqueue({
       tenantId: "tenant-1",
       eventType: "future",
-      payloadJson: "{}",
+      payload: {},
       availableAt: new Date(now.getTime() + 60_000),
     });
 

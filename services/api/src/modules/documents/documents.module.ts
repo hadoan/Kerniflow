@@ -14,8 +14,8 @@ import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generat
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
-import { OutboxPort, OUTBOX_PORT_TOKEN } from "../../shared/ports/outbox.port";
-import { PrismaOutboxAdapter } from "../../shared/infrastructure/persistence/prisma-outbox.adapter";
+import { OUTBOX_PORT } from "@kerniflow/kernel";
+import type { OutboxPort } from "@kerniflow/kernel";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { IdentityModule } from "../identity";
 
@@ -39,7 +39,6 @@ import { RequestInvoicePdfUseCase } from "./application/use-cases/request-invoic
     PrismaDocumentLinkAdapter,
     SystemIdGenerator,
     SystemClock,
-    PrismaOutboxAdapter,
     PdfLibRendererAdapter,
     {
       provide: GcsObjectStorageAdapter,
@@ -52,7 +51,6 @@ import { RequestInvoicePdfUseCase } from "./application/use-cases/request-invoic
       },
       inject: [EnvService],
     },
-    { provide: OUTBOX_PORT_TOKEN, useExisting: PrismaOutboxAdapter },
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
     { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     { provide: INVOICE_PDF_MODEL_PORT, useClass: NullInvoicePdfModelAdapter },
@@ -169,7 +167,7 @@ import { RequestInvoicePdfUseCase } from "./application/use-cases/request-invoic
         PrismaFileRepoAdapter,
         PrismaDocumentLinkAdapter,
         GcsObjectStorageAdapter,
-        OUTBOX_PORT_TOKEN,
+        OUTBOX_PORT,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
         EnvService,

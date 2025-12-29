@@ -16,13 +16,12 @@ import { IdGeneratorPort, ID_GENERATOR_TOKEN } from "../../shared/ports/id-gener
 import { ClockPort, CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
-import { PrismaOutboxAdapter } from "./infrastructure/outbox/prisma-outbox.adapter";
 import { EXPENSE_REPOSITORY } from "./application/ports/expense-repository.port";
 import { ArchiveExpenseUseCase } from "./application/use-cases/archive-expense.usecase";
 import { CreateExpenseUseCase } from "./application/use-cases/create-expense.usecase";
 import { UnarchiveExpenseUseCase } from "./application/use-cases/unarchive-expense.usecase";
 import { PrismaExpenseRepository } from "./infrastructure/adapters/prisma-expense-repository.adapter";
-import { IdempotencyInterceptor } from "../../shared/idempotency/IdempotencyInterceptor";
+import { IdempotencyInterceptor } from "../../shared/infrastructure/idempotency/IdempotencyInterceptor";
 
 @Module({
   imports: [DataModule],
@@ -35,7 +34,6 @@ import { IdempotencyInterceptor } from "../../shared/idempotency/IdempotencyInte
     // Local infrastructure adapters
     SystemIdGenerator,
     SystemClock,
-    PrismaOutboxAdapter,
     PrismaAuditAdapter,
     PrismaIdempotencyStorageAdapter,
     IdempotencyInterceptor,
@@ -87,7 +85,6 @@ import { IdempotencyInterceptor } from "../../shared/idempotency/IdempotencyInte
     },
 
     // Token bindings for shared ports
-    { provide: OUTBOX_PORT, useExisting: PrismaOutboxAdapter },
     { provide: AUDIT_PORT, useExisting: PrismaAuditAdapter },
     { provide: IDEMPOTENCY_STORAGE_PORT_TOKEN, useExisting: PrismaIdempotencyStorageAdapter },
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },

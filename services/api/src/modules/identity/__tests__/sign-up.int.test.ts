@@ -37,7 +37,7 @@ describe("Sign Up integration (Postgres)", () => {
       import("../infrastructure/adapters/prisma-refresh-token-repository.adapter"),
       import("../infrastructure/security/bcrypt.password-hasher"),
       import("../infrastructure/security/jwt.token-service"),
-      import("../../../shared/infrastructure/persistence/prisma-outbox.adapter"),
+      import("@kerniflow/data"),
       import("../infrastructure/adapters/prisma-audit-repository.adapter"),
       import("../../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter"),
       import("../../../shared/infrastructure/system-id-generator"),

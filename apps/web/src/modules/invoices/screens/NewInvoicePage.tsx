@@ -39,7 +39,7 @@ import {
   getDefaultCustomerFormValues,
   toCreateCustomerInput,
   type CustomerFormData,
-} from "@/modules/customers/schemas/customer-form.schema";
+} from "@/modules/customers";
 import {
   invoiceFormSchema,
   toCreateInvoiceInput,

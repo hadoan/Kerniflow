@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { PrismaService } from "@kerniflow/data";
+import { PrismaInvoiceEmailRepository } from "./infrastructure/prisma-invoice-email-repository.adapter";
 import { EventHandler, OutboxEvent } from "../outbox/event-handler.interface";
 import { renderEmail } from "@kerniflow/email-templates";
 import { InvoiceEmail, buildInvoiceEmailSubject } from "@kerniflow/email-templates/invoices";
@@ -25,31 +25,29 @@ export class InvoiceEmailRequestedHandler implements EventHandler {
 
   constructor(
     @Inject(EMAIL_SENDER_PORT) private readonly emailSender: EmailSenderPort,
-    private readonly prisma: PrismaService
+    private readonly repo: PrismaInvoiceEmailRepository
   ) {}
 
   async handle(event: OutboxEvent): Promise<void> {
-    const payload: InvoiceEmailRequestedPayload = JSON.parse(event.payloadJson);
+    const payload = event.payload as InvoiceEmailRequestedPayload;
+
+    if (!payload || typeof payload !== "object") {
+      throw new Error("Invalid payload for invoice.email.requested");
+    }
 
     // 1. Load delivery record
-    const delivery = await this.prisma.invoiceEmailDelivery.findUnique({
-      where: { id: payload.deliveryId },
-    });
+    const delivery = await this.repo.findDelivery(payload.deliveryId);
 
     if (!delivery) {
       throw new Error(`Delivery record not found: ${payload.deliveryId}`);
     }
 
+    if (delivery.status === "SENT") {
+      return;
+    }
+
     // 2. Load invoice context
-    const invoice = await this.prisma.invoice.findFirst({
-      where: {
-        id: payload.invoiceId,
-        tenantId: event.tenantId,
-      },
-      include: {
-        lines: true,
-      },
-    });
+    const invoice = await this.repo.findInvoiceWithLines(event.tenantId, payload.invoiceId);
 
     if (!invoice) {
       throw new Error(`Invoice not found: ${payload.invoiceId}`);
@@ -95,23 +93,17 @@ export class InvoiceEmailRequestedHandler implements EventHandler {
       const result = await this.emailSender.sendEmail(emailRequest);
 
       // 6. Update delivery record to SENT
-      await this.prisma.invoiceEmailDelivery.update({
-        where: { id: payload.deliveryId },
-        data: {
-          status: "SENT",
-          provider: result.provider,
-          providerMessageId: result.providerMessageId,
-        },
+      await this.repo.markDeliverySent({
+        deliveryId: payload.deliveryId,
+        provider: result.provider,
+        providerMessageId: result.providerMessageId,
       });
     } catch (error) {
       // Update delivery record to FAILED
       const errorMessage = error instanceof Error ? error.message : String(error);
-      await this.prisma.invoiceEmailDelivery.update({
-        where: { id: payload.deliveryId },
-        data: {
-          status: "FAILED",
-          lastError: errorMessage,
-        },
+      await this.repo.markDeliveryFailed({
+        deliveryId: payload.deliveryId,
+        error: errorMessage,
       });
 
       throw error; // Re-throw to mark outbox event as failed

@@ -20,5 +20,37 @@ export default tseslint.config(
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
     },
+  },
+  {
+    files: ["src/shared/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/modules/*", "@/modules/*/**"],
+              message: "shared/* must not import from modules/*.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/modules/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/modules/*/*", "@/modules/*/*/**"],
+              message: "Import other modules via their public index export.",
+            },
+          ],
+        },
+      ],
+    },
   }
 );

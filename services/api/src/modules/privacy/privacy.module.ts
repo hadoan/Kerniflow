@@ -5,10 +5,9 @@ import { RequestAccountErasureUseCase } from "./application/use-cases/request-ac
 import { GetPrivacyRequestStatusUseCase } from "./application/use-cases/get-privacy-request-status/get-privacy-request-status.usecase";
 import { ProcessPrivacyRequestHandler } from "./application/workers/process-privacy-request.handler";
 import { PrismaPrivacyRequestRepoAdapter } from "./infrastructure/prisma/prisma-privacy-request-repo.adapter";
-import { OUTBOX_PORT_TOKEN } from "../../shared/ports/outbox.port";
+import { OUTBOX_PORT } from "@kerniflow/kernel";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
-import { PrismaOutboxAdapter } from "../../shared/infrastructure/persistence/prisma-outbox.adapter";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import type { DocumentsPort } from "./application/ports/documents.port";
@@ -38,7 +37,6 @@ class NoopIdentityPort implements IdentityPort {}
     PrismaPrivacyRequestRepoAdapter,
     SystemIdGenerator,
     SystemClock,
-    { provide: OUTBOX_PORT_TOKEN, useClass: PrismaOutboxAdapter },
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
     { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     { provide: DOCUMENTS_PORT, useClass: NoopDocumentsPort },
@@ -51,7 +49,7 @@ class NoopIdentityPort implements IdentityPort {}
         new RequestPersonalDataExportUseCase(repo, outbox, idGen, clock),
       inject: [
         PrismaPrivacyRequestRepoAdapter,
-        OUTBOX_PORT_TOKEN,
+        OUTBOX_PORT,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
       ],
@@ -67,7 +65,7 @@ class NoopIdentityPort implements IdentityPort {}
       ) => new RequestAccountErasureUseCase(repo, outbox, idGen, clock, identity),
       inject: [
         PrismaPrivacyRequestRepoAdapter,
-        OUTBOX_PORT_TOKEN,
+        OUTBOX_PORT,
         ID_GENERATOR_TOKEN,
         CLOCK_PORT_TOKEN,
         IDENTITY_PORT,

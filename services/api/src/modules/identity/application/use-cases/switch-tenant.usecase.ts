@@ -8,7 +8,7 @@ import { USER_REPOSITORY_TOKEN } from "../ports/user-repository.port";
 import type { RefreshTokenRepositoryPort } from "../ports/refresh-token-repository.port";
 import { REFRESH_TOKEN_REPOSITORY_TOKEN } from "../ports/refresh-token-repository.port";
 import type { OutboxPort } from "../ports/outbox.port";
-import { OUTBOX_PORT_TOKEN } from "../ports/outbox.port";
+import { OUTBOX_PORT } from "../ports/outbox.port";
 import type { AuditPort } from "../ports/audit.port";
 import { AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import type { ClockPort } from "../../../../shared/ports/clock.port";
@@ -40,7 +40,7 @@ export class SwitchTenantUseCase {
     @Inject(USER_REPOSITORY_TOKEN) private readonly userRepo: UserRepositoryPort,
     @Inject(REFRESH_TOKEN_REPOSITORY_TOKEN)
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
-    @Inject(OUTBOX_PORT_TOKEN) private readonly outbox: OutboxPort,
+    @Inject(OUTBOX_PORT) private readonly outbox: OutboxPort,
     @Inject(AUDIT_PORT_TOKEN) private readonly audit: AuditPort,
     @Inject(CLOCK_PORT_TOKEN) private readonly clock: ClockPort
   ) {}
@@ -89,7 +89,7 @@ export class SwitchTenantUseCase {
     await this.outbox.enqueue({
       tenantId: input.toTenantId,
       eventType: event.eventType,
-      payloadJson: JSON.stringify(event),
+      payload: event,
     });
 
     // 6. Audit log

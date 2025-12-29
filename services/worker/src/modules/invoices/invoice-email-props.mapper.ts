@@ -1,4 +1,3 @@
-import type { Invoice, InvoiceLine } from "@prisma/client";
 import type { InvoiceEmailProps } from "@kerniflow/email-templates/invoices";
 
 type BillToFields = {
@@ -12,11 +11,21 @@ type BillToFields = {
   billToCountry?: string | null;
 };
 
+type InvoiceLineLike = {
+  description: string;
+  qty: number;
+  unitPriceCents: number;
+};
+
+type InvoiceLike = BillToFields & {
+  number?: string | null;
+  currency: string;
+  dueDate?: Date | null;
+  lines: InvoiceLineLike[];
+};
+
 type MapperInput = {
-  invoice: Invoice &
-    BillToFields & {
-      lines: InvoiceLine[];
-    };
+  invoice: InvoiceLike;
   companyName: string;
   customMessage?: string | undefined;
   viewInvoiceUrl?: string | undefined;
@@ -28,7 +37,7 @@ export function mapToInvoiceEmailProps(input: MapperInput): InvoiceEmailProps {
 
   // Calculate total amount
   const totalAmountCents = invoice.lines.reduce(
-    (sum: number, line: InvoiceLine) => sum + line.qty * line.unitPriceCents,
+    (sum: number, line: InvoiceLineLike) => sum + line.qty * line.unitPriceCents,
     0
   );
 
@@ -60,7 +69,7 @@ export function mapToInvoiceEmailProps(input: MapperInput): InvoiceEmailProps {
     currency: invoice.currency.toUpperCase(),
     customerName: invoice.billToName ?? "Customer",
     customMessage,
-    lines: invoice.lines.map((line: InvoiceLine) => ({
+    lines: invoice.lines.map((line: InvoiceLineLike) => ({
       description: line.description,
       quantity: line.qty,
       unitPrice: formatAmount(line.unitPriceCents),

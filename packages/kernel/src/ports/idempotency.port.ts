@@ -5,3 +5,5 @@
 export interface IdempotencyPort {
   run<T>(key: string, fn: () => Promise<T>): Promise<T>;
 }
+
+export const IDEMPOTENCY_PORT = Symbol("IDEMPOTENCY_PORT");

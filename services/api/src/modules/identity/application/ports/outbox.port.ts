@@ -1,12 +1,2 @@
-/**
- * Outbox Port (Interface)
- * Abstracts event publishing via Outbox pattern
- */
-export interface OutboxPort {
-  /**
-   * Enqueue an event for publishing
-   */
-  enqueue(data: { tenantId: string; eventType: string; payloadJson: string }): Promise<void>;
-}
-
-export const OUTBOX_PORT_TOKEN = Symbol("OUTBOX_PORT");
+export type { OutboxPort } from "@kerniflow/kernel";
+export { OUTBOX_PORT } from "@kerniflow/kernel";

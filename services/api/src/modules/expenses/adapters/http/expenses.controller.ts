@@ -14,7 +14,7 @@ import {
 } from "../../application/use-cases/create-expense.usecase";
 import { ArchiveExpenseUseCase } from "../../application/use-cases/archive-expense.usecase";
 import { UnarchiveExpenseUseCase } from "../../application/use-cases/unarchive-expense.usecase";
-import { IdempotencyInterceptor } from "../../../../shared/idempotency/IdempotencyInterceptor";
+import { IdempotencyInterceptor } from "../../../../shared/infrastructure/idempotency/IdempotencyInterceptor";
 import { buildRequestContext } from "../../../../shared/context/request-context";
 import type { Request } from "express";
 import { z } from "zod";

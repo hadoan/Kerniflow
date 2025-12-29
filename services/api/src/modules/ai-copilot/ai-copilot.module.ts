@@ -10,16 +10,16 @@ import { PrismaToolExecutionRepository } from "./infrastructure/adapters/prisma-
 import { ToolRegistry } from "./infrastructure/tools/tool-registry";
 import { AiSdkModelAdapter } from "./infrastructure/model/ai-sdk.model-adapter";
 import { PrismaAuditAdapter } from "./infrastructure/audit/prisma.audit.adapter";
-import { PrismaOutboxAdapter } from "./infrastructure/outbox/prisma.outbox.adapter";
 import { PrismaCopilotIdempotencyAdapter } from "./infrastructure/idempotency/prisma-idempotency-copilot.adapter";
 import { TenantGuard } from "./adapters/http/guards/tenant.guard";
 import { COPILOT_TOOLS } from "./application/ports/tool-registry.port";
 import { AuditPort } from "./application/ports/audit.port";
-import { OutboxPort } from "./application/ports/outbox.port";
+import { OUTBOX_PORT } from "./application/ports/outbox.port";
+import type { OutboxPort } from "./application/ports/outbox.port";
 import { ClockPort } from "@kerniflow/kernel/ports/clock.port";
 import { IdentityModule } from "../identity/identity.module";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
-import { IdempotencyService } from "../../shared/idempotency/idempotency.service";
+import { IdempotencyService } from "../../shared/infrastructure/idempotency/idempotency.service";
 import { InvoicesModule } from "../invoices/invoices.module";
 import { InvoicesApplication } from "../invoices/application/invoices.application";
 import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
@@ -49,7 +49,6 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
     PrismaToolExecutionRepository,
     ToolRegistry,
     PrismaAuditAdapter,
-    PrismaOutboxAdapter,
     IdempotencyService,
     PrismaCopilotIdempotencyAdapter,
     TenantGuard,
@@ -59,7 +58,7 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
       useFactory: (
         toolExec: PrismaToolExecutionRepository,
         audit: PrismaAuditAdapter,
-        outbox: PrismaOutboxAdapter,
+        outbox: OutboxPort,
         env: EnvService,
         logger: NestLoggerAdapter
       ) => {
@@ -69,7 +68,7 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
       inject: [
         PrismaToolExecutionRepository,
         PrismaAuditAdapter,
-        PrismaOutboxAdapter,
+        OUTBOX_PORT,
         "ENV_SERVICE",
         "COPILOT_LOGGER",
       ],
@@ -102,7 +101,7 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
         tools: ToolRegistry,
         model: AiSdkModelAdapter,
         audit: PrismaAuditAdapter,
-        outbox: PrismaOutboxAdapter,
+        outbox: OutboxPort,
         idem: PrismaCopilotIdempotencyAdapter,
         clock: ClockPort,
         logger: NestLoggerAdapter
@@ -127,7 +126,7 @@ import { buildPurchasingTools } from "../purchasing/adapters/tools/purchasing.to
         ToolRegistry,
         AiSdkModelAdapter,
         PrismaAuditAdapter,
-        PrismaOutboxAdapter,
+        OUTBOX_PORT,
         PrismaCopilotIdempotencyAdapter,
         "COPILOT_CLOCK",
         "COPILOT_LOGGER",

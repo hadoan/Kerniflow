@@ -16,7 +16,7 @@ Start as a **modular monolith** (single platform) but keep boundaries so you can
 - safe multi-tenant isolation
 - team scalability (clear ownership) tomorrow
 
-**Recommended stack:** Next.js (web + POS UI) + NestJS (API) + Worker (jobs/outbox) in a monorepo; PostgreSQL + Prisma; Redis for queues/caching; object storage for files; SSE/realtime provider for live POS.
+**Recommended stack:** Vite + React (web + POS UI) + NestJS (API) + Worker (jobs/outbox) in a monorepo; PostgreSQL + Prisma; Redis for queues/caching; object storage for files; SSE/realtime provider for live POS.
 
 ---
 
@@ -42,7 +42,7 @@ Bizflow is an AI-native ERP platform designed to support multiple business types
 
 The platform is organized into three runtime surfaces that share the same domain packages:
 
-- **Web/POS (Next.js):** UI, POS screens, SSR/RSC
+- **Web/POS (Vite + React):** UI, POS screens, SPA with client-side routing
 - **API (NestJS):** RBAC, tools, workflows, domain use-cases
 - **Worker (NestJS):** outbox, queues, automations, integrations
 
@@ -67,6 +67,7 @@ The platform is organized into three runtime surfaces that share the same domain
 | Process managers (sagas)   | Long workflows: approvals, multi-step ops, retries.           | WorkflowInstance + state machine; subscribe to events; emit commands.       |
 | CQRS-lite reads            | Fast dashboards/reports without polluting write model.        | Read services/materialized views; keep writes strict in use-cases.          |
 | Idempotent commands        | Safe retries for POS and AI tool executions.                  | Idempotency key per command; unique constraint + replay return.             |
+| AI tool cards              | Keeps AI outputs structured and user-confirmed.               | Tool schemas in contracts + UI cards with explicit apply/dismiss actions.   |
 
 ### Use case kernel (standardized application layer)
 
@@ -105,8 +106,8 @@ Treat each row as a bounded context with its own code ownership, migrations, and
 | Party & CRM               | Customers, suppliers, employees, contacts.          | Party, PartyRole, ContactPoint, Address            |
 | Catalog                   | Products/services, pricing, tax, units.             | Item, Variant, PriceList, TaxCode, Unit            |
 | Documents                 | Receipts, contracts, attachments, OCR metadata.     | Document, File, DocumentLink                       |
-| Sales Orders              | Quote-to-cash pipeline.                             | Order, OrderLine, Fulfillment, Shipment            |
-| Purchasing                | Procure-to-pay pipeline.                            | PurchaseOrder, POLine, SupplierTerms               |
+| Sales (AI-native)         | Quote-to-cash pipeline with AI drafts + postings.   | Quote, SalesOrder, Invoice, Payment, PostingLink   |
+| Purchasing (AI-native)    | Procure-to-pay pipeline with AI drafts + postings.  | PurchaseOrder, VendorBill, BillPayment, Mapping    |
 | Billing & Payments        | Invoices, payments, refunds, allocations.           | Invoice, InvoiceLine, Payment, Allocation, Refund  |
 | Accounting Core           | Chart of accounts and journal postings.             | LedgerAccount, JournalEntry, JournalLine           |
 | Expenses                  | Employee/vendor expenses and approvals.             | Expense, ExpenseLine, ReceiptLink, Approval        |
@@ -118,6 +119,15 @@ Treat each row as a bounded context with its own code ownership, migrations, and
 | Automation & Integrations | Webhooks, connectors, outbox, retries.              | Integration, Webhook, OutboxEvent, Delivery        |
 | AI Copilot                | Tool registry, runs, messages, tool execution logs. | AgentRun, Message, ToolExecution, Attachment       |
 | Reporting                 | Dashboards, analytics, exports.                     | ReadModels, Snapshots, MaterializedViews           |
+
+---
+
+# AI-native revenue + expense flows
+
+Sales and Purchasing are AI-native by default: the Copilot proposes structured drafts (quotes, orders,
+vendor bills, line items, pricing) and never mutates records silently. Every mutation is explicit and
+user-confirmed, while deterministic auto-posting to Accounting Core produces auditable journal entries
+with source links and explanations.
 
 ---
 

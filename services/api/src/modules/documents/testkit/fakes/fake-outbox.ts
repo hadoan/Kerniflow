@@ -1,4 +1,4 @@
-import { OutboxPort } from "../../application/ports/outbox.port";
+import type { OutboxPort } from "../../application/ports/outbox.port";
 
 export class FakeOutboxPort implements OutboxPort {
   events: Array<{ eventType: string; payload: any; tenantId: string; correlationId?: string }> = [];

@@ -1,10 +1,11 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
+import { OUTBOX_PORT } from "@kerniflow/kernel";
+import type { OutboxPort } from "@kerniflow/kernel";
 import { chromium } from "playwright";
 import { InvoicesHttpController } from "./adapters/http/invoices.controller";
 import { ResendWebhookController } from "./adapters/webhooks/resend-webhook.controller";
 import { PrismaInvoiceEmailDeliveryRepoAdapter } from "./infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
-import { PrismaOutboxAdapter } from "./infrastructure/outbox/prisma-outbox.adapter";
 import { InvoicesApplication } from "./application/invoices.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
@@ -21,7 +22,7 @@ import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { InvoiceNumberingAdapter } from "./infrastructure/prisma/prisma-numbering.adapter";
 import { IdentityModule } from "../identity";
 import { TimeService } from "@kerniflow/kernel";
-import { PrismaTenantTimeZoneAdapter } from "../../shared/time/prisma-tenant-timezone.adapter";
+import { PrismaTenantTimeZoneAdapter } from "../../shared/infrastructure/time/prisma-tenant-timezone.adapter";
 import { TENANT_TIMEZONE_PORT } from "../../shared/time/tenant-timezone.token";
 import { PartyCrmModule } from "../party-crm";
 import { DocumentsModule } from "../documents";
@@ -70,7 +71,6 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
       inject: ["PLAYWRIGHT_BROWSER"],
     },
     PrismaInvoiceEmailDeliveryRepoAdapter,
-    PrismaOutboxAdapter,
     {
       provide: CreateInvoiceUseCase,
       useFactory: (
@@ -140,7 +140,7 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
       useFactory: (
         repo: PrismaInvoiceRepoAdapter,
         deliveryRepo: PrismaInvoiceEmailDeliveryRepoAdapter,
-        outbox: PrismaOutboxAdapter,
+        outbox: OutboxPort,
         idGen: SystemIdGenerator
       ) =>
         new SendInvoiceUseCase({
@@ -153,7 +153,7 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
       inject: [
         PrismaInvoiceRepoAdapter,
         PrismaInvoiceEmailDeliveryRepoAdapter,
-        PrismaOutboxAdapter,
+        OUTBOX_PORT,
         ID_GENERATOR_TOKEN,
       ],
     },

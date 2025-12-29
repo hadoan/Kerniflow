@@ -9,6 +9,7 @@ import {
   PrismaJournalEntryRepository,
   PrismaAccountingPeriodRepository,
 } from "./infrastructure/adapters/prisma-accounting-repository.adapter";
+import { PrismaAccountingReportQueryAdapter } from "./infrastructure/adapters/prisma-accounting-report-query.adapter";
 
 // Ports
 import {
@@ -17,6 +18,7 @@ import {
   JOURNAL_ENTRY_REPO_PORT,
   ACCOUNTING_PERIOD_REPO_PORT,
 } from "./application/ports/accounting-repository.port";
+import { ACCOUNTING_REPORT_QUERY_PORT } from "./application/ports/accounting-report-query.port";
 
 // Use Cases
 import { SetupAccountingUseCase } from "./application/use-cases/setup-accounting.usecase";
@@ -56,7 +58,6 @@ import {
   SystemClock,
   SystemIdGenerator,
 } from "@kerniflow/kernel";
-import { PrismaService } from "@kerniflow/data";
 
 @Module({
   imports: [DataModule, KernelModule],
@@ -72,6 +73,7 @@ import { PrismaService } from "@kerniflow/data";
     PrismaLedgerAccountRepository,
     PrismaJournalEntryRepository,
     PrismaAccountingPeriodRepository,
+    PrismaAccountingReportQueryAdapter,
 
     // Ports
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
@@ -81,6 +83,7 @@ import { PrismaService } from "@kerniflow/data";
     { provide: LEDGER_ACCOUNT_REPO_PORT, useExisting: PrismaLedgerAccountRepository },
     { provide: JOURNAL_ENTRY_REPO_PORT, useExisting: PrismaJournalEntryRepository },
     { provide: ACCOUNTING_PERIOD_REPO_PORT, useExisting: PrismaAccountingPeriodRepository },
+    { provide: ACCOUNTING_REPORT_QUERY_PORT, useExisting: PrismaAccountingReportQueryAdapter },
 
     // Use Cases - Setup
     {
@@ -301,74 +304,74 @@ import { PrismaService } from "@kerniflow/data";
     // Use Cases - Reports
     {
       provide: GetTrialBalanceUseCase,
-      useFactory: (logger, settingsRepo, accountRepo, entryRepo, prisma) =>
+      useFactory: (logger, settingsRepo, accountRepo, entryRepo, reportQuery) =>
         new GetTrialBalanceUseCase({
           logger,
           settingsRepo,
           accountRepo,
           entryRepo,
-          prisma,
+          reportQuery,
         }),
       inject: [
         LOGGER_TOKEN,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
-        PrismaService,
+        ACCOUNTING_REPORT_QUERY_PORT,
       ],
     },
     {
       provide: GetGeneralLedgerUseCase,
-      useFactory: (logger, settingsRepo, accountRepo, entryRepo, prisma) =>
+      useFactory: (logger, settingsRepo, accountRepo, entryRepo, reportQuery) =>
         new GetGeneralLedgerUseCase({
           logger,
           settingsRepo,
           accountRepo,
           entryRepo,
-          prisma,
+          reportQuery,
         }),
       inject: [
         LOGGER_TOKEN,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
-        PrismaService,
+        ACCOUNTING_REPORT_QUERY_PORT,
       ],
     },
     {
       provide: GetProfitLossUseCase,
-      useFactory: (logger, settingsRepo, accountRepo, entryRepo, prisma) =>
+      useFactory: (logger, settingsRepo, accountRepo, entryRepo, reportQuery) =>
         new GetProfitLossUseCase({
           logger,
           settingsRepo,
           accountRepo,
           entryRepo,
-          prisma,
+          reportQuery,
         }),
       inject: [
         LOGGER_TOKEN,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
-        PrismaService,
+        ACCOUNTING_REPORT_QUERY_PORT,
       ],
     },
     {
       provide: GetBalanceSheetUseCase,
-      useFactory: (logger, settingsRepo, accountRepo, entryRepo, prisma) =>
+      useFactory: (logger, settingsRepo, accountRepo, entryRepo, reportQuery) =>
         new GetBalanceSheetUseCase({
           logger,
           settingsRepo,
           accountRepo,
           entryRepo,
-          prisma,
+          reportQuery,
         }),
       inject: [
         LOGGER_TOKEN,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
-        PrismaService,
+        ACCOUNTING_REPORT_QUERY_PORT,
       ],
     },
 
