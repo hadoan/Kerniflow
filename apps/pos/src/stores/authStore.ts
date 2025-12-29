@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
-import { PosApiClient } from '@/services/apiClient';
+import { AuthClient } from '@kerniflow/auth-client';
+import { PosApiClient } from '@/lib/pos-api-client';
+import { NativeStorageAdapter } from '@/lib/storage-adapter';
+import { router } from 'expo-router';
 
 interface User {
   userId: string;
@@ -10,76 +13,64 @@ interface User {
 
 interface AuthState {
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   initialized: boolean;
+  authClient: AuthClient | null;
   apiClient: PosApiClient | null;
 
   initialize: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
-  refreshAccessToken: () => Promise<string>;
-  getAccessToken: () => Promise<string | null>;
 }
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const storage = new NativeStorageAdapter();
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  accessToken: null,
-  refreshToken: null,
   isAuthenticated: false,
   isLoading: false,
   initialized: false,
+  authClient: null,
   apiClient: null,
-
-  getAccessToken: async () => {
-    return get().accessToken;
-  },
-
-  refreshAccessToken: async () => {
-    const { refreshToken, apiClient, logout } = get();
-    if (!refreshToken || !apiClient) {
-      throw new Error('No refresh token available');
-    }
-
-    try {
-      const result = await apiClient.refreshToken(refreshToken);
-      await get().setTokens(result.accessToken, result.refreshToken);
-      return result.accessToken;
-    } catch (error) {
-      await logout();
-      throw error;
-    }
-  },
 
   initialize: async () => {
     try {
-      const accessToken = await SecureStore.getItemAsync('accessToken');
-      const refreshToken = await SecureStore.getItemAsync('refreshToken');
-      const userJson = await SecureStore.getItemAsync('user');
-
-      // Initialize API client
-      const apiClient = new PosApiClient({
-        baseUrl: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
-        getAccessToken: () => get().getAccessToken(),
-        refreshAccessToken: () => get().refreshAccessToken(),
-        onAuthError: () => get().logout(),
+      // Create shared auth client
+      const authClient = new AuthClient({
+        apiUrl: API_URL,
+        storage,
       });
 
-      if (accessToken && refreshToken && userJson) {
+      // Load stored tokens
+      await authClient.loadStoredTokens();
+
+      // Create POS API client
+      const apiClient = new PosApiClient({
+        apiUrl: API_URL,
+        authClient,
+        storage,
+        onAuthError: () => {
+          get().logout();
+        },
+      });
+
+      // Check if user is authenticated
+      const accessToken = authClient.getAccessToken();
+      const userJson = await SecureStore.getItemAsync('user');
+
+      if (accessToken && userJson) {
         const user = JSON.parse(userJson);
         set({
           user,
-          accessToken,
-          refreshToken,
           isAuthenticated: true,
           initialized: true,
+          authClient,
           apiClient,
         });
       } else {
-        set({ initialized: true, apiClient });
+        set({ initialized: true, authClient, apiClient });
       }
     } catch (error) {
       console.error('Failed to initialize auth:', error);
@@ -88,28 +79,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   login: async (email: string, password: string) => {
-    const { apiClient } = get();
-    if (!apiClient) {
-      throw new Error('API client not initialized');
+    const { authClient } = get();
+    if (!authClient) {
+      throw new Error('Auth client not initialized');
     }
 
     set({ isLoading: true });
     try {
-      const data = await apiClient.login(email, password);
+      const data = await authClient.signin({ email, password });
+
       const user: User = {
         userId: data.userId,
-        workspaceId: data.workspaceId,
+        workspaceId: data.workspaceId || data.tenantId || '',
         email: data.email,
       };
 
-      await SecureStore.setItemAsync('accessToken', data.accessToken);
-      await SecureStore.setItemAsync('refreshToken', data.refreshToken);
       await SecureStore.setItemAsync('user', JSON.stringify(user));
 
       set({
         user,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -120,21 +108,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    await SecureStore.deleteItemAsync('accessToken');
-    await SecureStore.deleteItemAsync('refreshToken');
+    const { authClient } = get();
+
+    if (authClient) {
+      await authClient.signout();
+    }
+
     await SecureStore.deleteItemAsync('user');
 
     set({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
     });
-  },
 
-  setTokens: async (accessToken: string, refreshToken: string) => {
-    await SecureStore.setItemAsync('accessToken', accessToken);
-    await SecureStore.setItemAsync('refreshToken', refreshToken);
-    set({ accessToken, refreshToken });
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/login');
+    }
   },
 }));

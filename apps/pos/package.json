@@ -14,6 +14,7 @@
   "dependencies": {
     "@kerniflow/contracts": "workspace:*",
     "@kerniflow/api-client": "workspace:*",
+    "@kerniflow/auth-client": "workspace:*",
     "@kerniflow/offline-core": "workspace:*",
     "@kerniflow/offline-rn": "workspace:*",
     "@kerniflow/pos-core": "workspace:*",

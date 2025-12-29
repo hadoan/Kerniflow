@@ -7,6 +7,7 @@
     "@ai-sdk/react": "catalog:",
     "@hookform/resolvers": "^3.10.0",
     "@kerniflow/api-client": "workspace:*",
+    "@kerniflow/auth-client": "workspace:*",
     "@kerniflow/contracts": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",

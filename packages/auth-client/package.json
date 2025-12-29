@@ -1,0 +1,42 @@
+{
+  "name": "@kerniflow/auth-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./adapters/web": {
+      "import": "./dist/adapters/web/index.js",
+      "types": "./dist/adapters/web/index.d.ts"
+    },
+    "./adapters/native": {
+      "import": "./dist/adapters/native/index.js",
+      "types": "./dist/adapters/native/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@kerniflow/api-client": "workspace:*"
+  },
+  "peerDependencies": {
+    "expo-secure-store": ">=14.0.0"
+  },
+  "peerDependenciesMeta": {
+    "expo-secure-store": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
