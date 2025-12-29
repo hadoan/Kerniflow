@@ -25,3 +25,9 @@ We use a hexagonal layout per bounded context:
 - `testkit/` provides fakes for repo/numbering/notification to unit test use cases.
 
 Other modules should mirror this pattern: domain + application + infrastructure + adapters, with testkit utilities for isolated tests.
+
+## Permission catalog (roles & permissions)
+
+- Each module owns its permissions in a `*.permissions.ts` file that exports `PermissionGroup[]`.
+- Add the module catalog to `buildPermissionCatalog` in `identity/permissions/permission-catalog.ts` so it shows in the Roles UI.
+- Keys must be unique, match `^[a-z][a-z0-9]*(?:[.:][a-z0-9]+)*$`, and each permission must set `group` to the group `id`.
