@@ -7,6 +7,7 @@ import {
   type UseCaseContext,
   type UseCaseError,
   ValidationError,
+  type AuditPort,
   err,
   ok,
 } from "@kerniflow/kernel";
@@ -28,6 +29,7 @@ type SettingsDeps = {
   idGenerator: IdGeneratorPort;
   clock: ClockPort;
   idempotency: IdempotencyStoragePort;
+  audit: AuditPort;
 };
 
 export class GetSalesSettingsUseCase extends BaseUseCase<
@@ -99,6 +101,13 @@ export class UpdateSalesSettingsUseCase extends BaseUseCase<
 
     settings.updateSettings(input.patch, now);
     await this.deps.settingsRepo.save(settings);
+    await this.deps.audit.log({
+      tenantId: ctx.tenantId,
+      userId: ctx.userId ?? "system",
+      action: "sales.settings.updated",
+      entityType: "SalesSettings",
+      entityId: settings.id,
+    });
 
     const result = { settings: toSettingsDto(settings) };
     await storeIdempotentResult({
