@@ -57,11 +57,21 @@ export class AccountingApi {
   // ===== Ledger Accounts =====
   async listAccounts(query?: ListLedgerAccountsInput): Promise<ListLedgerAccountsOutput> {
     const params = new URLSearchParams();
-    if (query?.type) params.append("type", query.type);
-    if (query?.isActive !== undefined) params.append("isActive", query.isActive.toString());
-    if (query?.search) params.append("search", query.search);
-    if (query?.limit) params.append("limit", query.limit.toString());
-    if (query?.cursor) params.append("cursor", query.cursor);
+    if (query?.type) {
+      params.append("type", query.type);
+    }
+    if (query?.isActive !== undefined) {
+      params.append("isActive", query.isActive.toString());
+    }
+    if (query?.search) {
+      params.append("search", query.search);
+    }
+    if (query?.limit) {
+      params.append("limit", query.limit.toString());
+    }
+    if (query?.cursor) {
+      params.append("cursor", query.cursor);
+    }
 
     const queryString = params.toString();
     return await apiClient.get<ListLedgerAccountsOutput>(
@@ -108,13 +118,27 @@ export class AccountingApi {
   // ===== Journal Entries =====
   async listJournalEntries(query?: ListJournalEntriesInput): Promise<ListJournalEntriesOutput> {
     const params = new URLSearchParams();
-    if (query?.status) params.append("status", query.status);
-    if (query?.fromDate) params.append("fromDate", query.fromDate);
-    if (query?.toDate) params.append("toDate", query.toDate);
-    if (query?.accountId) params.append("accountId", query.accountId);
-    if (query?.search) params.append("search", query.search);
-    if (query?.limit) params.append("limit", query.limit.toString());
-    if (query?.cursor) params.append("cursor", query.cursor);
+    if (query?.status) {
+      params.append("status", query.status);
+    }
+    if (query?.fromDate) {
+      params.append("fromDate", query.fromDate);
+    }
+    if (query?.toDate) {
+      params.append("toDate", query.toDate);
+    }
+    if (query?.accountId) {
+      params.append("accountId", query.accountId);
+    }
+    if (query?.search) {
+      params.append("search", query.search);
+    }
+    if (query?.limit) {
+      params.append("limit", query.limit.toString());
+    }
+    if (query?.cursor) {
+      params.append("cursor", query.cursor);
+    }
 
     const queryString = params.toString();
     return await apiClient.get<ListJournalEntriesOutput>(

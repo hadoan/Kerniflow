@@ -1,6 +1,6 @@
-import { DocumentDTO, FileDTO } from "@kerniflow/contracts";
-import { DocumentAggregate } from "../../domain/document.aggregate";
-import { FileEntity } from "../../domain/file.entity";
+import { type DocumentDTO, type FileDTO } from "@kerniflow/contracts";
+import { type DocumentAggregate } from "../../domain/document.aggregate";
+import { type FileEntity } from "../../domain/file.entity";
 
 export const toFileDto = (file: FileEntity): FileDTO => ({
   id: file.id,

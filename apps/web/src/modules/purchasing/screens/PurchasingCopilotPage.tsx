@@ -124,7 +124,9 @@ export default function PurchasingCopilotPage() {
   };
 
   const renderPart = (part: MessagePart) => {
-    if (part.type === "text") return <p className="whitespace-pre-wrap">{part.text}</p>;
+    if (part.type === "text") {
+      return <p className="whitespace-pre-wrap">{part.text}</p>;
+    }
     if (part.type === "tool-call") {
       return <div className="text-xs text-muted-foreground">Tool call: {part.toolName}</div>;
     }

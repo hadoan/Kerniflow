@@ -1,9 +1,9 @@
-import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
-import { AuthClient } from '@kerniflow/auth-client';
-import { PosApiClient } from '@/lib/pos-api-client';
-import { NativeStorageAdapter } from '@/lib/storage-adapter';
-import { router } from 'expo-router';
+import { create } from "zustand";
+import * as SecureStore from "expo-secure-store";
+import { AuthClient } from "@kerniflow/auth-client";
+import { PosApiClient } from "@/lib/pos-api-client";
+import { NativeStorageAdapter } from "@/lib/storage-adapter";
+import { router } from "expo-router";
 
 interface User {
   userId: string;
@@ -24,7 +24,7 @@ interface AuthState {
   logout: () => Promise<void>;
 }
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/api";
 const storage = new NativeStorageAdapter();
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -52,13 +52,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         authClient,
         storage,
         onAuthError: () => {
-          get().logout();
+          void get().logout();
         },
       });
 
       // Check if user is authenticated
       const accessToken = authClient.getAccessToken();
-      const userJson = await SecureStore.getItemAsync('user');
+      const userJson = await SecureStore.getItemAsync("user");
 
       if (accessToken && userJson) {
         const user = JSON.parse(userJson);
@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ initialized: true, authClient, apiClient });
       }
     } catch (error) {
-      console.error('Failed to initialize auth:', error);
+      console.error("Failed to initialize auth:", error);
       set({ initialized: true });
     }
   },
@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email: string, password: string) => {
     const { authClient } = get();
     if (!authClient) {
-      throw new Error('Auth client not initialized');
+      throw new Error("Auth client not initialized");
     }
 
     set({ isLoading: true });
@@ -90,11 +90,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const user: User = {
         userId: data.userId,
-        workspaceId: data.workspaceId || data.tenantId || '',
+        workspaceId: data.workspaceId || data.tenantId || "",
         email: data.email,
       };
 
-      await SecureStore.setItemAsync('user', JSON.stringify(user));
+      await SecureStore.setItemAsync("user", JSON.stringify(user));
 
       set({
         user,
@@ -114,7 +114,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await authClient.signout();
     }
 
-    await SecureStore.deleteItemAsync('user');
+    await SecureStore.deleteItemAsync("user");
 
     set({
       user: null,
@@ -124,7 +124,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/login');
+      router.replace("/login");
     }
   },
 }));

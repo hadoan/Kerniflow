@@ -29,7 +29,9 @@ export const buildApprovalTools = (): DomainToolPort[] => [
           samplePayload: z.record(z.unknown()).optional(),
         })
         .safeParse(input);
-      if (!parsed.success) {return validationError(parsed.error.flatten());}
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { actionKey, description, samplePayload } = parsed.data;
 

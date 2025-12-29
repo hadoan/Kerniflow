@@ -74,7 +74,9 @@ export const CopilotPage: React.FC = () => {
   const { messages, input, handleInputChange, handleSubmit, addToolResult } = useChat(chatOptions);
 
   const renderPart = (part: MessagePart, messageId: string) => {
-    if (part.type === "text") return <p className="whitespace-pre-wrap">{part.text}</p>;
+    if (part.type === "text") {
+      return <p className="whitespace-pre-wrap">{part.text}</p>;
+    }
     if (part.type === "tool-call") {
       if (part.toolName === "invoice.issue" || part.toolName === "expense.confirmCreate") {
         return (

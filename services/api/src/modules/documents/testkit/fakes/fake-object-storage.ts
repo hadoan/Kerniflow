@@ -1,7 +1,7 @@
 import {
-  ObjectStoragePort,
-  SignedDownload,
-  SignedUpload,
+  type ObjectStoragePort,
+  type SignedDownload,
+  type SignedUpload,
 } from "../../application/ports/object-storage.port";
 
 type StoredObject = { key: string; contentType: string; bytes: Buffer };
@@ -45,7 +45,9 @@ export class FakeObjectStoragePort implements ObjectStoragePort {
 
   async headObject(args: { tenantId: string; objectKey: string }) {
     const stored = this.objects.get(args.objectKey);
-    if (!stored) return { exists: false };
+    if (!stored) {
+      return { exists: false };
+    }
     return { exists: true, sizeBytes: stored.bytes.length, contentType: stored.contentType };
   }
 

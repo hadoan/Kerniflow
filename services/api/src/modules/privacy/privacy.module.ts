@@ -47,12 +47,7 @@ class NoopIdentityPort implements IdentityPort {}
       provide: RequestPersonalDataExportUseCase,
       useFactory: (repo: PrismaPrivacyRequestRepoAdapter, outbox: any, idGen: any, clock: any) =>
         new RequestPersonalDataExportUseCase(repo, outbox, idGen, clock),
-      inject: [
-        PrismaPrivacyRequestRepoAdapter,
-        OUTBOX_PORT,
-        ID_GENERATOR_TOKEN,
-        CLOCK_PORT_TOKEN,
-      ],
+      inject: [PrismaPrivacyRequestRepoAdapter, OUTBOX_PORT, ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN],
     },
     {
       provide: RequestAccountErasureUseCase,

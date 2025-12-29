@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { format } from 'date-fns';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { format } from "date-fns";
 
 export default function ReceiptScreen() {
   const router = useRouter();
@@ -9,17 +9,17 @@ export default function ReceiptScreen() {
 
   // TODO: Load actual sale from SQLite or state
   const mockSale = {
-    receiptNumber: 'REG1-20250329-001',
+    receiptNumber: "REG1-20250329-001",
     createdAt: new Date(),
     lineItems: [
       {
-        name: 'Sample Product 1',
+        name: "Sample Product 1",
         quantity: 2,
         unitPriceCents: 1500,
         lineTotalCents: 3000,
       },
       {
-        name: 'Sample Product 2',
+        name: "Sample Product 2",
         quantity: 1,
         unitPriceCents: 2500,
         lineTotalCents: 2500,
@@ -30,7 +30,7 @@ export default function ReceiptScreen() {
     totalCents: 6050,
     payments: [
       {
-        method: 'CASH',
+        method: "CASH",
         amountCents: 7000,
       },
     ],
@@ -39,16 +39,16 @@ export default function ReceiptScreen() {
 
   const handlePrint = () => {
     // TODO: Implement print functionality
-    console.log('Print receipt');
+    console.log("Print receipt");
   };
 
   const handleEmail = () => {
     // TODO: Implement email functionality
-    console.log('Email receipt');
+    console.log("Email receipt");
   };
 
   const handleNewSale = () => {
-    router.replace('/(main)');
+    router.replace("/(main)");
   };
 
   return (
@@ -68,9 +68,7 @@ export default function ReceiptScreen() {
           <View style={styles.receiptHeader}>
             <Text style={styles.storeName}>Kerniflow POS</Text>
             <Text style={styles.receiptNumber}>{mockSale.receiptNumber}</Text>
-            <Text style={styles.dateTime}>
-              {format(mockSale.createdAt, 'MMM d, yyyy h:mm a')}
-            </Text>
+            <Text style={styles.dateTime}>{format(mockSale.createdAt, "MMM d, yyyy h:mm a")}</Text>
           </View>
 
           <View style={styles.divider} />
@@ -80,9 +78,7 @@ export default function ReceiptScreen() {
               <View key={index} style={styles.item}>
                 <View style={styles.itemHeader}>
                   <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemTotal}>
-                    ${(item.lineTotalCents / 100).toFixed(2)}
-                  </Text>
+                  <Text style={styles.itemTotal}>${(item.lineTotalCents / 100).toFixed(2)}</Text>
                 </View>
                 <View style={styles.itemDetails}>
                   <Text style={styles.itemQty}>
@@ -98,21 +94,15 @@ export default function ReceiptScreen() {
           <View style={styles.totals}>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Subtotal</Text>
-              <Text style={styles.totalValue}>
-                ${(mockSale.subtotalCents / 100).toFixed(2)}
-              </Text>
+              <Text style={styles.totalValue}>${(mockSale.subtotalCents / 100).toFixed(2)}</Text>
             </View>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Tax</Text>
-              <Text style={styles.totalValue}>
-                ${(mockSale.taxCents / 100).toFixed(2)}
-              </Text>
+              <Text style={styles.totalValue}>${(mockSale.taxCents / 100).toFixed(2)}</Text>
             </View>
             <View style={[styles.totalRow, styles.grandTotal]}>
               <Text style={styles.grandTotalLabel}>Total</Text>
-              <Text style={styles.grandTotalValue}>
-                ${(mockSale.totalCents / 100).toFixed(2)}
-              </Text>
+              <Text style={styles.grandTotalValue}>${(mockSale.totalCents / 100).toFixed(2)}</Text>
             </View>
           </View>
 
@@ -122,17 +112,13 @@ export default function ReceiptScreen() {
             {mockSale.payments.map((payment, index) => (
               <View key={index} style={styles.paymentRow}>
                 <Text style={styles.paymentLabel}>{payment.method}</Text>
-                <Text style={styles.paymentValue}>
-                  ${(payment.amountCents / 100).toFixed(2)}
-                </Text>
+                <Text style={styles.paymentValue}>${(payment.amountCents / 100).toFixed(2)}</Text>
               </View>
             ))}
             {mockSale.changeDue > 0 && (
               <View style={styles.paymentRow}>
                 <Text style={styles.paymentLabel}>Change Due</Text>
-                <Text style={styles.changeValue}>
-                  ${(mockSale.changeDue / 100).toFixed(2)}
-                </Text>
+                <Text style={styles.changeValue}>${(mockSale.changeDue / 100).toFixed(2)}</Text>
               </View>
             )}
           </View>
@@ -153,9 +139,7 @@ export default function ReceiptScreen() {
           onPress={handleNewSale}
         >
           <Ionicons name="add-circle-outline" size={20} color="#fff" />
-          <Text style={[styles.actionButtonText, { color: '#fff' }]}>
-            New Sale
-          </Text>
+          <Text style={[styles.actionButtonText, { color: "#fff" }]}>New Sale</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -165,51 +149,51 @@ export default function ReceiptScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   title: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   content: {
     flex: 1,
   },
   receipt: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     margin: 16,
     padding: 24,
     borderRadius: 8,
   },
   receiptHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
   storeName: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
   },
   receiptNumber: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginBottom: 4,
   },
   dateTime: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
   },
   divider: {
     height: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: "#e0e0e0",
     marginVertical: 16,
   },
   items: {
@@ -219,108 +203,108 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 4,
   },
   itemName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     flex: 1,
   },
   itemTotal: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   itemDetails: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   itemQty: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   totals: {
     marginBottom: 8,
   },
   totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 4,
   },
   totalLabel: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   totalValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   grandTotal: {
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   grandTotalLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   grandTotalValue: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2196f3',
+    fontWeight: "600",
+    color: "#2196f3",
   },
   payments: {
     marginBottom: 8,
   },
   paymentRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 4,
   },
   paymentLabel: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   paymentValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   changeValue: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#4caf50',
+    fontWeight: "500",
+    color: "#4caf50",
   },
   footer: {
     fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
+    color: "#999",
+    textAlign: "center",
     marginTop: 8,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 16,
     gap: 8,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   actionButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 16,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     gap: 8,
   },
   actionButtonPrimary: {
-    backgroundColor: '#2196f3',
+    backgroundColor: "#2196f3",
   },
   actionButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2196f3',
+    fontWeight: "600",
+    color: "#2196f3",
   },
 });

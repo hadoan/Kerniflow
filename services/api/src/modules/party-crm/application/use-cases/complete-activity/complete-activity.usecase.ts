@@ -3,7 +3,13 @@ import { ok, err, Result } from "neverthrow";
 import type { Logger } from "@kerniflow/kernel";
 import { LOGGER } from "@kerniflow/kernel";
 import type { CompleteActivityInput, CompleteActivityOutput } from "@kerniflow/contracts";
-import { BaseUseCase, UseCaseContext, UseCaseError, ValidationError, NotFoundError } from "@/shared/application";
+import {
+  BaseUseCase,
+  UseCaseContext,
+  UseCaseError,
+  ValidationError,
+  NotFoundError,
+} from "@/shared/application";
 import type { ClockPort } from "@/shared/ports/clock.port";
 import { CLOCK_PORT } from "@/shared/ports/clock.port";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
@@ -17,7 +23,10 @@ type Deps = {
 };
 
 @Injectable()
-export class CompleteActivityUseCase extends BaseUseCase<CompleteActivityInput, CompleteActivityOutput> {
+export class CompleteActivityUseCase extends BaseUseCase<
+  CompleteActivityInput,
+  CompleteActivityOutput
+> {
   constructor(
     @Inject(ACTIVITY_REPO_PORT) private readonly activityRepo: ActivityRepoPort,
     @Inject(CLOCK_PORT) private readonly clock: ClockPort,

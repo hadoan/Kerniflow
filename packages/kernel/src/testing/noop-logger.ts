@@ -1,4 +1,4 @@
-import { LoggerPort } from "../ports/logger.port";
+import { type LoggerPort } from "../ports/logger.port";
 
 export class NoopLogger implements LoggerPort {
   debug(): void {}

@@ -1,4 +1,4 @@
-import { AgentRun } from "../../domain/entities/agent-run.entity";
+import { type AgentRun } from "../../domain/entities/agent-run.entity";
 
 export interface AgentRunRepositoryPort {
   create(run: {

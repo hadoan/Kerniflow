@@ -20,7 +20,9 @@ export const WorkspaceMembersPage: React.FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      if (!activeWorkspaceId) return;
+      if (!activeWorkspaceId) {
+        return;
+      }
       setIsLoading(true);
       try {
         const result = await workspacesApi.listMembers(activeWorkspaceId);
@@ -35,11 +37,13 @@ export const WorkspaceMembersPage: React.FC = () => {
         setIsLoading(false);
       }
     };
-    load();
+    void load();
   }, [activeWorkspaceId, toast]);
 
   const sendInvite = async () => {
-    if (!activeWorkspaceId || !inviteForm.email) return;
+    if (!activeWorkspaceId || !inviteForm.email) {
+      return;
+    }
     setIsLoading(true);
     try {
       await workspacesApi.inviteMember(activeWorkspaceId, {

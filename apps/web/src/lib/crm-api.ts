@@ -78,12 +78,24 @@ export const crmApi = {
     pageSize?: number;
   }): Promise<{ deals: DealDto[]; nextCursor?: string }> {
     const queryParams = new URLSearchParams();
-    if (params?.partyId) queryParams.append("partyId", params.partyId);
-    if (params?.stageId) queryParams.append("stageId", params.stageId);
-    if (params?.status) queryParams.append("status", params.status);
-    if (params?.ownerUserId) queryParams.append("ownerUserId", params.ownerUserId);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.partyId) {
+      queryParams.append("partyId", params.partyId);
+    }
+    if (params?.stageId) {
+      queryParams.append("stageId", params.stageId);
+    }
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.ownerUserId) {
+      queryParams.append("ownerUserId", params.ownerUserId);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/crm/deals?${queryString}` : "/crm/deals";
 
@@ -124,13 +136,27 @@ export const crmApi = {
     pageSize?: number;
   }): Promise<{ activities: ActivityDto[]; nextCursor?: string }> {
     const queryParams = new URLSearchParams();
-    if (params?.partyId) queryParams.append("partyId", params.partyId);
-    if (params?.dealId) queryParams.append("dealId", params.dealId);
-    if (params?.type) queryParams.append("type", params.type);
-    if (params?.status) queryParams.append("status", params.status);
-    if (params?.assignedToUserId) queryParams.append("assignedToUserId", params.assignedToUserId);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.partyId) {
+      queryParams.append("partyId", params.partyId);
+    }
+    if (params?.dealId) {
+      queryParams.append("dealId", params.dealId);
+    }
+    if (params?.type) {
+      queryParams.append("type", params.type);
+    }
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.assignedToUserId) {
+      queryParams.append("assignedToUserId", params.assignedToUserId);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/crm/activities?${queryString}` : "/crm/activities";
 
@@ -150,8 +176,12 @@ export const crmApi = {
     }
   ): Promise<{ items: TimelineItem[]; nextCursor?: string }> {
     const queryParams = new URLSearchParams();
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString
       ? `/crm/timeline/${entityType}/${entityId}?${queryString}`

@@ -1,4 +1,4 @@
-import { InvoiceLine } from "./invoice-line.entity";
+import { type InvoiceLine } from "./invoice-line.entity";
 
 export type InvoiceStatus = "DRAFT" | "ISSUED" | "PAID";
 
@@ -28,7 +28,9 @@ export class Invoice {
   }
 
   markPaid(at: Date) {
-    if (this.status === "PAID") return;
+    if (this.status === "PAID") {
+      return;
+    }
     if (this.status === "DRAFT") {
       throw new Error("Draft invoices cannot be marked as paid");
     }

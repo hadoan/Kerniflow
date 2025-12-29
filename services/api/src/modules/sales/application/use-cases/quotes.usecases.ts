@@ -132,7 +132,10 @@ export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuot
     const now = this.deps.clock.now();
     const issueDate = input.issueDate ? parseLocalDate(input.issueDate) : null;
     const validUntilDate = input.validUntilDate ? parseLocalDate(input.validUntilDate) : null;
-    const lineItems = buildLineItems({ idGenerator: this.deps.idGenerator, lineItems: input.lineItems });
+    const lineItems = buildLineItems({
+      idGenerator: this.deps.idGenerator,
+      lineItems: input.lineItems,
+    });
 
     const quote = QuoteAggregate.createDraft({
       id: this.deps.idGenerator.newId(),

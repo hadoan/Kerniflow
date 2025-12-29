@@ -1,4 +1,4 @@
-import { ClockPort } from "../ports/clock.port";
+import { type ClockPort } from "../ports/clock.port";
 
 export class FixedClock implements ClockPort {
   constructor(private readonly fixedDate: Date) {}

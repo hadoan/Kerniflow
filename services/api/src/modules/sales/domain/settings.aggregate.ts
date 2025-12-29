@@ -81,7 +81,10 @@ export class SalesSettingsAggregate {
     return this.props.updatedAt;
   }
 
-  updateSettings(patch: Partial<Omit<SalesSettingsProps, "id" | "tenantId" | "createdAt">>, now: Date) {
+  updateSettings(
+    patch: Partial<Omit<SalesSettingsProps, "id" | "tenantId" | "createdAt">>,
+    now: Date
+  ) {
     if (patch.defaultPaymentTerms !== undefined) {
       this.props.defaultPaymentTerms = patch.defaultPaymentTerms ?? null;
     }

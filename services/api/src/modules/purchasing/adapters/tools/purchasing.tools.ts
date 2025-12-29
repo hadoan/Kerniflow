@@ -31,7 +31,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
     }),
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = z.object({ sourceText: z.string() }).safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { sourceText } = parsed.data;
 
@@ -85,7 +87,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       const parsed = z
         .object({ sourceText: z.string(), supplierPartyId: z.string().optional() })
         .safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { sourceText, supplierPartyId } = parsed.data;
 
@@ -148,7 +152,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
     }),
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = z.object({ sourceText: z.string() }).safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { sourceText } = parsed.data;
 
@@ -237,7 +243,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
             .optional(),
         })
         .safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { object } = await generateObject({
         model: anthropic("claude-3-5-sonnet-20241022"),
@@ -286,7 +294,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
           billDate: z.string().optional(),
         })
         .safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       return DuplicateRiskCardSchema.parse({
         ok: true,
@@ -310,7 +320,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       const parsed = z
         .object({ objective: z.string(), context: z.string().optional() })
         .safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { object } = await generateObject({
         model: anthropic("claude-3-5-sonnet-20241022"),
@@ -352,7 +364,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
           supplierPartyId: z.string().optional(),
         })
         .safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       return ExpenseChangesNarrativeCardSchema.parse({
         ok: true,
@@ -376,7 +390,9 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       const parsed = z
         .object({ vendorBillId: z.string().optional(), billPaymentId: z.string().optional() })
         .safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       return PostingExplanationCardSchema.parse({
         ok: true,

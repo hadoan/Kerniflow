@@ -63,7 +63,10 @@ export default function InvoicesPage() {
       <Card>
         <CardContent className="p-0">
           {invoices.length === 0 ? (
-            <EmptyState title="No invoices yet" description="Create or convert an invoice from orders or quotes." />
+            <EmptyState
+              title="No invoices yet"
+              description="Create or convert an invoice from orders or quotes."
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -92,10 +95,10 @@ export default function InvoicesPage() {
                       key={invoice.id}
                       className="border-b border-border last:border-0 hover:bg-muted/30"
                     >
-                      <td className="px-4 py-3 text-sm font-medium">
-                        {invoice.number ?? "Draft"}
+                      <td className="px-4 py-3 text-sm font-medium">{invoice.number ?? "Draft"}</td>
+                      <td className="px-4 py-3 text-sm">
+                        {getCustomerName(invoice.customerPartyId)}
                       </td>
-                      <td className="px-4 py-3 text-sm">{getCustomerName(invoice.customerPartyId)}</td>
                       <td className="px-4 py-3">
                         <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
                       </td>

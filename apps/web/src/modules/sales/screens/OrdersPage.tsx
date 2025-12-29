@@ -61,7 +61,10 @@ export default function OrdersPage() {
       <Card>
         <CardContent className="p-0">
           {orders.length === 0 ? (
-            <EmptyState title="No orders yet" description="Convert a quote or create a new order." />
+            <EmptyState
+              title="No orders yet"
+              description="Convert a quote or create a new order."
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -90,10 +93,10 @@ export default function OrdersPage() {
                       key={order.id}
                       className="border-b border-border last:border-0 hover:bg-muted/30"
                     >
-                      <td className="px-4 py-3 text-sm font-medium">
-                        {order.number ?? "Draft"}
+                      <td className="px-4 py-3 text-sm font-medium">{order.number ?? "Draft"}</td>
+                      <td className="px-4 py-3 text-sm">
+                        {getCustomerName(order.customerPartyId)}
                       </td>
-                      <td className="px-4 py-3 text-sm">{getCustomerName(order.customerPartyId)}</td>
                       <td className="px-4 py-3">
                         <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                       </td>

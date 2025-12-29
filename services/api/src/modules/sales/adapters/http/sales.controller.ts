@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import {
   CreateQuoteInputSchema,
@@ -193,7 +183,11 @@ export class SalesController {
 
   @Post("orders/:orderId/confirm")
   @RequirePermission("sales.orders.confirm")
-  async confirmOrder(@Param("orderId") orderId: string, @Body() body: unknown, @Req() req: Request) {
+  async confirmOrder(
+    @Param("orderId") orderId: string,
+    @Body() body: unknown,
+    @Req() req: Request
+  ) {
     const input = ConfirmSalesOrderInputSchema.parse({ ...(body as object), orderId });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.confirmOrder.execute(input, ctx);
@@ -202,7 +196,11 @@ export class SalesController {
 
   @Post("orders/:orderId/fulfill")
   @RequirePermission("sales.orders.fulfill")
-  async fulfillOrder(@Param("orderId") orderId: string, @Body() body: unknown, @Req() req: Request) {
+  async fulfillOrder(
+    @Param("orderId") orderId: string,
+    @Body() body: unknown,
+    @Req() req: Request
+  ) {
     const input = FulfillSalesOrderInputSchema.parse({ ...(body as object), orderId });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.fulfillOrder.execute(input, ctx);

@@ -1,5 +1,5 @@
-import { OutboxStore } from "../outbox/outboxStore.port";
-import { OutboxCommand, OutboxError } from "../outbox/outboxTypes";
+import { type OutboxStore } from "../outbox/outboxStore.port";
+import { type OutboxCommand, type OutboxError } from "../outbox/outboxTypes";
 
 export class InMemoryOutboxStore implements OutboxStore {
   private readonly commands = new Map<string, OutboxCommand>();

@@ -101,10 +101,10 @@ export default function QuotesPage() {
                       key={quote.id}
                       className="border-b border-border last:border-0 hover:bg-muted/30"
                     >
-                      <td className="px-4 py-3 text-sm font-medium">
-                        {quote.number ?? "Draft"}
+                      <td className="px-4 py-3 text-sm font-medium">{quote.number ?? "Draft"}</td>
+                      <td className="px-4 py-3 text-sm">
+                        {getCustomerName(quote.customerPartyId)}
                       </td>
-                      <td className="px-4 py-3 text-sm">{getCustomerName(quote.customerPartyId)}</td>
                       <td className="px-4 py-3">
                         <Badge variant={getStatusVariant(quote.status)}>{quote.status}</Badge>
                       </td>

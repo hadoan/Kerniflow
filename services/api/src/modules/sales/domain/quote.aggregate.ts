@@ -89,7 +89,13 @@ export class QuoteAggregate {
     patch: Partial<
       Pick<
         QuoteProps,
-        "customerPartyId" | "customerContactPartyId" | "issueDate" | "validUntilDate" | "currency" | "paymentTerms" | "notes"
+        | "customerPartyId"
+        | "customerContactPartyId"
+        | "issueDate"
+        | "validUntilDate"
+        | "currency"
+        | "paymentTerms"
+        | "notes"
       >
     >,
     now: Date

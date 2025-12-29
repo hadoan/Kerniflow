@@ -28,14 +28,18 @@ export function parseRetryAfterMs(
   headerValue: string | null,
   now: () => Date = () => new Date()
 ): number | null {
-  if (!headerValue) return null;
+  if (!headerValue) {
+    return null;
+  }
   const seconds = Number(headerValue);
   if (!Number.isNaN(seconds)) {
     return seconds > 0 ? seconds * 1000 : 0;
   }
   const date = new Date(headerValue);
   const delta = date.getTime() - now().getTime();
-  if (Number.isFinite(delta) && delta > 0) return delta;
+  if (Number.isFinite(delta) && delta > 0) {
+    return delta;
+  }
   return null;
 }
 
@@ -51,20 +55,26 @@ export function shouldRetry(
   { response, error, method, idempotencyKey, isIdempotentRequest }: RetryableResult,
   maxAttempts: number = defaultRetryPolicy.maxAttempts
 ): boolean {
-  if (attempt >= maxAttempts) return false;
+  if (attempt >= maxAttempts) {
+    return false;
+  }
 
   const normalizedMethod = (method || "GET").toUpperCase();
   const methodIsSafe = safeMethods.has(normalizedMethod);
   const methodAllowsRetry = methodIsSafe || Boolean(idempotencyKey) || Boolean(isIdempotentRequest);
 
-  if (!methodAllowsRetry) return false;
+  if (!methodAllowsRetry) {
+    return false;
+  }
 
   if (error) {
     // Network / fetch errors
     return true;
   }
 
-  if (!response) return false;
+  if (!response) {
+    return false;
+  }
 
   if (response.status === 500 && !methodIsSafe && !idempotencyKey && !isIdempotentRequest) {
     return false;
@@ -74,7 +84,9 @@ export function shouldRetry(
 }
 
 export function getRetryAfterMs(response?: Response): number | null {
-  if (!response) return null;
+  if (!response) {
+    return null;
+  }
   const header = response.headers?.get("Retry-After");
   return parseRetryAfterMs(header);
 }

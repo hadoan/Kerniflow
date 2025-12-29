@@ -64,7 +64,9 @@ export default function NewVendorBillPage() {
   };
 
   const removeLineItem = (index: number) => {
-    if (lineItems.length === 1) return;
+    if (lineItems.length === 1) {
+      return;
+    }
     setLineItems(lineItems.filter((_, i) => i !== index));
   };
 

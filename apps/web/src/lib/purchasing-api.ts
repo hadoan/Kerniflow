@@ -39,9 +39,15 @@ import { apiClient } from "./api-client";
 export class PurchasingApi {
   async listSuppliers(params?: ListSuppliersInput): Promise<ListSuppliersOutput> {
     const queryParams = new URLSearchParams();
-    if (params?.search) queryParams.append("search", params.search);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.search) {
+      queryParams.append("search", params.search);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/purchasing/suppliers?${queryString}` : "/purchasing/suppliers";
     return apiClient.get<ListSuppliersOutput>(endpoint, {
@@ -150,13 +156,27 @@ export class PurchasingApi {
 
   async listPurchaseOrders(params?: ListPurchaseOrdersInput): Promise<ListPurchaseOrdersOutput> {
     const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append("status", params.status);
-    if (params?.supplierPartyId) queryParams.append("supplierPartyId", params.supplierPartyId);
-    if (params?.fromDate) queryParams.append("fromDate", params.fromDate);
-    if (params?.toDate) queryParams.append("toDate", params.toDate);
-    if (params?.search) queryParams.append("search", params.search);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.supplierPartyId) {
+      queryParams.append("supplierPartyId", params.supplierPartyId);
+    }
+    if (params?.fromDate) {
+      queryParams.append("fromDate", params.fromDate);
+    }
+    if (params?.toDate) {
+      queryParams.append("toDate", params.toDate);
+    }
+    if (params?.search) {
+      queryParams.append("search", params.search);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString
       ? `/purchasing/purchase-orders?${queryString}`
@@ -239,15 +259,33 @@ export class PurchasingApi {
 
   async listVendorBills(params?: ListVendorBillsInput): Promise<ListVendorBillsOutput> {
     const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append("status", params.status);
-    if (params?.supplierPartyId) queryParams.append("supplierPartyId", params.supplierPartyId);
-    if (params?.fromDate) queryParams.append("fromDate", params.fromDate);
-    if (params?.toDate) queryParams.append("toDate", params.toDate);
-    if (params?.dueFromDate) queryParams.append("dueFromDate", params.dueFromDate);
-    if (params?.dueToDate) queryParams.append("dueToDate", params.dueToDate);
-    if (params?.search) queryParams.append("search", params.search);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.supplierPartyId) {
+      queryParams.append("supplierPartyId", params.supplierPartyId);
+    }
+    if (params?.fromDate) {
+      queryParams.append("fromDate", params.fromDate);
+    }
+    if (params?.toDate) {
+      queryParams.append("toDate", params.toDate);
+    }
+    if (params?.dueFromDate) {
+      queryParams.append("dueFromDate", params.dueFromDate);
+    }
+    if (params?.dueToDate) {
+      queryParams.append("dueToDate", params.dueToDate);
+    }
+    if (params?.search) {
+      queryParams.append("search", params.search);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString
       ? `/purchasing/vendor-bills?${queryString}`
@@ -302,7 +340,9 @@ export class PurchasingApi {
 
   async listAccountMappings(supplierPartyId?: string): Promise<ListAccountMappingsOutput> {
     const queryParams = new URLSearchParams();
-    if (supplierPartyId) queryParams.append("supplierPartyId", supplierPartyId);
+    if (supplierPartyId) {
+      queryParams.append("supplierPartyId", supplierPartyId);
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString
       ? `/purchasing/account-mappings?${queryString}`

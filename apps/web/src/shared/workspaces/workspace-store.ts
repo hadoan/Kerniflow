@@ -4,8 +4,12 @@ let activeWorkspaceId: string | null = null;
 const subscribers = new Set<(workspaceId: string | null) => void>();
 
 export function loadActiveWorkspaceId(): string | null {
-  if (activeWorkspaceId) return activeWorkspaceId;
-  if (typeof window === "undefined") return null;
+  if (activeWorkspaceId) {
+    return activeWorkspaceId;
+  }
+  if (typeof window === "undefined") {
+    return null;
+  }
   activeWorkspaceId = localStorage.getItem(STORAGE_KEY);
   return activeWorkspaceId;
 }

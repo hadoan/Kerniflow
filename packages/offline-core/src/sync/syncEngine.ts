@@ -1,20 +1,20 @@
-import { ConflictInfo } from "../conflicts/conflictTypes";
-import { OutboxStore } from "../outbox/outboxStore.port";
-import { OutboxCommand, OutboxError } from "../outbox/outboxTypes";
-import { Clock } from "../platform/clock.port";
-import { IdGenerator } from "../platform/idGenerator.port";
-import { Logger } from "../platform/logger.port";
-import { NetworkMonitor } from "../platform/networkMonitor.port";
-import { SyncLock } from "./syncLock.port";
-import { SyncTransport } from "./syncTransport.port";
+import { type ConflictInfo } from "../conflicts/conflictTypes";
+import { type OutboxStore } from "../outbox/outboxStore.port";
+import { type OutboxCommand, type OutboxError } from "../outbox/outboxTypes";
+import { type Clock } from "../platform/clock.port";
+import { type IdGenerator } from "../platform/idGenerator.port";
+import { type Logger } from "../platform/logger.port";
+import { type NetworkMonitor } from "../platform/networkMonitor.port";
+import { type SyncLock } from "./syncLock.port";
+import { type SyncTransport } from "./syncTransport.port";
 import {
-  BatchResult,
-  CommandResult,
-  FlushStats,
-  SyncEngineEvent,
-  SyncEventSubscriber,
+  type BatchResult,
+  type CommandResult,
+  type FlushStats,
+  type SyncEngineEvent,
+  type SyncEventSubscriber,
 } from "./syncTypes";
-import { calculateBackoffDelay, BackoffConfig } from "./backoff";
+import { calculateBackoffDelay, type BackoffConfig } from "./backoff";
 
 export interface SyncEngineOptions {
   flushIntervalMs?: number;

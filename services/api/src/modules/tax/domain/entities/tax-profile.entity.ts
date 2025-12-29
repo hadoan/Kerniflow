@@ -19,7 +19,9 @@ export class TaxProfile {
    * Check if profile can be used for calculation at a given date
    */
   static canCalculate(profile: TaxProfileEntity | null, at: Date): boolean {
-    if (!profile) return false;
+    if (!profile) {
+      return false;
+    }
 
     const isAfterStart = at >= profile.effectiveFrom;
     const isBeforeEnd = !profile.effectiveTo || at <= profile.effectiveTo;

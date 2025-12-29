@@ -139,9 +139,7 @@ export class ReceiptFormatter {
     // Line items
     for (const line of receiptData.lineItems) {
       lines.push(`${line.description}`);
-      lines.push(
-        `  ${line.qty} x ${line.unitPrice}${this.rightAlign(line.lineTotal, width - 2)}`
-      );
+      lines.push(`  ${line.qty} x ${line.unitPrice}${this.rightAlign(line.lineTotal, width - 2)}`);
     }
     lines.push(this.repeat("-", width));
 

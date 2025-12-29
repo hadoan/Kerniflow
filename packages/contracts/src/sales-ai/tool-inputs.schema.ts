@@ -23,23 +23,27 @@ export const SalesPriceAssistInputSchema = z.object({
 });
 export type SalesPriceAssistInput = z.infer<typeof SalesPriceAssistInputSchema>;
 
-export const SalesSummarizeDealOrQuoteInputSchema = z.object({
-  quoteId: z.string().optional(),
-  dealId: z.string().optional(),
-}).refine((data) => data.quoteId || data.dealId, {
-  message: "quoteId or dealId is required",
-});
+export const SalesSummarizeDealOrQuoteInputSchema = z
+  .object({
+    quoteId: z.string().optional(),
+    dealId: z.string().optional(),
+  })
+  .refine((data) => data.quoteId || data.dealId, {
+    message: "quoteId or dealId is required",
+  });
 export type SalesSummarizeDealOrQuoteInput = z.infer<typeof SalesSummarizeDealOrQuoteInputSchema>;
 
-export const SalesDraftFollowUpMessageInputSchema = z.object({
-  quoteId: z.string().optional(),
-  invoiceId: z.string().optional(),
-  customerPartyId: z.string().optional(),
-  tone: z.string().optional(),
-  objective: z.string().optional(),
-}).refine((data) => data.quoteId || data.invoiceId || data.customerPartyId, {
-  message: "At least one context id is required",
-});
+export const SalesDraftFollowUpMessageInputSchema = z
+  .object({
+    quoteId: z.string().optional(),
+    invoiceId: z.string().optional(),
+    customerPartyId: z.string().optional(),
+    tone: z.string().optional(),
+    objective: z.string().optional(),
+  })
+  .refine((data) => data.quoteId || data.invoiceId || data.customerPartyId, {
+    message: "At least one context id is required",
+  });
 export type SalesDraftFollowUpMessageInput = z.infer<typeof SalesDraftFollowUpMessageInputSchema>;
 
 export const SalesDetectStalledQuotesInputSchema = z.object({
@@ -49,10 +53,12 @@ export const SalesDetectStalledQuotesInputSchema = z.object({
 });
 export type SalesDetectStalledQuotesInput = z.infer<typeof SalesDetectStalledQuotesInputSchema>;
 
-export const SalesExplainPostingInputSchema = z.object({
-  invoiceId: z.string().optional(),
-  paymentId: z.string().optional(),
-}).refine((data) => data.invoiceId || data.paymentId, {
-  message: "invoiceId or paymentId is required",
-});
+export const SalesExplainPostingInputSchema = z
+  .object({
+    invoiceId: z.string().optional(),
+    paymentId: z.string().optional(),
+  })
+  .refine((data) => data.invoiceId || data.paymentId, {
+    message: "invoiceId or paymentId is required",
+  });
 export type SalesExplainPostingInput = z.infer<typeof SalesExplainPostingInputSchema>;

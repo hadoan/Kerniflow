@@ -1,6 +1,6 @@
-import { CopilotUIMessage } from "../../domain/types/ui-message";
-import { DomainToolPort } from "./domain-tool.port";
-import { Response } from "express";
+import { type CopilotUIMessage } from "../../domain/types/ui-message";
+import { type DomainToolPort } from "./domain-tool.port";
+import { type Response } from "express";
 
 export interface LanguageModelPort {
   streamChat(params: {

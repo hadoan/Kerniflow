@@ -1,4 +1,4 @@
-import { PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
+import { type PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
 
 export interface PurchasingSettingsRepositoryPort {
   findByTenant(tenantId: string): Promise<PurchasingSettingsAggregate | null>;

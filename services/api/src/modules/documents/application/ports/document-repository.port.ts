@@ -1,5 +1,5 @@
-import { DocumentAggregate } from "../../domain/document.aggregate";
-import { DocumentLinkEntityType, DocumentType } from "../../domain/document.types";
+import { type DocumentAggregate } from "../../domain/document.aggregate";
+import { type DocumentLinkEntityType, type DocumentType } from "../../domain/document.types";
 
 export interface DocumentRepoPort {
   create(document: DocumentAggregate): Promise<void>;

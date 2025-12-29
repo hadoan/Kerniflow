@@ -1,4 +1,4 @@
-import { RequestContext } from "../context/request-context";
+import { type RequestContext } from "../context/request-context";
 
 export interface AuditEntry {
   tenantId: string | null;

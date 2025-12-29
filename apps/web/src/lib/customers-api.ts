@@ -33,8 +33,12 @@ export const customersApi = {
     includeArchived?: boolean;
   }): Promise<{ customers: CustomerDto[]; nextCursor?: string }> {
     const queryParams = new URLSearchParams();
-    if (params?.cursor) {queryParams.append("cursor", params.cursor);}
-    if (params?.pageSize) {queryParams.append("pageSize", params.pageSize.toString());}
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     if (params?.includeArchived !== undefined) {
       queryParams.append("includeArchived", params.includeArchived.toString());
     }

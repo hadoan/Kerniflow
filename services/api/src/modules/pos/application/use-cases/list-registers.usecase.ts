@@ -12,10 +12,7 @@ export class ListRegistersUseCase extends BaseUseCase<ListRegistersInput, ListRe
     super();
   }
 
-  async executeImpl(
-    input: ListRegistersInput,
-    ctx: Context
-  ): Promise<Result<ListRegistersOutput>> {
+  async executeImpl(input: ListRegistersInput, ctx: Context): Promise<Result<ListRegistersOutput>> {
     const registers = await this.registerRepo.findByWorkspace(ctx.workspaceId, input.status);
 
     return Ok({

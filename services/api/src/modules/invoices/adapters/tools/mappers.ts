@@ -1,4 +1,4 @@
-import { Result, UseCaseError, isErr } from "@kerniflow/kernel";
+import { type Result, type UseCaseError, isErr } from "@kerniflow/kernel";
 
 export const mapToolResult = <T extends Record<string, unknown>>(
   result: Result<T, UseCaseError>

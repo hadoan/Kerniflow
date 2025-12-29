@@ -37,7 +37,9 @@ export function useCreateAccount() {
       toast.success(`Account "${account.name}" created successfully`);
       // Invalidate all account lists and the detail
       void queryClient.invalidateQueries({ queryKey: accountingQueryKeys.accounts.lists() });
-      void queryClient.invalidateQueries({ queryKey: accountingQueryKeys.accounts.detail(account.id) });
+      void queryClient.invalidateQueries({
+        queryKey: accountingQueryKeys.accounts.detail(account.id),
+      });
     },
     onError: (error: Error) => {
       toast.error(`Failed to create account: ${error.message}`);
@@ -61,7 +63,9 @@ export function useUpdateAccount() {
       toast.success(`Account "${account.name}" updated successfully`);
       // Invalidate all account lists and the specific detail
       void queryClient.invalidateQueries({ queryKey: accountingQueryKeys.accounts.lists() });
-      void queryClient.invalidateQueries({ queryKey: accountingQueryKeys.accounts.detail(account.id) });
+      void queryClient.invalidateQueries({
+        queryKey: accountingQueryKeys.accounts.detail(account.id),
+      });
     },
     onError: (error: Error) => {
       toast.error(`Failed to update account: ${error.message}`);

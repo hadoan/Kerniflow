@@ -1,7 +1,7 @@
 import {
-  InvoiceEmailSenderPort,
-  SendInvoiceEmailRequest,
-  SendInvoiceEmailResponse,
+  type InvoiceEmailSenderPort,
+  type SendInvoiceEmailRequest,
+  type SendInvoiceEmailResponse,
 } from "../../application/ports/invoice-email-sender.port";
 
 export class FakeInvoiceEmailSender implements InvoiceEmailSenderPort {

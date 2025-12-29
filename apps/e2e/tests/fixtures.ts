@@ -1,5 +1,5 @@
 import { test as base, expect } from "@playwright/test";
-import { seedTestData, resetTestData, TestData } from "../utils/testData";
+import { seedTestData, resetTestData, type TestData } from "../utils/testData";
 
 type TestFixtures = {
   testData: TestData;

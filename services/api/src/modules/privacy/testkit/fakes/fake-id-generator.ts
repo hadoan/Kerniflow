@@ -1,4 +1,4 @@
-import { IdGeneratorPort } from "@shared/ports/id-generator.port";
+import { type IdGeneratorPort } from "@shared/ports/id-generator.port";
 
 export class FakeIdGenerator implements IdGeneratorPort {
   private counter = 0;

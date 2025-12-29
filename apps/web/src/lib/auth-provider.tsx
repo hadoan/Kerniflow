@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
   authClient,
-  CurrentUserResponse,
-  SignUpData,
-  SignInData,
-  AuthResponse,
+  type CurrentUserResponse,
+  type SignUpData,
+  type SignInData,
+  type AuthResponse,
 } from "./auth-client";
 import { setActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
 
@@ -39,21 +39,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        authClient.loadStoredTokens();
+        await authClient.loadStoredTokens();
 
         if (authClient.getAccessToken()) {
           const currentUser = await authClient.getCurrentUser();
           setUser(currentUser);
         }
       } catch (err) {
-        authClient.clearTokens();
+        await authClient.clearTokens();
         setError(err instanceof Error ? err.message : "Auth initialization failed");
       } finally {
         setIsLoading(false);
       }
     };
 
-    initAuth();
+    void initAuth();
   }, []);
 
   const signup = async (data: SignUpData): Promise<AuthResponse> => {
@@ -63,7 +63,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Fetch user data after signup
       const currentUser = await authClient.getCurrentUser();
       const workspaceId = currentUser.activeWorkspaceId ?? currentUser.activeTenantId;
-      if (workspaceId) setActiveWorkspaceId(workspaceId);
+      if (workspaceId) {
+        setActiveWorkspaceId(workspaceId);
+      }
       setUser(currentUser);
       return result;
     } catch (err) {
@@ -84,7 +86,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         currentUser.activeTenantId ??
         data.workspaceId ??
         data.tenantId;
-      if (workspaceId) setActiveWorkspaceId(workspaceId);
+      if (workspaceId) {
+        setActiveWorkspaceId(workspaceId);
+      }
       setUser(currentUser);
       return result;
     } catch (err) {
@@ -129,7 +133,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (authClient.getAccessToken()) {
         const currentUser = await authClient.getCurrentUser();
         const workspaceId = currentUser.activeWorkspaceId ?? currentUser.activeTenantId;
-        if (workspaceId) setActiveWorkspaceId(workspaceId);
+        if (workspaceId) {
+          setActiveWorkspaceId(workspaceId);
+        }
         setUser(currentUser);
       }
     } catch (err) {

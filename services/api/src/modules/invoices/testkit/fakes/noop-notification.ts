@@ -1,4 +1,4 @@
-import { NotificationPort } from "../../application/ports/notification.port";
+import { type NotificationPort } from "../../application/ports/notification.port";
 
 export class NoopNotification implements NotificationPort {
   sent: { tenantId: string; invoiceId: string; to?: string }[] = [];

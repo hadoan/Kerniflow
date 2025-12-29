@@ -15,10 +15,12 @@ export type ActivityProposal = z.infer<typeof ActivityProposalSchema>;
 export const ActivityProposalCardSchema = z.object({
   ok: z.literal(true),
   proposals: z.array(ActivityProposalSchema), // Multiple activities proposed
-  emailDraft: z.object({
-    subject: z.string(),
-    body: z.string(),
-  }).optional(),
+  emailDraft: z
+    .object({
+      subject: z.string(),
+      body: z.string(),
+    })
+    .optional(),
   confidence: z.number().min(0).max(1),
   rationale: z.string(),
   provenance: ProvenanceSchema,
@@ -54,12 +56,14 @@ export const PipelineDigestSchema = z.object({
   totalDeals: z.number().int(),
   totalValue: z.number().int(), // in cents
   dealsByStage: z.record(z.number().int()),
-  topPriorities: z.array(z.object({
-    dealId: z.string(),
-    title: z.string(),
-    reason: z.string(),
-    action: z.string(),
-  })),
+  topPriorities: z.array(
+    z.object({
+      dealId: z.string(),
+      title: z.string(),
+      reason: z.string(),
+      action: z.string(),
+    })
+  ),
   weeklyWins: z.number().int(),
   weeklyLosses: z.number().int(),
   narrative: z.string(), // AI-generated summary

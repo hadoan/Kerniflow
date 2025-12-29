@@ -76,7 +76,11 @@ export const OrderForm: React.FC<OrderFormProps> = ({ customers, initial, disabl
     return { subtotalCents, discountCents, totalCents };
   }, [lineItems]);
 
-  const updateLineItem = (index: number, field: keyof OrderFormValues["lineItems"][number], value: string) => {
+  const updateLineItem = (
+    index: number,
+    field: keyof OrderFormValues["lineItems"][number],
+    value: string
+  ) => {
     setLineItems((prev) => {
       const next = [...prev];
       const current = { ...next[index] };
@@ -130,11 +134,20 @@ export const OrderForm: React.FC<OrderFormProps> = ({ customers, initial, disabl
         </div>
         <div className="space-y-2">
           <Label>Currency</Label>
-          <Input value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={disabled} />
+          <Input
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            disabled={disabled}
+          />
         </div>
         <div className="space-y-2">
           <Label>Order Date</Label>
-          <Input type="date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} disabled={disabled} />
+          <Input
+            type="date"
+            value={orderDate}
+            onChange={(e) => setOrderDate(e.target.value)}
+            disabled={disabled}
+          />
         </div>
         <div className="space-y-2">
           <Label>Delivery Date</Label>
@@ -193,7 +206,12 @@ export const OrderForm: React.FC<OrderFormProps> = ({ customers, initial, disabl
                 />
               </div>
               <div className="flex justify-end">
-                <Button type="button" variant="ghost" onClick={() => removeLineItem(index)} disabled={disabled}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => removeLineItem(index)}
+                  disabled={disabled}
+                >
                   Remove
                 </Button>
               </div>

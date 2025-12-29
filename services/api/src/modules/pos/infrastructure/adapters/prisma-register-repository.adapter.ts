@@ -18,10 +18,7 @@ export class PrismaRegisterRepositoryAdapter implements RegisterRepositoryPort {
     return record ? this.toDomain(record) : null;
   }
 
-  async findByWorkspace(
-    workspaceId: string,
-    status?: "ACTIVE" | "INACTIVE"
-  ): Promise<Register[]> {
+  async findByWorkspace(workspaceId: string, status?: "ACTIVE" | "INACTIVE"): Promise<Register[]> {
     const records = await this.prisma.register.findMany({
       where: {
         workspaceId,

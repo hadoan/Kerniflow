@@ -89,9 +89,7 @@ export class ActivityEntity {
   }
 
   updateActivity(
-    patch: Partial<
-      Pick<ActivityProps, "subject" | "body" | "dueAt" | "assignedToUserId">
-    >,
+    patch: Partial<Pick<ActivityProps, "subject" | "body" | "dueAt" | "assignedToUserId">>,
     now: Date
   ) {
     if (this.status === "COMPLETED") {

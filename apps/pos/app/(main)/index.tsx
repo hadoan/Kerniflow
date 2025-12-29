@@ -1,18 +1,11 @@
-import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useShiftStore } from '@/stores/shiftStore';
-import { useCartStore } from '@/stores/cartStore';
-import { useCatalogStore } from '@/stores/catalogStore';
-import { useRegisterStore } from '@/stores/registerStore';
+import { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useShiftStore } from "@/stores/shiftStore";
+import { useCartStore } from "@/stores/cartStore";
+import { useCatalogStore } from "@/stores/catalogStore";
+import { useRegisterStore } from "@/stores/registerStore";
 
 export default function POSHomeScreen() {
   const router = useRouter();
@@ -20,7 +13,7 @@ export default function POSHomeScreen() {
   const { currentShift } = useShiftStore();
   const { addItem, items } = useCartStore();
   const { searchProducts } = useCatalogStore();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const handleSearch = async (query: string) => {
@@ -41,12 +34,12 @@ export default function POSHomeScreen() {
       unitPriceCents: product.salePriceCents,
       discountCents: 0,
     });
-    setSearchQuery('');
+    setSearchQuery("");
     setSearchResults([]);
   };
 
   const handleOpenScanner = () => {
-    router.push('/scanner');
+    router.push("/scanner");
   };
 
   // Check if register is selected
@@ -56,12 +49,10 @@ export default function POSHomeScreen() {
         <View style={styles.emptyState}>
           <Ionicons name="desktop-outline" size={64} color="#999" />
           <Text style={styles.emptyTitle}>No Register Selected</Text>
-          <Text style={styles.emptyText}>
-            Please select a register to start using the POS
-          </Text>
+          <Text style={styles.emptyText}>Please select a register to start using the POS</Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push('/register-selection')}
+            onPress={() => router.push("/register-selection")}
           >
             <Text style={styles.buttonText}>Select Register</Text>
           </TouchableOpacity>
@@ -76,13 +67,8 @@ export default function POSHomeScreen() {
         <View style={styles.emptyState}>
           <Ionicons name="time-outline" size={64} color="#999" />
           <Text style={styles.emptyTitle}>No Active Shift</Text>
-          <Text style={styles.emptyText}>
-            Please open a shift to start selling
-          </Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push('/shift/open')}
-          >
+          <Text style={styles.emptyText}>Please open a shift to start selling</Text>
+          <TouchableOpacity style={styles.button} onPress={() => router.push("/shift/open")}>
             <Text style={styles.buttonText}>Open Shift</Text>
           </TouchableOpacity>
         </View>
@@ -113,17 +99,12 @@ export default function POSHomeScreen() {
           data={searchResults}
           keyExtractor={(item) => item.productId}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.productItem}
-              onPress={() => handleAddToCart(item)}
-            >
+            <TouchableOpacity style={styles.productItem} onPress={() => handleAddToCart(item)}>
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.name}</Text>
                 <Text style={styles.productSku}>{item.sku}</Text>
               </View>
-              <Text style={styles.productPrice}>
-                ${(item.salePriceCents / 100).toFixed(2)}
-              </Text>
+              <Text style={styles.productPrice}>${(item.salePriceCents / 100).toFixed(2)}</Text>
             </TouchableOpacity>
           )}
         />
@@ -132,16 +113,14 @@ export default function POSHomeScreen() {
       {searchResults.length === 0 && searchQuery.length === 0 && (
         <View style={styles.emptyState}>
           <Ionicons name="search-outline" size={64} color="#999" />
-          <Text style={styles.emptyText}>
-            Search for products or scan barcodes to add to cart
-          </Text>
+          <Text style={styles.emptyText}>Search for products or scan barcodes to add to cart</Text>
         </View>
       )}
 
       {items.length > 0 && (
         <View style={styles.cartPreview}>
           <Text style={styles.cartPreviewText}>{items.length} items in cart</Text>
-          <TouchableOpacity onPress={() => router.push('/(main)/cart')}>
+          <TouchableOpacity onPress={() => router.push("/(main)/cart")}>
             <Text style={styles.cartPreviewLink}>View Cart →</Text>
           </TouchableOpacity>
         </View>
@@ -153,20 +132,20 @@ export default function POSHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   searchContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   searchBar: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
     borderRadius: 8,
     paddingHorizontal: 12,
     marginRight: 8,
@@ -180,81 +159,81 @@ const styles = StyleSheet.create({
   scanButton: {
     width: 48,
     height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#e3f2fd',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#e3f2fd",
     borderRadius: 8,
   },
   productItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   productInfo: {
     flex: 1,
   },
   productName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 4,
   },
   productSku: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   productPrice: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2196f3',
+    fontWeight: "600",
+    color: "#2196f3",
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 24,
   },
   button: {
-    backgroundColor: '#2196f3',
+    backgroundColor: "#2196f3",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   cartPreview: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: '#2196f3',
+    backgroundColor: "#2196f3",
   },
   cartPreviewText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   cartPreviewLink: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

@@ -1,4 +1,4 @@
-import { ClockPort } from "../../ports/clock.port";
+import { type ClockPort } from "../../ports/clock.port";
 
 export class FakeClock implements ClockPort {
   private current: Date;

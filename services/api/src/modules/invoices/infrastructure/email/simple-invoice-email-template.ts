@@ -1,4 +1,4 @@
-import { InvoiceEmailContext } from "../../application/ports/invoice-email-context-query.port";
+import { type InvoiceEmailContext } from "../../application/ports/invoice-email-context-query.port";
 
 export function buildInvoiceEmailSubject(context: InvoiceEmailContext): string {
   return `Invoice ${context.invoiceNumber} from ${context.companyName ?? "your company"}`;

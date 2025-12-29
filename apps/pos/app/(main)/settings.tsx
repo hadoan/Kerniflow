@@ -1,15 +1,8 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useAuthStore } from '@/stores/authStore';
-import { useShiftStore } from '@/stores/shiftStore';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useAuthStore } from "@/stores/authStore";
+import { useShiftStore } from "@/stores/shiftStore";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -17,26 +10,22 @@ export default function SettingsScreen() {
   const { currentShift } = useShiftStore();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/login');
-          },
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/login");
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleCloseShift = () => {
     if (currentShift) {
-      router.push('/shift/close');
+      router.push("/shift/close");
     }
   };
 
@@ -69,10 +58,7 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={handleCloseShift}
-              >
+              <TouchableOpacity style={styles.actionButton} onPress={handleCloseShift}>
                 <Text style={styles.actionButtonText}>Close Shift</Text>
                 <Ionicons name="chevron-forward" size={20} color="#2196f3" />
               </TouchableOpacity>
@@ -83,14 +69,12 @@ export default function SettingsScreen() {
                 <Ionicons name="time-outline" size={24} color="#999" />
                 <View style={styles.shiftDetails}>
                   <Text style={styles.shiftStatus}>No Active Shift</Text>
-                  <Text style={styles.shiftTime}>
-                    Open a shift to start selling
-                  </Text>
+                  <Text style={styles.shiftTime}>Open a shift to start selling</Text>
                 </View>
               </View>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => router.push('/shift/open')}
+                onPress={() => router.push("/shift/open")}
               >
                 <Text style={styles.actionButtonText}>Open Shift</Text>
                 <Ionicons name="chevron-forward" size={20} color="#2196f3" />
@@ -138,10 +122,7 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={20} color="#d32f2f" />
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
@@ -153,27 +134,27 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: "600",
+    color: "#666",
     marginLeft: 16,
     marginBottom: 8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
   },
   userDetails: {
@@ -181,54 +162,54 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   userRole: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   shiftInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   shiftDetails: {
     marginLeft: 16,
   },
   shiftStatus: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   shiftTime: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   actionButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
   },
   actionButtonText: {
     fontSize: 16,
-    color: '#2196f3',
-    fontWeight: '500',
+    color: "#2196f3",
+    fontWeight: "500",
   },
   menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   menuItemContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   menuItemText: {
     fontSize: 16,
@@ -236,23 +217,23 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
   },
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
     padding: 16,
     marginHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#d32f2f',
+    borderColor: "#d32f2f",
   },
   logoutButtonText: {
     fontSize: 16,
-    color: '#d32f2f',
-    fontWeight: '600',
+    color: "#d32f2f",
+    fontWeight: "600",
     marginLeft: 8,
   },
 });

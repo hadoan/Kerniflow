@@ -6,7 +6,7 @@ import vi from "./locales/vi.json";
 
 const savedLanguage = localStorage.getItem("bizflow-language") || "en";
 
-i18n.use(initReactI18next).init({
+void i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
     de: { translation: de },

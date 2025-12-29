@@ -1,4 +1,4 @@
-import { FileKind, StorageProvider } from "./document.types";
+import { type FileKind, type StorageProvider } from "./document.types";
 
 type FileProps = {
   id: string;

@@ -1,4 +1,4 @@
-import { TransactionContext } from "./unit-of-work.port";
+import { type TransactionContext } from "./unit-of-work.port";
 
 export interface AuditPort {
   log(

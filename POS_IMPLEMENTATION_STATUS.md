@@ -11,9 +11,11 @@ This document tracks the implementation progress of the AI-Native, Offline-First
 ### Packages Created
 
 #### 1. `packages/contracts/src/pos/` - POS Contracts ✅
+
 **Purpose:** Shared TypeScript types and Zod schemas for POS domain
 
 **Files:**
+
 - `register.types.ts` - Register (POS device) type definitions
 - `shift-session.types.ts` - Shift session (operating session) types
 - `pos-sale.types.ts` - POS sale and ticket types with payment methods
@@ -26,6 +28,7 @@ This document tracks the implementation progress of the AI-Native, Offline-First
 - `get-catalog-snapshot.schema.ts` - Product catalog download contract
 
 **Key Features:**
+
 - Platform-agnostic Zod schemas (work in RN and web)
 - Full type safety via `z.infer<>`
 - Support for offline-first with local-first IDs
@@ -35,9 +38,11 @@ This document tracks the implementation progress of the AI-Native, Offline-First
 ---
 
 #### 2. `packages/contracts/src/pos-ai/` - POS AI Tool Schemas ✅
+
 **Purpose:** AI Copilot tool input/output schemas for POS
 
 **Files:**
+
 - `product-match-card.schema.ts` - Product search results from AI
 - `cart-proposal-card.schema.ts` - Text-to-cart conversion results
 - `upsell-card.schema.ts` - AI upsell suggestions
@@ -45,6 +50,7 @@ This document tracks the implementation progress of the AI-Native, Offline-First
 - `shift-digest-card.schema.ts` - Shift summary with anomalies
 
 **Key Features:**
+
 - Structured tool-card pattern (ok, confidence, rationale, provenance)
 - Aligns with existing sales-ai and inventory-ai patterns
 - Ready for AI tool execution via server endpoints
@@ -53,21 +59,25 @@ This document tracks the implementation progress of the AI-Native, Offline-First
 ---
 
 #### 3. `packages/pos-core/` - POS Business Logic ✅
+
 **Purpose:** Platform-agnostic POS domain logic shared between web and RN
 
 **Files:**
+
 - `sale-builder.ts` - Calculate totals, validate sales, handle payments
 - `receipt-formatter.ts` - Format sales for display/printing
 - `sync-command-mapper.ts` - Map PosSale to SyncPosSaleInput
 - `receipt-numbering.ts` - Generate local receipt numbers
 
 **Key Features:**
+
 - **No framework dependencies** - Pure TypeScript
 - **No platform-specific code** - Works in any JS environment
 - **Fully testable** - Pure functions and simple classes
 - **Type-safe** - Uses `@kerniflow/contracts`
 
 **Example Usage:**
+
 ```typescript
 import { SaleBuilder } from "@kerniflow/pos-core";
 
@@ -79,13 +89,16 @@ builder.validateSale(posSale); // Throws if invalid
 ---
 
 #### 4. `packages/offline-rn/` - Enhanced with SQLite Store ✅
+
 **Purpose:** React Native offline sync adapters
 
 **Files Added:**
+
 - `src/outbox/sqliteOutboxStore.ts` - Full OutboxStore implementation
 - `README.md` - Usage documentation
 
 **Key Features:**
+
 - SQLite-backed command queue (expo-sqlite compatible)
 - Idempotency key indexing
 - Status tracking (PENDING/IN_FLIGHT/SUCCEEDED/FAILED/CONFLICT)
@@ -93,6 +106,7 @@ builder.validateSale(posSale); // Throws if invalid
 - Cleanup utilities for old commands
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE outbox_commands (
   commandId TEXT PRIMARY KEY,
@@ -110,14 +124,17 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
 ---
 
 #### 5. `packages/data/prisma/schema/72_pos.prisma` - Backend Schema ✅
+
 **Purpose:** PostgreSQL schema for server-side POS data
 
 **Models:**
+
 - `Register` - POS device/location with workspace scoping
 - `ShiftSession` - Operating session with cash reconciliation
 - `PosSaleIdempotency` - Sync deduplication mapping
 
 **Key Features:**
+
 - Multi-tenant scoping via `workspaceId`
 - Efficient indexing for queries
 - Cash variance tracking for shift close
@@ -128,9 +145,11 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
 ## ✅ Phase 2: Backend POS Module - COMPLETED
 
 ### NestJS POS Module Structure ✅
+
 **Location:** `services/api/src/modules/pos/`
 
 **Created:**
+
 - `pos.module.ts` - Module definition with full dependency injection
 - `domain/` - Domain aggregates with business logic
   - `register.aggregate.ts` - Register entity with activate/deactivate
@@ -146,21 +165,26 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
   - `pos.controller.ts` - 7 endpoints with JWT auth
 
 ### Repository Adapters ✅
+
 - ✅ `PrismaRegisterRepositoryAdapter` - Full CRUD with workspace scoping
 - ✅ `PrismaShiftSessionRepositoryAdapter` - Shift lifecycle management
 - ✅ `PrismaPosSaleIdempotencyAdapter` - Idempotency cache for sync
 
 ### Use Cases Implemented ✅
+
 **Register Management:**
+
 - ✅ `CreateRegisterUseCase` - Create register with default settings
 - ✅ `ListRegistersUseCase` - Query registers by status
 
 **Shift Management:**
+
 - ✅ `OpenShiftUseCase` - Validate no conflicts, create session
 - ✅ `CloseShiftUseCase` - Calculate variance, update totals
 - ✅ `GetCurrentShiftUseCase` - Query open session by register
 
 **Sale Sync:**
+
 - ✅ `SyncPosSaleUseCase` - Core sync logic with idempotency
   - ✅ Idempotency check (returns cached on duplicate)
   - 🚧 Product validation (TODO: inject InventoryApplication)
@@ -169,10 +193,13 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
   - ✅ Idempotency mapping storage
 
 **Catalog:**
+
 - ✅ `GetCatalogSnapshotUseCase` - Product snapshot for offline cache
 
 ### HTTP Controllers ✅
+
 **Endpoints Implemented:**
+
 - ✅ `POST /pos/registers` - Create register
 - ✅ `GET /pos/registers` - List registers
 - ✅ `POST /pos/shifts/open` - Open shift with conflict detection
@@ -182,13 +209,16 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
 - ✅ `GET /pos/catalog/snapshot` - Download product catalog
 
 **Features:**
+
 - JWT authentication on all endpoints
 - Workspace-scoped operations from req.user
 - Proper error handling with Result<T, Error> pattern
 - Full TypeScript type safety
 
 ### AI Tools 🚧
+
 **Status:** Schemas created, implementations pending
+
 - ⏳ `pos_findProduct` - Natural language product search
 - ⏳ `pos_buildCartFromText` - Text-to-cart conversion
 - ⏳ `pos_upsellSuggestions` - Suggest add-ons based on cart
@@ -204,6 +234,7 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
 **Location:** `apps/pos/`
 
 **Stack:**
+
 - ✅ Expo (v52) - React Native framework with managed workflow
 - ✅ Expo Router (v4) - File-based routing system
 - ✅ expo-sqlite (v15) - Offline storage
@@ -217,14 +248,17 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
 ### Screens Implemented ✅
 
 **Auth Flow:**
+
 - ✅ `app/login.tsx` - Login screen with email/password
 - ✅ `app/index.tsx` - Route guard for auth state
 
 **Shift Management:**
+
 - ✅ `app/shift/open.tsx` - Open shift with starting cash input
 - ✅ `app/shift/close.tsx` - Close shift with variance calculation
 
 **POS Main Flow:**
+
 - ✅ `app/(main)/index.tsx` - POS Home with product search
 - ✅ `app/(main)/cart.tsx` - Cart screen with quantity controls
 - ✅ `app/checkout.tsx` - Payment collection with multiple methods
@@ -232,23 +266,28 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
 - ✅ `app/scanner.tsx` - Barcode scanner with camera integration
 
 **Utilities:**
+
 - ✅ `app/(main)/sync.tsx` - Sync queue with pending/failed sales
 - ✅ `app/(main)/settings.tsx` - User profile and shift status
 
 **AI Copilot:**
+
 - ⏳ CopilotDrawer - Pending (schemas ready)
 
 ### Core Services Implemented ✅
 
 **`apps/pos/src/services/`**
+
 - ✅ `apiClient.ts` - POS API client with automatic token refresh
 - ✅ `salesService.ts` - SQLite-based sales persistence
 
 **`apps/pos/src/hooks/`**
+
 - ✅ `useSyncEngine.ts` - Sync engine initialization and status
 - ✅ `useSalesService.ts` - Sales service initialization
 
 **`apps/pos/src/stores/` (Zustand)**
+
 - ✅ `authStore.ts` - User, workspace, tokens with secure storage
 - ✅ `cartStore.ts` - Current cart state with totals calculation
 - ✅ `catalogStore.ts` - Cached products with local search
@@ -257,6 +296,7 @@ CREATE INDEX idx_outbox_idempotency ON outbox_commands(workspaceId, idempotencyK
 ### Offline Sales Persistence ✅
 
 **SQLite Schema:**
+
 ```sql
 -- pos_sales table
 CREATE TABLE pos_sales (
@@ -291,6 +331,7 @@ CREATE TABLE pos_sale_payments (
 ```
 
 **Features:**
+
 - Local-first IDs (UUID v4)
 - Automatic receipt numbering
 - Status tracking (PENDING_SYNC, SYNCED, FAILED)
@@ -302,12 +343,14 @@ CREATE TABLE pos_sale_payments (
 ## 🧪 Phase 4: Testing & QA - PENDING
 
 ### Integration Tests
+
 - Offline sale → sync → verify invoice created
 - Conflict scenarios (product deleted, customer archived)
 - Idempotency (duplicate sync returns cached result)
 - Multi-device (two registers, separate shifts)
 
 ### Manual QA
+
 - Test on real device (iPad or Android tablet)
 - Test barcode scanner (camera + keyboard wedge)
 - Test offline mode (airplane mode for 8 hours)
@@ -317,12 +360,12 @@ CREATE TABLE pos_sale_payments (
 
 ## 📊 Implementation Progress
 
-| Phase | Status | Progress |
-|-------|--------|----------|
-| **Phase 1: Foundation (Contracts, Core, Offline)** | ✅ Completed | 100% |
-| **Phase 2: Backend POS Module** | ✅ Completed | 100% |
-| **Phase 3: React Native App** | ✅ Completed | 95% |
-| **Phase 4: Testing & QA** | ⏳ Pending | 0% |
+| Phase                                              | Status       | Progress |
+| -------------------------------------------------- | ------------ | -------- |
+| **Phase 1: Foundation (Contracts, Core, Offline)** | ✅ Completed | 100%     |
+| **Phase 2: Backend POS Module**                    | ✅ Completed | 100%     |
+| **Phase 3: React Native App**                      | ✅ Completed | 95%      |
+| **Phase 4: Testing & QA**                          | ⏳ Pending   | 0%       |
 
 **Overall Progress:** ~75% Complete
 
@@ -358,18 +401,21 @@ CREATE TABLE pos_sale_payments (
 ### Architecture
 
 **✅ Chosen: Dedicated POS Sale Aggregate**
+
 - POS creates immutable `PosSale` locally
 - Sync converts to `SalesInvoice` via Sales module
 - **Pros:** Isolates offline complexity, clear conflict boundary
 - **Cons:** Adds conversion step
 
 **❌ Rejected: Direct Sales Invoice Creation**
+
 - Would require Sales module to accept offline-first semantics
 - Harder conflict handling
 
 ### Inventory Policy
 
 **✅ Chosen: Server-Authoritative Inventory**
+
 - Inventory decremented on server during sync
 - Client shows "estimated available" from cache
 - **Pros:** Prevents overselling across devices
@@ -378,6 +424,7 @@ CREATE TABLE pos_sale_payments (
 ### Receipt Numbering
 
 **✅ Chosen: Hybrid Local + Server**
+
 - Local: `{registerPrefix}-{date}-{sequence}` (e.g., FRONT-20250315-001)
 - Server: Optionally replaces with workspace-wide sequence on sync
 - **Pros:** Works offline, upgradable to global numbering
@@ -387,11 +434,13 @@ CREATE TABLE pos_sale_payments (
 ## 🔧 Development Commands
 
 ### Install Dependencies
+
 ```bash
 pnpm install
 ```
 
 ### Build Shared Packages
+
 ```bash
 pnpm --filter @kerniflow/contracts build
 pnpm --filter @kerniflow/pos-core build
@@ -400,17 +449,20 @@ pnpm --filter @kerniflow/offline-rn build
 ```
 
 ### Run Prisma Migration
+
 ```bash
 cd packages/data
 pnpm prisma migrate dev --name add_pos_tables
 ```
 
 ### Start Backend API
+
 ```bash
 pnpm --filter @kerniflow/api dev
 ```
 
 ### Start RN App (When Created)
+
 ```bash
 cd apps/pos
 expo start
@@ -432,6 +484,7 @@ pnpm start
 ## ✅ Completed Deliverables
 
 ### Foundation (Phase 1)
+
 1. **POS Contracts Package** - All request/response schemas (11 files) ✅
 2. **POS AI Tool Schemas** - 5 AI tool card definitions ✅
 3. **POS Core Package** - Platform-agnostic business logic (4 modules) ✅
@@ -439,6 +492,7 @@ pnpm start
 5. **POS Prisma Schema** - Backend database tables (3 models) ✅
 
 ### Backend (Phase 2)
+
 6. **Domain Aggregates** - Register and ShiftSession (2 files) ✅
 7. **Repository Ports** - 3 port interfaces ✅
 8. **Repository Adapters** - 3 Prisma implementations ✅
@@ -447,6 +501,7 @@ pnpm start
 11. **NestJS Module** - Full dependency injection setup ✅
 
 ### React Native App (Phase 3)
+
 12. **App Scaffold** - Expo + Expo Router configuration ✅
 13. **Auth Screens** - Login with secure storage ✅
 14. **Shift Screens** - Open/close with variance tracking ✅
@@ -458,6 +513,7 @@ pnpm start
 20. **Hooks** - Sync engine and sales service hooks ✅
 
 ### Documentation
+
 21. **Implementation Status** - This comprehensive document ✅
 22. **POS App README** - App-specific documentation ✅
 
@@ -468,11 +524,13 @@ pnpm start
 ## 🚀 Estimated Timeline to Production
 
 **Completed Work:**
+
 - Phase 1 (Foundation): ~2 weeks ✅
 - Phase 2 (Backend Module): ~1.5 weeks ✅
 - Phase 3 (RN App): ~2 weeks ✅
 
 **Remaining Work:**
+
 - SyncPosSaleUseCase integration: ~2 days
 - Background sync automation: ~1 day
 - AI Copilot UI: ~3 days

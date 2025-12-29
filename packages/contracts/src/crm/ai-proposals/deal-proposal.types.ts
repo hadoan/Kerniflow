@@ -34,16 +34,20 @@ export const DealSummarySchema = z.object({
   daysInStage: z.number().int(),
   lastActivityDate: z.string().nullable(),
   nextBestActions: z.array(z.string()),
-  riskFlags: z.array(z.object({
-    type: z.string(),
-    severity: z.enum(["low", "medium", "high"]),
-    description: z.string(),
-  })),
-  suggestedTasks: z.array(z.object({
-    subject: z.string(),
-    type: z.enum(["NOTE", "TASK", "CALL", "MEETING", "EMAIL_DRAFT"]),
-    dueAt: z.string().optional(),
-  })),
+  riskFlags: z.array(
+    z.object({
+      type: z.string(),
+      severity: z.enum(["low", "medium", "high"]),
+      description: z.string(),
+    })
+  ),
+  suggestedTasks: z.array(
+    z.object({
+      subject: z.string(),
+      type: z.enum(["NOTE", "TASK", "CALL", "MEETING", "EMAIL_DRAFT"]),
+      dueAt: z.string().optional(),
+    })
+  ),
 });
 
 export type DealSummary = z.infer<typeof DealSummarySchema>;

@@ -1,5 +1,5 @@
-import { ConflictInfo } from "../conflicts/conflictTypes";
-import { OutboxCommand, OutboxCommandStatus } from "../outbox/outboxTypes";
+import { type ConflictInfo } from "../conflicts/conflictTypes";
+import { type OutboxCommand, type OutboxCommandStatus } from "../outbox/outboxTypes";
 
 export type CommandResultStatus = "OK" | "CONFLICT" | "RETRYABLE_ERROR" | "FATAL_ERROR";
 

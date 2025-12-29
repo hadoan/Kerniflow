@@ -121,10 +121,7 @@ function checkBackendModuleBoundaries() {
 function checkPrismaAccess() {
   const apiSrc = path.join(repoRoot, "services", "api", "src");
   const workerSrc = path.join(repoRoot, "services", "worker", "src");
-  const files = [
-    ...listFiles(apiSrc, [".ts", ".tsx"]),
-    ...listFiles(workerSrc, [".ts", ".tsx"]),
-  ];
+  const files = [...listFiles(apiSrc, [".ts", ".tsx"]), ...listFiles(workerSrc, [".ts", ".tsx"])];
 
   for (const filePath of files) {
     const rel = path.relative(repoRoot, filePath);

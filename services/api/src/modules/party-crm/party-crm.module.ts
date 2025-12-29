@@ -2,7 +2,10 @@ import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
 import { CustomersHttpController } from "./adapters/http/customers.controller";
 import { DealsHttpController } from "./adapters/http/deals.controller";
-import { ActivitiesHttpController, TimelineHttpController } from "./adapters/http/activities.controller";
+import {
+  ActivitiesHttpController,
+  TimelineHttpController,
+} from "./adapters/http/activities.controller";
 import { PrismaPartyRepoAdapter } from "./infrastructure/prisma/prisma-party-repo.adapter";
 import { PrismaCustomerQueryAdapter } from "./infrastructure/prisma/prisma-customer-query.adapter";
 import { PrismaDealRepoAdapter } from "./infrastructure/prisma/prisma-deal-repo.adapter";
@@ -39,7 +42,12 @@ import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-tim
 
 @Module({
   imports: [DataModule, IdentityModule],
-  controllers: [CustomersHttpController, DealsHttpController, ActivitiesHttpController, TimelineHttpController],
+  controllers: [
+    CustomersHttpController,
+    DealsHttpController,
+    ActivitiesHttpController,
+    TimelineHttpController,
+  ],
   providers: [
     PrismaPartyRepoAdapter,
     PrismaCustomerQueryAdapter,
@@ -158,8 +166,11 @@ import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-tim
     // Activity use cases
     {
       provide: CreateActivityUseCase,
-      useFactory: (activityRepo: PrismaActivityRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
-        new CreateActivityUseCase(activityRepo, clock, idGen, new NestLoggerAdapter()),
+      useFactory: (
+        activityRepo: PrismaActivityRepoAdapter,
+        idGen: SystemIdGenerator,
+        clock: SystemClock
+      ) => new CreateActivityUseCase(activityRepo, clock, idGen, new NestLoggerAdapter()),
       inject: [ACTIVITY_REPO_PORT, CLOCK_PORT_TOKEN, ID_GENERATOR_TOKEN],
     },
     {

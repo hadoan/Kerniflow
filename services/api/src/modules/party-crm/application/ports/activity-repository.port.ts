@@ -1,4 +1,8 @@
-import { ActivityEntity, ActivityStatus, ActivityType } from "../../domain/activity.entity";
+import {
+  type ActivityEntity,
+  type ActivityStatus,
+  type ActivityType,
+} from "../../domain/activity.entity";
 
 export type ListActivitiesFilters = {
   partyId?: string;

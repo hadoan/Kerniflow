@@ -1,4 +1,4 @@
-import { PdfRendererPort } from "../../application/ports/pdf-renderer.port";
+import { type PdfRendererPort } from "../../application/ports/pdf-renderer.port";
 
 export class FakePdfRenderer implements PdfRendererPort {
   async renderInvoicePdf(): Promise<Buffer> {

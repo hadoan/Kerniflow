@@ -1,4 +1,4 @@
-import { DocumentsPort } from "../../application/ports/documents.port";
+import { type DocumentsPort } from "../../application/ports/documents.port";
 
 export class FakeDocumentsPort implements DocumentsPort {
   exports: any[] = [];

@@ -3,7 +3,9 @@ import { ValidationError } from "../application/errors";
 export type TimeZoneId = string & { __brand?: "TimeZoneId" };
 
 export function isValidTimeZoneId(tz: string | undefined | null): tz is TimeZoneId {
-  if (!tz) return false;
+  if (!tz) {
+    return false;
+  }
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: tz }).format(new Date());
     return true;

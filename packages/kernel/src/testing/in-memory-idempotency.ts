@@ -1,4 +1,4 @@
-import { IdempotencyPort } from "../ports/idempotency.port";
+import { type IdempotencyPort } from "../ports/idempotency.port";
 
 export class InMemoryIdempotency implements IdempotencyPort {
   private readonly store = new Map<string, Promise<unknown>>();

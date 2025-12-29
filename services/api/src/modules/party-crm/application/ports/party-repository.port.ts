@@ -1,4 +1,4 @@
-import { PartyAggregate } from "../../domain/party.aggregate";
+import { type PartyAggregate } from "../../domain/party.aggregate";
 
 export type ListCustomersFilters = {
   includeArchived?: boolean;

@@ -1,4 +1,4 @@
-import { ToolExecution } from "../../domain/entities/tool-execution.entity";
+import { type ToolExecution } from "../../domain/entities/tool-execution.entity";
 
 export interface ToolExecutionRepositoryPort {
   create(execution: {

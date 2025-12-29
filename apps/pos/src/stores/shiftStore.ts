@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import type { ShiftSession } from '@kerniflow/contracts';
-import { useAuthStore } from './authStore';
+import { create } from "zustand";
+import type { ShiftSession } from "@kerniflow/contracts";
+import { useAuthStore } from "./authStore";
 
 interface ShiftState {
   currentShift: ShiftSession | null;
@@ -12,9 +12,7 @@ interface ShiftState {
     registerId: string;
     startingCashCents: number | null;
   }) => Promise<void>;
-  closeShift: (data: {
-    closingCashCents: number | null;
-  }) => Promise<void>;
+  closeShift: (data: { closingCashCents: number | null }) => Promise<void>;
   setCurrentShift: (shift: ShiftSession | null) => void;
 }
 
@@ -24,14 +22,16 @@ export const useShiftStore = create<ShiftState>((set, get) => ({
 
   loadCurrentShift: async (registerId: string) => {
     const apiClient = useAuthStore.getState().apiClient;
-    if (!apiClient) throw new Error('API client not initialized');
+    if (!apiClient) {
+      throw new Error("API client not initialized");
+    }
 
     set({ isLoading: true });
     try {
       const data = await apiClient.getCurrentShift({ registerId });
       set({ currentShift: data.session ?? null, isLoading: false });
     } catch (error) {
-      console.error('Failed to load current shift:', error);
+      console.error("Failed to load current shift:", error);
       set({ isLoading: false });
       throw error;
     }
@@ -39,10 +39,14 @@ export const useShiftStore = create<ShiftState>((set, get) => ({
 
   openShift: async (data) => {
     const apiClient = useAuthStore.getState().apiClient;
-    if (!apiClient) throw new Error('API client not initialized');
+    if (!apiClient) {
+      throw new Error("API client not initialized");
+    }
 
     const user = useAuthStore.getState().user;
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
 
     set({ isLoading: true });
     try {
@@ -61,14 +65,18 @@ export const useShiftStore = create<ShiftState>((set, get) => ({
 
   closeShift: async (data) => {
     const apiClient = useAuthStore.getState().apiClient;
-    if (!apiClient) throw new Error('API client not initialized');
+    if (!apiClient) {
+      throw new Error("API client not initialized");
+    }
 
     const user = useAuthStore.getState().user;
-    if (!user) throw new Error('User not authenticated');
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
 
     const { currentShift } = get();
     if (!currentShift) {
-      throw new Error('No active shift to close');
+      throw new Error("No active shift to close");
     }
 
     set({ isLoading: true });

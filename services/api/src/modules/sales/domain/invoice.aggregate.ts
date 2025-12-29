@@ -102,7 +102,13 @@ export class SalesInvoiceAggregate {
     patch: Partial<
       Pick<
         SalesInvoiceProps,
-        "customerPartyId" | "customerContactPartyId" | "issueDate" | "dueDate" | "currency" | "paymentTerms" | "notes"
+        | "customerPartyId"
+        | "customerContactPartyId"
+        | "issueDate"
+        | "dueDate"
+        | "currency"
+        | "paymentTerms"
+        | "notes"
       >
     >,
     now: Date

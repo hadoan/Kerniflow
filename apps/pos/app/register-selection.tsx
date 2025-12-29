@@ -1,16 +1,25 @@
-import { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { router } from 'expo-router';
-import { useRegisterStore } from '@/stores/registerStore';
-import type { Register } from '@kerniflow/contracts';
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { router } from "expo-router";
+import { useRegisterStore } from "@/stores/registerStore";
+import type { Register } from "@kerniflow/contracts";
 
 export default function RegisterSelectionScreen() {
-  const { registers, selectedRegister, isLoading, loadRegisters, selectRegister } = useRegisterStore();
+  const { registers, selectedRegister, isLoading, loadRegisters, selectRegister } =
+    useRegisterStore();
   const [selecting, setSelecting] = useState(false);
 
   useEffect(() => {
     loadRegisters().catch((error) => {
-      Alert.alert('Error', 'Failed to load registers');
+      Alert.alert("Error", "Failed to load registers");
       console.error(error);
     });
   }, []);
@@ -23,10 +32,10 @@ export default function RegisterSelectionScreen() {
       if (router.canGoBack()) {
         router.back();
       } else {
-        router.replace('/(main)');
+        router.replace("/(main)");
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to select register');
+      Alert.alert("Error", "Failed to select register");
       console.error(error);
     } finally {
       setSelecting(false);
@@ -45,9 +54,7 @@ export default function RegisterSelectionScreen() {
         <View style={styles.registerInfo}>
           <Text style={styles.registerName}>{item.name}</Text>
           {item.location && <Text style={styles.registerLocation}>{item.location}</Text>}
-          <Text style={styles.registerStatus}>
-            Status: {item.status}
-          </Text>
+          <Text style={styles.registerStatus}>Status: {item.status}</Text>
         </View>
         {isSelected && (
           <View style={styles.selectedBadge}>
@@ -79,9 +86,7 @@ export default function RegisterSelectionScreen() {
       {registers.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>No active registers available</Text>
-          <Text style={styles.emptySubtext}>
-            Contact your administrator to set up registers
-          </Text>
+          <Text style={styles.emptySubtext}>Contact your administrator to set up registers</Text>
         </View>
       ) : (
         <FlatList
@@ -104,101 +109,101 @@ export default function RegisterSelectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   listContainer: {
     padding: 16,
   },
   registerCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   selectedCard: {
-    borderColor: '#4CAF50',
-    backgroundColor: '#f1f8f4',
+    borderColor: "#4CAF50",
+    backgroundColor: "#f1f8f4",
   },
   registerInfo: {
     flex: 1,
   },
   registerName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   registerLocation: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 4,
   },
   registerStatus: {
     fontSize: 12,
-    color: '#999',
+    color: "#999",
   },
   selectedBadge: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   selectedText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

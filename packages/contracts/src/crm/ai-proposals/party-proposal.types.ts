@@ -10,12 +10,16 @@ export const PartyProposalSchema = z.object({
   vatId: z.string().optional(),
   tags: z.array(z.string()).optional(),
   notes: z.string().optional(),
-  duplicates: z.array(z.object({
-    id: z.string(),
-    displayName: z.string(),
-    email: z.string().optional(),
-    matchScore: z.number().min(0).max(1),
-  })).optional(),
+  duplicates: z
+    .array(
+      z.object({
+        id: z.string(),
+        displayName: z.string(),
+        email: z.string().optional(),
+        matchScore: z.number().min(0).max(1),
+      })
+    )
+    .optional(),
 });
 
 export type PartyProposal = z.infer<typeof PartyProposalSchema>;
@@ -23,11 +27,15 @@ export type PartyProposal = z.infer<typeof PartyProposalSchema>;
 export const ProvenanceSchema = z.object({
   sourceText: z.string().optional(),
   extractedFields: z.array(z.string()).optional(),
-  referencedEntities: z.array(z.object({
-    type: z.string(),
-    id: z.string(),
-    name: z.string(),
-  })).optional(),
+  referencedEntities: z
+    .array(
+      z.object({
+        type: z.string(),
+        id: z.string(),
+        name: z.string(),
+      })
+    )
+    .optional(),
 });
 
 export type Provenance = z.infer<typeof ProvenanceSchema>;

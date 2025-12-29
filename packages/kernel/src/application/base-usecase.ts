@@ -1,10 +1,10 @@
-import { LoggerPort } from "../ports/logger.port";
-import { IdempotencyPort } from "../ports/idempotency.port";
-import { UnitOfWorkPort } from "../ports/unit-of-work.port";
-import { Result, err, isOk } from "./result";
-import { UseCaseContext } from "./context";
+import { type LoggerPort } from "../ports/logger.port";
+import { type IdempotencyPort } from "../ports/idempotency.port";
+import { type UnitOfWorkPort } from "../ports/unit-of-work.port";
+import { type Result, err, isOk } from "./result";
+import { type UseCaseContext } from "./context";
 import { UseCaseError, ValidationError } from "./errors";
-import { UseCase } from "./usecase";
+import { type UseCase } from "./usecase";
 
 type BaseDeps = {
   logger: LoggerPort;

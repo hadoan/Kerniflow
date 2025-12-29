@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import * as SQLite from 'expo-sqlite';
-import { SalesService } from '@/services/salesService';
+import { useState, useEffect } from "react";
+import * as SQLite from "expo-sqlite";
+import { SalesService } from "@/services/salesService";
 
 let salesServiceInstance: SalesService | null = null;
 
@@ -8,7 +8,7 @@ export function useSalesService() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    initializeSalesService();
+    void initializeSalesService();
   }, []);
 
   const initializeSalesService = async () => {
@@ -18,12 +18,12 @@ export function useSalesService() {
     }
 
     try {
-      const db = await SQLite.openDatabaseAsync('kerniflow-pos.db');
+      const db = await SQLite.openDatabaseAsync("kerniflow-pos.db");
       salesServiceInstance = new SalesService(db as any);
       await salesServiceInstance.initialize();
       setInitialized(true);
     } catch (error) {
-      console.error('Failed to initialize sales service:', error);
+      console.error("Failed to initialize sales service:", error);
     }
   };
 

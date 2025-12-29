@@ -58,7 +58,10 @@ import {
   ListPaymentsUseCase,
   ReversePaymentUseCase,
 } from "./application/use-cases/payments.usecases";
-import { GetSalesSettingsUseCase, UpdateSalesSettingsUseCase } from "./application/use-cases/settings.usecases";
+import {
+  GetSalesSettingsUseCase,
+  UpdateSalesSettingsUseCase,
+} from "./application/use-cases/settings.usecases";
 
 @Module({
   imports: [DataModule, PartyCrmModule, AccountingModule],

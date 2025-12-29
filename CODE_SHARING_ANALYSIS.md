@@ -18,13 +18,13 @@
 
 ### Results
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Code Sharing** | 60% | 95%+ | +35% |
-| **Duplicate Auth Logic** | 2 copies | 1 shared | ✅ Fixed |
-| **Duplicate API Logic** | 2 copies | 1 shared | ✅ Fixed |
-| **Lines of Duplicate Code** | ~400 | 0 | -100% |
-| **Platform Adapters** | 0 | 3 (web, native, memory) | ✅ Implemented |
+| Metric                      | Before   | After                   | Improvement    |
+| --------------------------- | -------- | ----------------------- | -------------- |
+| **Code Sharing**            | 60%      | 95%+                    | +35%           |
+| **Duplicate Auth Logic**    | 2 copies | 1 shared                | ✅ Fixed       |
+| **Duplicate API Logic**     | 2 copies | 1 shared                | ✅ Fixed       |
+| **Lines of Duplicate Code** | ~400     | 0                       | -100%          |
+| **Platform Adapters**       | 0        | 3 (web, native, memory) | ✅ Implemented |
 
 ---
 
@@ -41,6 +41,7 @@
 ## ✅ What's Properly Shared
 
 ### 1. Contracts & Types (`@kerniflow/contracts`)
+
 - **Status**: ✅ 100% SHARED
 - **Web**: Uses workspace package
 - **POS**: Uses workspace package
@@ -48,10 +49,11 @@
 - **Example**:
   ```typescript
   // Both apps use the same types
-  import type { OpenShiftInput, OpenShiftOutput } from '@kerniflow/contracts';
+  import type { OpenShiftInput, OpenShiftOutput } from "@kerniflow/contracts";
   ```
 
 ### 2. POS Business Logic (`@kerniflow/pos-core`)
+
 - **Status**: ✅ 100% SHARED
 - **Web**: Would use (not yet integrated)
 - **POS**: Uses workspace package
@@ -59,18 +61,20 @@
 - **Example**:
   ```typescript
   // Both apps use the same sale calculations
-  import { SaleBuilder } from '@kerniflow/pos-core';
+  import { SaleBuilder } from "@kerniflow/pos-core";
   const builder = new SaleBuilder();
   const total = builder.calculateLineTotal(qty, price, discount);
   ```
 
 ### 3. Offline Sync Engine (`@kerniflow/offline-core`)
+
 - **Status**: ✅ 100% SHARED
 - **Web**: Uses workspace package
 - **POS**: Uses workspace package with RN adapter (`@kerniflow/offline-rn`)
 - **Pattern**: Core logic shared, platform adapters separate
 
 ### 4. Base HTTP Request (`@kerniflow/api-client`)
+
 - **Status**: ⚠️ PARTIALLY SHARED (50%)
 - **Shared**: Base `request()` function with retry logic, idempotency
 - **Duplicated**: API client wrapper, token refresh logic
@@ -82,6 +86,7 @@
 ### 1. API Client Wrapper 🔴 CRITICAL
 
 **Web Implementation** ([apps/web/src/lib/api-client.ts](apps/web/src/lib/api-client.ts)):
+
 ```typescript
 // Web wraps @kerniflow/api-client with token refresh
 class ApiClient {
@@ -119,6 +124,7 @@ class ApiClient {
 ```
 
 **POS Implementation** ([apps/pos/src/services/apiClient.ts](apps/pos/src/services/apiClient.ts)):
+
 ```typescript
 // POS DUPLICATES the same logic!!!
 export class PosApiClient {
@@ -162,6 +168,7 @@ export class PosApiClient {
 ```
 
 **Problems**:
+
 - ❌ Duplicated token refresh logic
 - ❌ Duplicated 401 handling
 - ❌ Duplicated retry coordination
@@ -177,6 +184,7 @@ export class PosApiClient {
 ### 2. Auth Client & Token Management 🔴 CRITICAL
 
 **Web Implementation** ([apps/web/src/lib/auth-client.ts](apps/web/src/lib/auth-client.ts)):
+
 ```typescript
 class AuthClient {
   private accessToken: string | null = null;
@@ -220,6 +228,7 @@ class AuthClient {
 ```
 
 **POS Implementation** ([apps/pos/src/stores/authStore.ts](apps/pos/src/stores/authStore.ts)):
+
 ```typescript
 // POS DUPLICATES auth logic with different storage!!!
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -230,9 +239,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     // DUPLICATED: Different storage mechanism
-    const accessToken = await SecureStore.getItemAsync('accessToken');
-    const refreshToken = await SecureStore.getItemAsync('refreshToken');
-    const userJson = await SecureStore.getItemAsync('user');
+    const accessToken = await SecureStore.getItemAsync("accessToken");
+    const refreshToken = await SecureStore.getItemAsync("refreshToken");
+    const userJson = await SecureStore.getItemAsync("user");
 
     if (accessToken && refreshToken && userJson) {
       set({ accessToken, refreshToken, user: JSON.parse(userJson) });
@@ -244,9 +253,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const data = await apiClient.login(email, password);
 
     // DUPLICATED: Different storage mechanism
-    await SecureStore.setItemAsync('accessToken', data.accessToken);
-    await SecureStore.setItemAsync('refreshToken', data.refreshToken);
-    await SecureStore.setItemAsync('user', JSON.stringify(user));
+    await SecureStore.setItemAsync("accessToken", data.accessToken);
+    await SecureStore.setItemAsync("refreshToken", data.refreshToken);
+    await SecureStore.setItemAsync("user", JSON.stringify(user));
 
     set({ user, accessToken: data.accessToken, refreshToken: data.refreshToken });
   },
@@ -254,14 +263,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshAccessToken: async () => {
     // DUPLICATED: Same refresh logic
     const result = await apiClient.refreshToken(refreshToken);
-    await SecureStore.setItemAsync('accessToken', result.accessToken);
-    await SecureStore.setItemAsync('refreshToken', result.refreshToken);
+    await SecureStore.setItemAsync("accessToken", result.accessToken);
+    await SecureStore.setItemAsync("refreshToken", result.refreshToken);
     set({ accessToken: result.accessToken, refreshToken: result.refreshToken });
   },
 }));
 ```
 
 **Problems**:
+
 - ❌ Duplicated auth flow logic (login, refresh, logout)
 - ❌ Duplicated token management
 - ❌ Different storage mechanisms (localStorage vs expo-secure-store)
@@ -275,11 +285,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 ### 3. Platform-Specific Storage Not Abstracted
 
 **Web**:
+
 ```typescript
 localStorage.setItem("accessToken", token);
 ```
 
 **POS**:
+
 ```typescript
 await SecureStore.setItemAsync("accessToken", token);
 ```
@@ -290,16 +302,16 @@ await SecureStore.setItemAsync("accessToken", token);
 
 ## 📊 Duplication Analysis
 
-| Component | Web | POS | Shared? | Duplication |
-|-----------|-----|-----|---------|-------------|
-| **Contracts** | ✅ Uses | ✅ Uses | ✅ YES | 0% |
-| **POS Core Logic** | ✅ Uses | ✅ Uses | ✅ YES | 0% |
-| **Offline Sync** | ✅ Uses | ✅ Uses | ✅ YES | 0% |
-| **Base HTTP Request** | ✅ Uses | ❌ Custom | ⚠️ PARTIAL | 50% |
-| **API Client Wrapper** | Custom | Custom | ❌ NO | **100%** |
-| **Auth Logic** | Custom | Custom | ❌ NO | **100%** |
-| **Token Storage** | localStorage | SecureStore | ❌ NO | **100%** |
-| **User State** | Custom | Zustand | ⚠️ PARTIAL | 70% |
+| Component              | Web          | POS         | Shared?    | Duplication |
+| ---------------------- | ------------ | ----------- | ---------- | ----------- |
+| **Contracts**          | ✅ Uses      | ✅ Uses     | ✅ YES     | 0%          |
+| **POS Core Logic**     | ✅ Uses      | ✅ Uses     | ✅ YES     | 0%          |
+| **Offline Sync**       | ✅ Uses      | ✅ Uses     | ✅ YES     | 0%          |
+| **Base HTTP Request**  | ✅ Uses      | ❌ Custom   | ⚠️ PARTIAL | 50%         |
+| **API Client Wrapper** | Custom       | Custom      | ❌ NO      | **100%**    |
+| **Auth Logic**         | Custom       | Custom      | ❌ NO      | **100%**    |
+| **Token Storage**      | localStorage | SecureStore | ❌ NO      | **100%**    |
+| **User State**         | Custom       | Zustand     | ⚠️ PARTIAL | 70%         |
 
 **Lines of Duplicate Code**: ~350+ lines
 **Maintenance Risk**: 🔴 HIGH - Bug fixes need to be applied twice
@@ -313,6 +325,7 @@ await SecureStore.setItemAsync("accessToken", token);
 **Location**: `packages/auth-client/`
 
 **Structure**:
+
 ```
 packages/auth-client/
 ├── src/
@@ -360,7 +373,7 @@ export class LocalStorageAdapter implements TokenStorage {
 }
 
 // packages/auth-client/adapters/native/secure-storage.ts
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 
 export class SecureStorageAdapter implements TokenStorage {
   async getItem(key: string): Promise<string | null> {
@@ -377,8 +390,8 @@ export class SecureStorageAdapter implements TokenStorage {
 
 ```typescript
 // packages/auth-client/src/auth-client.ts
-import { request } from '@kerniflow/api-client';
-import type { TokenStorage } from './storage/storage.interface';
+import { request } from "@kerniflow/api-client";
+import type { TokenStorage } from "./storage/storage.interface";
 
 export interface AuthClientConfig {
   apiUrl: string;
@@ -396,14 +409,14 @@ export class AuthClient {
   }
 
   async initialize(): Promise<void> {
-    this.accessToken = await this.config.storage.getItem('accessToken');
-    this.refreshToken = await this.config.storage.getItem('refreshToken');
+    this.accessToken = await this.config.storage.getItem("accessToken");
+    this.refreshToken = await this.config.storage.getItem("refreshToken");
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
     const result = await request<AuthResponse>({
       url: `${this.config.apiUrl}/auth/login`,
-      method: 'POST',
+      method: "POST",
       body: { email, password },
     });
 
@@ -412,11 +425,11 @@ export class AuthClient {
   }
 
   async refreshAccessToken(): Promise<void> {
-    if (!this.refreshToken) throw new Error('No refresh token');
+    if (!this.refreshToken) throw new Error("No refresh token");
 
     const result = await request<{ accessToken: string; refreshToken: string }>({
       url: `${this.config.apiUrl}/auth/refresh`,
-      method: 'POST',
+      method: "POST",
       body: { refreshToken: this.refreshToken },
     });
 
@@ -426,8 +439,8 @@ export class AuthClient {
   private async storeTokens(accessToken: string, refreshToken: string): Promise<void> {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
-    await this.config.storage.setItem('accessToken', accessToken);
-    await this.config.storage.setItem('refreshToken', refreshToken);
+    await this.config.storage.setItem("accessToken", accessToken);
+    await this.config.storage.setItem("refreshToken", refreshToken);
   }
 
   getAccessToken(): string | null {
@@ -435,8 +448,8 @@ export class AuthClient {
   }
 
   async logout(): Promise<void> {
-    await this.config.storage.removeItem('accessToken');
-    await this.config.storage.removeItem('refreshToken');
+    await this.config.storage.removeItem("accessToken");
+    await this.config.storage.removeItem("refreshToken");
     this.accessToken = null;
     this.refreshToken = null;
   }
@@ -447,8 +460,8 @@ export class AuthClient {
 
 ```typescript
 // packages/auth-client/src/api-client.ts
-import { request, HttpError } from '@kerniflow/api-client';
-import type { AuthClient } from './auth-client';
+import { request, HttpError } from "@kerniflow/api-client";
+import type { AuthClient } from "./auth-client";
 
 export interface ApiClientConfig {
   apiUrl: string;
@@ -477,7 +490,7 @@ export class ApiClient {
     try {
       return await request<T>({
         url: `${this.config.apiUrl}${endpoint}`,
-        method: options.method ?? 'GET',
+        method: options.method ?? "GET",
         headers: options.headers,
         body: options.body,
         accessToken: accessToken ?? undefined,
@@ -523,15 +536,11 @@ export class ApiClient {
   }
 
   async get<T>(endpoint: string, opts?: { correlationId?: string }): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' }, opts);
+    return this.request<T>(endpoint, { method: "GET" }, opts);
   }
 
-  async post<T>(
-    endpoint: string,
-    body?: unknown,
-    opts?: { idempotencyKey?: string }
-  ): Promise<T> {
-    return this.request<T>(endpoint, { method: 'POST', body }, opts);
+  async post<T>(endpoint: string, body?: unknown, opts?: { idempotencyKey?: string }): Promise<T> {
+    return this.request<T>(endpoint, { method: "POST", body }, opts);
   }
 
   // ... put, patch, delete methods
@@ -555,7 +564,7 @@ export class ApiClient {
 
 ```typescript
 // apps/web/src/lib/api-client.ts - AFTER MIGRATION
-import { ApiClient, AuthClient, LocalStorageAdapter } from '@kerniflow/auth-client';
+import { ApiClient, AuthClient, LocalStorageAdapter } from "@kerniflow/auth-client";
 
 const storage = new LocalStorageAdapter();
 const authClient = new AuthClient({
@@ -567,7 +576,7 @@ export const apiClient = new ApiClient({
   apiUrl: import.meta.env.VITE_API_URL,
   authClient,
   getWorkspaceId: () => getActiveWorkspaceId(),
-  onAuthError: () => window.location.href = '/login',
+  onAuthError: () => (window.location.href = "/login"),
 });
 ```
 
@@ -577,8 +586,8 @@ export const apiClient = new ApiClient({
 // apps/pos/src/services/apiClient.ts - DELETE THIS FILE
 
 // apps/pos/src/stores/authStore.ts - SIMPLIFIED
-import { AuthClient, SecureStorageAdapter } from '@kerniflow/auth-client';
-import { create } from 'zustand';
+import { AuthClient, SecureStorageAdapter } from "@kerniflow/auth-client";
+import { create } from "zustand";
 
 const storage = new SecureStorageAdapter();
 const authClient = new AuthClient({
@@ -623,14 +632,14 @@ export const useAuthStore = create((set) => ({
 
 ## 📊 Expected Results
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Code Sharing** | 60% | 95% | +35% |
-| **Duplicate Auth Logic** | 2 copies | 1 shared | -50% maintenance |
-| **Duplicate API Logic** | 2 copies | 1 shared | -50% maintenance |
-| **Token Refresh Bugs** | Fix twice | Fix once | -50% bug surface |
-| **Lines of Code** | ~750 | ~550 | -27% |
-| **Platform Adapters** | 0 | 2 (web, native) | Better architecture |
+| Metric                   | Before    | After           | Improvement         |
+| ------------------------ | --------- | --------------- | ------------------- |
+| **Code Sharing**         | 60%       | 95%             | +35%                |
+| **Duplicate Auth Logic** | 2 copies  | 1 shared        | -50% maintenance    |
+| **Duplicate API Logic**  | 2 copies  | 1 shared        | -50% maintenance    |
+| **Token Refresh Bugs**   | Fix twice | Fix once        | -50% bug surface    |
+| **Lines of Code**        | ~750      | ~550            | -27%                |
+| **Platform Adapters**    | 0         | 2 (web, native) | Better architecture |
 
 ---
 
@@ -648,11 +657,13 @@ export const useAuthStore = create((set) => ({
 ## 🎯 Current Status Summary
 
 ### What's Good ✅
+
 - Contracts are properly shared
 - POS business logic is properly shared
 - Offline sync is properly shared with adapters
 
 ### What Needs Fixing 🔴
+
 - **API client wrapper is duplicated** - Create shared package
 - **Auth logic is duplicated** - Create shared package
 - **Token storage not abstracted** - Create adapter pattern

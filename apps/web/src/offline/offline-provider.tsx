@@ -7,7 +7,13 @@ import {
   WebNetworkMonitor,
   createIndexedDbPersister,
 } from "@kerniflow/offline-web";
-import { Clock, IdGenerator, Logger, SyncEngine, SyncTransport } from "@kerniflow/offline-core";
+import {
+  type Clock,
+  type IdGenerator,
+  type Logger,
+  SyncEngine,
+  type SyncTransport,
+} from "@kerniflow/offline-core";
 import { computeBackoffDelayMs, defaultRetryPolicy } from "@kerniflow/api-client";
 import { useAuth } from "@/lib/auth-provider";
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";

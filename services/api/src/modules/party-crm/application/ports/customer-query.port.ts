@@ -1,5 +1,5 @@
 import {
-  CustomerQueryPort as InvoicesCustomerQueryPort,
+  type CustomerQueryPort as InvoicesCustomerQueryPort,
   CUSTOMER_QUERY_PORT,
 } from "../../../invoices/application/ports/customer-query.port";
 

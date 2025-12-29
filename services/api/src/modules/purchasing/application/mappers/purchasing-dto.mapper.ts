@@ -5,10 +5,10 @@ import type {
   PurchasingSettingsDto,
   PurchasingAccountMappingDto,
 } from "@kerniflow/contracts";
-import { PurchaseOrderAggregate } from "../../domain/purchase-order.aggregate";
-import { VendorBillAggregate } from "../../domain/vendor-bill.aggregate";
+import { type PurchaseOrderAggregate } from "../../domain/purchase-order.aggregate";
+import { type VendorBillAggregate } from "../../domain/vendor-bill.aggregate";
 import type { BillPayment, PurchasingAccountMapping } from "../../domain/purchasing.types";
-import { PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
+import { type PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
 
 const toIso = (value: Date | null | undefined): string | null | undefined =>
   value ? value.toISOString() : value === null ? null : undefined;

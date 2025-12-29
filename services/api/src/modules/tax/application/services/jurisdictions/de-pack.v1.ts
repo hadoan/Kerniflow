@@ -55,8 +55,12 @@ export class DEPackV1 extends TaxJurisdictionPack {
     const codes = await this.taxCodeRepo.findByKind(kind, tenantId);
     if (codes.length === 0) {
       // No tax code configured - fall back to German defaults
-      if (kind === "STANDARD") return 1900; // 19%
-      if (kind === "REDUCED") return 700; // 7%
+      if (kind === "STANDARD") {
+        return 1900;
+      } // 19%
+      if (kind === "REDUCED") {
+        return 700;
+      } // 7%
       return 0;
     }
 

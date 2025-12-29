@@ -1,5 +1,5 @@
-import { QuoteAggregate } from "../../domain/quote.aggregate";
-import { QuoteStatus } from "../../domain/sales.types";
+import { type QuoteAggregate } from "../../domain/quote.aggregate";
+import { type QuoteStatus } from "../../domain/sales.types";
 
 export type ListQuotesFilters = {
   status?: QuoteStatus;

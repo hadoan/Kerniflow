@@ -30,7 +30,12 @@ type InvoiceFormProps = {
   onSubmit: (values: InvoiceFormValues) => void;
 };
 
-export const InvoiceForm: React.FC<InvoiceFormProps> = ({ customers, initial, disabled, onSubmit }) => {
+export const InvoiceForm: React.FC<InvoiceFormProps> = ({
+  customers,
+  initial,
+  disabled,
+  onSubmit,
+}) => {
   const [customerPartyId, setCustomerPartyId] = useState(initial?.customerPartyId ?? "");
   const [currency, setCurrency] = useState(initial?.currency ?? "EUR");
   const [issueDate, setIssueDate] = useState(initial?.issueDate ?? "");
@@ -79,7 +84,11 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ customers, initial, di
     return { subtotalCents, discountCents, totalCents };
   }, [lineItems]);
 
-  const updateLineItem = (index: number, field: keyof InvoiceFormValues["lineItems"][number], value: string) => {
+  const updateLineItem = (
+    index: number,
+    field: keyof InvoiceFormValues["lineItems"][number],
+    value: string
+  ) => {
     setLineItems((prev) => {
       const next = [...prev];
       const current = { ...next[index] };
@@ -134,15 +143,29 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ customers, initial, di
         </div>
         <div className="space-y-2">
           <Label>Currency</Label>
-          <Input value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={disabled} />
+          <Input
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            disabled={disabled}
+          />
         </div>
         <div className="space-y-2">
           <Label>Issue Date</Label>
-          <Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} disabled={disabled} />
+          <Input
+            type="date"
+            value={issueDate}
+            onChange={(e) => setIssueDate(e.target.value)}
+            disabled={disabled}
+          />
         </div>
         <div className="space-y-2">
           <Label>Due Date</Label>
-          <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} disabled={disabled} />
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            disabled={disabled}
+          />
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label>Payment Terms</Label>
@@ -200,7 +223,12 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ customers, initial, di
                 />
               </div>
               <div className="flex justify-end">
-                <Button type="button" variant="ghost" onClick={() => removeLineItem(index)} disabled={disabled}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => removeLineItem(index)}
+                  disabled={disabled}
+                >
                   Remove
                 </Button>
               </div>

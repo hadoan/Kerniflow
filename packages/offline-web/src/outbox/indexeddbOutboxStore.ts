@@ -1,10 +1,10 @@
 import {
   deserializeCommand,
-  OutboxStore,
-  OutboxCommand,
-  OutboxError,
+  type OutboxStore,
+  type OutboxCommand,
+  type OutboxError,
   serializeCommand,
-  SerializedCommand,
+  type SerializedCommand,
 } from "@kerniflow/offline-core";
 import { getDb, OUTBOX_STORE } from "../idb";
 

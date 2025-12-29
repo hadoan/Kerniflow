@@ -46,7 +46,9 @@ export const WorkspaceSettingsPage: React.FC = () => {
   }
 
   const handleSave = async () => {
-    if (!activeWorkspaceId) return;
+    if (!activeWorkspaceId) {
+      return;
+    }
     setIsSaving(true);
     try {
       await workspacesApi.updateWorkspace(activeWorkspaceId, {

@@ -74,7 +74,11 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({ customers, initial, disabl
     return { subtotalCents, discountCents, totalCents };
   }, [lineItems]);
 
-  const updateLineItem = (index: number, field: keyof QuoteFormValues["lineItems"][number], value: string) => {
+  const updateLineItem = (
+    index: number,
+    field: keyof QuoteFormValues["lineItems"][number],
+    value: string
+  ) => {
     setLineItems((prev) => {
       const next = [...prev];
       const current = { ...next[index] };
@@ -129,11 +133,20 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({ customers, initial, disabl
         </div>
         <div className="space-y-2">
           <Label>Currency</Label>
-          <Input value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={disabled} />
+          <Input
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            disabled={disabled}
+          />
         </div>
         <div className="space-y-2">
           <Label>Issue Date</Label>
-          <Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} disabled={disabled} />
+          <Input
+            type="date"
+            value={issueDate}
+            onChange={(e) => setIssueDate(e.target.value)}
+            disabled={disabled}
+          />
         </div>
         <div className="space-y-2">
           <Label>Valid Until</Label>
@@ -200,7 +213,12 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({ customers, initial, disabl
                 />
               </div>
               <div className="flex justify-end">
-                <Button type="button" variant="ghost" onClick={() => removeLineItem(index)} disabled={disabled}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => removeLineItem(index)}
+                  disabled={disabled}
+                >
                   Remove
                 </Button>
               </div>

@@ -127,7 +127,10 @@ export class CreateSalesInvoiceUseCase extends BaseUseCase<
     const now = this.deps.clock.now();
     const issueDate = input.issueDate ? parseLocalDate(input.issueDate) : null;
     const dueDate = input.dueDate ? parseLocalDate(input.dueDate) : null;
-    const lineItems = buildLineItems({ idGenerator: this.deps.idGenerator, lineItems: input.lineItems });
+    const lineItems = buildLineItems({
+      idGenerator: this.deps.idGenerator,
+      lineItems: input.lineItems,
+    });
 
     const invoice = SalesInvoiceAggregate.createDraft({
       id: this.deps.idGenerator.newId(),
@@ -218,7 +221,12 @@ const buildRevenueLines = (params: {
   lineItems: InvoiceLineItem[];
   currency: string;
   defaultRevenueAccountId: string;
-}): Array<{ ledgerAccountId: string; amountCents: number; currency: string; lineMemo?: string }> => {
+}): Array<{
+  ledgerAccountId: string;
+  amountCents: number;
+  currency: string;
+  lineMemo?: string;
+}> => {
   const buckets = new Map<string, number>();
   for (const line of params.lineItems) {
     const accountId = line.revenueCategory ?? params.defaultRevenueAccountId;
@@ -359,7 +367,10 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
   }
 }
 
-export class VoidSalesInvoiceUseCase extends BaseUseCase<VoidSalesInvoiceInput, VoidSalesInvoiceOutput> {
+export class VoidSalesInvoiceUseCase extends BaseUseCase<
+  VoidSalesInvoiceInput,
+  VoidSalesInvoiceOutput
+> {
   constructor(private readonly deps: InvoiceDeps) {
     super({ logger: deps.logger });
   }

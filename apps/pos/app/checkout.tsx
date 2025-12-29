@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   View,
   Text,
@@ -8,17 +8,17 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { v4 as uuidv4 } from '@lukeed/uuid';
-import { useCartStore } from '@/stores/cartStore';
-import { useShiftStore } from '@/stores/shiftStore';
-import { useAuthStore } from '@/stores/authStore';
-import { useSalesService } from '@/hooks/useSalesService';
-import type { PosSalePayment } from '@kerniflow/contracts';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { v4 as uuidv4 } from "@lukeed/uuid";
+import { useCartStore } from "@/stores/cartStore";
+import { useShiftStore } from "@/stores/shiftStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useSalesService } from "@/hooks/useSalesService";
+import type { PosSalePayment } from "@kerniflow/contracts";
 
-type PaymentMethod = 'CASH' | 'CARD' | 'BANK_TRANSFER' | 'OTHER';
+type PaymentMethod = "CASH" | "CARD" | "BANK_TRANSFER" | "OTHER";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -29,8 +29,8 @@ export default function CheckoutScreen() {
   const totals = getTotals();
 
   const [payments, setPayments] = useState<PosSalePayment[]>([]);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('CASH');
-  const [paymentAmount, setPaymentAmount] = useState('');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("CASH");
+  const [paymentAmount, setPaymentAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   const totalPaid = payments.reduce((sum, p) => sum + p.amountCents, 0);
@@ -40,7 +40,7 @@ export default function CheckoutScreen() {
   const handleAddPayment = () => {
     const amountCents = Math.round(parseFloat(paymentAmount) * 100);
     if (isNaN(amountCents) || amountCents <= 0) {
-      Alert.alert('Invalid Amount', 'Please enter a valid payment amount');
+      Alert.alert("Invalid Amount", "Please enter a valid payment amount");
       return;
     }
 
@@ -52,7 +52,7 @@ export default function CheckoutScreen() {
     };
 
     setPayments([...payments, payment]);
-    setPaymentAmount('');
+    setPaymentAmount("");
   };
 
   const handleRemovePayment = (paymentId: string) => {
@@ -61,22 +61,22 @@ export default function CheckoutScreen() {
 
   const handleCompleteSale = async () => {
     if (remaining > 0) {
-      Alert.alert('Insufficient Payment', 'Please collect full payment before completing sale');
+      Alert.alert("Insufficient Payment", "Please collect full payment before completing sale");
       return;
     }
 
     if (!currentShift) {
-      Alert.alert('No Active Shift', 'Please open a shift before completing sales');
+      Alert.alert("No Active Shift", "Please open a shift before completing sales");
       return;
     }
 
     if (!salesService) {
-      Alert.alert('Error', 'Sales service not initialized');
+      Alert.alert("Error", "Sales service not initialized");
       return;
     }
 
     if (!user) {
-      Alert.alert('Error', 'User not authenticated');
+      Alert.alert("Error", "User not authenticated");
       return;
     }
 
@@ -97,27 +97,27 @@ export default function CheckoutScreen() {
       // TODO: Enqueue sync command via outbox
 
       Alert.alert(
-        'Sale Complete',
+        "Sale Complete",
         `Receipt: ${sale.receiptNumber}\nPayment: $${(totalPaid / 100).toFixed(2)}\nChange: $${(changeDue / 100).toFixed(2)}`,
         [
           {
-            text: 'Print Receipt',
+            text: "Print Receipt",
             onPress: () => {
               clearCart();
               router.replace(`/receipt?saleId=${sale.posSaleId}`);
             },
           },
           {
-            text: 'New Sale',
+            text: "New Sale",
             onPress: () => {
               clearCart();
-              router.replace('/(main)');
+              router.replace("/(main)");
             },
           },
         ]
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to complete sale');
+      Alert.alert("Error", error.message || "Failed to complete sale");
     } finally {
       setIsProcessing(false);
     }
@@ -142,21 +142,15 @@ export default function CheckoutScreen() {
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>
-              ${(totals.subtotalCents / 100).toFixed(2)}
-            </Text>
+            <Text style={styles.summaryValue}>${(totals.subtotalCents / 100).toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Tax</Text>
-            <Text style={styles.summaryValue}>
-              ${(totals.taxCents / 100).toFixed(2)}
-            </Text>
+            <Text style={styles.summaryValue}>${(totals.taxCents / 100).toFixed(2)}</Text>
           </View>
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>
-              ${(totals.totalCents / 100).toFixed(2)}
-            </Text>
+            <Text style={styles.totalValue}>${(totals.totalCents / 100).toFixed(2)}</Text>
           </View>
         </View>
       </View>
@@ -165,27 +159,22 @@ export default function CheckoutScreen() {
         <Text style={styles.sectionTitle}>Payment</Text>
 
         <View style={styles.methodSelector}>
-          {(['CASH', 'CARD', 'BANK_TRANSFER', 'OTHER'] as PaymentMethod[]).map(
-            (method) => (
-              <TouchableOpacity
-                key={method}
+          {(["CASH", "CARD", "BANK_TRANSFER", "OTHER"] as PaymentMethod[]).map((method) => (
+            <TouchableOpacity
+              key={method}
+              style={[styles.methodButton, selectedMethod === method && styles.methodButtonActive]}
+              onPress={() => setSelectedMethod(method)}
+            >
+              <Text
                 style={[
-                  styles.methodButton,
-                  selectedMethod === method && styles.methodButtonActive,
+                  styles.methodButtonText,
+                  selectedMethod === method && styles.methodButtonTextActive,
                 ]}
-                onPress={() => setSelectedMethod(method)}
               >
-                <Text
-                  style={[
-                    styles.methodButtonText,
-                    selectedMethod === method && styles.methodButtonTextActive,
-                  ]}
-                >
-                  {method.replace('_', ' ')}
-                </Text>
-              </TouchableOpacity>
-            )
-          )}
+                {method.replace("_", " ")}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View style={styles.paymentInput}>
@@ -211,9 +200,7 @@ export default function CheckoutScreen() {
                     ${(payment.amountCents / 100).toFixed(2)}
                   </Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handleRemovePayment(payment.paymentId)}
-                >
+                <TouchableOpacity onPress={() => handleRemovePayment(payment.paymentId)}>
                   <Ionicons name="close-circle" size={24} color="#d32f2f" />
                 </TouchableOpacity>
               </View>
@@ -224,26 +211,15 @@ export default function CheckoutScreen() {
         <View style={styles.paymentSummary}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Total Due</Text>
-            <Text style={styles.summaryValue}>
-              ${(totals.totalCents / 100).toFixed(2)}
-            </Text>
+            <Text style={styles.summaryValue}>${(totals.totalCents / 100).toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Paid</Text>
-            <Text style={styles.summaryValue}>
-              ${(totalPaid / 100).toFixed(2)}
-            </Text>
+            <Text style={styles.summaryValue}>${(totalPaid / 100).toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>
-              {remaining > 0 ? 'Remaining' : 'Change'}
-            </Text>
-            <Text
-              style={[
-                styles.summaryValue,
-                remaining < 0 && { color: '#4caf50' },
-              ]}
-            >
+            <Text style={styles.summaryLabel}>{remaining > 0 ? "Remaining" : "Change"}</Text>
+            <Text style={[styles.summaryValue, remaining < 0 && { color: "#4caf50" }]}>
               ${(Math.abs(remaining) / 100).toFixed(2)}
             </Text>
           </View>
@@ -271,69 +247,69 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   title: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   section: {
     marginTop: 16,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: "600",
+    color: "#666",
     marginLeft: 16,
     marginBottom: 8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   summaryLabel: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   summaryValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   totalRow: {
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   totalLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   totalValue: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2196f3',
+    fontWeight: "600",
+    color: "#2196f3",
   },
   methodSelector: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     padding: 16,
     gap: 8,
   },
@@ -341,94 +317,94 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: "#e0e0e0",
   },
   methodButtonActive: {
-    backgroundColor: '#2196f3',
-    borderColor: '#2196f3',
+    backgroundColor: "#2196f3",
+    borderColor: "#2196f3",
   },
   methodButtonText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
+    fontWeight: "500",
+    color: "#666",
   },
   methodButtonTextActive: {
-    color: '#fff',
+    color: "#fff",
   },
   paymentInput: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 16,
     gap: 8,
   },
   amountInput: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: "#e0e0e0",
   },
   addButton: {
-    backgroundColor: '#2196f3',
+    backgroundColor: "#2196f3",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   addButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   paymentsCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginHorizontal: 16,
     borderRadius: 8,
     padding: 8,
   },
   paymentItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 8,
   },
   paymentInfo: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   paymentMethod: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   paymentAmount: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   paymentSummary: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     marginTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   completeButton: {
-    backgroundColor: '#4caf50',
+    backgroundColor: "#4caf50",
     margin: 16,
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   completeButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
   },
   completeButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

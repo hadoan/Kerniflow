@@ -32,7 +32,6 @@ import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-s
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import type { AccountingApplication } from "../../accounting/application/accounting.application";
 
-
 type PaymentDeps = {
   logger: LoggerPort;
   paymentRepo: SalesPaymentRepositoryPort;

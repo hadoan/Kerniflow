@@ -1,24 +1,24 @@
 // Accounting Application Service Facade
-import { SetupAccountingUseCase } from "./use-cases/setup-accounting.usecase";
+import { type SetupAccountingUseCase } from "./use-cases/setup-accounting.usecase";
 import {
-  GetSetupStatusUseCase,
-  CreateLedgerAccountUseCase,
-  UpdateLedgerAccountUseCase,
-  ListLedgerAccountsUseCase,
-  CreateJournalEntryUseCase,
-  UpdateJournalEntryUseCase,
-  PostJournalEntryUseCase,
-  ReverseJournalEntryUseCase,
-  ListJournalEntriesUseCase,
-  ClosePeriodUseCase,
-  ReopenPeriodUseCase,
-  UpdateAccountingSettingsUseCase,
+  type GetSetupStatusUseCase,
+  type CreateLedgerAccountUseCase,
+  type UpdateLedgerAccountUseCase,
+  type ListLedgerAccountsUseCase,
+  type CreateJournalEntryUseCase,
+  type UpdateJournalEntryUseCase,
+  type PostJournalEntryUseCase,
+  type ReverseJournalEntryUseCase,
+  type ListJournalEntriesUseCase,
+  type ClosePeriodUseCase,
+  type ReopenPeriodUseCase,
+  type UpdateAccountingSettingsUseCase,
 } from "./use-cases/accounting.usecases";
 import {
-  GetTrialBalanceUseCase,
-  GetGeneralLedgerUseCase,
-  GetProfitLossUseCase,
-  GetBalanceSheetUseCase,
+  type GetTrialBalanceUseCase,
+  type GetGeneralLedgerUseCase,
+  type GetProfitLossUseCase,
+  type GetBalanceSheetUseCase,
 } from "./use-cases/reports.usecases";
 
 export class AccountingApplication {

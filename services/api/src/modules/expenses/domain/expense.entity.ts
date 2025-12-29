@@ -15,7 +15,9 @@ export class Expense {
   ) {}
 
   archive(now: Date, userId: string) {
-    if (this.archivedAt) return;
+    if (this.archivedAt) {
+      return;
+    }
     this.archivedAt = now;
     this.archivedByUserId = userId;
   }

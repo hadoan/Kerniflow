@@ -159,7 +159,7 @@ Treat each row as a bounded context with its own code ownership, migrations, and
 | Accounting Core           | Chart of accounts and journal postings.             | LedgerAccount, JournalEntry, JournalLine           |
 | Expenses                  | Employee/vendor expenses and approvals.             | Expense, ExpenseLine, ReceiptLink, Approval        |
 | Inventory                 | Stock ledger, reservations, reorder rules.          | Location, StockMove, Reservation, ReorderPolicy    |
-| POS / Register             | Register sessions and offline sales sync.           | Register, ShiftSession, PosTicket, PosSale         |
+| POS / Register            | Register sessions and offline sales sync.           | Register, ShiftSession, PosTicket, PosSale         |
 | Assets & Maintenance      | Equipment lifecycle and servicing.                  | Asset, MaintenanceTask, WorkOrder                  |
 | Projects & Jobs           | Job costing and time/material tracking.             | Project, Job, TimeEntry, CostAllocation            |
 | HR (light)                | Profiles, time off, shifts (optional).              | EmployeeProfile, LeaveRequest, Shift               |

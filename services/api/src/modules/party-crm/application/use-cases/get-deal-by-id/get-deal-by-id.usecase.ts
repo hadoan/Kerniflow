@@ -3,7 +3,13 @@ import { ok, err, Result } from "neverthrow";
 import type { Logger } from "@kerniflow/kernel";
 import { LOGGER } from "@kerniflow/kernel";
 import type { GetDealInput, GetDealOutput } from "@kerniflow/contracts";
-import { BaseUseCase, UseCaseContext, UseCaseError, ValidationError, NotFoundError } from "@/shared/application";
+import {
+  BaseUseCase,
+  UseCaseContext,
+  UseCaseError,
+  ValidationError,
+  NotFoundError,
+} from "@/shared/application";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
 import { DEAL_REPO_PORT } from "../../ports/deal-repository.port";
 import { toDealDto } from "../../mappers/deal-dto.mapper";

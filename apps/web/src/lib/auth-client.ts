@@ -49,14 +49,18 @@ class WebAuthClient {
   async signup(data: Parameters<AuthClient["signup"]>[0]) {
     const result = await this.client.signup(data);
     const workspaceId = result.workspaceId ?? result.tenantId;
-    if (workspaceId) setActiveWorkspaceId(workspaceId);
+    if (workspaceId) {
+      setActiveWorkspaceId(workspaceId);
+    }
     return result;
   }
 
   async signin(data: Parameters<AuthClient["signin"]>[0]) {
     const result = await this.client.signin(data);
     const workspaceId = result.workspaceId ?? result.tenantId ?? data.workspaceId ?? data.tenantId;
-    if (workspaceId) setActiveWorkspaceId(workspaceId);
+    if (workspaceId) {
+      setActiveWorkspaceId(workspaceId);
+    }
     return result;
   }
 

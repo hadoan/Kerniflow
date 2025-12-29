@@ -38,7 +38,9 @@ const toAggregate = (row: DealRow): DealAggregate => {
     stageId: row.stageId,
     amountCents: row.amountCents,
     currency: row.currency,
-    expectedCloseDate: row.expectedCloseDate ? row.expectedCloseDate.toISOString().split("T")[0] : null,
+    expectedCloseDate: row.expectedCloseDate
+      ? row.expectedCloseDate.toISOString().split("T")[0]
+      : null,
     probability: row.probability,
     status: row.status,
     ownerUserId: row.ownerUserId,
@@ -91,7 +93,7 @@ export class PrismaDealRepoAdapter implements DealRepoPort {
     });
 
     const deals = results.map((row) => toAggregate(row as DealRow));
-    const nextCursor = deals.length === pageSize ? deals.at(-1)?.id ?? null : null;
+    const nextCursor = deals.length === pageSize ? (deals.at(-1)?.id ?? null) : null;
 
     return { deals, nextCursor };
   }

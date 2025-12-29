@@ -73,7 +73,7 @@ export class ApiClient {
             .refreshAccessToken()
             .catch((refreshError) => {
               // If refresh fails, clear tokens and call auth error handler
-              this.authClient.clearTokens();
+              void this.authClient.clearTokens();
               if (this.onAuthError) {
                 this.onAuthError();
               }

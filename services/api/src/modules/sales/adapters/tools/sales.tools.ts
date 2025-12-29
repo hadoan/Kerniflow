@@ -16,8 +16,8 @@ import type {
   StalledQuotesCard,
   PostingExplanationCard,
 } from "@kerniflow/contracts";
-import { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
-import { SalesApplication } from "../../application/sales.application";
+import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
+import { type SalesApplication } from "../../application/sales.application";
 
 const validationError = (issues: unknown) => ({
   ok: false,
@@ -41,7 +41,9 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
     inputSchema: SalesCreateQuoteFromTextInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = SalesCreateQuoteFromTextInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const proposal: QuoteDraftProposalCard = {
         ok: true,
         proposal: {
@@ -57,7 +59,8 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
           missingFields: ["Confirm unit price", "Confirm customer"],
         },
         confidence: 0.4,
-        rationale: "Draft generated from the provided description. Please confirm prices and customer details.",
+        rationale:
+          "Draft generated from the provided description. Please confirm prices and customer details.",
         provenance: {
           sourceText: parsed.data.userText,
           extractedFields: ["description"],
@@ -74,7 +77,9 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
     inputSchema: SalesGenerateLineItemsInputSchema,
     execute: async ({ input }) => {
       const parsed = SalesGenerateLineItemsInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const card: LineItemsProposalCard = {
         ok: true,
         proposal: {
@@ -87,7 +92,8 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
           ],
         },
         confidence: 0.35,
-        rationale: "Drafted a simple line item based on the goal. Please refine quantities and pricing.",
+        rationale:
+          "Drafted a simple line item based on the goal. Please refine quantities and pricing.",
         provenance: {
           sourceText: parsed.data.goalText,
           extractedFields: ["scope"],
@@ -104,7 +110,9 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
     inputSchema: SalesPriceAssistInputSchema,
     execute: async ({ input }) => {
       const parsed = SalesPriceAssistInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const card: PricingSuggestionCard = {
         ok: true,
         suggestions: [
@@ -116,7 +124,8 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
           },
         ],
         confidence: 0.3,
-        rationale: "Provide a baseline package; refine with historical pricing for higher confidence.",
+        rationale:
+          "Provide a baseline package; refine with historical pricing for higher confidence.",
         provenance: {
           sourceText: parsed.data.scope,
           extractedFields: ["scope"],
@@ -133,7 +142,9 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
     inputSchema: SalesSummarizeDealOrQuoteInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = SalesSummarizeDealOrQuoteInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       if (parsed.data.quoteId) {
         const result = await app.getQuote.execute(
           { quoteId: parsed.data.quoteId },
@@ -158,7 +169,11 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
           rationale: "Summary based on quote status and metadata.",
           provenance: {
             referencedEntities: [
-              { type: "quote", id: result.value.quote.id, name: result.value.quote.number ?? "Quote" },
+              {
+                type: "quote",
+                id: result.value.quote.id,
+                name: result.value.quote.number ?? "Quote",
+              },
             ],
           },
         };
@@ -188,13 +203,14 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
     inputSchema: SalesDraftFollowUpMessageInputSchema,
     execute: async ({ input }) => {
       const parsed = SalesDraftFollowUpMessageInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const card: MessageDraftCard = {
         ok: true,
         draft: {
           subject: "Quick follow-up on your quote",
-          body:
-            "Hi there,\n\nJust checking in to see if you had any questions on the quote. Happy to clarify details or adjust scope.\n\nBest regards,",
+          body: "Hi there,\n\nJust checking in to see if you had any questions on the quote. Happy to clarify details or adjust scope.\n\nBest regards,",
           tone: parsed.data.tone ?? "professional",
         },
         confidence: 0.5,
@@ -213,7 +229,9 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
     inputSchema: SalesDetectStalledQuotesInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = SalesDetectStalledQuotesInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const list = await app.listQuotes.execute(
         {
           status: "SENT",
@@ -273,7 +291,9 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
     inputSchema: SalesExplainPostingInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = SalesExplainPostingInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       if (parsed.data.invoiceId) {
         const result = await app.getInvoice.execute(

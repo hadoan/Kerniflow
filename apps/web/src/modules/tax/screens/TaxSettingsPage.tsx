@@ -45,7 +45,7 @@ export default function TaxSettingsPage() {
       return taxApi.upsertProfile(input);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tax-profile"] });
+      void queryClient.invalidateQueries({ queryKey: ["tax-profile"] });
       toast.success("Tax profile saved successfully");
     },
     onError: (error) => {

@@ -15,10 +15,7 @@ interface CreateRegisterDeps {
 }
 
 @Injectable()
-export class CreateRegisterUseCase extends BaseUseCase<
-  CreateRegisterInput,
-  CreateRegisterOutput
-> {
+export class CreateRegisterUseCase extends BaseUseCase<CreateRegisterInput, CreateRegisterOutput> {
   constructor(
     @Inject(REGISTER_REPOSITORY_PORT) private registerRepo: RegisterRepositoryPort,
     @Inject(ID_GENERATOR_TOKEN) private idGenerator: IdGenerator
@@ -34,7 +31,10 @@ export class CreateRegisterUseCase extends BaseUseCase<
     const exists = await this.registerRepo.existsByName(ctx.workspaceId, input.name);
     if (exists) {
       return Err(
-        new ConflictError("REGISTER_NAME_EXISTS", `Register with name '${input.name}' already exists`)
+        new ConflictError(
+          "REGISTER_NAME_EXISTS",
+          `Register with name '${input.name}' already exists`
+        )
       );
     }
 

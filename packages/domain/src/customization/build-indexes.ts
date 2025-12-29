@@ -12,9 +12,13 @@ export interface BuildIndexInput {
 export function buildCustomFieldIndexes(input: BuildIndexInput): CustomFieldIndexRow[] {
   const rows: CustomFieldIndexRow[] = [];
   for (const def of input.definitions) {
-    if (!def.isIndexed) continue;
+    if (!def.isIndexed) {
+      continue;
+    }
     const value = input.values[def.key];
-    if (value === undefined || value === null) continue;
+    if (value === undefined || value === null) {
+      continue;
+    }
 
     const base: CustomFieldIndexRow = {
       tenantId: input.tenantId,
@@ -54,31 +58,47 @@ export function buildCustomFieldIndexes(input: BuildIndexInput): CustomFieldInde
 }
 
 function toNumber(value: unknown): number {
-  if (typeof value === "number") return value;
+  if (typeof value === "number") {
+    return value;
+  }
   const parsed = Number(value);
-  if (Number.isNaN(parsed)) throw new Error("Cannot index non-numeric value");
+  if (Number.isNaN(parsed)) {
+    throw new Error("Cannot index non-numeric value");
+  }
   return parsed;
 }
 
 function toDate(value: unknown): Date {
-  if (value instanceof Date) return value;
+  if (value instanceof Date) {
+    return value;
+  }
   const parsed = new Date(String(value));
-  if (Number.isNaN(parsed.getTime())) throw new Error("Cannot index invalid date");
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error("Cannot index invalid date");
+  }
   return parsed;
 }
 
 function extractAmount(value: unknown): number {
-  if (typeof value === "number") return value;
+  if (typeof value === "number") {
+    return value;
+  }
   if (typeof value === "string") {
     const parsed = Number(value);
-    if (!Number.isNaN(parsed)) return parsed;
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
   }
   if (typeof value === "object" && value !== null) {
     const amount = (value as any).amountCents;
-    if (typeof amount === "number") return amount;
+    if (typeof amount === "number") {
+      return amount;
+    }
     if (typeof amount === "string") {
       const parsed = Number(amount);
-      if (!Number.isNaN(parsed)) return parsed;
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
     }
   }
   throw new Error("Cannot index money value without amount");

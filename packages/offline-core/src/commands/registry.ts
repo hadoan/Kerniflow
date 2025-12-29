@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { CommandDefinition } from "./command";
+import { type z } from "zod";
+import { type CommandDefinition } from "./command";
 
 export class CommandRegistry {
   private readonly definitions = new Map<string, CommandDefinition<unknown>>();

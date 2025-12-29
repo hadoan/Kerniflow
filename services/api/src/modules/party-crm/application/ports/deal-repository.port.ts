@@ -1,4 +1,4 @@
-import { DealAggregate, DealStatus } from "../../domain/deal.aggregate";
+import { type DealAggregate, type DealStatus } from "../../domain/deal.aggregate";
 
 export type DealStageTransition = {
   tenantId: string;

@@ -1,4 +1,7 @@
-import type { IdempotencyStoragePort, StoredResponse } from "../../../shared/ports/idempotency-storage.port";
+import type {
+  IdempotencyStoragePort,
+  StoredResponse,
+} from "../../../shared/ports/idempotency-storage.port";
 
 export const getIdempotentResult = async <T>(params: {
   idempotency: IdempotencyStoragePort;

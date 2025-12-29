@@ -1,4 +1,4 @@
-import { InvoiceNumberingPort } from "../../application/ports/invoice-numbering.port";
+import { type InvoiceNumberingPort } from "../../application/ports/invoice-numbering.port";
 
 export class FakeInvoiceNumbering implements InvoiceNumberingPort {
   private counter = 1;

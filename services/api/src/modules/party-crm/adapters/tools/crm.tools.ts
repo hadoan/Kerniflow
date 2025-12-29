@@ -45,7 +45,9 @@ export const buildCrmAiTools = (app: PartyCrmApplication): DomainToolPort[] => [
       const parsed = z
         .object({ sourceText: z.string(), suggestedRoles: z.array(z.string()).optional() })
         .safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { sourceText, suggestedRoles } = parsed.data;
 
@@ -76,7 +78,12 @@ export const buildCrmAiTools = (app: PartyCrmApplication): DomainToolPort[] => [
       });
 
       // Search for potential duplicates
-      const duplicates: Array<{ id: string; displayName: string; email?: string; matchScore: number }> = [];
+      const duplicates: Array<{
+        id: string;
+        displayName: string;
+        email?: string;
+        matchScore: number;
+      }> = [];
       if (object.email) {
         const searchResult = await app.searchCustomers.execute(
           { q: object.email, pageSize: 5 },
@@ -111,7 +118,9 @@ export const buildCrmAiTools = (app: PartyCrmApplication): DomainToolPort[] => [
         rationale: object.rationale,
         provenance: {
           sourceText,
-          extractedFields: Object.keys(object).filter((k) => k !== "confidence" && k !== "rationale"),
+          extractedFields: Object.keys(object).filter(
+            (k) => k !== "confidence" && k !== "rationale"
+          ),
         },
       });
 
@@ -132,8 +141,12 @@ export const buildCrmAiTools = (app: PartyCrmApplication): DomainToolPort[] => [
       partyId: z.string().optional().describe("Optional party ID to associate the deal with"),
     }),
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
-      const parsed = z.object({ sourceText: z.string(), partyId: z.string().optional() }).safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      const parsed = z
+        .object({ sourceText: z.string(), partyId: z.string().optional() })
+        .safeParse(input);
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { sourceText, partyId } = parsed.data;
 
@@ -175,7 +188,9 @@ export const buildCrmAiTools = (app: PartyCrmApplication): DomainToolPort[] => [
         rationale: object.rationale,
         provenance: {
           sourceText,
-          extractedFields: Object.keys(object).filter((k) => k !== "confidence" && k !== "rationale"),
+          extractedFields: Object.keys(object).filter(
+            (k) => k !== "confidence" && k !== "rationale"
+          ),
         },
       });
 
@@ -193,11 +208,18 @@ export const buildCrmAiTools = (app: PartyCrmApplication): DomainToolPort[] => [
     kind: "server",
     inputSchema: z.object({
       dealId: z.string().describe("The deal ID to generate follow-ups for"),
-      context: z.string().optional().describe("Additional context (e.g., meeting notes, conversation summary)"),
+      context: z
+        .string()
+        .optional()
+        .describe("Additional context (e.g., meeting notes, conversation summary)"),
     }),
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
-      const parsed = z.object({ dealId: z.string(), context: z.string().optional() }).safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      const parsed = z
+        .object({ dealId: z.string(), context: z.string().optional() })
+        .safeParse(input);
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
 
       const { dealId, context } = parsed.data;
 

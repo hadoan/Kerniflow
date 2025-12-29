@@ -130,7 +130,10 @@ export class CreateSalesOrderUseCase extends BaseUseCase<
     const now = this.deps.clock.now();
     const orderDate = input.orderDate ? parseLocalDate(input.orderDate) : null;
     const deliveryDate = input.deliveryDate ? parseLocalDate(input.deliveryDate) : null;
-    const lineItems = buildLineItems({ idGenerator: this.deps.idGenerator, lineItems: input.lineItems });
+    const lineItems = buildLineItems({
+      idGenerator: this.deps.idGenerator,
+      lineItems: input.lineItems,
+    });
 
     const order = SalesOrderAggregate.createDraft({
       id: this.deps.idGenerator.newId(),

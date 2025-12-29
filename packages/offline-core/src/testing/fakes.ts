@@ -1,8 +1,8 @@
-import { Clock } from "../platform/clock.port";
-import { IdGenerator } from "../platform/idGenerator.port";
-import { Logger } from "../platform/logger.port";
-import { NetworkMonitor, NetworkStatus } from "../platform/networkMonitor.port";
-import { SyncLock } from "../sync/syncLock.port";
+import { type Clock } from "../platform/clock.port";
+import { type IdGenerator } from "../platform/idGenerator.port";
+import { type Logger } from "../platform/logger.port";
+import { type NetworkMonitor, type NetworkStatus } from "../platform/networkMonitor.port";
+import { type SyncLock } from "../sync/syncLock.port";
 
 export class StaticClock implements Clock {
   private current: Date;

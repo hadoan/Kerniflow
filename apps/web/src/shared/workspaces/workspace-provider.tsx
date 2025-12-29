@@ -54,7 +54,7 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   const setWorkspace = (workspaceId: string) => {
     setActiveWorkspaceId(workspaceId);
     setActiveId(workspaceId);
-    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    void queryClient.invalidateQueries({ queryKey: ["workspaces"] });
   };
 
   const value: WorkspaceContextValue = {
@@ -73,6 +73,8 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
 
 export const useWorkspace = (): WorkspaceContextValue => {
   const ctx = useContext(WorkspaceContext);
-  if (!ctx) throw new Error("useWorkspace must be used within WorkspaceProvider");
+  if (!ctx) {
+    throw new Error("useWorkspace must be used within WorkspaceProvider");
+  }
   return ctx;
 };

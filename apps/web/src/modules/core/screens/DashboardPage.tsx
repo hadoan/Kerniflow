@@ -55,7 +55,9 @@ export default function DashboardPage() {
     const revenueThisMonthCents = invoices
       .filter((inv) => {
         const paidAt = inv.payments?.[0]?.paidAt;
-        if (!paidAt || inv.status !== "PAID") return false;
+        if (!paidAt || inv.status !== "PAID") {
+          return false;
+        }
         const paidDate = new Date(paidAt);
         return paidDate >= thisMonth && paidDate < nextMonth;
       })
@@ -254,9 +256,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-3">
               {dashboard.recentInvoices.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No invoices yet
-                </p>
+                <p className="text-sm text-muted-foreground text-center py-4">No invoices yet</p>
               ) : (
                 dashboard.recentInvoices.map((invoice) => {
                   const customer = customers.find((c) => c.id === invoice.customerPartyId);
@@ -306,9 +306,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-3">
               {dashboard.recentExpenses.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No expenses yet
-                </p>
+                <p className="text-sm text-muted-foreground text-center py-4">No expenses yet</p>
               ) : (
                 dashboard.recentExpenses.map((expense) => (
                   <Link

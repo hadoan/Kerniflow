@@ -1,5 +1,5 @@
-import { SalesOrderAggregate } from "../../domain/order.aggregate";
-import { OrderStatus } from "../../domain/sales.types";
+import { type SalesOrderAggregate } from "../../domain/order.aggregate";
+import { type OrderStatus } from "../../domain/sales.types";
 
 export type ListOrdersFilters = {
   status?: OrderStatus;

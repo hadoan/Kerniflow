@@ -1,5 +1,5 @@
-import { CustomerBillingSnapshotDTO } from "@kerniflow/contracts";
-import { CustomerQueryPort } from "../../application/ports/customer-query.port";
+import { type CustomerBillingSnapshotDTO } from "@kerniflow/contracts";
+import { type CustomerQueryPort } from "../../application/ports/customer-query.port";
 
 export class FakeCustomerQueryPort implements CustomerQueryPort {
   snapshots: Record<string, CustomerBillingSnapshotDTO> = {};

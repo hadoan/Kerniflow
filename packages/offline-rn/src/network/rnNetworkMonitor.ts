@@ -1,4 +1,4 @@
-import { NetworkMonitor, NetworkStatus } from "@kerniflow/offline-core";
+import { type NetworkMonitor, type NetworkStatus } from "@kerniflow/offline-core";
 
 type NetInfoLike = {
   addEventListener: (callback: (state: { isConnected: boolean | null }) => void) => () => void;

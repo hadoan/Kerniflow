@@ -72,7 +72,8 @@ const MetaFooter: React.FC<{
 
 export default function SalesCopilotPage() {
   const navigate = useNavigate();
-  const apiBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:3000";
+  const apiBase =
+    import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:3000";
   const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
   const accessToken = authClient.getAccessToken() ?? "";
 
@@ -194,8 +195,7 @@ export default function SalesCopilotPage() {
     const quoteCard = QuoteDraftProposalCardSchema.safeParse(result);
     if (quoteCard.success) {
       const proposal = quoteCard.data.proposal;
-      const selectedCustomerId =
-        proposal.customerPartyId ?? customerOverrides[toolCallId] ?? "";
+      const selectedCustomerId = proposal.customerPartyId ?? customerOverrides[toolCallId] ?? "";
       return (
         <Card className="bg-white">
           <CardContent className="p-4 space-y-3">
@@ -206,7 +206,9 @@ export default function SalesCopilotPage() {
             <div className="space-y-2">
               <div className="text-sm text-muted-foreground">Customer</div>
               {proposal.customerPartyId ? (
-                <div className="text-sm font-medium">{getCustomerName(proposal.customerPartyId)}</div>
+                <div className="text-sm font-medium">
+                  {getCustomerName(proposal.customerPartyId)}
+                </div>
               ) : (
                 <Select
                   value={selectedCustomerId}
@@ -233,7 +235,8 @@ export default function SalesCopilotPage() {
                 {proposal.lineItems.map((line, idx) => (
                   <div key={idx} className="flex items-center justify-between text-sm">
                     <div>
-                      {line.description} · {line.quantity} x {formatMoney(line.unitPriceCents, "en-US", defaultCurrency)}
+                      {line.description} · {line.quantity} x{" "}
+                      {formatMoney(line.unitPriceCents, "en-US", defaultCurrency)}
                     </div>
                     <div className="font-medium">
                       {formatMoney(line.quantity * line.unitPriceCents, "en-US", defaultCurrency)}
@@ -254,7 +257,8 @@ export default function SalesCopilotPage() {
             ) : null}
             {proposal.missingFields?.length ? (
               <div className="text-sm text-muted-foreground">
-                Missing: <span className="text-foreground">{proposal.missingFields.join(", ")}</span>
+                Missing:{" "}
+                <span className="text-foreground">{proposal.missingFields.join(", ")}</span>
               </div>
             ) : null}
             <div className="flex flex-wrap gap-2">
@@ -294,7 +298,8 @@ export default function SalesCopilotPage() {
               {proposal.lineItems.map((line, idx) => (
                 <div key={idx} className="flex items-center justify-between text-sm">
                   <div>
-                    {line.description} · {line.quantity} x {formatMoney(line.unitPriceCents, "en-US", defaultCurrency)}
+                    {line.description} · {line.quantity} x{" "}
+                    {formatMoney(line.unitPriceCents, "en-US", defaultCurrency)}
                   </div>
                   <div className="font-medium">
                     {formatMoney(line.quantity * line.unitPriceCents, "en-US", defaultCurrency)}
@@ -335,7 +340,9 @@ export default function SalesCopilotPage() {
                   <div>
                     {suggestion.label}{" "}
                     {suggestion.marginPercent ? (
-                      <span className="text-muted-foreground">· {suggestion.marginPercent}% margin</span>
+                      <span className="text-muted-foreground">
+                        · {suggestion.marginPercent}% margin
+                      </span>
                     ) : null}
                   </div>
                   <div className="font-medium">
@@ -404,7 +411,11 @@ export default function SalesCopilotPage() {
                   <div>
                     Quote {alert.quoteNumber ?? alert.quoteId} · {alert.daysSinceSent} days
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => navigate(`/sales/quotes/${alert.quoteId}`)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/sales/quotes/${alert.quoteId}`)}
+                  >
                     Open
                   </Button>
                 </div>
@@ -437,14 +448,19 @@ export default function SalesCopilotPage() {
             <div className="text-sm">{postingCard.data.explanation}</div>
             {postingCard.data.journalEntryId ? (
               <div className="text-sm text-muted-foreground">
-                Journal Entry: <span className="text-foreground">{postingCard.data.journalEntryId}</span>
+                Journal Entry:{" "}
+                <span className="text-foreground">{postingCard.data.journalEntryId}</span>
               </div>
             ) : null}
             <div className="flex flex-wrap gap-2">
               <Button variant="ghost" size="sm" onClick={() => dismissTool(toolCallId)}>
                 Dismiss
               </Button>
-              <Button variant="secondary" size="sm" onClick={() => navigate("/accounting/journal-entries")}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate("/accounting/journal-entries")}
+              >
                 View Journal Entries
               </Button>
             </div>
@@ -470,13 +486,16 @@ export default function SalesCopilotPage() {
             <div className="text-sm">{summaryCard.data.summary.summary}</div>
             {summaryCard.data.summary.risks?.length ? (
               <div className="text-sm text-muted-foreground">
-                Risks: <span className="text-foreground">{summaryCard.data.summary.risks.join(", ")}</span>
+                Risks:{" "}
+                <span className="text-foreground">{summaryCard.data.summary.risks.join(", ")}</span>
               </div>
             ) : null}
             {summaryCard.data.summary.nextSteps?.length ? (
               <div className="text-sm text-muted-foreground">
                 Next Steps:{" "}
-                <span className="text-foreground">{summaryCard.data.summary.nextSteps.join(", ")}</span>
+                <span className="text-foreground">
+                  {summaryCard.data.summary.nextSteps.join(", ")}
+                </span>
               </div>
             ) : null}
             <div className="flex flex-wrap gap-2">
@@ -510,7 +529,9 @@ export default function SalesCopilotPage() {
   };
 
   const renderPart = (part: MessagePart, messageId: string) => {
-    if (part.type === "text") return <p className="whitespace-pre-wrap">{part.text}</p>;
+    if (part.type === "text") {
+      return <p className="whitespace-pre-wrap">{part.text}</p>;
+    }
     if (part.type === "tool-call") {
       return (
         <div className="text-xs text-muted-foreground">
@@ -543,8 +564,8 @@ export default function SalesCopilotPage() {
       <Card>
         <CardContent className="p-4 space-y-4">
           <div className="text-sm text-muted-foreground">
-            Try prompts like: “Create a quote for website redesign,” “Draft a follow-up for quote 123,”
-            or “Explain posting for invoice 456.”
+            Try prompts like: “Create a quote for website redesign,” “Draft a follow-up for quote
+            123,” or “Explain posting for invoice 456.”
           </div>
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Textarea

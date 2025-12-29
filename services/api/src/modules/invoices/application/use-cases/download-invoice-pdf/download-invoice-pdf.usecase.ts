@@ -47,7 +47,7 @@ export class DownloadInvoicePdfUseCase {
     }
 
     // // 2. Validate status: only finalized invoices can have PDFs
-    // if (invoice.status === "DRAFT") { 
+    // if (invoice.status === "DRAFT") {
     //   throw new Error("Cannot download PDF for draft invoice");
     // }
 
@@ -140,9 +140,14 @@ export class DownloadInvoicePdfUseCase {
       // Write the PDF to the local file
       await fs.writeFile(filePath, pdfBytes);
 
-      this.logger.log(`PDF saved locally for tenant ${tenantId}, invoice ${invoiceId}: ${filePath}`);
+      this.logger.log(
+        `PDF saved locally for tenant ${tenantId}, invoice ${invoiceId}: ${filePath}`
+      );
     } catch (error) {
-      this.logger.error(`Failed to save PDF locally for tenant ${tenantId}, invoice ${invoiceId}`, error);
+      this.logger.error(
+        `Failed to save PDF locally for tenant ${tenantId}, invoice ${invoiceId}`,
+        error
+      );
       // Don't throw - we still want to upload to GCS even if local save fails
     }
   }

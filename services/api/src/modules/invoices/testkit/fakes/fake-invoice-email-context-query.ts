@@ -1,6 +1,6 @@
 import {
-  InvoiceEmailContextQueryPort,
-  InvoiceEmailContext,
+  type InvoiceEmailContextQueryPort,
+  type InvoiceEmailContext,
 } from "../../application/ports/invoice-email-context-query.port";
 
 export class FakeInvoiceEmailContextQuery implements InvoiceEmailContextQueryPort {

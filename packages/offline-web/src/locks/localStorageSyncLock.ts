@@ -1,4 +1,4 @@
-import { Clock, SyncLock } from "@kerniflow/offline-core";
+import { type Clock, type SyncLock } from "@kerniflow/offline-core";
 
 interface LocalStorageSyncLockOptions {
   ttlMs?: number;

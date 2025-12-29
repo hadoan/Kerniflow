@@ -88,14 +88,18 @@ export default function SalesSettingsPage() {
               <Label>Default Currency</Label>
               <Input
                 value={formState.defaultCurrency}
-                onChange={(e) => setFormState((prev) => ({ ...prev, defaultCurrency: e.target.value }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, defaultCurrency: e.target.value }))
+                }
               />
             </div>
             <div className="space-y-2">
               <Label>Default Payment Terms</Label>
               <Input
                 value={formState.defaultPaymentTerms}
-                onChange={(e) => setFormState((prev) => ({ ...prev, defaultPaymentTerms: e.target.value }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, defaultPaymentTerms: e.target.value }))
+                }
               />
             </div>
           </div>
@@ -105,7 +109,9 @@ export default function SalesSettingsPage() {
               <Label>Quote Prefix</Label>
               <Input
                 value={formState.quoteNumberPrefix}
-                onChange={(e) => setFormState((prev) => ({ ...prev, quoteNumberPrefix: e.target.value }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, quoteNumberPrefix: e.target.value }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -113,14 +119,18 @@ export default function SalesSettingsPage() {
               <Input
                 type="number"
                 value={formState.quoteNextNumber}
-                onChange={(e) => setFormState((prev) => ({ ...prev, quoteNextNumber: Number(e.target.value) }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, quoteNextNumber: Number(e.target.value) }))
+                }
               />
             </div>
             <div className="space-y-2">
               <Label>Order Prefix</Label>
               <Input
                 value={formState.orderNumberPrefix}
-                onChange={(e) => setFormState((prev) => ({ ...prev, orderNumberPrefix: e.target.value }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, orderNumberPrefix: e.target.value }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -128,14 +138,18 @@ export default function SalesSettingsPage() {
               <Input
                 type="number"
                 value={formState.orderNextNumber}
-                onChange={(e) => setFormState((prev) => ({ ...prev, orderNextNumber: Number(e.target.value) }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, orderNextNumber: Number(e.target.value) }))
+                }
               />
             </div>
             <div className="space-y-2">
               <Label>Invoice Prefix</Label>
               <Input
                 value={formState.invoiceNumberPrefix}
-                onChange={(e) => setFormState((prev) => ({ ...prev, invoiceNumberPrefix: e.target.value }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, invoiceNumberPrefix: e.target.value }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -143,7 +157,9 @@ export default function SalesSettingsPage() {
               <Input
                 type="number"
                 value={formState.invoiceNextNumber}
-                onChange={(e) => setFormState((prev) => ({ ...prev, invoiceNextNumber: Number(e.target.value) }))}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, invoiceNextNumber: Number(e.target.value) }))
+                }
               />
             </div>
           </div>
@@ -163,7 +179,10 @@ export default function SalesSettingsPage() {
               <Input
                 value={formState.defaultAccountsReceivableAccountId}
                 onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, defaultAccountsReceivableAccountId: e.target.value }))
+                  setFormState((prev) => ({
+                    ...prev,
+                    defaultAccountsReceivableAccountId: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -181,7 +200,9 @@ export default function SalesSettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label>Auto-post on Issue</Label>
-              <p className="text-sm text-muted-foreground">Create journal entries when invoices are issued.</p>
+              <p className="text-sm text-muted-foreground">
+                Create journal entries when invoices are issued.
+              </p>
             </div>
             <Switch
               checked={formState.autoPostOnIssue}
@@ -194,7 +215,9 @@ export default function SalesSettingsPage() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label>Auto-post on Payment</Label>
-              <p className="text-sm text-muted-foreground">Create journal entries when payments are recorded.</p>
+              <p className="text-sm text-muted-foreground">
+                Create journal entries when payments are recorded.
+              </p>
             </div>
             <Switch
               checked={formState.autoPostOnPayment}

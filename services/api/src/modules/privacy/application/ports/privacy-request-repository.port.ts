@@ -1,4 +1,4 @@
-import { PrivacyRequest } from "../../domain/privacy-request.entity";
+import { type PrivacyRequest } from "../../domain/privacy-request.entity";
 
 export interface PrivacyRequestRepoPort {
   create(request: PrivacyRequest): Promise<void>;

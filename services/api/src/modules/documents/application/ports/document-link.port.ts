@@ -1,4 +1,4 @@
-import { DocumentLinkEntityType } from "../../domain/document.types";
+import { type DocumentLinkEntityType } from "../../domain/document.types";
 
 export interface DocumentLinkRepoPort {
   createLink(params: {

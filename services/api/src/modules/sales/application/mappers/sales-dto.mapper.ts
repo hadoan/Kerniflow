@@ -5,11 +5,11 @@ import type {
   SalesPaymentDto,
   SalesSettingsDto,
 } from "@kerniflow/contracts";
-import { QuoteAggregate } from "../../domain/quote.aggregate";
-import { SalesOrderAggregate } from "../../domain/order.aggregate";
-import { SalesInvoiceAggregate } from "../../domain/invoice.aggregate";
+import { type QuoteAggregate } from "../../domain/quote.aggregate";
+import { type SalesOrderAggregate } from "../../domain/order.aggregate";
+import { type SalesInvoiceAggregate } from "../../domain/invoice.aggregate";
 import type { SalesPayment } from "../../domain/sales.types";
-import { SalesSettingsAggregate } from "../../domain/settings.aggregate";
+import { type SalesSettingsAggregate } from "../../domain/settings.aggregate";
 
 const toIso = (value: Date | null | undefined): string | null | undefined =>
   value ? value.toISOString() : value === null ? null : undefined;

@@ -86,7 +86,12 @@ export class SalesOrderAggregate {
     patch: Partial<
       Pick<
         OrderProps,
-        "customerPartyId" | "customerContactPartyId" | "orderDate" | "deliveryDate" | "currency" | "notes"
+        | "customerPartyId"
+        | "customerContactPartyId"
+        | "orderDate"
+        | "deliveryDate"
+        | "currency"
+        | "notes"
       >
     >,
     now: Date

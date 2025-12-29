@@ -1,4 +1,4 @@
-import { CopilotMessage } from "../../domain/entities/message.entity";
+import { type CopilotMessage } from "../../domain/entities/message.entity";
 
 export interface MessageRepositoryPort {
   create(message: {

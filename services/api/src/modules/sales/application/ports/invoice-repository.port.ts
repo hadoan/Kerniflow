@@ -1,5 +1,5 @@
-import { SalesInvoiceAggregate } from "../../domain/invoice.aggregate";
-import { SalesInvoiceStatus } from "../../domain/sales.types";
+import { type SalesInvoiceAggregate } from "../../domain/invoice.aggregate";
+import { type SalesInvoiceStatus } from "../../domain/sales.types";
 
 export type ListSalesInvoicesFilters = {
   status?: SalesInvoiceStatus;

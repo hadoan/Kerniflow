@@ -8,8 +8,8 @@ import {
   SendInvoiceInputSchema,
   UpdateInvoiceInputSchema,
 } from "@kerniflow/contracts";
-import { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
-import { InvoicesApplication } from "../../application/invoices.application";
+import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
+import { type InvoicesApplication } from "../../application/invoices.application";
 import { mapToolResult } from "./mappers";
 
 const validationError = (issues: unknown) => ({
@@ -34,7 +34,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: GetInvoiceByIdInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = GetInvoiceByIdInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.getInvoiceById.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)
@@ -49,7 +51,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: ListInvoicesInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = ListInvoicesInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.listInvoices.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)
@@ -64,7 +68,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: CreateInvoiceInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = CreateInvoiceInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.createInvoice.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)
@@ -79,7 +85,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: UpdateInvoiceInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = UpdateInvoiceInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.updateInvoice.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)
@@ -94,7 +102,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: FinalizeInvoiceInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = FinalizeInvoiceInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.finalizeInvoice.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)
@@ -109,7 +119,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: SendInvoiceInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = SendInvoiceInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.sendInvoice.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)
@@ -124,7 +136,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: RecordPaymentInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = RecordPaymentInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.recordPayment.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)
@@ -139,7 +153,9 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     inputSchema: CancelInvoiceInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
       const parsed = CancelInvoiceInputSchema.safeParse(input);
-      if (!parsed.success) return validationError(parsed.error.flatten());
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
       const result = await app.cancelInvoice.execute(
         parsed.data,
         buildCtx(tenantId, userId, toolCallId, runId)

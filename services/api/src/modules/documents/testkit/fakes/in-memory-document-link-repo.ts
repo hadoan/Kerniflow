@@ -1,6 +1,6 @@
-import { DocumentLinkRepoPort } from "../../application/ports/document-link.port";
-import { DocumentLinkEntityType } from "../../domain/document.types";
-import { InMemoryDocumentRepo } from "./in-memory-document-repo";
+import { type DocumentLinkRepoPort } from "../../application/ports/document-link.port";
+import { type DocumentLinkEntityType } from "../../domain/document.types";
+import { type InMemoryDocumentRepo } from "./in-memory-document-repo";
 
 export class InMemoryDocumentLinkRepo implements DocumentLinkRepoPort {
   links: Array<{

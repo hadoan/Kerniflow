@@ -1,5 +1,5 @@
-import { InvoiceDto } from "@kerniflow/contracts";
-import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
+import { type InvoiceDto } from "@kerniflow/contracts";
+import { type InvoiceAggregate } from "../../../domain/invoice.aggregate";
 
 export const toInvoiceDto = (invoice: InvoiceAggregate): InvoiceDto => ({
   id: invoice.id,

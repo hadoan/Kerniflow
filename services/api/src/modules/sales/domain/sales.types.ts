@@ -2,12 +2,7 @@ import type { LocalDate } from "@kerniflow/kernel";
 
 export type QuoteStatus = "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "CONVERTED" | "EXPIRED";
 export type OrderStatus = "DRAFT" | "CONFIRMED" | "FULFILLED" | "INVOICED" | "CANCELED";
-export type SalesInvoiceStatus =
-  | "DRAFT"
-  | "ISSUED"
-  | "PARTIALLY_PAID"
-  | "PAID"
-  | "VOID";
+export type SalesInvoiceStatus = "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "VOID";
 
 export type PaymentMethod = "BANK_TRANSFER" | "CASH" | "CARD" | "OTHER";
 

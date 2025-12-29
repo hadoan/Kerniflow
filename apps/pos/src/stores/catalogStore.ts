@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import type { CatalogProduct } from '@kerniflow/contracts';
-import { useAuthStore } from './authStore';
-import * as SecureStore from 'expo-secure-store';
+import { create } from "zustand";
+import type { CatalogProduct } from "@kerniflow/contracts";
+import { useAuthStore } from "./authStore";
+import * as SecureStore from "expo-secure-store";
 
 interface CatalogState {
   products: CatalogProduct[];
@@ -18,8 +18,8 @@ interface CatalogState {
   getProductByBarcode: (barcode: string) => CatalogProduct | undefined;
 }
 
-const CATALOG_STORAGE_KEY = 'pos-catalog';
-const CATALOG_SYNC_KEY = 'pos-catalog-sync-at';
+const CATALOG_STORAGE_KEY = "pos-catalog";
+const CATALOG_SYNC_KEY = "pos-catalog-sync-at";
 
 export const useCatalogStore = create<CatalogState>((set, get) => ({
   products: [],
@@ -29,7 +29,9 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   syncError: null,
 
   initialize: async () => {
-    if (get().isInitialized) return;
+    if (get().isInitialized) {
+      return;
+    }
 
     try {
       // Load cached catalog from storage
@@ -46,11 +48,13 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
       }
 
       // Trigger background sync to refresh catalog
-      get().syncCatalog(false).catch((error) => {
-        console.error('Background catalog sync failed:', error);
-      });
+      get()
+        .syncCatalog(false)
+        .catch((error) => {
+          console.error("Background catalog sync failed:", error);
+        });
     } catch (error) {
-      console.error('Failed to initialize catalog:', error);
+      console.error("Failed to initialize catalog:", error);
       set({ isInitialized: true });
     }
   },
@@ -58,12 +62,12 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   syncCatalog: async (force = false) => {
     const apiClient = useAuthStore.getState().apiClient;
     if (!apiClient) {
-      throw new Error('API client not initialized');
+      throw new Error("API client not initialized");
     }
 
     // Skip if already syncing
     if (get().isLoading) {
-      console.log('Catalog sync already in progress');
+      console.log("Catalog sync already in progress");
       return;
     }
 
@@ -89,8 +93,8 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
 
       console.log(`Synced ${data.products.length} products from server`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Failed to sync catalog:', error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.error("Failed to sync catalog:", error);
       set({ isLoading: false, syncError: errorMessage });
       throw error;
     }

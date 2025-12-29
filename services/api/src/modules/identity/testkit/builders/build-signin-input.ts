@@ -1,4 +1,4 @@
-import { SignInInput } from "../../application/use-cases/sign-in.usecase";
+import { type SignInInput } from "../../application/use-cases/sign-in.usecase";
 import { buildRequestContext } from "../../../../shared/context/request-context";
 
 export const buildSignInInput = (overrides: Partial<SignInInput> = {}): SignInInput => {

@@ -1,7 +1,7 @@
-import * as SQLite from 'expo-sqlite';
-import { v4 as uuidv4 } from '@lukeed/uuid';
-import type { PosSale, PosSaleLineItem, PosSalePayment } from '@kerniflow/contracts';
-import { SaleBuilder } from '@kerniflow/pos-core';
+import type * as SQLite from "expo-sqlite";
+import { v4 as uuidv4 } from "@lukeed/uuid";
+import type { PosSale, PosSaleLineItem, PosSalePayment } from "@kerniflow/contracts";
+import { SaleBuilder } from "@kerniflow/pos-core";
 
 const saleBuilder = new SaleBuilder();
 
@@ -10,7 +10,7 @@ export interface CreateSaleParams {
   sessionId: string | null;
   registerId: string;
   customerId: string | null;
-  lineItems: Omit<PosSaleLineItem, 'lineId'>[];
+  lineItems: Omit<PosSaleLineItem, "lineId">[];
   payments: PosSalePayment[];
   notes: string | null;
   taxCents: number;
@@ -80,22 +80,14 @@ export class SalesService {
     // Calculate totals
     const subtotalCents = params.lineItems.reduce((sum, item) => {
       return (
-        sum +
-        saleBuilder.calculateLineTotal(
-          item.quantity,
-          item.unitPriceCents,
-          item.discountCents
-        )
+        sum + saleBuilder.calculateLineTotal(item.quantity, item.unitPriceCents, item.discountCents)
       );
     }, 0);
 
     const totalCents = subtotalCents + params.taxCents;
 
     // Generate receipt number (local format)
-    const receiptNumber = this.generateReceiptNumber(
-      params.registerId,
-      createdAt
-    );
+    const receiptNumber = this.generateReceiptNumber(params.registerId, createdAt);
 
     // Add line items with IDs
     const lineItems: PosSaleLineItem[] = params.lineItems.map((item) => ({
@@ -116,7 +108,7 @@ export class SalesService {
       subtotalCents,
       taxCents: params.taxCents,
       totalCents,
-      status: 'PENDING_SYNC',
+      status: "PENDING_SYNC",
       idempotencyKey,
       serverInvoiceId: null,
       serverPaymentId: null,
@@ -143,7 +135,7 @@ export class SalesService {
         subtotalCents,
         params.taxCents,
         totalCents,
-        'PENDING_SYNC',
+        "PENDING_SYNC",
         idempotencyKey,
         params.notes,
         createdAt.toISOString(),
@@ -182,13 +174,7 @@ export class SalesService {
         `INSERT INTO pos_sale_payments (
           payment_id, pos_sale_id, method, amount_cents, reference
         ) VALUES (?, ?, ?, ?, ?)`,
-        [
-          payment.paymentId,
-          posSaleId,
-          payment.method,
-          payment.amountCents,
-          payment.reference,
-        ]
+        [payment.paymentId, posSaleId, payment.method, payment.amountCents, payment.reference]
       );
     }
 
@@ -196,20 +182,21 @@ export class SalesService {
   }
 
   async getSaleById(posSaleId: string): Promise<PosSale | null> {
-    const sale = await this.db.getFirstAsync<any>(
-      'SELECT * FROM pos_sales WHERE pos_sale_id = ?',
-      [posSaleId]
-    );
+    const sale = await this.db.getFirstAsync<any>("SELECT * FROM pos_sales WHERE pos_sale_id = ?", [
+      posSaleId,
+    ]);
 
-    if (!sale) return null;
+    if (!sale) {
+      return null;
+    }
 
     const lineItems = await this.db.getAllAsync<any>(
-      'SELECT * FROM pos_sale_line_items WHERE pos_sale_id = ?',
+      "SELECT * FROM pos_sale_line_items WHERE pos_sale_id = ?",
       [posSaleId]
     );
 
     const payments = await this.db.getAllAsync<any>(
-      'SELECT * FROM pos_sale_payments WHERE pos_sale_id = ?',
+      "SELECT * FROM pos_sale_payments WHERE pos_sale_id = ?",
       [posSaleId]
     );
 
@@ -228,12 +215,12 @@ export class SalesService {
 
     for (const sale of sales) {
       const lineItems = await this.db.getAllAsync<any>(
-        'SELECT * FROM pos_sale_line_items WHERE pos_sale_id = ?',
+        "SELECT * FROM pos_sale_line_items WHERE pos_sale_id = ?",
         [sale.pos_sale_id]
       );
 
       const payments = await this.db.getAllAsync<any>(
-        'SELECT * FROM pos_sale_payments WHERE pos_sale_id = ?',
+        "SELECT * FROM pos_sale_payments WHERE pos_sale_id = ?",
         [sale.pos_sale_id]
       );
 
@@ -270,18 +257,14 @@ export class SalesService {
   }
 
   private generateReceiptNumber(registerId: string, date: Date): string {
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
     const randomSuffix = Math.floor(Math.random() * 10000)
       .toString()
-      .padStart(4, '0');
+      .padStart(4, "0");
     return `${registerId.slice(0, 6).toUpperCase()}-${dateStr}-${randomSuffix}`;
   }
 
-  private mapSaleFromDb(
-    sale: any,
-    lineItems: any[],
-    payments: any[]
-  ): PosSale {
+  private mapSaleFromDb(sale: any, lineItems: any[], payments: any[]): PosSale {
     return {
       posSaleId: sale.pos_sale_id,
       workspaceId: sale.workspace_id,

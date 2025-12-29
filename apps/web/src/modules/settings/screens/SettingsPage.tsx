@@ -15,7 +15,7 @@ export default function SettingsPage() {
   const db = getDb();
 
   const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
+    void i18n.changeLanguage(lang);
     localStorage.setItem("bizflow-language", lang);
   };
 

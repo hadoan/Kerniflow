@@ -2,7 +2,7 @@ import {
   computeBackoffDelayMs,
   defaultRetryPolicy,
   getRetryAfterMs,
-  RetryPolicyOptions,
+  type RetryPolicyOptions,
   shouldRetry,
 } from "../retry/retryPolicy";
 import { createIdempotencyKey } from "../idempotency";

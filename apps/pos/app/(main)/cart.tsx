@@ -1,14 +1,8 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useCartStore } from '@/stores/cartStore';
-import { SaleBuilder } from '@kerniflow/pos-core';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useCartStore } from "@/stores/cartStore";
+import { SaleBuilder } from "@kerniflow/pos-core";
 
 const saleBuilder = new SaleBuilder();
 
@@ -32,7 +26,7 @@ export default function CartScreen() {
   };
 
   const handleCheckout = () => {
-    router.push('/checkout');
+    router.push("/checkout");
   };
 
   if (items.length === 0) {
@@ -41,9 +35,7 @@ export default function CartScreen() {
         <View style={styles.emptyState}>
           <Ionicons name="cart-outline" size={64} color="#999" />
           <Text style={styles.emptyTitle}>Cart is Empty</Text>
-          <Text style={styles.emptyText}>
-            Add products to start a new sale
-          </Text>
+          <Text style={styles.emptyText}>Add products to start a new sale</Text>
         </View>
       </View>
     );
@@ -65,9 +57,7 @@ export default function CartScreen() {
             <View style={styles.cartItem}>
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemPrice}>
-                  ${(item.unitPriceCents / 100).toFixed(2)} each
-                </Text>
+                <Text style={styles.itemPrice}>${(item.unitPriceCents / 100).toFixed(2)} each</Text>
               </View>
 
               <View style={styles.quantityControls}>
@@ -87,9 +77,7 @@ export default function CartScreen() {
               </View>
 
               <View style={styles.itemTotalContainer}>
-                <Text style={styles.itemTotal}>
-                  ${(lineTotal / 100).toFixed(2)}
-                </Text>
+                <Text style={styles.itemTotal}>${(lineTotal / 100).toFixed(2)}</Text>
                 <TouchableOpacity onPress={() => removeItem(item.id)}>
                   <Ionicons name="trash-outline" size={20} color="#d32f2f" />
                 </TouchableOpacity>
@@ -99,10 +87,7 @@ export default function CartScreen() {
         }}
         ListFooterComponent={
           <View style={styles.footer}>
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={clearCart}
-            >
+            <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
               <Text style={styles.clearButtonText}>Clear Cart</Text>
             </TouchableOpacity>
           </View>
@@ -112,21 +97,15 @@ export default function CartScreen() {
       <View style={styles.totalsContainer}>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Subtotal</Text>
-          <Text style={styles.totalValue}>
-            ${(totals.subtotalCents / 100).toFixed(2)}
-          </Text>
+          <Text style={styles.totalValue}>${(totals.subtotalCents / 100).toFixed(2)}</Text>
         </View>
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Tax</Text>
-          <Text style={styles.totalValue}>
-            ${(totals.taxCents / 100).toFixed(2)}
-          </Text>
+          <Text style={styles.totalValue}>${(totals.taxCents / 100).toFixed(2)}</Text>
         </View>
         <View style={[styles.totalRow, styles.grandTotalRow]}>
           <Text style={styles.grandTotalLabel}>Total</Text>
-          <Text style={styles.grandTotalValue}>
-            ${(totals.totalCents / 100).toFixed(2)}
-          </Text>
+          <Text style={styles.grandTotalValue}>${(totals.totalCents / 100).toFixed(2)}</Text>
         </View>
       </View>
 
@@ -140,72 +119,72 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
   cartItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   itemInfo: {
     flex: 1,
   },
   itemName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 4,
   },
   itemPrice: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginHorizontal: 16,
   },
   quantityButton: {
     width: 32,
     height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
     borderRadius: 4,
   },
   quantity: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginHorizontal: 12,
     minWidth: 24,
-    textAlign: 'center',
+    textAlign: "center",
   },
   itemTotalContainer: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     minWidth: 80,
   },
   itemTotal: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
   },
   footer: {
@@ -213,57 +192,57 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   clearButtonText: {
-    color: '#d32f2f',
+    color: "#d32f2f",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   totalsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   totalLabel: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   totalValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   grandTotalRow: {
     marginTop: 8,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
   },
   grandTotalLabel: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   grandTotalValue: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2196f3',
+    fontWeight: "600",
+    color: "#2196f3",
   },
   checkoutButton: {
-    backgroundColor: '#2196f3',
+    backgroundColor: "#2196f3",
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     margin: 16,
     borderRadius: 8,
   },
   checkoutButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

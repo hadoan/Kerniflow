@@ -9,9 +9,7 @@ interface TimelineViewProps {
 
 export const TimelineView: FC<TimelineViewProps> = ({ items }) => {
   if (items.length === 0) {
-    return (
-      <div className="text-center text-muted-foreground py-8">No timeline items yet</div>
-    );
+    return <div className="text-center text-muted-foreground py-8">No timeline items yet</div>;
   }
 
   return (
@@ -20,10 +18,7 @@ export const TimelineView: FC<TimelineViewProps> = ({ items }) => {
         <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
             {item.type === "ACTIVITY" && item.metadata?.activityType ? (
-              <ActivityTypeIcon
-                type={item.metadata.activityType as any}
-                className="w-4 h-4"
-              />
+              <ActivityTypeIcon type={item.metadata.activityType as any} className="w-4 h-4" />
             ) : item.type === "STAGE_TRANSITION" ? (
               <ArrowRight className="w-4 h-4" />
             ) : (

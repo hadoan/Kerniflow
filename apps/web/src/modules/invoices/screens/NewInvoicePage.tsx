@@ -286,7 +286,9 @@ export default function NewInvoicePage() {
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-2">
-                      <Label className="text-xs text-muted-foreground uppercase">{t("invoices.billedTo")}</Label>
+                      <Label className="text-xs text-muted-foreground uppercase">
+                        {t("invoices.billedTo")}
+                      </Label>
                       <Button
                         type="button"
                         variant="ghost"
@@ -310,7 +312,9 @@ export default function NewInvoicePage() {
                     >
                       <div className="flex flex-col items-start">
                         <span className="text-sm font-medium">
-                          {selectedCustomer ? selectedCustomer.displayName : t("customers.selectCustomer")}
+                          {selectedCustomer
+                            ? selectedCustomer.displayName
+                            : t("customers.selectCustomer")}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {selectedCustomerAddress ||
@@ -358,7 +362,9 @@ export default function NewInvoicePage() {
                     </DialogHeader>
                     <div className="flex items-center justify-between border-b px-4 py-3">
                       <div>
-                        <div className="text-base font-semibold">{t("customers.wizard.selectCustomer")}</div>
+                        <div className="text-base font-semibold">
+                          {t("customers.wizard.selectCustomer")}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           {t("customers.selectExisting")}
                         </p>
@@ -422,9 +428,7 @@ export default function NewInvoicePage() {
                     <DialogContent className="max-w-2xl">
                       <DialogHeader className="space-y-2">
                         <DialogTitle>{t("customers.addNewClient")}</DialogTitle>
-                        <DialogDescription>
-                          {t("customers.createDescription")}
-                        </DialogDescription>
+                        <DialogDescription>{t("customers.createDescription")}</DialogDescription>
                       </DialogHeader>
                       <form
                         onSubmit={customerForm.handleSubmit((data) =>
@@ -436,7 +440,8 @@ export default function NewInvoicePage() {
                         <div className="space-y-4">
                           <div>
                             <Label htmlFor="displayName">
-                              {t("customers.displayName")} <span className="text-destructive">*</span>
+                              {t("customers.displayName")}{" "}
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               id="displayName"
@@ -484,7 +489,9 @@ export default function NewInvoicePage() {
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2">
-                              <Label htmlFor="billingAddress.line1">{t("customers.addressLine1")}</Label>
+                              <Label htmlFor="billingAddress.line1">
+                                {t("customers.addressLine1")}
+                              </Label>
                               <Input
                                 id="billingAddress.line1"
                                 {...customerForm.register("billingAddress.line1")}
@@ -494,7 +501,9 @@ export default function NewInvoicePage() {
                             </div>
 
                             <div className="md:col-span-2">
-                              <Label htmlFor="billingAddress.line2">{t("customers.addressLine2")}</Label>
+                              <Label htmlFor="billingAddress.line2">
+                                {t("customers.addressLine2")}
+                              </Label>
                               <Input
                                 id="billingAddress.line2"
                                 {...customerForm.register("billingAddress.line2")}
@@ -514,7 +523,9 @@ export default function NewInvoicePage() {
                             </div>
 
                             <div>
-                              <Label htmlFor="billingAddress.postalCode">{t("customers.postalCode")}</Label>
+                              <Label htmlFor="billingAddress.postalCode">
+                                {t("customers.postalCode")}
+                              </Label>
                               <Input
                                 id="billingAddress.postalCode"
                                 {...customerForm.register("billingAddress.postalCode")}
@@ -524,7 +535,9 @@ export default function NewInvoicePage() {
                             </div>
 
                             <div className="md:col-span-2">
-                              <Label htmlFor="billingAddress.country">{t("customers.country")}</Label>
+                              <Label htmlFor="billingAddress.country">
+                                {t("customers.country")}
+                              </Label>
                               <Input
                                 id="billingAddress.country"
                                 {...customerForm.register("billingAddress.country")}
@@ -549,7 +562,9 @@ export default function NewInvoicePage() {
                             variant="accent"
                             disabled={createCustomerMutation.isPending}
                           >
-                            {createCustomerMutation.isPending ? t("invoices.saving") : t("common.save")}
+                            {createCustomerMutation.isPending
+                              ? t("invoices.saving")
+                              : t("common.save")}
                           </Button>
                         </DialogFooter>
                       </form>
@@ -561,7 +576,9 @@ export default function NewInvoicePage() {
                 <div className="grid grid-cols-2 gap-4">
                   {/* Invoice date */}
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground uppercase">{t("invoices.invoiceDate")}</Label>
+                    <Label className="text-xs text-muted-foreground uppercase">
+                      {t("invoices.invoiceDate")}
+                    </Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -591,7 +608,9 @@ export default function NewInvoicePage() {
 
                   {/* Service date */}
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground uppercase">{t("invoices.serviceDate")}</Label>
+                    <Label className="text-xs text-muted-foreground uppercase">
+                      {t("invoices.serviceDate")}
+                    </Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -605,7 +624,9 @@ export default function NewInvoicePage() {
                               {format(form.watch("serviceDateEnd"), "dd.MM.yyyy")}
                             </>
                           ) : (
-                            <span className="text-muted-foreground">{t("invoices.selectDateRange")}</span>
+                            <span className="text-muted-foreground">
+                              {t("invoices.selectDateRange")}
+                            </span>
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -653,7 +674,9 @@ export default function NewInvoicePage() {
 
                   {/* Due date */}
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground uppercase">{t("invoices.dueDate")}</Label>
+                    <Label className="text-xs text-muted-foreground uppercase">
+                      {t("invoices.dueDate")}
+                    </Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button

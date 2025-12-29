@@ -1,4 +1,4 @@
-import { OutboxCommand } from "../outbox/outboxTypes";
+import { type OutboxCommand } from "../outbox/outboxTypes";
 
 export type SerializedCommand = Omit<OutboxCommand, "createdAt" | "nextAttemptAt"> & {
   createdAt: string;

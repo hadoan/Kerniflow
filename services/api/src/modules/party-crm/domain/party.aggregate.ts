@@ -1,6 +1,6 @@
-import { Address } from "./address";
-import { ContactPoint, ContactPointType } from "./contact-point";
-import { PartyRoleType } from "./party-role";
+import { type Address } from "./address";
+import { type ContactPoint, type ContactPointType } from "./contact-point";
+import { type PartyRoleType } from "./party-role";
 
 type PartyProps = {
   id: string;
@@ -201,7 +201,9 @@ export class PartyAggregate {
     value: string | null | undefined,
     generateId: () => string
   ) {
-    if (value === undefined) return;
+    if (value === undefined) {
+      return;
+    }
 
     const trimmed = value === null ? null : value.trim();
     const existingIndex = this.contactPoints.findIndex((cp) => cp.type === type);
@@ -226,7 +228,9 @@ export class PartyAggregate {
     }
 
     this.contactPoints = this.contactPoints.map((cp, index) => {
-      if (cp.type !== type) return cp;
+      if (cp.type !== type) {
+        return cp;
+      }
       return index === this.contactPoints.findIndex((p) => p.type === type)
         ? cp
         : { ...cp, isPrimary: false };
@@ -234,7 +238,9 @@ export class PartyAggregate {
   }
 
   private setBillingAddress(address: Address | null | undefined, generateId: () => string) {
-    if (address === undefined) return;
+    if (address === undefined) {
+      return;
+    }
     if (address === null) {
       this.billingAddress = null;
       return;

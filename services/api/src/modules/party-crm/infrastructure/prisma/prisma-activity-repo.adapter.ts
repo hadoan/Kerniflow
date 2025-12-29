@@ -85,7 +85,7 @@ export class PrismaActivityRepoAdapter implements ActivityRepoPort {
     });
 
     const activities = results.map((row) => toEntity(row as ActivityRow));
-    const nextCursor = activities.length === pageSize ? activities.at(-1)?.id ?? null : null;
+    const nextCursor = activities.length === pageSize ? (activities.at(-1)?.id ?? null) : null;
 
     return { activities, nextCursor };
   }
@@ -200,7 +200,7 @@ export class PrismaActivityRepoAdapter implements ActivityRepoPort {
 
     // Apply pagination
     const items = allItems.slice(0, pageSize);
-    const nextCursor = items.length === pageSize ? items.at(-1)?.id ?? null : null;
+    const nextCursor = items.length === pageSize ? (items.at(-1)?.id ?? null) : null;
 
     return { items, nextCursor };
   }

@@ -8,7 +8,9 @@ export const localDateSchema = z
     const year = Number(yearStr);
     const month = Number(monthStr);
     const day = Number(dayStr);
-    if (month < 1 || month > 12) return false;
+    if (month < 1 || month > 12) {
+      return false;
+    }
     const daysInMonth = new Date(year, month, 0).getDate();
     return day >= 1 && day <= daysInMonth;
   }, "Invalid calendar date");

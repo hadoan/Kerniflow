@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useCatalogStore } from '@/stores/catalogStore';
-import { useCartStore } from '@/stores/cartStore';
+import { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useCatalogStore } from "@/stores/catalogStore";
+import { useCartStore } from "@/stores/cartStore";
 
 export default function ScannerScreen() {
   const router = useRouter();
@@ -27,9 +27,7 @@ export default function ScannerScreen() {
         <View style={styles.permissionContainer}>
           <Ionicons name="camera-outline" size={64} color="#999" />
           <Text style={styles.permissionTitle}>Camera Permission Required</Text>
-          <Text style={styles.permissionText}>
-            We need access to your camera to scan barcodes
-          </Text>
+          <Text style={styles.permissionText}>We need access to your camera to scan barcodes</Text>
           <TouchableOpacity style={styles.button} onPress={requestPermission}>
             <Text style={styles.buttonText}>Grant Permission</Text>
           </TouchableOpacity>
@@ -39,7 +37,9 @@ export default function ScannerScreen() {
   }
 
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
-    if (scanned) return;
+    if (scanned) {
+      return;
+    }
     setScanned(true);
 
     const product = getProductByBarcode(data);
@@ -53,35 +53,27 @@ export default function ScannerScreen() {
         discountCents: 0,
       });
 
-      Alert.alert(
-        'Product Added',
-        `${product.name} added to cart`,
-        [
-          {
-            text: 'Scan Another',
-            onPress: () => setScanned(false),
-          },
-          {
-            text: 'View Cart',
-            onPress: () => router.replace('/(main)/cart'),
-          },
-        ]
-      );
+      Alert.alert("Product Added", `${product.name} added to cart`, [
+        {
+          text: "Scan Another",
+          onPress: () => setScanned(false),
+        },
+        {
+          text: "View Cart",
+          onPress: () => router.replace("/(main)/cart"),
+        },
+      ]);
     } else {
-      Alert.alert(
-        'Product Not Found',
-        `No product found with barcode: ${data}`,
-        [
-          {
-            text: 'Try Again',
-            onPress: () => setScanned(false),
-          },
-          {
-            text: 'Cancel',
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      Alert.alert("Product Not Found", `No product found with barcode: ${data}`, [
+        {
+          text: "Try Again",
+          onPress: () => setScanned(false),
+        },
+        {
+          text: "Cancel",
+          onPress: () => router.back(),
+        },
+      ]);
     }
   };
 
@@ -99,7 +91,7 @@ export default function ScannerScreen() {
         style={styles.camera}
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
-          barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39'],
+          barcodeTypes: ["ean13", "ean8", "upc_a", "upc_e", "code128", "code39"],
         }}
       >
         <View style={styles.overlay}>
@@ -109,9 +101,7 @@ export default function ScannerScreen() {
             <View style={[styles.corner, styles.bottomLeft]} />
             <View style={[styles.corner, styles.bottomRight]} />
           </View>
-          <Text style={styles.instruction}>
-            Position barcode within the frame
-          </Text>
+          <Text style={styles.instruction}>Position barcode within the frame</Text>
         </View>
       </CameraView>
 
@@ -127,68 +117,68 @@ export default function ScannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   title: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
   },
   permissionContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
   },
   permissionTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 16,
     marginBottom: 8,
-    color: '#fff',
+    color: "#fff",
   },
   permissionText: {
     fontSize: 16,
-    color: '#999',
-    textAlign: 'center',
+    color: "#999",
+    textAlign: "center",
     marginBottom: 24,
   },
   button: {
-    backgroundColor: '#2196f3',
+    backgroundColor: "#2196f3",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   camera: {
     flex: 1,
   },
   overlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   scanArea: {
     width: 300,
     height: 200,
-    position: 'relative',
+    position: "relative",
   },
   corner: {
-    position: 'absolute',
+    position: "absolute",
     width: 40,
     height: 40,
-    borderColor: '#2196f3',
+    borderColor: "#2196f3",
   },
   topLeft: {
     top: 0,
@@ -215,24 +205,24 @@ const styles = StyleSheet.create({
     borderRightWidth: 4,
   },
   instruction: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     marginTop: 32,
-    textAlign: 'center',
+    textAlign: "center",
   },
   scannedOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   scannedText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

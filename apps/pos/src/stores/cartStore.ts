@@ -1,11 +1,11 @@
-import { create } from 'zustand';
-import { v4 as uuidv4 } from '@lukeed/uuid';
-import type { PosTicketLineItem } from '@kerniflow/contracts';
-import { SaleBuilder } from '@kerniflow/pos-core';
+import { create } from "zustand";
+import { v4 as uuidv4 } from "@lukeed/uuid";
+import type { PosTicketLineItem } from "@kerniflow/contracts";
+import { SaleBuilder } from "@kerniflow/pos-core";
 
 const saleBuilder = new SaleBuilder();
 
-interface CartItem extends Omit<PosTicketLineItem, 'lineId'> {
+interface CartItem extends Omit<PosTicketLineItem, "lineId"> {
   id: string;
 }
 
@@ -14,7 +14,7 @@ interface CartState {
   customerId: string | null;
   notes: string | null;
 
-  addItem: (item: Omit<CartItem, 'id'>) => void;
+  addItem: (item: Omit<CartItem, "id">) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   updateDiscount: (itemId: string, discountCents: number) => void;
   removeItem: (itemId: string) => void;
@@ -40,9 +40,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     if (existingItem) {
       set({
         items: items.map((i) =>
-          i.id === existingItem.id
-            ? { ...i, quantity: i.quantity + item.quantity }
-            : i
+          i.id === existingItem.id ? { ...i, quantity: i.quantity + item.quantity } : i
         ),
       });
     } else {
@@ -54,17 +52,13 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   updateQuantity: (itemId, quantity) => {
     set({
-      items: get().items.map((item) =>
-        item.id === itemId ? { ...item, quantity } : item
-      ),
+      items: get().items.map((item) => (item.id === itemId ? { ...item, quantity } : item)),
     });
   },
 
   updateDiscount: (itemId, discountCents) => {
     set({
-      items: get().items.map((item) =>
-        item.id === itemId ? { ...item, discountCents } : item
-      ),
+      items: get().items.map((item) => (item.id === itemId ? { ...item, discountCents } : item)),
     });
   },
 
@@ -94,12 +88,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     const { items } = get();
     const subtotalCents = items.reduce((sum, item) => {
       return (
-        sum +
-        saleBuilder.calculateLineTotal(
-          item.quantity,
-          item.unitPriceCents,
-          item.discountCents
-        )
+        sum + saleBuilder.calculateLineTotal(item.quantity, item.unitPriceCents, item.discountCents)
       );
     }, 0);
 

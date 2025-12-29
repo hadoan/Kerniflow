@@ -40,7 +40,9 @@ export class InMemoryTaxCodeRepo extends TaxCodeRepoPort {
     updates: Partial<Pick<TaxCodeEntity, "label" | "isActive" | "kind">>
   ): Promise<TaxCodeEntity> {
     const code = await this.findById(id, tenantId);
-    if (!code) throw new Error("Code not found");
+    if (!code) {
+      throw new Error("Code not found");
+    }
 
     Object.assign(code, updates, { updatedAt: new Date() });
     return code;

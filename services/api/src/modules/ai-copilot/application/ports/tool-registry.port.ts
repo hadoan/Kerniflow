@@ -1,4 +1,4 @@
-import { DomainToolPort } from "./domain-tool.port";
+import { type DomainToolPort } from "./domain-tool.port";
 
 export interface ToolRegistryPort {
   listForTenant(tenantId: string): DomainToolPort[];

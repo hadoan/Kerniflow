@@ -1,5 +1,5 @@
-import { FileEntity } from "../../domain/file.entity";
-import { FileKind } from "../../domain/document.types";
+import { type FileEntity } from "../../domain/file.entity";
+import { type FileKind } from "../../domain/document.types";
 
 export interface FileRepoPort {
   create(file: FileEntity): Promise<void>;

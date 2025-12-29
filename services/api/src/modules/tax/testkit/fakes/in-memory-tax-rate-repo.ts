@@ -42,7 +42,9 @@ export class InMemoryTaxRateRepo extends TaxRateRepoPort {
     updates: Partial<Pick<TaxRateEntity, "rateBps" | "effectiveTo">>
   ): Promise<TaxRateEntity> {
     const rate = this.rates.find((r) => r.id === id && r.tenantId === tenantId);
-    if (!rate) throw new Error("Rate not found");
+    if (!rate) {
+      throw new Error("Rate not found");
+    }
 
     Object.assign(rate, updates, { updatedAt: new Date() });
     return rate;

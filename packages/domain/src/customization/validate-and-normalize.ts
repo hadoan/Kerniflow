@@ -78,17 +78,27 @@ function normalizeValueForType(
 }
 
 function normalizeText(raw: unknown): string {
-  if (raw === undefined || raw === null) return "";
-  if (typeof raw === "string") return raw;
-  if (typeof raw === "number" || typeof raw === "boolean") return String(raw);
+  if (raw === undefined || raw === null) {
+    return "";
+  }
+  if (typeof raw === "string") {
+    return raw;
+  }
+  if (typeof raw === "number" || typeof raw === "boolean") {
+    return String(raw);
+  }
   throw new CustomFieldValidationError("TEXT custom fields must be a string");
 }
 
 function normalizeNumber(raw: unknown): number {
-  if (typeof raw === "number") return raw;
+  if (typeof raw === "number") {
+    return raw;
+  }
   if (typeof raw === "string") {
     const parsed = Number(raw);
-    if (!Number.isNaN(parsed)) return parsed;
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
   }
   throw new CustomFieldValidationError("NUMBER custom fields must be a number");
 }
@@ -102,20 +112,32 @@ function normalizeDate(raw: unknown): Date {
   }
   if (typeof raw === "string") {
     const parsed = new Date(raw);
-    if (!Number.isNaN(parsed.getTime())) return parsed;
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
   }
   throw new CustomFieldValidationError("DATE custom fields must be a valid date");
 }
 
 function normalizeBoolean(raw: unknown): boolean {
-  if (typeof raw === "boolean") return raw;
+  if (typeof raw === "boolean") {
+    return raw;
+  }
   if (typeof raw === "string") {
-    if (raw.toLowerCase() === "true") return true;
-    if (raw.toLowerCase() === "false") return false;
+    if (raw.toLowerCase() === "true") {
+      return true;
+    }
+    if (raw.toLowerCase() === "false") {
+      return false;
+    }
   }
   if (typeof raw === "number") {
-    if (raw === 1) return true;
-    if (raw === 0) return false;
+    if (raw === 1) {
+      return true;
+    }
+    if (raw === 0) {
+      return false;
+    }
   }
   throw new CustomFieldValidationError("BOOLEAN custom fields must be a boolean");
 }
@@ -148,15 +170,21 @@ function normalizeMultiSelect(
 }
 
 function normalizeSelectValue(raw: unknown): string | number | boolean {
-  if (typeof raw === "string" || typeof raw === "number" || typeof raw === "boolean") return raw;
+  if (typeof raw === "string" || typeof raw === "number" || typeof raw === "boolean") {
+    return raw;
+  }
   throw new CustomFieldValidationError("Select custom fields must be string, number or boolean");
 }
 
 function normalizeMoney(raw: unknown): Record<string, unknown> {
-  if (typeof raw === "number") return { amountCents: raw };
+  if (typeof raw === "number") {
+    return { amountCents: raw };
+  }
   if (typeof raw === "string") {
     const parsed = Number(raw);
-    if (!Number.isNaN(parsed)) return { amountCents: parsed };
+    if (!Number.isNaN(parsed)) {
+      return { amountCents: parsed };
+    }
   }
   if (typeof raw === "object" && raw !== null) {
     const amount = (raw as Record<string, unknown>).amountCents;

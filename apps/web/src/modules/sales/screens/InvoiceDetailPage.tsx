@@ -78,7 +78,9 @@ export default function InvoiceDetailPage() {
         })),
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: salesQueryKeys.invoices.detail(invoiceId ?? "") });
+      void queryClient.invalidateQueries({
+        queryKey: salesQueryKeys.invoices.detail(invoiceId ?? ""),
+      });
       toast.success("Invoice updated");
     },
     onError: () => toast.error("Failed to update invoice"),
@@ -87,7 +89,9 @@ export default function InvoiceDetailPage() {
   const issueMutation = useMutation({
     mutationFn: () => salesApi.issueInvoice(invoiceId ?? ""),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: salesQueryKeys.invoices.detail(invoiceId ?? "") });
+      void queryClient.invalidateQueries({
+        queryKey: salesQueryKeys.invoices.detail(invoiceId ?? ""),
+      });
       toast.success("Invoice issued");
     },
     onError: () => toast.error("Failed to issue invoice"),
@@ -96,7 +100,9 @@ export default function InvoiceDetailPage() {
   const voidMutation = useMutation({
     mutationFn: () => salesApi.voidInvoice(invoiceId ?? ""),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: salesQueryKeys.invoices.detail(invoiceId ?? "") });
+      void queryClient.invalidateQueries({
+        queryKey: salesQueryKeys.invoices.detail(invoiceId ?? ""),
+      });
       toast.success("Invoice voided");
     },
     onError: () => toast.error("Failed to void invoice"),
@@ -113,7 +119,9 @@ export default function InvoiceDetailPage() {
       }),
     onSuccess: () => {
       setPaymentDialogOpen(false);
-      void queryClient.invalidateQueries({ queryKey: salesQueryKeys.invoices.detail(invoiceId ?? "") });
+      void queryClient.invalidateQueries({
+        queryKey: salesQueryKeys.invoices.detail(invoiceId ?? ""),
+      });
       toast.success("Payment recorded");
     },
     onError: () => toast.error("Failed to record payment"),
@@ -155,10 +163,13 @@ export default function InvoiceDetailPage() {
             </Button>
           )}
           {invoice.status === "ISSUED" || invoice.status === "PARTIALLY_PAID" ? (
-            <Button variant="secondary" onClick={() => {
-              setPaymentAmount(invoice.totals.dueCents);
-              setPaymentDialogOpen(true);
-            }}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setPaymentAmount(invoice.totals.dueCents);
+                setPaymentDialogOpen(true);
+              }}
+            >
               Record Payment
             </Button>
           ) : null}
@@ -218,7 +229,11 @@ export default function InvoiceDetailPage() {
             </div>
             <div className="space-y-2">
               <Label>Payment Date</Label>
-              <Input type="date" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+              <Input
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Method</Label>

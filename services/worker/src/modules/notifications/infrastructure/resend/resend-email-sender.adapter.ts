@@ -1,8 +1,8 @@
 import { Resend } from "resend";
 import {
-  EmailSenderPort,
-  SendEmailRequest,
-  SendEmailResponse,
+  type EmailSenderPort,
+  type SendEmailRequest,
+  type SendEmailResponse,
 } from "../../ports/email-sender.port";
 
 export class ResendEmailSenderAdapter implements EmailSenderPort {
@@ -28,10 +28,18 @@ export class ResendEmailSenderAdapter implements EmailSenderPort {
       text: request.text,
     };
 
-    if (request.cc && request.cc.length) emailOptions.cc = request.cc;
-    if (request.bcc && request.bcc.length) emailOptions.bcc = request.bcc;
-    if (this.replyTo || request.replyTo) emailOptions.replyTo = request.replyTo ?? this.replyTo;
-    if (request.headers) emailOptions.headers = request.headers;
+    if (request.cc && request.cc.length) {
+      emailOptions.cc = request.cc;
+    }
+    if (request.bcc && request.bcc.length) {
+      emailOptions.bcc = request.bcc;
+    }
+    if (this.replyTo || request.replyTo) {
+      emailOptions.replyTo = request.replyTo ?? this.replyTo;
+    }
+    if (request.headers) {
+      emailOptions.headers = request.headers;
+    }
     if (request.attachments?.length) {
       emailOptions.attachments = request.attachments.map((att) => ({
         filename: att.filename,

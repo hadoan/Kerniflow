@@ -48,12 +48,24 @@ export class SalesApi {
     pageSize?: number;
   }) {
     const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append("status", params.status);
-    if (params?.customerPartyId) queryParams.append("customerPartyId", params.customerPartyId);
-    if (params?.fromDate) queryParams.append("fromDate", params.fromDate);
-    if (params?.toDate) queryParams.append("toDate", params.toDate);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.customerPartyId) {
+      queryParams.append("customerPartyId", params.customerPartyId);
+    }
+    if (params?.fromDate) {
+      queryParams.append("fromDate", params.fromDate);
+    }
+    if (params?.toDate) {
+      queryParams.append("toDate", params.toDate);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/sales/quotes?${queryString}` : "/sales/quotes";
     return apiClient.get<ListQuotesOutput>(endpoint);
@@ -76,21 +88,33 @@ export class SalesApi {
   }
 
   async sendQuote(quoteId: string) {
-    return apiClient.post<SendQuoteOutput>(`/sales/quotes/${quoteId}/send`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<SendQuoteOutput>(
+      `/sales/quotes/${quoteId}/send`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async acceptQuote(quoteId: string) {
-    return apiClient.post<AcceptQuoteOutput>(`/sales/quotes/${quoteId}/accept`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<AcceptQuoteOutput>(
+      `/sales/quotes/${quoteId}/accept`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async rejectQuote(quoteId: string) {
-    return apiClient.post<RejectQuoteOutput>(`/sales/quotes/${quoteId}/reject`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<RejectQuoteOutput>(
+      `/sales/quotes/${quoteId}/reject`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async convertQuoteToOrder(quoteId: string) {
@@ -118,12 +142,24 @@ export class SalesApi {
     pageSize?: number;
   }) {
     const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append("status", params.status);
-    if (params?.customerPartyId) queryParams.append("customerPartyId", params.customerPartyId);
-    if (params?.fromDate) queryParams.append("fromDate", params.fromDate);
-    if (params?.toDate) queryParams.append("toDate", params.toDate);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.customerPartyId) {
+      queryParams.append("customerPartyId", params.customerPartyId);
+    }
+    if (params?.fromDate) {
+      queryParams.append("fromDate", params.fromDate);
+    }
+    if (params?.toDate) {
+      queryParams.append("toDate", params.toDate);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/sales/orders?${queryString}` : "/sales/orders";
     return apiClient.get<ListSalesOrdersOutput>(endpoint);
@@ -146,21 +182,33 @@ export class SalesApi {
   }
 
   async confirmOrder(orderId: string) {
-    return apiClient.post<ConfirmSalesOrderOutput>(`/sales/orders/${orderId}/confirm`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<ConfirmSalesOrderOutput>(
+      `/sales/orders/${orderId}/confirm`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async fulfillOrder(orderId: string) {
-    return apiClient.post<FulfillSalesOrderOutput>(`/sales/orders/${orderId}/fulfill`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<FulfillSalesOrderOutput>(
+      `/sales/orders/${orderId}/fulfill`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async cancelOrder(orderId: string) {
-    return apiClient.post<CancelSalesOrderOutput>(`/sales/orders/${orderId}/cancel`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<CancelSalesOrderOutput>(
+      `/sales/orders/${orderId}/cancel`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async createInvoiceFromOrder(orderId: string) {
@@ -180,12 +228,24 @@ export class SalesApi {
     pageSize?: number;
   }) {
     const queryParams = new URLSearchParams();
-    if (params?.status) queryParams.append("status", params.status);
-    if (params?.customerPartyId) queryParams.append("customerPartyId", params.customerPartyId);
-    if (params?.fromDate) queryParams.append("fromDate", params.fromDate);
-    if (params?.toDate) queryParams.append("toDate", params.toDate);
-    if (params?.cursor) queryParams.append("cursor", params.cursor);
-    if (params?.pageSize) queryParams.append("pageSize", params.pageSize.toString());
+    if (params?.status) {
+      queryParams.append("status", params.status);
+    }
+    if (params?.customerPartyId) {
+      queryParams.append("customerPartyId", params.customerPartyId);
+    }
+    if (params?.fromDate) {
+      queryParams.append("fromDate", params.fromDate);
+    }
+    if (params?.toDate) {
+      queryParams.append("toDate", params.toDate);
+    }
+    if (params?.cursor) {
+      queryParams.append("cursor", params.cursor);
+    }
+    if (params?.pageSize) {
+      queryParams.append("pageSize", params.pageSize.toString());
+    }
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/sales/invoices?${queryString}` : "/sales/invoices";
     return apiClient.get<ListSalesInvoicesOutput>(endpoint);
@@ -208,21 +268,33 @@ export class SalesApi {
   }
 
   async issueInvoice(invoiceId: string) {
-    return apiClient.post<IssueSalesInvoiceOutput>(`/sales/invoices/${invoiceId}/issue`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<IssueSalesInvoiceOutput>(
+      `/sales/invoices/${invoiceId}/issue`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async voidInvoice(invoiceId: string, reason?: string) {
-    return apiClient.post<VoidSalesInvoiceOutput>(`/sales/invoices/${invoiceId}/void`, { reason }, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<VoidSalesInvoiceOutput>(
+      `/sales/invoices/${invoiceId}/void`,
+      { reason },
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async recordPayment(input: RecordPaymentInput) {
-    return apiClient.post<RecordPaymentOutput>(`/sales/invoices/${input.invoiceId}/payments`, input, {
-      idempotencyKey: input.idempotencyKey || apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<RecordPaymentOutput>(
+      `/sales/invoices/${input.invoiceId}/payments`,
+      input,
+      {
+        idempotencyKey: input.idempotencyKey || apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async listPayments(invoiceId: string) {
@@ -230,9 +302,13 @@ export class SalesApi {
   }
 
   async reversePayment(paymentId: string) {
-    return apiClient.post<ReversePaymentOutput>(`/sales/payments/${paymentId}/reverse`, {}, {
-      idempotencyKey: apiClient.generateIdempotencyKey(),
-    });
+    return apiClient.post<ReversePaymentOutput>(
+      `/sales/payments/${paymentId}/reverse`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+      }
+    );
   }
 
   async getSettings() {

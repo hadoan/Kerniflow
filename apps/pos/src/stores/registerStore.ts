@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import type { Register } from '@kerniflow/contracts';
-import { useAuthStore } from './authStore';
-import * as SecureStore from 'expo-secure-store';
+import { create } from "zustand";
+import type { Register } from "@kerniflow/contracts";
+import { useAuthStore } from "./authStore";
+import * as SecureStore from "expo-secure-store";
 
 interface RegisterState {
   registers: Register[];
@@ -14,7 +14,7 @@ interface RegisterState {
   getSelectedRegisterId: () => string | null;
 }
 
-const SELECTED_REGISTER_KEY = 'pos-selected-register';
+const SELECTED_REGISTER_KEY = "pos-selected-register";
 
 export const useRegisterStore = create<RegisterState>((set, get) => ({
   registers: [],
@@ -31,7 +31,7 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
         await get().loadRegisters();
 
         const register = get().registers.find((r) => r.registerId === registerId);
-        if (register && register.status === 'ACTIVE') {
+        if (register && register.status === "ACTIVE") {
           set({ selectedRegister: register });
           console.log(`Restored register selection: ${register.name}`);
         } else {
@@ -40,22 +40,22 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
         }
       }
     } catch (error) {
-      console.error('Failed to initialize register store:', error);
+      console.error("Failed to initialize register store:", error);
     }
   },
 
   loadRegisters: async () => {
     const apiClient = useAuthStore.getState().apiClient;
     if (!apiClient) {
-      throw new Error('API client not initialized');
+      throw new Error("API client not initialized");
     }
 
     set({ isLoading: true });
     try {
-      const data = await apiClient.listRegisters({ status: 'ACTIVE' });
+      const data = await apiClient.listRegisters({ status: "ACTIVE" });
       set({ registers: data.registers, isLoading: false });
     } catch (error) {
-      console.error('Failed to load registers:', error);
+      console.error("Failed to load registers:", error);
       set({ isLoading: false });
       throw error;
     }
@@ -66,7 +66,7 @@ export const useRegisterStore = create<RegisterState>((set, get) => ({
     const register = registers.find((r) => r.registerId === registerId);
 
     if (!register) {
-      throw new Error('Register not found');
+      throw new Error("Register not found");
     }
 
     set({ selectedRegister: register });

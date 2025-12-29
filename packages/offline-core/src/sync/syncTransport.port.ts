@@ -1,5 +1,5 @@
-import { OutboxCommand } from "../outbox/outboxTypes";
-import { BatchResult, CommandResult } from "./syncTypes";
+import { type OutboxCommand } from "../outbox/outboxTypes";
+import { type BatchResult, type CommandResult } from "./syncTypes";
 
 export interface SyncTransport {
   executeCommand(command: OutboxCommand): Promise<CommandResult>;

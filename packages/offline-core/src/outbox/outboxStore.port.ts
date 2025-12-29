@@ -1,4 +1,4 @@
-import { OutboxCommand, OutboxError } from "./outboxTypes";
+import { type OutboxCommand, type OutboxError } from "./outboxTypes";
 
 export interface OutboxStore {
   enqueue(cmd: OutboxCommand): Promise<void>;

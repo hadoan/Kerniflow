@@ -1,5 +1,5 @@
-import { Logger, LoggerService } from "@nestjs/common";
-import { LoggerPort } from "@kerniflow/kernel/ports/logger.port";
+import { Logger, type LoggerService } from "@nestjs/common";
+import { type LoggerPort } from "@kerniflow/kernel/ports/logger.port";
 
 export class NestLoggerAdapter implements LoggerPort {
   constructor(private readonly logger: LoggerService = new Logger("UseCase")) {}

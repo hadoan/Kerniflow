@@ -41,12 +41,7 @@ export class ListDealsUseCase extends BaseUseCase<ListDealsInput, ListDealsOutpu
       ownerUserId: input.ownerUserId,
     };
 
-    const result = await this.dealRepo.list(
-      ctx.tenantId,
-      filters,
-      input.pageSize,
-      input.cursor
-    );
+    const result = await this.dealRepo.list(ctx.tenantId, filters, input.pageSize, input.cursor);
 
     return ok({
       deals: result.deals.map(toDealDto),

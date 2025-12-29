@@ -1,13 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { SyncPosSaleInput, SyncPosSaleOutput } from "@kerniflow/contracts";
-import {
-  BaseUseCase,
-  type Context,
-  type Result,
-  Ok,
-  Err,
-  ConflictError,
-} from "@kerniflow/kernel";
+import { BaseUseCase, type Context, type Result, Ok, Err, ConflictError } from "@kerniflow/kernel";
 import {
   POS_SALE_IDEMPOTENCY_PORT,
   type PosSaleIdempotencyPort,

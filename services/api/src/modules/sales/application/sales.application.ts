@@ -1,38 +1,41 @@
 import {
-  CreateQuoteUseCase,
-  UpdateQuoteUseCase,
-  SendQuoteUseCase,
-  AcceptQuoteUseCase,
-  RejectQuoteUseCase,
-  ConvertQuoteToOrderUseCase,
-  ConvertQuoteToInvoiceUseCase,
-  GetQuoteUseCase,
-  ListQuotesUseCase,
+  type CreateQuoteUseCase,
+  type UpdateQuoteUseCase,
+  type SendQuoteUseCase,
+  type AcceptQuoteUseCase,
+  type RejectQuoteUseCase,
+  type ConvertQuoteToOrderUseCase,
+  type ConvertQuoteToInvoiceUseCase,
+  type GetQuoteUseCase,
+  type ListQuotesUseCase,
 } from "./use-cases/quotes.usecases";
 import {
-  CreateSalesOrderUseCase,
-  UpdateSalesOrderUseCase,
-  ConfirmSalesOrderUseCase,
-  FulfillSalesOrderUseCase,
-  CancelSalesOrderUseCase,
-  CreateInvoiceFromOrderUseCase,
-  GetSalesOrderUseCase,
-  ListSalesOrdersUseCase,
+  type CreateSalesOrderUseCase,
+  type UpdateSalesOrderUseCase,
+  type ConfirmSalesOrderUseCase,
+  type FulfillSalesOrderUseCase,
+  type CancelSalesOrderUseCase,
+  type CreateInvoiceFromOrderUseCase,
+  type GetSalesOrderUseCase,
+  type ListSalesOrdersUseCase,
 } from "./use-cases/orders.usecases";
 import {
-  CreateSalesInvoiceUseCase,
-  UpdateSalesInvoiceUseCase,
-  IssueSalesInvoiceUseCase,
-  VoidSalesInvoiceUseCase,
-  GetSalesInvoiceUseCase,
-  ListSalesInvoicesUseCase,
+  type CreateSalesInvoiceUseCase,
+  type UpdateSalesInvoiceUseCase,
+  type IssueSalesInvoiceUseCase,
+  type VoidSalesInvoiceUseCase,
+  type GetSalesInvoiceUseCase,
+  type ListSalesInvoicesUseCase,
 } from "./use-cases/invoices.usecases";
 import {
-  RecordPaymentUseCase,
-  ListPaymentsUseCase,
-  ReversePaymentUseCase,
+  type RecordPaymentUseCase,
+  type ListPaymentsUseCase,
+  type ReversePaymentUseCase,
 } from "./use-cases/payments.usecases";
-import { GetSalesSettingsUseCase, UpdateSalesSettingsUseCase } from "./use-cases/settings.usecases";
+import {
+  type GetSalesSettingsUseCase,
+  type UpdateSalesSettingsUseCase,
+} from "./use-cases/settings.usecases";
 
 export class SalesApplication {
   constructor(

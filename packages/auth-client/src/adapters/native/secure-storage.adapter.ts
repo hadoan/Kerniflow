@@ -9,11 +9,13 @@ export class SecureStorageAdapter implements TokenStorage {
   private readonly REFRESH_TOKEN_KEY = "refreshToken";
   private readonly WORKSPACE_ID_KEY = "activeWorkspaceId";
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private SecureStore: any;
 
   constructor() {
     // Lazy load expo-secure-store to avoid import errors on web
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       this.SecureStore = require("expo-secure-store");
     } catch {
       throw new Error(

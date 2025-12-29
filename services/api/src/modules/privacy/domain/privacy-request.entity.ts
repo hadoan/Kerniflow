@@ -1,4 +1,4 @@
-import { PrivacyRequestStatus, PrivacyRequestType } from "./privacy.types";
+import { type PrivacyRequestStatus, type PrivacyRequestType } from "./privacy.types";
 
 export class PrivacyRequest {
   constructor(

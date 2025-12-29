@@ -81,9 +81,7 @@ export class SaleBuilder {
     const paymentSum = payments.reduce((sum, p) => sum + p.amountCents, 0);
 
     if (paymentSum !== totalCents) {
-      throw new Error(
-        `Payment total (${paymentSum}) does not match sale total (${totalCents})`
-      );
+      throw new Error(`Payment total (${paymentSum}) does not match sale total (${totalCents})`);
     }
 
     return true;
@@ -92,7 +90,12 @@ export class SaleBuilder {
   /**
    * Validate complete POS sale
    */
-  validateSale(sale: Pick<PosSale, "lineItems" | "subtotalCents" | "cartDiscountCents" | "taxCents" | "totalCents" | "payments">): void {
+  validateSale(
+    sale: Pick<
+      PosSale,
+      "lineItems" | "subtotalCents" | "cartDiscountCents" | "taxCents" | "totalCents" | "payments"
+    >
+  ): void {
     // Validate line items exist
     if (sale.lineItems.length === 0) {
       throw new Error("Sale must have at least one line item");
@@ -113,9 +116,7 @@ export class SaleBuilder {
       sale.taxCents
     );
     if (calculatedTotal !== sale.totalCents) {
-      throw new Error(
-        `Total mismatch: calculated ${calculatedTotal}, provided ${sale.totalCents}`
-      );
+      throw new Error(`Total mismatch: calculated ${calculatedTotal}, provided ${sale.totalCents}`);
     }
 
     // Validate payments

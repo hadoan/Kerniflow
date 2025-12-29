@@ -79,7 +79,7 @@ export default function NewExpensePage() {
     },
     onSuccess: () => {
       setSuccessMessage(t("common.success"));
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      void queryClient.invalidateQueries({ queryKey: ["expenses"] });
       setTimeout(() => navigate("/expenses"), 500);
     },
   });
