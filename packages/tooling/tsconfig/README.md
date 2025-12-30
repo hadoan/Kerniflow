@@ -1,6 +1,6 @@
-# @kerniflow/tsconfig
+# @corely/tsconfig
 
-Shared TypeScript configurations for the Kerniflow monorepo.
+Shared TypeScript configurations for the Corely monorepo.
 
 ## Available Profiles
 
@@ -14,7 +14,7 @@ For Node.js backend services (API, worker):
 
 ```json
 {
-  "extends": "@kerniflow/tsconfig/node.json",
+  "extends": "@corely/tsconfig/node.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"
@@ -29,7 +29,7 @@ For React/Vite frontend applications:
 
 ```json
 {
-  "extends": "@kerniflow/tsconfig/react.json",
+  "extends": "@corely/tsconfig/react.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
@@ -45,7 +45,7 @@ For shared internal libraries (packages):
 
 ```json
 {
-  "extends": "@kerniflow/tsconfig/lib.json",
+  "extends": "@corely/tsconfig/lib.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"
@@ -60,7 +60,7 @@ For test files with Vitest globals:
 
 ```json
 {
-  "extends": "@kerniflow/tsconfig/test.json",
+  "extends": "@corely/tsconfig/test.json",
   "compilerOptions": {
     "types": ["vitest/globals", "node"]
   }
@@ -72,7 +72,7 @@ For test files with Vitest globals:
 1. Add as a devDependency:
 
 ```bash
-pnpm add -D @kerniflow/tsconfig@workspace:*
+pnpm add -D @corely/tsconfig@workspace:*
 ```
 
 2. Extend from the appropriate profile in your `tsconfig.json`

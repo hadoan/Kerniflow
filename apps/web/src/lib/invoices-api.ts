@@ -3,7 +3,7 @@
  * Handles HTTP calls to invoice endpoints
  */
 
-import type { CreateInvoiceInput, CreateInvoiceOutput, InvoiceDto } from "@kerniflow/contracts";
+import type { CreateInvoiceInput, CreateInvoiceOutput, InvoiceDto } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
 export class InvoicesApi {

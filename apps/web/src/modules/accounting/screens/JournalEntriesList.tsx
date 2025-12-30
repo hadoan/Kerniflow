@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { useJournalEntries } from "../queries";
 import { EntryStatusBadge, Money } from "../components";
-import type { EntryStatus } from "@kerniflow/contracts";
+import type { EntryStatus } from "@corely/contracts";
 
 /**
  * Journal Entries list with filtering and search

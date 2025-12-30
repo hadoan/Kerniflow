@@ -1,4 +1,4 @@
-# Kerniflow Naming Refactor: Complete Rename Mapping
+# Corely Naming Refactor: Complete Rename Mapping
 
 **Generated:** 23 Dec 2025
 **Purpose:** Complete mapping of file renames to enforce naming conventions

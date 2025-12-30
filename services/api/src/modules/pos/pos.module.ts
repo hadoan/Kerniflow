@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { PosController } from "./adapters/http/pos.controller";
 import { CreateRegisterUseCase } from "./application/use-cases/create-register.usecase";

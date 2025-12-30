@@ -15,14 +15,14 @@ These tokens are defined in `packages/kernel/src/tokens.ts` and used across mult
 
 | Token                          | Value                            | Canonical Source     | Should Be Provided By | Notes                                 |
 | ------------------------------ | -------------------------------- | -------------------- | --------------------- | ------------------------------------- |
-| AUDIT_PORT                     | `"kernel/audit-port"`            | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
-| OUTBOX_PORT                    | `"kernel/outbox-port"`           | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
-| IDEMPOTENCY_PORT               | `"kernel/idempotency-port"`      | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
-| UNIT_OF_WORK                   | `"kernel/unit-of-work"`          | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
-| CLOCK_PORT_TOKEN               | `"kernel/clock-port"`            | @kerniflow/kernel | **KernelModule**      | Re-exported by shared/ports           |
-| ID_GENERATOR_TOKEN             | `"kernel/id-generator"`          | @kerniflow/kernel | **KernelModule**      | Re-exported by shared/ports           |
-| IDEMPOTENCY_STORAGE_PORT_TOKEN | `"api/idempotency-storage-port"` | @kerniflow/kernel | **KernelModule**      | API-specific                          |
-| TENANT_TIMEZONE_PORT           | `"api/tenant-timezone-port"`     | @kerniflow/kernel | InvoicesModule        | Time service dependency               |
+| AUDIT_PORT                     | `"kernel/audit-port"`            | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
+| OUTBOX_PORT                    | `"kernel/outbox-port"`           | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
+| IDEMPOTENCY_PORT               | `"kernel/idempotency-port"`      | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
+| UNIT_OF_WORK                   | `"kernel/unit-of-work"`          | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
+| CLOCK_PORT_TOKEN               | `"kernel/clock-port"`            | @corely/kernel | **KernelModule**      | Re-exported by shared/ports           |
+| ID_GENERATOR_TOKEN             | `"kernel/id-generator"`          | @corely/kernel | **KernelModule**      | Re-exported by shared/ports           |
+| IDEMPOTENCY_STORAGE_PORT_TOKEN | `"api/idempotency-storage-port"` | @corely/kernel | **KernelModule**      | API-specific                          |
+| TENANT_TIMEZONE_PORT           | `"api/tenant-timezone-port"`     | @corely/kernel | InvoicesModule        | Time service dependency               |
 
 **Status**: ✅ Token definitions are centralized
 **Issue**: ❌ 11 modules re-declare providers instead of importing
@@ -242,16 +242,16 @@ These files re-export kernel tokens for convenience:
 
 | File                        | Re-exports                     | Source               |
 | --------------------------- | ------------------------------ | -------------------- |
-| audit.port.ts               | AUDIT_PORT, AUDIT_PORT_TOKEN   | @kerniflow/kernel |
-| clock.port.ts               | CLOCK_PORT_TOKEN               | @kerniflow/kernel |
-| id-generator.port.ts        | ID_GENERATOR_TOKEN             | @kerniflow/kernel |
-| idempotency-storage.port.ts | IDEMPOTENCY_STORAGE_PORT_TOKEN | @kerniflow/kernel |
+| audit.port.ts               | AUDIT_PORT, AUDIT_PORT_TOKEN   | @corely/kernel |
+| clock.port.ts               | CLOCK_PORT_TOKEN               | @corely/kernel |
+| id-generator.port.ts        | ID_GENERATOR_TOKEN             | @corely/kernel |
+| idempotency-storage.port.ts | IDEMPOTENCY_STORAGE_PORT_TOKEN | @corely/kernel |
 
 **Pattern**:
 
 ```typescript
-export type { IdGeneratorPort } from "@kerniflow/kernel";
-export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+export type { IdGeneratorPort } from "@corely/kernel";
+export { ID_GENERATOR_TOKEN } from "@corely/kernel";
 ```
 
 **Purpose**: Allows API modules to import from local path while preserving token identity
@@ -264,8 +264,8 @@ export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
 
 **ID_GENERATOR_TOKEN** can be imported from:
 
-1. `@kerniflow/kernel` (canonical)
-2. `@kerniflow/kernel` (re-export)
+1. `@corely/kernel` (canonical)
+2. `@corely/kernel` (re-export)
 3. `../../shared/ports/id-generator.port` (re-export)
 
 All resolve to the same string value `"kernel/id-generator"`, so no identity mismatch occurs. ✅
@@ -345,7 +345,7 @@ Examples:
 
 Consider enforcing imports from canonical sources:
 
-- Kernel tokens: `@kerniflow/kernel`
+- Kernel tokens: `@corely/kernel`
 - Module tokens: Local `./ports/*` paths
 
 ### 4. Document Export Rules

@@ -4,8 +4,8 @@
  */
 
 import { z } from "zod";
-import type { CreateInvoiceInput } from "@kerniflow/contracts";
-import { CreateInvoiceInputSchema, InvoiceLineInputSchema } from "@kerniflow/contracts";
+import type { CreateInvoiceInput } from "@corely/contracts";
+import { CreateInvoiceInputSchema, InvoiceLineInputSchema } from "@corely/contracts";
 import { format } from "date-fns";
 
 /**

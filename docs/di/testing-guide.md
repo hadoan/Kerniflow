@@ -43,8 +43,8 @@ docker-compose -f docker-compose.local.yml up -d
 docker-compose -f docker-compose.local.yml ps
 
 # Expected output:
-# kerniflow_postgres   running (healthy)
-# kerniflow_redis      running (healthy)
+# corely_postgres   running (healthy)
+# corely_redis      running (healthy)
 ```
 
 ### Running the Tests
@@ -98,11 +98,11 @@ pnpm test di-smoke
 
 ### Unit Tests (Always Run)
 
-| Test                                | What It Verifies                                                                |
-| ----------------------------------- | ------------------------------------------------------------------------------- |
-| Token Identity (ID_GENERATOR_TOKEN) | Token imports from `@kerniflow/kernel` and `shared/ports` resolve to same value |
-| Token Identity (AUDIT_PORT)         | Audit port token consistent across imports                                      |
-| KernelModule Instantiation          | KernelModule can be created and provides kernel services                        |
+| Test                                | What It Verifies                                                             |
+| ----------------------------------- | ---------------------------------------------------------------------------- |
+| Token Identity (ID_GENERATOR_TOKEN) | Token imports from `@corely/kernel` and `shared/ports` resolve to same value |
+| Token Identity (AUDIT_PORT)         | Audit port token consistent across imports                                   |
+| KernelModule Instantiation          | KernelModule can be created and provides kernel services                     |
 
 ### Integration Tests (Currently Skipped)
 

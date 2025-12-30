@@ -5,7 +5,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { inventoryApi } from "@/lib/inventory-api";
-import type { LocationType } from "@kerniflow/contracts";
+import type { LocationType } from "@corely/contracts";
 import { inventoryQueryKeys } from "../queries/inventory.queryKeys";
 
 export default function WarehousesPage() {

@@ -3,7 +3,7 @@
 
 set -e
 
-BASE_DIR="d:/Working/Kerniflow"
+BASE_DIR="d:/Working/Corely"
 cd "$BASE_DIR"
 
 echo "Fixing remaining import path issues..."

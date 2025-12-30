@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
-import { AUDIT_PORT } from "@kerniflow/kernel";
+import { DataModule } from "@corely/data";
+import { AUDIT_PORT } from "@corely/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
 import { SalesController } from "./adapters/http/sales.controller";

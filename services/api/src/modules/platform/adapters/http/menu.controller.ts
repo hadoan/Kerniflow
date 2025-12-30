@@ -1,26 +1,33 @@
-import { Controller, Get, Put, Delete, Query, Body, UseGuards, Inject } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Put,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
+import {
+  GetMenuQuerySchema,
+  UpdateMenuOverridesInputSchema,
+  type MenuScope,
+} from "@corely/contracts";
 import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
 import {
+  CurrentRoleIds,
   CurrentTenantId,
   CurrentUserId,
 } from "../../../identity/adapters/http/current-user.decorator";
 import { ComposeMenuUseCase } from "../../application/use-cases/compose-menu.usecase";
 import { UpdateMenuOverridesUseCase } from "../../application/use-cases/update-menu-overrides.usecase";
 import { ResetMenuOverridesUseCase } from "../../application/use-cases/reset-menu-overrides.usecase";
-import type { MenuOverrides } from "@kerniflow/contracts";
-
-/**
- * Temporary interface for role permission grant repository
- * This will be replaced with proper import once identity module is updated
- */
-interface RolePermissionGrantRepositoryPort {
-  listByRoleAndTenant(
-    tenantId: string,
-    roleId: string
-  ): Promise<Array<{ permissionKey: string; effect: string }>>;
-}
-
-const ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN = "platform/role-permission-grant-repository";
+import {
+  ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN,
+  type RolePermissionGrantRepositoryPort,
+} from "../../../identity/application/ports/role-permission-grant-repository.port";
+import { toAllowedPermissionKeys } from "../../../../shared/permissions/effective-permissions";
 
 @Controller("menu")
 @UseGuards(AuthGuard)
@@ -35,53 +42,78 @@ export class MenuController {
 
   @Get()
   async getMenu(
-    @Query("scope") scope: "web" | "pos" = "web",
+    @Query("scope") scope: string | undefined,
     @CurrentTenantId() tenantId: string,
-    @CurrentUserId() userId: string
-    // TODO: Get roleId from JWT or membership lookup
-    // For now, we'll need to add roleId to the JWT payload or look it up
+    @CurrentUserId() userId: string,
+    @CurrentRoleIds() roleIds: string[]
   ) {
-    // Temporary: This needs to be updated once we have proper role resolution
-    // For now, assume we can get roleId from a membership lookup
-    const roleId = "temp-role-id"; // This should come from membership or JWT
+    const validatedScope = this.parseScope(scope);
+    if (!tenantId || !userId) {
+      throw new BadRequestException("Missing tenant or user context");
+    }
 
-    // Get user permissions
-    const grants = await this.grantRepo.listByRoleAndTenant(tenantId, roleId);
-
-    // Filter to ALLOW grants only
-    const permissions = grants.filter((g) => g.effect === "ALLOW").map((g) => g.permissionKey);
+    const requestedRoles = Array.isArray(roleIds) ? roleIds : [];
+    const grants =
+      requestedRoles.length > 0
+        ? await this.grantRepo.listByRoleIdsAndTenant(tenantId, requestedRoles)
+        : [];
+    const permissions = toAllowedPermissionKeys(grants);
 
     return await this.composeMenuUseCase.execute({
       tenantId,
       userId,
       permissions,
-      scope,
+      scope: validatedScope,
     });
   }
 
   @Put("overrides")
   async updateOverrides(
-    @Query("scope") scope: "web" | "pos" = "web",
-    @Body("overrides") overrides: MenuOverrides,
+    @Query("scope") scope: string | undefined,
+    @Body("overrides") overrides: unknown,
     @CurrentTenantId() tenantId: string,
     @CurrentUserId() userId: string
   ) {
+    const parsed = UpdateMenuOverridesInputSchema.safeParse({
+      scope,
+      overrides,
+    });
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.message);
+    }
+
+    if (!tenantId || !userId) {
+      throw new BadRequestException("Missing tenant or user context");
+    }
+
     return await this.updateMenuOverridesUseCase.execute({
       tenantId,
       userId,
-      scope,
-      overrides,
+      scope: parsed.data.scope,
+      overrides: parsed.data.overrides,
     });
   }
 
   @Delete("overrides")
   async resetOverrides(
-    @Query("scope") scope: "web" | "pos" = "web",
+    @Query("scope") scope: string | undefined,
     @CurrentTenantId() tenantId: string
   ) {
+    const validatedScope = this.parseScope(scope);
+    if (!tenantId) {
+      throw new BadRequestException("Missing tenant context");
+    }
     return await this.resetMenuOverridesUseCase.execute({
       tenantId,
-      scope,
+      scope: validatedScope,
     });
+  }
+
+  private parseScope(scope: string | undefined): MenuScope {
+    const parsed = GetMenuQuerySchema.safeParse({ scope });
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.message);
+    }
+    return parsed.data.scope;
   }
 }

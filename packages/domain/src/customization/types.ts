@@ -1,4 +1,4 @@
-import type { CustomEntityType, CustomFieldType } from "@kerniflow/contracts";
+import type { CustomEntityType, CustomFieldType } from "@corely/contracts";
 
 export interface CustomFieldDefinition {
   id: string;

@@ -3,9 +3,9 @@ import { selectors } from "../utils/selectors";
 
 const mockWorkspaceA = {
   id: "ws-1",
-  name: "Kerniflow GmbH",
+  name: "Corely GmbH",
   kind: "COMPANY",
-  legalName: "Kerniflow GmbH",
+  legalName: "Corely GmbH",
   countryCode: "DE",
   currency: "EUR",
   onboardingStatus: "DONE",
@@ -45,7 +45,7 @@ test.describe("Workspaces UI", () => {
     await page.waitForURL("**/dashboard", { timeout: 10_000 });
 
     const switcher = page.locator(selectors.workspace.switcherTrigger);
-    await expect(switcher).toContainText("Kerniflow GmbH");
+    await expect(switcher).toContainText("Corely GmbH");
 
     await switcher.click();
     await page.click(selectors.workspace.option("ws-2"));

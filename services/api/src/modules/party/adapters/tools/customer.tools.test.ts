@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildCustomerTools } from "./customer.tools";
 import { PartyApplication } from "../../application/party.application";
-import { err, NotFoundError, ok } from "@kerniflow/kernel";
+import { err, NotFoundError, ok } from "@corely/kernel";
 
 const customer = {
   id: "cust-1",

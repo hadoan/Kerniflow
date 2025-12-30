@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { OpenShiftInput, OpenShiftOutput } from "@kerniflow/contracts";
+import type { OpenShiftInput, OpenShiftOutput } from "@corely/contracts";
 import {
   BaseUseCase,
   ConflictError,
@@ -11,7 +11,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { ShiftSession } from "../../domain/shift-session.aggregate";
 import {
   SHIFT_SESSION_REPOSITORY_PORT,

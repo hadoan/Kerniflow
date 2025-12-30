@@ -1,6 +1,6 @@
 import type { InventoryDocumentAggregate } from "../../domain/inventory-document.aggregate";
 import type { InventoryDocumentStatus, InventoryDocumentType } from "../../domain/inventory.types";
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 export type ListDocumentsFilters = {
   type?: InventoryDocumentType;

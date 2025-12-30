@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { FileText, CheckSquare, Phone, Calendar, Mail } from "lucide-react";
-import type { ActivityType } from "@kerniflow/contracts";
+import type { ActivityType } from "@corely/contracts";
 
 interface ActivityTypeIconProps {
   type: ActivityType;

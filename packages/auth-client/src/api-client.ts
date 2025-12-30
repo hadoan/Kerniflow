@@ -1,4 +1,4 @@
-import { request, createIdempotencyKey, HttpError } from "@kerniflow/api-client";
+import { request, createIdempotencyKey, HttpError } from "@corely/api-client";
 import type { AuthClient } from "./auth-client";
 import type { TokenStorage } from "./storage/storage.interface";
 

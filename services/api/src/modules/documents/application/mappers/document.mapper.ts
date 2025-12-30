@@ -1,4 +1,4 @@
-import { type DocumentDTO, type FileDTO } from "@kerniflow/contracts";
+import { type DocumentDTO, type FileDTO } from "@corely/contracts";
 import { type DocumentAggregate } from "../../domain/document.aggregate";
 import { type FileEntity } from "../../domain/file.entity";
 

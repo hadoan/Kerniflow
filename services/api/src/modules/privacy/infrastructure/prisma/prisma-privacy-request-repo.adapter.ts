@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { PrismaService } from "@kerniflow/data";
+import type { PrismaService } from "@corely/data";
 import type { PrivacyRequestRepoPort } from "../../application/ports/privacy-request-repository.port";
 import { PrivacyRequest } from "../../domain/privacy-request.entity";
 

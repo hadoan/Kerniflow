@@ -2,7 +2,7 @@
 
 ## Overview
 
-Workspaces are the fundamental organizational unit within Kerniflow, representing a legal entity (company or personal/freelancer) for which invoices, expenses, and other business operations are managed. Each workspace has its own settings, members, and data scoping.
+Workspaces are the fundamental organizational unit within Corely, representing a legal entity (company or personal/freelancer) for which invoices, expenses, and other business operations are managed. Each workspace has its own settings, members, and data scoping.
 
 ## History / Intent
 

@@ -1,5 +1,5 @@
 import { Logger } from "@nestjs/common";
-import type { LlmPort } from "@kerniflow/core";
+import type { LlmPort } from "@corely/core";
 
 export class NoopLlmAdapter implements LlmPort {
   private readonly logger = new Logger(NoopLlmAdapter.name);

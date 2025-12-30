@@ -1,6 +1,6 @@
 # PROMPT: Implement **AI-Native Approvals** on top of the existing Workflow Runtime (BullMQ + XState + Prisma) — reusable “gating” across Purchasing/Sales/Inventory/POS/Accounting + rich AI copilot support
 
-You are an expert TypeScript/NestJS architect working in the Kerniflow monorepo. The **workflow infrastructure runtime already exists** (BullMQ + XState + Prisma), including:
+You are an expert TypeScript/NestJS architect working in the Corely monorepo. The **workflow infrastructure runtime already exists** (BullMQ + XState + Prisma), including:
 
 - versioned `WorkflowDefinition` (key/version/spec/status)
 - `WorkflowInstance` (businessKey/status/currentState/context snapshots)

@@ -1,4 +1,4 @@
-import type { Register as RegisterDto } from "@kerniflow/contracts";
+import type { Register as RegisterDto } from "@corely/contracts";
 
 /**
  * Register Aggregate - POS device/location

@@ -11,8 +11,8 @@ import {
   parseLocalDate,
   ok,
   err,
-} from "@kerniflow/kernel";
-import type { CreateDealInput, CreateDealOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import type { CreateDealInput, CreateDealOutput } from "@corely/contracts";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
 import { DealAggregate } from "../../../domain/deal.aggregate";
 import { toDealDto } from "../../mappers/deal-dto.mapper";

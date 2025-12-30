@@ -6,7 +6,7 @@ import type {
   GetGeneralLedgerInput,
   GetProfitLossInput,
   GetBalanceSheetInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 // Query: Trial Balance
 export function useTrialBalance(params: GetTrialBalanceInput) {

@@ -1,6 +1,6 @@
 # Authentication & Identity Implementation Summary
 
-## Project: Kerniflow - AI-native Modular ERP
+## Project: Corely - AI-native Modular ERP
 
 **Implementation Date:** December 16, 2025  
 **Status:** Complete and Ready for Integration Testing

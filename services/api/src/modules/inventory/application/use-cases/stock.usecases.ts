@@ -8,7 +8,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   GetOnHandInput,
   GetOnHandOutput,
@@ -18,7 +18,7 @@ import type {
   ListStockMovesOutput,
   ListReservationsInput,
   ListReservationsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { StockMoveRepositoryPort } from "../ports/stock-move-repository.port";
 import type { StockReservationRepositoryPort } from "../ports/stock-reservation-repository.port";
 import type { LocationRepositoryPort } from "../ports/location-repository.port";

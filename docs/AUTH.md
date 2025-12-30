@@ -1,8 +1,8 @@
-# Authentication & Identity System - Kerniflow
+# Authentication & Identity System - Corely
 
 ## Overview
 
-This document describes the complete authentication and identity management system for Kerniflow, including multi-tenancy, RBAC, sessions, and audit logging.
+This document describes the complete authentication and identity management system for Corely, including multi-tenancy, RBAC, sessions, and audit logging.
 
 ## Architecture
 

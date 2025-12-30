@@ -1,5 +1,5 @@
 import type { CustomFieldDefinition } from "./types";
-import type { CustomFieldType } from "@kerniflow/contracts";
+import type { CustomFieldType } from "@corely/contracts";
 
 export interface ValidateAndNormalizeOptions {
   rejectUnknown?: boolean;

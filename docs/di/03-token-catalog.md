@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-After completing the DI refactoring, the Kerniflow backend now has a clean, centralized token management system with **zero provider duplication**. All 68 DI tokens are properly organized, and cross-cutting infrastructure services are provided by centralized modules.
+After completing the DI refactoring, the Corely backend now has a clean, centralized token management system with **zero provider duplication**. All 68 DI tokens are properly organized, and cross-cutting infrastructure services are provided by centralized modules.
 
 **Status**: ✅ All DI issues resolved
 
@@ -14,15 +14,15 @@ After completing the DI refactoring, the Kerniflow backend now has a clean, cent
 
 These tokens are defined in `packages/kernel/src/tokens.ts` and provided by centralized modules:
 
-| Token | Value | Provided By | Exported By | Used By |
-|-------|-------|-------------|-------------|---------|
-| **AUDIT_PORT** | `"kernel/audit-port"` | DataModule (@Global) | DataModule | All modules needing audit |
-| **OUTBOX_PORT** | `"kernel/outbox-port"` | DataModule (@Global) | DataModule | All modules needing events |
-| **IDEMPOTENCY_PORT** | `"kernel/idempotency-port"` | DataModule (@Global) | DataModule | All modules needing idempotency |
-| **UNIT_OF_WORK** | `"kernel/unit-of-work"` | DataModule (@Global) | DataModule | All modules needing transactions |
-| **ID_GENERATOR_TOKEN** | `"kernel/id-generator"` | **KernelModule** | **KernelModule** | All modules needing ID generation |
-| **CLOCK_PORT_TOKEN** | `"kernel/clock-port"` | **KernelModule** | **KernelModule** | All modules needing time services |
-| **IDEMPOTENCY_STORAGE_PORT_TOKEN** | `"api/idempotency-storage-port"` | **KernelModule** | **KernelModule** | API idempotency storage |
+| Token                              | Value                            | Provided By          | Exported By      | Used By                           |
+| ---------------------------------- | -------------------------------- | -------------------- | ---------------- | --------------------------------- |
+| **AUDIT_PORT**                     | `"kernel/audit-port"`            | DataModule (@Global) | DataModule       | All modules needing audit         |
+| **OUTBOX_PORT**                    | `"kernel/outbox-port"`           | DataModule (@Global) | DataModule       | All modules needing events        |
+| **IDEMPOTENCY_PORT**               | `"kernel/idempotency-port"`      | DataModule (@Global) | DataModule       | All modules needing idempotency   |
+| **UNIT_OF_WORK**                   | `"kernel/unit-of-work"`          | DataModule (@Global) | DataModule       | All modules needing transactions  |
+| **ID_GENERATOR_TOKEN**             | `"kernel/id-generator"`          | **KernelModule**     | **KernelModule** | All modules needing ID generation |
+| **CLOCK_PORT_TOKEN**               | `"kernel/clock-port"`            | **KernelModule**     | **KernelModule** | All modules needing time services |
+| **IDEMPOTENCY_STORAGE_PORT_TOKEN** | `"api/idempotency-storage-port"` | **KernelModule**     | **KernelModule** | API idempotency storage           |
 
 **Key Decision**: KernelModule provides ID generator, clock, and idempotency storage. DataModule (marked @Global) provides audit, outbox, idempotency port, and unit of work.
 
@@ -36,13 +36,13 @@ All feature modules now follow this consistent pattern:
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 
 @Module({
   imports: [
-    DataModule,        // Provides: AUDIT_PORT, OUTBOX_PORT, UNIT_OF_WORK
-    KernelModule,      // Provides: ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN
+    DataModule, // Provides: AUDIT_PORT, OUTBOX_PORT, UNIT_OF_WORK
+    KernelModule, // Provides: ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN
     // ... other feature modules
   ],
   providers: [
@@ -71,21 +71,21 @@ export class FeatureModule {}
 
 These Identity tokens are **exported** for use by other modules:
 
-| Token | Value | Used By |
-|-------|-------|---------|
-| MEMBERSHIP_REPOSITORY_TOKEN | `"identity/membership-repository"` | ApprovalsModule, PlatformModule |
+| Token                                  | Value                                         | Used By                         |
+| -------------------------------------- | --------------------------------------------- | ------------------------------- |
+| MEMBERSHIP_REPOSITORY_TOKEN            | `"identity/membership-repository"`            | ApprovalsModule, PlatformModule |
 | ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN | `"identity/role-permission-grant-repository"` | ApprovalsModule, PlatformModule |
 
 ### Platform Module (Cross-Module Tokens)
 
 These Platform tokens are **exported** for use by other modules:
 
-| Token | Value | Used By |
-|-------|-------|---------|
-| APP_REGISTRY_TOKEN | `"platform/app-registry"` | PlatformController, EntitlementGuard |
-| TEMPLATE_REGISTRY_TOKEN | `"platform/template-registry"` | Template use cases |
-| PACK_REGISTRY_TOKEN | `"platform/pack-registry"` | Pack management |
-| TENANT_APP_INSTALL_REPOSITORY_TOKEN | `"platform/tenant-app-install-repository"` | EnableAppUseCase, DisableAppUseCase |
+| Token                               | Value                                      | Used By                              |
+| ----------------------------------- | ------------------------------------------ | ------------------------------------ |
+| APP_REGISTRY_TOKEN                  | `"platform/app-registry"`                  | PlatformController, EntitlementGuard |
+| TEMPLATE_REGISTRY_TOKEN             | `"platform/template-registry"`             | Template use cases                   |
+| PACK_REGISTRY_TOKEN                 | `"platform/pack-registry"`                 | Pack management                      |
+| TENANT_APP_INSTALL_REPOSITORY_TOKEN | `"platform/tenant-app-install-repository"` | EnableAppUseCase, DisableAppUseCase  |
 
 ### All Other Module Tokens
 
@@ -110,17 +110,20 @@ All other modules keep their tokens **private** (not exported):
 
 ### Canonical Import Sources
 
-**Kernel Tokens** - Import from `@kerniflow/kernel`:
+**Kernel Tokens** - Import from `@corely/kernel`:
+
 ```typescript
-import { AUDIT_PORT, OUTBOX_PORT, ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+import { AUDIT_PORT, OUTBOX_PORT, ID_GENERATOR_TOKEN } from "@corely/kernel";
 ```
 
 **Module-Local Tokens** - Import from local ports directory:
+
 ```typescript
 import { USER_REPOSITORY_TOKEN } from "./application/ports/user-repository.port";
 ```
 
 **Cross-Module Tokens** - Import from the owning module:
+
 ```typescript
 import { MEMBERSHIP_REPOSITORY_TOKEN } from "../identity/application/ports/membership-repository.port";
 ```
@@ -131,8 +134,8 @@ The `services/api/src/shared/ports/` directory provides convenience re-exports:
 
 ```typescript
 // shared/ports/id-generator.port.ts
-export type { IdGeneratorPort } from "@kerniflow/kernel";
-export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+export type { IdGeneratorPort } from "@corely/kernel";
+export { ID_GENERATOR_TOKEN } from "@corely/kernel";
 ```
 
 This allows local imports while preserving token identity.
@@ -191,11 +194,13 @@ Only export tokens that are used by other modules:
 ### Zero Duplication Achieved
 
 **Before Refactor**:
+
 - `ID_GENERATOR_TOKEN` duplicated in 11 modules ❌
 - `CLOCK_PORT_TOKEN` duplicated in 10 modules ❌
 - `AUDIT_PORT` duplicated in 4 modules ❌
 
 **After Refactor**:
+
 - `ID_GENERATOR_TOKEN` provided by KernelModule only ✅
 - `CLOCK_PORT_TOKEN` provided by KernelModule only ✅
 - `AUDIT_PORT` provided by DataModule only ✅
@@ -217,6 +222,7 @@ All 11 previously broken modules now import KernelModule:
 11. ✅ CustomizationModule
 
 Plus 4 modules that were already correct:
+
 - ExpensesModule
 - CrmModule
 - WorkspacesModule
@@ -230,11 +236,11 @@ Plus 4 modules that were already correct:
 
 While inconsistent across the codebase, these patterns emerged:
 
-| Suffix | Usage | Example |
-|--------|-------|---------|
-| `*_TOKEN` | Cross-cutting services, newer code | `ID_GENERATOR_TOKEN` |
-| `*_PORT` | Kernel/infrastructure ports | `AUDIT_PORT`, `OUTBOX_PORT` |
-| `*_REPO` or `*_REPOSITORY_PORT` | Domain repositories | `PRODUCT_REPO`, `USER_REPOSITORY_TOKEN` |
+| Suffix                          | Usage                              | Example                                 |
+| ------------------------------- | ---------------------------------- | --------------------------------------- |
+| `*_TOKEN`                       | Cross-cutting services, newer code | `ID_GENERATOR_TOKEN`                    |
+| `*_PORT`                        | Kernel/infrastructure ports        | `AUDIT_PORT`, `OUTBOX_PORT`             |
+| `*_REPO` or `*_REPOSITORY_PORT` | Domain repositories                | `PRODUCT_REPO`, `USER_REPOSITORY_TOKEN` |
 
 **Recommendation**: Standardize on `*_TOKEN` for all future DI tokens.
 
@@ -243,6 +249,7 @@ While inconsistent across the codebase, these patterns emerged:
 **All tokens** use the format: `"<module>/<resource-type>"`
 
 Examples:
+
 - `"kernel/id-generator"` ✅
 - `"identity/user-repository"` ✅
 - `"platform/app-registry"` ✅
@@ -254,16 +261,16 @@ No exceptions found in the codebase.
 
 ## Summary Statistics
 
-| Metric | Count |
-|--------|-------|
-| Total DI Tokens | 68 |
-| Kernel-Level Tokens | 7 |
-| Module-Specific Tokens | 61 |
-| Exported Tokens (cross-module) | 6 |
-| Private Tokens (module-only) | 55 |
-| Modules Using KernelModule | 15 |
+| Metric                            | Count                        |
+| --------------------------------- | ---------------------------- |
+| Total DI Tokens                   | 68                           |
+| Kernel-Level Tokens               | 7                            |
+| Module-Specific Tokens            | 61                           |
+| Exported Tokens (cross-module)    | 6                            |
+| Private Tokens (module-only)      | 55                           |
+| Modules Using KernelModule        | 15                           |
 | Modules Providing Kernel Services | 2 (KernelModule, DataModule) |
-| Provider Duplications | **0** ✅ |
+| Provider Duplications             | **0** ✅                     |
 
 ---
 

@@ -21,7 +21,7 @@ import {
 } from "../ports/membership-repository.port";
 import { type PasswordHasherPort, PASSWORD_HASHER_TOKEN } from "../ports/password-hasher.port";
 import { type TokenServicePort, TOKEN_SERVICE_TOKEN } from "../ports/token-service.port";
-import { type OutboxPort, OUTBOX_PORT } from "@kerniflow/kernel";
+import { type OutboxPort, OUTBOX_PORT } from "@corely/kernel";
 import { type AuditPort, AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import { type RoleRepositoryPort, ROLE_REPOSITORY_TOKEN } from "../ports/role-repository.port";
 import {
@@ -133,6 +133,7 @@ export class SignUpUseCase {
       userId,
       email: email.getValue(),
       tenantId,
+      roleIds: [ownerRole],
     });
     const refreshToken = this.tokenService.generateRefreshToken();
     const { refreshTokenExpiresInMs } = this.tokenService.getExpirationTimes();

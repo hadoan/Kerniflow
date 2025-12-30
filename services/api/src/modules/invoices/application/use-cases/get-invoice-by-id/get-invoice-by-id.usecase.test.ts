@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { GetInvoiceByIdUseCase } from "./get-invoice-by-id.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
-import { NoopLogger, NotFoundError, unwrap, isErr } from "@kerniflow/kernel";
+import { NoopLogger, NotFoundError, unwrap, isErr } from "@corely/kernel";
 
 describe("GetInvoiceByIdUseCase", () => {
   let useCase: GetInvoiceByIdUseCase;

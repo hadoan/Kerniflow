@@ -5,31 +5,31 @@ version: "3.9"
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: kerniflow_dev_postgres
+    container_name: corely_dev_postgres
     restart: unless-stopped
     env_file:
       - .env.dev
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-kerniflow}
-      POSTGRES_USER: ${POSTGRES_USER:-kerniflow}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kerniflow}
+      POSTGRES_DB: ${POSTGRES_DB:-corely}
+      POSTGRES_USER: ${POSTGRES_USER:-corely}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-corely}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corely}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - kerniflow_dev
+      - corely_dev
 
   redis:
     image: redis:7-alpine
-    container_name: kerniflow_dev_redis
+    container_name: corely_dev_redis
     restart: unless-stopped
     env_file:
       - .env.dev
@@ -44,19 +44,19 @@ services:
       retries: 5
       start_period: 5s
     networks:
-      - kerniflow_dev
+      - corely_dev
 
   api:
     build:
       context: .
       dockerfile: Dockerfile.api
-    container_name: kerniflow_dev_api
+    container_name: corely_dev_api
     env_file:
       - .env.dev
     command: >
       sh -c "cd /app/packages/data &&
              (pnpm exec prisma migrate deploy || /app/node_modules/.pnpm/prisma@*/node_modules/prisma/build/index.js migrate deploy) &&
-             cd /app && pnpm --filter @kerniflow/api dev"
+             cd /app && pnpm --filter @corely/api dev"
     restart: unless-stopped
     depends_on:
       postgres:
@@ -65,7 +65,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/corely?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
       NODE_OPTIONS: --enable-source-maps
@@ -86,13 +86,13 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - kerniflow_dev
+      - corely_dev
 
   worker:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    container_name: kerniflow_dev_worker
+    container_name: corely_dev_worker
     env_file:
       - .env.dev
     restart: unless-stopped
@@ -103,7 +103,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/corely?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
       NODE_OPTIONS: --enable-source-maps
@@ -117,13 +117,13 @@ services:
       - ./packages/kernel/src:/app/packages/kernel/src
       - ./packages/email-templates/src:/app/packages/email-templates/src
     networks:
-      - kerniflow_dev
+      - corely_dev
 
   web:
     build:
       context: .
       dockerfile: Dockerfile.web
-    container_name: kerniflow_dev_web
+    container_name: corely_dev_web
     env_file:
       - .env.dev
     restart: unless-stopped
@@ -143,12 +143,12 @@ services:
       - ./packages/offline-core/src:/app/packages/offline-core/src
       - ./packages/offline-web/src:/app/packages/offline-web/src
     networks:
-      - kerniflow_dev
+      - corely_dev
 
 volumes:
   postgres_dev_data:
   redis_dev_data:
 
 networks:
-  kerniflow_dev:
+  corely_dev:
     driver: bridge

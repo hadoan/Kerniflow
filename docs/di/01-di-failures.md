@@ -2,9 +2,10 @@
 
 ## Executive Summary
 
-The Kerniflow NestJS backend has a **critical DI architecture flaw**: massive provider duplication across modules. 12 out of 20+ feature modules independently declare and instantiate cross-cutting infrastructure providers (ID generator, clock, audit, idempotency storage) instead of importing them from a central `KernelModule`.
+The Corely NestJS backend has a **critical DI architecture flaw**: massive provider duplication across modules. 12 out of 20+ feature modules independently declare and instantiate cross-cutting infrastructure providers (ID generator, clock, audit, idempotency storage) instead of importing them from a central `KernelModule`.
 
 This violates NestJS module encapsulation principles and causes:
+
 - Multiple singleton instances across the application
 - Potential token identity mismatches at runtime
 - Broken dependency injection for cross-module use cases
@@ -17,21 +18,22 @@ This violates NestJS module encapsulation principles and causes:
 
 **11 feature modules duplicate the same providers:**
 
-| Module | Duplicates ID_GENERATOR | Duplicates CLOCK | Duplicates IDEMPOTENCY_STORAGE | Duplicates AUDIT |
-|--------|------------------------|------------------|-------------------------------|------------------|
-| AccountingModule | ✅ | ✅ | ❌ | ❌ |
-| CustomizationModule | ✅ | ✅ | ❌ | ❌ |
-| IdentityModule | ✅ | ✅ | ✅ | ❌ |
-| InventoryModule | ✅ | ✅ | ❌ | ✅ |
-| InvoicesModule | ✅ | ✅ | ❌ | ❌ |
-| PartyModule | ✅ | ✅ | ❌ | ❌ |
-| **PlatformModule** | ✅ | ❌ | ❌ | ✅ |
-| PosModule | ✅ | ❌ | ❌ | ❌ |
-| PrivacyModule | ✅ | ✅ | ❌ | ❌ |
-| PurchasingModule | ✅ | ✅ | ❌ | ✅ |
-| SalesModule | ✅ | ✅ | ✅ | ✅ |
+| Module              | Duplicates ID_GENERATOR | Duplicates CLOCK | Duplicates IDEMPOTENCY_STORAGE | Duplicates AUDIT |
+| ------------------- | ----------------------- | ---------------- | ------------------------------ | ---------------- |
+| AccountingModule    | ✅                      | ✅               | ❌                             | ❌               |
+| CustomizationModule | ✅                      | ✅               | ❌                             | ❌               |
+| IdentityModule      | ✅                      | ✅               | ✅                             | ❌               |
+| InventoryModule     | ✅                      | ✅               | ❌                             | ✅               |
+| InvoicesModule      | ✅                      | ✅               | ❌                             | ❌               |
+| PartyModule         | ✅                      | ✅               | ❌                             | ❌               |
+| **PlatformModule**  | ✅                      | ❌               | ❌                             | ✅               |
+| PosModule           | ✅                      | ❌               | ❌                             | ❌               |
+| PrivacyModule       | ✅                      | ✅               | ❌                             | ❌               |
+| PurchasingModule    | ✅                      | ✅               | ❌                             | ✅               |
+| SalesModule         | ✅                      | ✅               | ✅                             | ✅               |
 
 **Only 4 modules do it correctly** (import KernelModule):
+
 - ✅ ExpensesModule
 - ✅ CrmModule
 - ✅ WorkspacesModule
@@ -40,6 +42,7 @@ This violates NestJS module encapsulation principles and causes:
 ### Code Example: The Anti-Pattern
 
 **PlatformModule** (services/api/src/modules/platform/platform.module.ts:96-100):
+
 ```typescript
 providers: [
   // ... other providers
@@ -49,7 +52,7 @@ providers: [
     useExisting: SystemIdGenerator,
   },
   // ...
-]
+];
 ```
 
 **AccountingModule**, **InvoicesModule**, **SalesModule**, and 8 others have **identical duplication**.
@@ -57,6 +60,7 @@ providers: [
 ### What SHOULD Happen
 
 **KernelModule** already correctly provides and exports these:
+
 ```typescript
 @Module({
   imports: [DataModule],
@@ -109,13 +113,14 @@ constructor(
 3. **PlatformModule** declares its OWN `ID_GENERATOR_TOKEN` provider
 4. **PlatformModule** declares its OWN `AUDIT_PORT` provider
 5. Token imports come from different paths:
-   - `AUDIT_PORT` from `@kerniflow/kernel` (line 2)
+   - `AUDIT_PORT` from `@corely/kernel` (line 2)
    - `ID_GENERATOR_TOKEN` from `../../../../shared/ports/id-generator.port` (line 10)
 
-6. Shared ports re-export from `@kerniflow/kernel`:
+6. Shared ports re-export from `@corely/kernel`:
+
    ```typescript
    // shared/ports/id-generator.port.ts
-   export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+   export { ID_GENERATOR_TOKEN } from "@corely/kernel";
    ```
 
 7. All tokens resolve to the same string values, but the **provider instances** are isolated to PlatformModule
@@ -139,7 +144,7 @@ EnableAppUseCase constructor
   ↓
 import from ../../../../shared/ports/id-generator.port
   ↓
-export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel"
+export { ID_GENERATOR_TOKEN } from "@corely/kernel"
   ↓
 packages/kernel/src/tokens.ts:
   export const ID_GENERATOR_TOKEN = "kernel/id-generator"
@@ -150,18 +155,19 @@ packages/kernel/src/tokens.ts:
 
 ### Provider Registration Analysis
 
-| Token | Canonical Source | Should Be Provided By | Actually Provided By |
-|-------|-----------------|----------------------|---------------------|
-| ID_GENERATOR_TOKEN | @kerniflow/kernel | KernelModule | KernelModule + 11 feature modules |
-| CLOCK_PORT_TOKEN | @kerniflow/kernel | KernelModule | KernelModule + 10 feature modules |
-| AUDIT_PORT | @kerniflow/kernel | DataModule | DataModule + 4 feature modules |
-| IDEMPOTENCY_STORAGE_PORT_TOKEN | @kerniflow/kernel | KernelModule | KernelModule + 3 feature modules |
+| Token                          | Canonical Source | Should Be Provided By | Actually Provided By              |
+| ------------------------------ | ---------------- | --------------------- | --------------------------------- |
+| ID_GENERATOR_TOKEN             | @corely/kernel   | KernelModule          | KernelModule + 11 feature modules |
+| CLOCK_PORT_TOKEN               | @corely/kernel   | KernelModule          | KernelModule + 10 feature modules |
+| AUDIT_PORT                     | @corely/kernel   | DataModule            | DataModule + 4 feature modules    |
+| IDEMPOTENCY_STORAGE_PORT_TOKEN | @corely/kernel   | KernelModule          | KernelModule + 3 feature modules  |
 
 ## Impact Assessment
 
 ### Modules Affected
 
 **Critical (must fix immediately)**:
+
 - PlatformModule (used by EnableAppUseCase, DisableAppUseCase, etc.)
 - IdentityModule (foundational for all authenticated operations)
 - SalesModule (high business value)
@@ -170,6 +176,7 @@ packages/kernel/src/tokens.ts:
 - PurchasingModule (high business value)
 
 **High Priority**:
+
 - InventoryModule
 - PartyModule
 - PosModule
@@ -179,11 +186,13 @@ packages/kernel/src/tokens.ts:
 ### Use Cases Potentially Broken
 
 Any use case that:
+
 1. Depends on cross-module providers
 2. Is used across multiple module boundaries
 3. Relies on singleton semantics for ID generation, time, or audit
 
 Examples:
+
 - EnableAppUseCase
 - DisableAppUseCase
 - SignUpUseCase
@@ -192,13 +201,13 @@ Examples:
 
 ## Failure Mode Classification
 
-| Failure Type | Count | Example |
-|-------------|-------|---------|
-| Missing provider registration | 0 | N/A (all providers exist somewhere) |
-| Missing export | 0 | KernelModule correctly exports |
-| Missing import | 11 | Feature modules don't import KernelModule |
-| Token mismatch | 0 | All tokens resolve to same strings |
-| **Duplicate provider declarations** | **11** | **Root cause** |
+| Failure Type                        | Count  | Example                                   |
+| ----------------------------------- | ------ | ----------------------------------------- |
+| Missing provider registration       | 0      | N/A (all providers exist somewhere)       |
+| Missing export                      | 0      | KernelModule correctly exports            |
+| Missing import                      | 11     | Feature modules don't import KernelModule |
+| Token mismatch                      | 0      | All tokens resolve to same strings        |
+| **Duplicate provider declarations** | **11** | **Root cause**                            |
 
 ## Next Steps (Phase 1 & 2)
 

@@ -4,8 +4,8 @@ import {
   createTenant,
   createTestDb,
   stopSharedContainer,
-} from "@kerniflow/testkit";
-import { PrismaService, resetPrisma } from "@kerniflow/data";
+} from "@corely/testkit";
+import { PrismaService, resetPrisma } from "@corely/data";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 

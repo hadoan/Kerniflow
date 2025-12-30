@@ -9,8 +9,8 @@ import type {
   StockMoveDto,
   StockReservationDto,
   WarehouseDto,
-} from "@kerniflow/contracts";
-import type { LocalDate } from "@kerniflow/kernel";
+} from "@corely/contracts";
+import type { LocalDate } from "@corely/kernel";
 import type { InventoryDocumentAggregate } from "../../domain/inventory-document.aggregate";
 import type {
   InventoryDocumentLine,

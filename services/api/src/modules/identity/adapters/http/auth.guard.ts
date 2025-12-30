@@ -38,12 +38,13 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException("Invalid or expired token");
     }
 
-    // Set user and tenant on request
+    // Set user, tenant, and roles on request
     request.user = {
       userId: decoded.userId,
       email: decoded.email,
     };
     request.tenantId = decoded.tenantId;
+    request.roleIds = Array.isArray(decoded.roleIds) ? decoded.roleIds : [];
 
     return true;
   }

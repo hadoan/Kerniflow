@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
-import { ApprovalPolicyInputSchema } from "@kerniflow/contracts";
+import { ApprovalPolicyInputSchema } from "@corely/contracts";
 import {
   CurrentTenantId,
   CurrentUserId,

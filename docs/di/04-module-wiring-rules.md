@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the **standard patterns and rules** for NestJS dependency injection in the Kerniflow backend. Following these rules prevents the DI issues that plagued the codebase before the refactoring.
+This document defines the **standard patterns and rules** for NestJS dependency injection in the Corely backend. Following these rules prevents the DI issues that plagued the codebase before the refactoring.
 
 ---
 
@@ -52,6 +52,7 @@ export const CLOCK_PORT_TOKEN = "kernel/clock-port";
 ```
 
 **Rules**:
+
 - ✅ Define once in `packages/kernel/src/tokens.ts`
 - ✅ Use string values, never `Symbol()` (monorepo compatibility)
 - ✅ Follow naming pattern: `"<module>/<resource-type>"`
@@ -72,6 +73,7 @@ export interface UserRepositoryPort {
 ```
 
 **Rules**:
+
 - ✅ Define in `<module>/application/ports/<resource>.port.ts`
 - ✅ Keep private unless explicitly needed by other modules
 - ✅ Use same naming pattern: `"<module>/<resource-type>"`
@@ -79,10 +81,10 @@ export interface UserRepositoryPort {
 
 ### Token Import Rules
 
-**Import kernel tokens from `@kerniflow/kernel`:**
+**Import kernel tokens from `@corely/kernel`:**
 
 ```typescript
-import { AUDIT_PORT, ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+import { AUDIT_PORT, ID_GENERATOR_TOKEN } from "@corely/kernel";
 ```
 
 **Import module tokens from local paths:**
@@ -101,7 +103,7 @@ import { MEMBERSHIP_REPOSITORY_TOKEN } from "../identity/application/ports/membe
 
 ```typescript
 // Both work - prefer direct import from kernel for clarity
-import { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+import { ID_GENERATOR_TOKEN } from "@corely/kernel";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 ```
 
@@ -113,7 +115,7 @@ import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 
 // Infrastructure adapters
@@ -130,8 +132,8 @@ import { UserController } from "./adapters/http/user.controller";
 
 @Module({
   imports: [
-    DataModule,     // Provides: AUDIT_PORT, OUTBOX_PORT, UNIT_OF_WORK (global)
-    KernelModule,   // Provides: ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN
+    DataModule, // Provides: AUDIT_PORT, OUTBOX_PORT, UNIT_OF_WORK (global)
+    KernelModule, // Provides: ID_GENERATOR_TOKEN, CLOCK_PORT_TOKEN
     // Other feature modules if needed
   ],
   controllers: [UserController],
@@ -275,6 +277,7 @@ providers: [
 ```
 
 **Why `useExisting` instead of `useClass`?**
+
 - Allows DI by both token and class
 - Ensures singleton semantics
 - Enables testing with mocks
@@ -315,10 +318,12 @@ providers: [
 ```typescript
 useFactory: (
   repo: UserRepositoryPort,
-  idGen: any,  // From KernelModule - concrete type not imported
-  clock: any,  // From KernelModule - concrete type not imported
-  audit: any   // From DataModule - concrete type not imported
-) => { /* ... */ }
+  idGen: any, // From KernelModule - concrete type not imported
+  clock: any, // From KernelModule - concrete type not imported
+  audit: any // From DataModule - concrete type not imported
+) => {
+  /* ... */
+};
 ```
 
 ### Pattern 3: Simple Service (No Factory)
@@ -340,6 +345,7 @@ providers: [
 **Location**: `services/api/src/shared/kernel/kernel.module.ts`
 
 **Provides**:
+
 - `ID_GENERATOR_TOKEN` → `SystemIdGenerator`
 - `CLOCK_PORT_TOKEN` → `SystemClock`
 - `IDEMPOTENCY_STORAGE_PORT_TOKEN` → `PrismaIdempotencyStorageAdapter`
@@ -353,6 +359,7 @@ providers: [
 **Location**: `packages/data/src/data.module.ts`
 
 **Provides**:
+
 - `PrismaService` - Database client
 - `AUDIT_PORT` → `PrismaAuditAdapter`
 - `OUTBOX_PORT` → `PrismaOutboxAdapter`
@@ -444,7 +451,7 @@ providers: [
 export class ModuleAModule {}
 
 @Module({
-  imports: [ModuleAModule],  // ❌ Circular
+  imports: [ModuleAModule], // ❌ Circular
 })
 export class ModuleBModule {}
 ```
@@ -477,11 +484,7 @@ Import real modules for integration tests:
 
 ```typescript
 const module = await Test.createTestingModule({
-  imports: [
-    DataModule,
-    KernelModule,
-    UsersModule,
-  ],
+  imports: [DataModule, KernelModule, UsersModule],
 }).compile();
 ```
 
@@ -508,6 +511,7 @@ When creating a new feature module:
 ### Manual Review
 
 During code review, check:
+
 1. No duplicate provider registrations
 2. KernelModule imported if ID_GENERATOR_TOKEN or CLOCK_PORT_TOKEN used
 3. No Symbol() tokens
@@ -516,6 +520,7 @@ During code review, check:
 ### Automated (Future)
 
 Add ESLint rules to prevent:
+
 - Symbol-based DI tokens
 - Duplicate provider registrations (harder to detect statically)
 - Missing KernelModule import when kernel tokens are used
@@ -524,15 +529,15 @@ Add ESLint rules to prevent:
 
 ## Summary
 
-| Rule | Description |
-|------|-------------|
-| **Single Source** | Each provider registered exactly once |
+| Rule                       | Description                                           |
+| -------------------------- | ----------------------------------------------------- |
+| **Single Source**          | Each provider registered exactly once                 |
 | **Import Don't Duplicate** | Import KernelModule/DataModule instead of redeclaring |
-| **Export Intentionally** | Only export cross-module services with documentation |
-| **String Tokens** | Always use strings, never Symbol() |
-| **Naming Convention** | `"<module>/<resource-type>"` format |
-| **Standard Structure** | Follow feature module template |
-| **No Circular Deps** | Avoid circular module imports |
+| **Export Intentionally**   | Only export cross-module services with documentation  |
+| **String Tokens**          | Always use strings, never Symbol()                    |
+| **Naming Convention**      | `"<module>/<resource-type>"` format                   |
+| **Standard Structure**     | Follow feature module template                        |
+| **No Circular Deps**       | Avoid circular module imports                         |
 
 **Key Insight**: Treat DI tokens like an API contract. Breaking changes affect all consumers.
 

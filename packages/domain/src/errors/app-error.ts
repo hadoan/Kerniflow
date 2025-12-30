@@ -1,4 +1,4 @@
-import type { ValidationErrorItem } from "@kerniflow/contracts";
+import type { ValidationErrorItem } from "@corely/contracts";
 
 /**
  * Log level hint for error handlers

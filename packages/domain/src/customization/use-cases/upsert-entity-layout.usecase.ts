@@ -1,4 +1,4 @@
-import type { CustomEntityType } from "@kerniflow/contracts";
+import type { CustomEntityType } from "@corely/contracts";
 import type { EntityLayoutPort } from "../ports";
 import type { EntityLayout } from "../types";
 

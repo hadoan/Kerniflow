@@ -9,13 +9,13 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   GetPurchasingSettingsInput,
   GetPurchasingSettingsOutput,
   UpdatePurchasingSettingsInput,
   UpdatePurchasingSettingsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { PurchasingSettingsRepositoryPort } from "../ports/settings-repository.port";
 import { PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
 import { toSettingsDto } from "../mappers/purchasing-dto.mapper";

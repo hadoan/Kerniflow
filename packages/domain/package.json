@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/domain",
+  "name": "@corely/domain",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -17,7 +17,7 @@
     "dist"
   ],
   "dependencies": {
-    "@kerniflow/contracts": "workspace:*"
+    "@corely/contracts": "workspace:*"
   },
   "scripts": {
     "build": "tsdown",

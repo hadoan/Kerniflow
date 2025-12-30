@@ -7,8 +7,8 @@ import type { UserRepositoryPort } from "../ports/user-repository.port";
 import { USER_REPOSITORY_TOKEN } from "../ports/user-repository.port";
 import type { RefreshTokenRepositoryPort } from "../ports/refresh-token-repository.port";
 import { REFRESH_TOKEN_REPOSITORY_TOKEN } from "../ports/refresh-token-repository.port";
-import type { OutboxPort } from "@kerniflow/kernel";
-import { OUTBOX_PORT } from "@kerniflow/kernel";
+import type { OutboxPort } from "@corely/kernel";
+import { OUTBOX_PORT } from "@corely/kernel";
 import type { AuditPort } from "../ports/audit.port";
 import { AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import type { ClockPort } from "../../../../shared/ports/clock.port";
@@ -67,6 +67,7 @@ export class SwitchTenantUseCase {
       userId: input.userId,
       email: user.getEmail().getValue(),
       tenantId: input.toTenantId,
+      roleIds: [membership.getRoleId()],
     });
 
     const refreshToken = this.tokenService.generateRefreshToken();

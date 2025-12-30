@@ -11,8 +11,8 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
-import { type RecordPaymentInput, type RecordPaymentOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type RecordPaymentInput, type RecordPaymentOutput } from "@corely/contracts";
 import { type InvoiceRepoPort } from "../../ports/invoice-repository.port";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";
 

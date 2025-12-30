@@ -1,11 +1,11 @@
-# @kerniflow/prettier-config
+# @corely/prettier-config
 
-Shared Prettier configuration for the Kerniflow monorepo.
+Shared Prettier configuration for the Corely monorepo.
 
 ## Installation
 
 ```bash
-pnpm add -D @kerniflow/prettier-config@workspace:* prettier
+pnpm add -D @corely/prettier-config@workspace:* prettier
 ```
 
 ## Usage
@@ -14,20 +14,20 @@ pnpm add -D @kerniflow/prettier-config@workspace:* prettier
 
 ```json
 {
-  "prettier": "@kerniflow/prettier-config"
+  "prettier": "@corely/prettier-config"
 }
 ```
 
 ### Option 2: prettier.config.js
 
 ```javascript
-export { default } from "@kerniflow/prettier-config";
+export { default } from "@corely/prettier-config";
 ```
 
 ### Option 3: Extend and customize
 
 ```javascript
-import baseConfig from "@kerniflow/prettier-config";
+import baseConfig from "@corely/prettier-config";
 
 export default {
   ...baseConfig,

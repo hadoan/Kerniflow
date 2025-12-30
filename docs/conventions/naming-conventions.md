@@ -1,4 +1,4 @@
-# Kerniflow Naming Conventions
+# Corely Naming Conventions
 
 **Version:** 1.0
 **Date:** 23 Dec 2025
@@ -8,7 +8,7 @@
 
 ## Purpose and Principles
 
-This document defines the **single, authoritative naming taxonomy** for all code in the Kerniflow monorepo. Consistent naming conventions enable:
+This document defines the **single, authoritative naming taxonomy** for all code in the Corely monorepo. Consistent naming conventions enable:
 
 - **Instant discoverability**: Developers can predict file locations and names
 - **Reduced cognitive load**: No mental translation between file names and class names
@@ -816,12 +816,12 @@ Use this checklist when creating or refactoring files:
 
 ## References
 
-- [Kerniflow Overall Structure](../overall-structure.md)
-- [Kerniflow Architecture](../architect.md)
+- [Corely Overall Structure](../overall-structure.md)
+- [Corely Architecture](../architect.md)
 - [Hexagonal Architecture (Ports & Adapters)](https://alistair.cockburn.us/hexagonal-architecture/)
 - [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
 - [NestJS Style Guide](https://docs.nestjs.com/)
 
 ---
 
-**This document is the single source of truth for naming conventions in the Kerniflow monorepo. All code must conform to these standards.**
+**This document is the single source of truth for naming conventions in the Corely monorepo. All code must conform to these standards.**

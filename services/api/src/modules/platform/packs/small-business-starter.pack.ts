@@ -1,4 +1,4 @@
-import type { PackDefinition } from "@kerniflow/contracts";
+import type { PackDefinition } from "@corely/contracts";
 
 /**
  * Small Business Starter Pack

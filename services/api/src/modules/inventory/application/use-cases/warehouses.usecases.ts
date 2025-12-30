@@ -11,7 +11,7 @@ import {
   type AuditPort,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateWarehouseInput,
   CreateWarehouseOutput,
@@ -21,7 +21,7 @@ import type {
   GetWarehouseOutput,
   ListWarehousesInput,
   ListWarehousesOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { WarehouseRepositoryPort } from "../ports/warehouse-repository.port";
 import type { LocationRepositoryPort } from "../ports/location-repository.port";
 import { toWarehouseDto } from "../mappers/inventory-dto.mapper";

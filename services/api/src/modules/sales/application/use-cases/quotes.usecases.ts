@@ -12,7 +12,7 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateQuoteInput,
   CreateQuoteOutput,
@@ -32,7 +32,7 @@ import type {
   GetQuoteOutput,
   ListQuotesInput,
   ListQuotesOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { QuoteAggregate } from "../../domain/quote.aggregate";
 import { SalesOrderAggregate } from "../../domain/order.aggregate";
 import { SalesInvoiceAggregate } from "../../domain/invoice.aggregate";

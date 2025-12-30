@@ -1,11 +1,11 @@
-# @kerniflow/eslint-config
+# @corely/eslint-config
 
-Shared ESLint configuration for the Kerniflow monorepo using ESLint flat config format.
+Shared ESLint configuration for the Corely monorepo using ESLint flat config format.
 
 ## Installation
 
 ```bash
-pnpm add -D @kerniflow/eslint-config@workspace:* eslint typescript-eslint @eslint/js globals
+pnpm add -D @corely/eslint-config@workspace:* eslint typescript-eslint @eslint/js globals
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ pnpm add -D @kerniflow/eslint-config@workspace:* eslint typescript-eslint @eslin
 ```javascript
 // eslint.config.js
 import tseslint from "typescript-eslint";
-import config from "@kerniflow/eslint-config";
+import config from "@corely/eslint-config";
 
 export default tseslint.config(
   {
@@ -41,7 +41,7 @@ Pick only what you need:
 ```javascript
 // For a Node.js backend service
 import tseslint from "typescript-eslint";
-import { base, typescript, node, test } from "@kerniflow/eslint-config";
+import { base, typescript, node, test } from "@corely/eslint-config";
 
 export default tseslint.config({ ignores: ["dist/"] }, base, typescript, node, test);
 ```
@@ -49,7 +49,7 @@ export default tseslint.config({ ignores: ["dist/"] }, base, typescript, node, t
 ```javascript
 // For a React frontend app
 import tseslint from "typescript-eslint";
-import { base, typescript, react, test } from "@kerniflow/eslint-config";
+import { base, typescript, react, test } from "@corely/eslint-config";
 
 export default tseslint.config({ ignores: ["dist/"] }, base, typescript, react, test);
 ```

@@ -6,7 +6,7 @@ import type {
   LineDirection,
   PeriodStatus,
   SourceType,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 // Value Objects
 export type Money = {

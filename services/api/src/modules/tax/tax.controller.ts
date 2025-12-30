@@ -32,7 +32,7 @@ import {
   type TaxProfileDto,
   type TaxCodeDto,
   type TaxRateDto,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { IdempotencyInterceptor } from "../../shared/infrastructure/idempotency/IdempotencyInterceptor";
 import { GetTaxProfileUseCase } from "./application/use-cases/get-tax-profile.use-case";
 import { UpsertTaxProfileUseCase } from "./application/use-cases/upsert-tax-profile.use-case";

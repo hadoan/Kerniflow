@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { UpdateRolePermissionsRequest } from "@kerniflow/contracts";
+import type { UpdateRolePermissionsRequest } from "@corely/contracts";
 import { identityApi } from "@/lib/identity-api";
 import { settingsQueryKeys } from "./settings.queryKeys";
 

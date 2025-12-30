@@ -1,11 +1,11 @@
 {
-  "extends": "@kerniflow/tsconfig/node.json",
+  "extends": "@corely/tsconfig/node.json",
   "compilerOptions": {
     "strict": false,
     "exactOptionalPropertyTypes": false,
     "paths": {
-      "@kerniflow/testkit": ["./src/index.ts"],
-      "@kerniflow/testkit/*": ["./src/*"]
+      "@corely/testkit": ["./src/index.ts"],
+      "@corely/testkit/*": ["./src/*"]
     }
   },
   "include": ["src"]

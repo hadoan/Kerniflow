@@ -8,8 +8,8 @@ import {
   createTenant,
   createTestDb,
   stopSharedContainer,
-} from "@kerniflow/testkit";
-import { CreateInvoiceDraftOutputSchema } from "@kerniflow/contracts";
+} from "@corely/testkit";
+import { CreateInvoiceDraftOutputSchema } from "@corely/contracts";
 import { JwtTokenService } from "../../identity/infrastructure/security/jwt.token-service";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
@@ -53,6 +53,7 @@ describe("Invoice API contracts", () => {
           userId: "user-schema",
           email: "user@example.com",
           tenantId,
+          roleIds: ["schema-role"],
         })}`
       )
       .send({

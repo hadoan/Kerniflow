@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Badge } from "@/shared/ui/badge";
 import { useAccounts } from "../queries";
 import { AccountTypeBadge } from "../components";
-import type { AccountType } from "@kerniflow/contracts";
+import type { AccountType } from "@corely/contracts";
 
 /**
  * Chart of Accounts list with filtering and search

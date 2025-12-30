@@ -1,4 +1,4 @@
-# Kerniflow Frontend — Folder Structure (apps/webs)
+# Corely Frontend — Folder Structure (apps/webs)
 
 This document explains how the frontend code is organized inside `apps/webs/src` and the rules for keeping it scalable as we add more modules (freelancer → full ERP).
 

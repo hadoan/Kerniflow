@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { Worker, type Job } from "bullmq";
-import { WORKFLOW_TASK_QUEUE, type WorkflowEventInput } from "@kerniflow/contracts";
+import { WORKFLOW_TASK_QUEUE, type WorkflowEventInput } from "@corely/contracts";
 import {
   PrismaService,
   WorkflowEventRepository,
   WorkflowInstanceRepository,
   WorkflowTaskRepository,
-} from "@kerniflow/data";
-import type { TransactionContext } from "@kerniflow/kernel";
+} from "@corely/data";
+import type { TransactionContext } from "@corely/kernel";
 import { WorkflowQueues } from "./workflow-queues";
 import { WorkflowMetricsService } from "./workflow-metrics.service";
 import { TaskHandlerRegistry } from "./handlers/task-handler.registry";

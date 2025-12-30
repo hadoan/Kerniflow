@@ -4,7 +4,7 @@ import { RequestAccountErasureUseCase } from "../request-account-erasure/request
 import { FakePrivacyRequestRepo } from "../../../testkit/fakes/fake-privacy-request-repo";
 import { FakeOutbox } from "../../../testkit/fakes/fake-outbox";
 import { FakeIdGenerator } from "../../../testkit/fakes/fake-id-generator";
-import { FixedClock } from "@kerniflow/kernel";
+import { FixedClock } from "@corely/kernel";
 import { IdentityPort } from "../../ports/identity-port";
 
 class NoopIdentity implements IdentityPort {}

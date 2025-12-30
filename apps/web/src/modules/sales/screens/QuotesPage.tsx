@@ -10,7 +10,7 @@ import { customersApi } from "@/lib/customers-api";
 import { formatMoney } from "@/shared/lib/formatters";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { salesQueryKeys } from "../queries/sales.queryKeys";
-import type { QuoteDto } from "@kerniflow/contracts";
+import type { QuoteDto } from "@corely/contracts";
 
 const getStatusVariant = (status: QuoteDto["status"]) => {
   switch (status) {

@@ -1,6 +1,6 @@
 ## Prompt: Implement Systematic Error Handling (Backend + Web + POS)
 
-You are an expert TypeScript/NestJS + React + React Native architect working in the **Kerniflow** monorepo. Implement a **systematic, cross-platform error handling system** inspired by ABP’s “UserFriendlyException” concept, but using **Problem Details** as the standard wire format. This is **infrastructure work**: do not implement domain features (invoices/expenses/etc.), only the error system and integration points.
+You are an expert TypeScript/NestJS + React + React Native architect working in the **Corely** monorepo. Implement a **systematic, cross-platform error handling system** inspired by ABP’s “UserFriendlyException” concept, but using **Problem Details** as the standard wire format. This is **infrastructure work**: do not implement domain features (invoices/expenses/etc.), only the error system and integration points.
 
 ### Context (repo + runtimes)
 
@@ -250,7 +250,7 @@ POS must treat errors differently depending on category:
 
 Create a short doc (and keep it crisp) describing:
 
-- The ProblemDetails payload shape used in Kerniflow
+- The ProblemDetails payload shape used in Corely
 - Error code convention (`Module:Meaning`)
 - Which errors are safe to show (`UserFriendlyError`)
 - Mapping table (error type → HTTP status)

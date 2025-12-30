@@ -7,18 +7,18 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   ListAccountMappingsInput,
   ListAccountMappingsOutput,
   UpsertAccountMappingInput,
   UpsertAccountMappingOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { PurchasingAccountMappingRepositoryPort } from "../ports/account-mapping-repository.port";
 import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import { toAccountMappingDto } from "../mappers/purchasing-dto.mapper";
-import type { IdGeneratorPort, ClockPort } from "@kerniflow/kernel";
+import type { IdGeneratorPort, ClockPort } from "@corely/kernel";
 
 const buildMapping = (params: {
   id: string;

@@ -6,8 +6,8 @@ import {
   createUser,
   createTestDb,
   stopSharedContainer,
-} from "@kerniflow/testkit";
-import type { PrismaService } from "@kerniflow/data";
+} from "@corely/testkit";
+import type { PrismaService } from "@corely/data";
 import { buildRequestContext } from "@shared/context/request-context";
 import { CreateExpenseUseCase } from "../application/use-cases/create-expense.usecase";
 import { MockAuditPort } from "@shared/testkit/mocks/mock-audit-port";
@@ -32,11 +32,11 @@ describe("Expenses integration (Postgres)", () => {
       { CustomFieldDefinitionRepository, CustomFieldIndexRepository },
     ] = await Promise.all([
       import("../infrastructure/adapters/prisma-expense-repository.adapter"),
-      import("@kerniflow/data"),
+      import("@corely/data"),
       import("../../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter"),
       import("../../../shared/infrastructure/system-id-generator"),
       import("../../../shared/infrastructure/system-clock"),
-      import("@kerniflow/data"),
+      import("@corely/data"),
     ]);
 
     ExpenseRepo = PrismaExpenseRepository;

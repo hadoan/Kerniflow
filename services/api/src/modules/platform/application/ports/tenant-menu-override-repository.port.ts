@@ -1,4 +1,4 @@
-import type { TransactionContext } from "@kerniflow/kernel";
+import type { TransactionContext } from "@corely/kernel";
 
 export type MenuScope = "WEB" | "POS";
 

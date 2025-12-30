@@ -1,12 +1,12 @@
-# Kerniflow NestJS DI Refactoring - Complete Summary
+# Corely NestJS DI Refactoring - Complete Summary
 
 ## Overview
 
-This directory contains the complete documentation for the **Kerniflow NestJS Dependency Injection Refactoring** completed on December 30, 2025. This refactoring resolved critical DI architecture issues and established best practices for the backend monorepo.
+This directory contains the complete documentation for the **Corely NestJS Dependency Injection Refactoring** completed on December 30, 2025. This refactoring resolved critical DI architecture issues and established best practices for the backend monorepo.
 
 ## Problem Statement
 
-The Kerniflow backend suffered from **massive provider duplication**: 11 out of 20+ feature modules independently declared cross-cutting infrastructure providers (ID generator, clock, audit, idempotency storage) instead of importing them from centralized modules. This violated NestJS principles and caused:
+The Corely backend suffered from **massive provider duplication**: 11 out of 20+ feature modules independently declared cross-cutting infrastructure providers (ID generator, clock, audit, idempotency storage) instead of importing them from centralized modules. This violated NestJS principles and caused:
 
 - Multiple singleton instances across the application
 - Potential `UnknownDependenciesException` errors
@@ -44,6 +44,7 @@ The Kerniflow backend suffered from **massive provider duplication**: 11 out of 
 ## Documentation Structure
 
 ### [01-di-failures.md](./01-di-failures.md) - Phase 0: Baseline & Diagnosis
+
 **Status**: ✅ Complete
 
 - Root cause analysis of provider duplication
@@ -54,6 +55,7 @@ The Kerniflow backend suffered from **massive provider duplication**: 11 out of 
 **Key Finding**: 11 modules duplicating providers instead of importing KernelModule.
 
 ### [02-token-inventory.md](./02-token-inventory.md) - Phase 1: Token Audit
+
 **Status**: ✅ Complete
 
 - Comprehensive inventory of all 68 DI tokens
@@ -64,6 +66,7 @@ The Kerniflow backend suffered from **massive provider duplication**: 11 out of 
 **Key Finding**: Token definitions are correct; provider registration is the problem.
 
 ### [03-token-catalog.md](./03-token-catalog.md) - Phase 3: Post-Refactor Catalog
+
 **Status**: ✅ Complete
 
 - Final token organization after refactoring
@@ -74,9 +77,10 @@ The Kerniflow backend suffered from **massive provider duplication**: 11 out of 
 **Key Metric**: 0 provider duplications (down from 11+ instances).
 
 ### [04-module-wiring-rules.md](./04-module-wiring-rules.md) - Phase 4: Best Practices
+
 **Status**: ✅ Complete
 
-- Standard NestJS DI patterns for Kerniflow
+- Standard NestJS DI patterns for Corely
 - Core principles (Single Source, Import Don't Duplicate, Export Intentionally)
 - Feature module template
 - Anti-patterns to avoid
@@ -114,24 +118,26 @@ These modules were already importing KernelModule correctly:
 
 ### Quality Metrics
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Provider Duplications | 28+ instances | **0** ✅ |
-| Modules with DI Issues | 11 | **0** ✅ |
-| Modules Importing KernelModule | 4 | **15** ✅ |
-| Token Identity Issues | 0 | **0** ✅ |
-| Symbol-Based Tokens | 0 | **0** ✅ |
+| Metric                         | Before        | After     |
+| ------------------------------ | ------------- | --------- |
+| Provider Duplications          | 28+ instances | **0** ✅  |
+| Modules with DI Issues         | 11            | **0** ✅  |
+| Modules Importing KernelModule | 4             | **15** ✅ |
+| Token Identity Issues          | 0             | **0** ✅  |
+| Symbol-Based Tokens            | 0             | **0** ✅  |
 
 ## Architecture Decisions
 
 ### Centralized Modules
 
 **KernelModule** (`services/api/src/shared/kernel/kernel.module.ts`)
+
 - Provides: ID generator, clock, idempotency storage
 - Scope: Per-request services that all modules need
 - Import: Required in every feature module
 
 **DataModule** (`packages/data/src/data.module.ts`)
+
 - Provides: Audit, outbox, UoW, Prisma, shared repositories
 - Scope: Global (@Global decorator)
 - Import: Once in AppModule, available everywhere
@@ -139,11 +145,13 @@ These modules were already importing KernelModule correctly:
 ### Token Organization
 
 **Cross-Module Tokens** (7 tokens)
+
 - Defined in: `packages/kernel/src/tokens.ts`
 - Provided by: KernelModule or DataModule
 - Usage: All feature modules
 
 **Module-Specific Tokens** (61 tokens)
+
 - Defined in: `<module>/application/ports/*.port.ts`
 - Provided by: Owning module
 - Usage: Private unless explicitly exported
@@ -183,6 +191,7 @@ These modules were already importing KernelModule correctly:
 Location: `services/api/src/__tests__/di-smoke.test.ts`
 
 Tests verify:
+
 - ✅ AppModule instantiation
 - ✅ KernelModule provides kernel services
 - ✅ Critical use cases resolve (EnableAppUseCase, SignUpUseCase)
@@ -190,6 +199,7 @@ Tests verify:
 - ✅ Token identity consistency
 
 Run with:
+
 ```bash
 cd services/api
 pnpm test di-smoke.test
@@ -212,12 +222,14 @@ pnpm dev
 ## Future Enhancements
 
 ### Short Term
+
 - [ ] Add ESLint rules to prevent Symbol-based tokens
 - [ ] Add ESLint rules to catch duplicate provider patterns
 - [ ] Expand smoke tests to cover more modules
 - [ ] Document worker service DI patterns
 
 ### Long Term
+
 - [ ] Consider consolidating token naming (choose `*_TOKEN` vs `*_PORT`)
 - [ ] Evaluate if all kernel services should be global
 - [ ] Create architectural decision records (ADRs) for DI patterns
@@ -241,6 +253,7 @@ All criteria from the original requirements are met:
 ### For Developers
 
 When creating a new feature module:
+
 1. Follow the template in `04-module-wiring-rules.md`
 2. Import `DataModule` and `KernelModule`
 3. Never duplicate kernel providers
@@ -250,6 +263,7 @@ When creating a new feature module:
 ### For Code Reviewers
 
 Check for:
+
 1. No duplicate provider registrations
 2. KernelModule imported if kernel tokens are used
 3. Proper token naming (`"<module>/<resource-type>"`)
@@ -258,6 +272,7 @@ Check for:
 ### For Architects
 
 Monitor:
+
 1. Module dependency graph (avoid circular dependencies)
 2. Token proliferation (combine similar concepts)
 3. Global module usage (minimize scope)
@@ -274,7 +289,7 @@ Monitor:
 
 **Refactoring Lead**: Senior NestJS Architect
 **Date**: December 30, 2025
-**Scope**: Kerniflow Backend Services (API + Worker)
+**Scope**: Corely Backend Services (API + Worker)
 **Impact**: All 15 feature modules, 68 DI tokens, 2 centralized modules
 
 ---

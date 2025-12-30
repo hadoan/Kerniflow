@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LineDirectionSchema } from "@kerniflow/contracts";
+import { LineDirectionSchema } from "@corely/contracts";
 
 /**
  * Frontend form schema for journal entry lines

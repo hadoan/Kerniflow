@@ -7,7 +7,7 @@ import { Label } from "@/shared/ui/label";
 import { inventoryApi } from "@/lib/inventory-api";
 import { inventoryQueryKeys } from "../queries/inventory.queryKeys";
 import { useNavigate } from "react-router-dom";
-import type { InventoryDocumentType } from "@kerniflow/contracts";
+import type { InventoryDocumentType } from "@corely/contracts";
 
 export default function DocumentsPage() {
   const navigate = useNavigate();

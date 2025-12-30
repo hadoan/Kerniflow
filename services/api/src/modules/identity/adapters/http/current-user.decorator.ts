@@ -33,3 +33,12 @@ export const CurrentTenantId = createParamDecorator((data: unknown, ctx: Executi
   const request = ctx.switchToHttp().getRequest();
   return request.tenantId;
 });
+
+/**
+ * @CurrentRoleIds decorator
+ * Returns the resolved roles for the current user/tenant context.
+ */
+export const CurrentRoleIds = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest();
+  return request.roleIds ?? [];
+});

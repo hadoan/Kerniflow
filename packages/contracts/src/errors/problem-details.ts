@@ -1,8 +1,8 @@
 /**
  * Problem Details for HTTP APIs (RFC 7807)
- * Extended with Kerniflow-specific fields
+ * Extended with Corely-specific fields
  *
- * This is the standard error response format used across all Kerniflow APIs.
+ * This is the standard error response format used across all Corely APIs.
  * It ensures consistent, predictable error handling across backend, web, and POS clients.
  */
 
@@ -19,10 +19,10 @@ export interface ValidationErrorItem {
 /**
  * Problem Details payload - the standard error response format
  *
- * Based on RFC 7807 with Kerniflow extensions for traceability and validation
+ * Based on RFC 7807 with Corely extensions for traceability and validation
  */
 export interface ProblemDetails {
-  /** Stable error type identifier (e.g., "https://errors.kerniflow.com/validation" or "Common:ValidationFailed") */
+  /** Stable error type identifier (e.g., "https://errors.corely.com/validation" or "Common:ValidationFailed") */
   type: string;
 
   /** Short, human-readable summary of the error type */

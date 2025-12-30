@@ -2,7 +2,7 @@
 
 ## Overview
 
-Kerniflow uses a **systematic, cross-platform error handling system** based on RFC 7807 Problem Details for HTTP APIs. This ensures predictable, consistent error responses across backend, web, and POS clients.
+Corely uses a **systematic, cross-platform error handling system** based on RFC 7807 Problem Details for HTTP APIs. This ensures predictable, consistent error responses across backend, web, and POS clients.
 
 ## Core Principles
 
@@ -21,13 +21,13 @@ All API error responses follow this structure:
 ```typescript
 interface ProblemDetails {
   // RFC 7807 base fields
-  type: string; // "https://errors.kerniflow.com/Invoices:Locked"
+  type: string; // "https://errors.corely.com/Invoices:Locked"
   title: string; // "Conflict"
   status: number; // 409
   detail: string; // "This invoice has already been finalized"
   instance: string; // "/api/invoices/123/finalize"
 
-  // Kerniflow extensions
+  // Corely extensions
   code: string; // "Invoices:Locked" (stable machine code)
   validationErrors?: Array<{
     // Field-level validation errors
@@ -199,7 +199,7 @@ class ApiError {
 The `normalizeError()` function converts any error to `ApiError`:
 
 ```typescript
-import { normalizeError } from "@kerniflow/api-client";
+import { normalizeError } from "@corely/api-client";
 
 try {
   await apiClient.post("/invoices", data);
@@ -250,7 +250,7 @@ try {
 #### 3. Custom Error Handling
 
 ```typescript
-import { ApiError, normalizeError } from "@kerniflow/api-client";
+import { ApiError, normalizeError } from "@corely/api-client";
 
 try {
   await apiClient.delete(`/invoices/${id}`);
@@ -419,7 +419,7 @@ describe("UserFriendlyError", () => {
 ### Web Tests
 
 ```typescript
-import { normalizeError } from "@kerniflow/api-client";
+import { normalizeError } from "@corely/api-client";
 import { mapValidationErrorsToForm } from "@/shared/lib/errors";
 
 describe("mapValidationErrorsToForm", () => {

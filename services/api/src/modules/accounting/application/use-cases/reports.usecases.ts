@@ -1,7 +1,7 @@
 // Report Use Cases
-import { BaseUseCase, type LoggerPort, ValidationError, NotFoundError } from "@kerniflow/kernel";
-import type { Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
-import { ok, err } from "@kerniflow/kernel";
+import { BaseUseCase, type LoggerPort, ValidationError, NotFoundError } from "@corely/kernel";
+import type { Result, UseCaseContext, UseCaseError } from "@corely/kernel";
+import { ok, err } from "@corely/kernel";
 import type {
   GetTrialBalanceInput,
   GetTrialBalanceOutput,
@@ -12,7 +12,7 @@ import type {
   GetBalanceSheetInput,
   GetBalanceSheetOutput,
   AccountType,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type {
   AccountingSettingsRepoPort,
   LedgerAccountRepoPort,

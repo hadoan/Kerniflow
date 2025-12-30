@@ -1,4 +1,4 @@
-import type { TemplatePlan, TemplateResult } from "@kerniflow/contracts";
+import type { TemplatePlan, TemplateResult } from "@corely/contracts";
 
 /**
  * Template Executor Port

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { OutboxPort, TransactionContext } from "@kerniflow/kernel";
+import { OutboxPort, TransactionContext } from "@corely/kernel";
 import { PrismaService } from "../prisma/prisma.service";
 import { getPrismaClient } from "../uow/prisma-unit-of-work.adapter";
 

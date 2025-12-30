@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Badge } from "@/shared/ui/badge";
-import type { AccountType } from "@kerniflow/contracts";
+import type { AccountType } from "@corely/contracts";
 
 interface AccountTypeBadgeProps {
   type: AccountType;

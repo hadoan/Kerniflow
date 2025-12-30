@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import {
   CreateWorkflowDefinitionInputSchema,
   ListWorkflowDefinitionsQuerySchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { WorkflowService } from "../../application/workflow.service";
 import {
   CurrentTenantId,

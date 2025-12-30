@@ -1,4 +1,4 @@
-import type { SyncLock } from "@kerniflow/offline-core";
+import type { SyncLock } from "@corely/offline-core";
 
 export class InMemorySyncLock implements SyncLock {
   private readonly locks = new Set<string>();

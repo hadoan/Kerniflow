@@ -1,4 +1,4 @@
-import { type NetworkMonitor, type NetworkStatus } from "@kerniflow/offline-core";
+import { type NetworkMonitor, type NetworkStatus } from "@corely/offline-core";
 
 export class WebNetworkMonitor implements NetworkMonitor {
   async getCurrent(): Promise<NetworkStatus> {

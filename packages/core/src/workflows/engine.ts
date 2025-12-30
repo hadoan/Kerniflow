@@ -5,7 +5,7 @@ import type {
   WorkflowEventInput,
   WorkflowSpec,
   WorkflowTaskCreateSpec,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type {
   WorkflowSnapshot,
   WorkflowStateValue,

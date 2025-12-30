@@ -1,6 +1,6 @@
-Fix NestJS DI in Kerniflow (modules, providers, tokens) — best-practice refactor + guardrails
+Fix NestJS DI in Corely (modules, providers, tokens) — best-practice refactor + guardrails
 
-You are a senior NestJS + DDD architect working inside the **Kerniflow pnpm monorepo**. The current backend DI is brittle/broken (e.g., `UnknownDependenciesException` for `EnableAppUseCase` missing `ID_GENERATOR_TOKEN` in `PlatformModule` context). Your job is to **analyze the existing repo**, identify why DI breaks, and **refactor to a stable, scalable DI pattern** aligned with our architecture docs (modular monolith, bounded contexts, ports/adapters, API + worker). Keep behavior the same; fix wiring, boundaries, and conventions.
+You are a senior NestJS + DDD architect working inside the **Corely pnpm monorepo**. The current backend DI is brittle/broken (e.g., `UnknownDependenciesException` for `EnableAppUseCase` missing `ID_GENERATOR_TOKEN` in `PlatformModule` context). Your job is to **analyze the existing repo**, identify why DI breaks, and **refactor to a stable, scalable DI pattern** aligned with our architecture docs (modular monolith, bounded contexts, ports/adapters, API + worker). Keep behavior the same; fix wiring, boundaries, and conventions.
 
 ### Repo context you must respect
 

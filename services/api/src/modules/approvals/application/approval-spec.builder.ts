@@ -1,5 +1,5 @@
-import type { WorkflowSpec } from "@kerniflow/contracts";
-import type { ApprovalPolicyInput } from "@kerniflow/contracts";
+import type { WorkflowSpec } from "@corely/contracts";
+import type { ApprovalPolicyInput } from "@corely/contracts";
 
 const APPROVAL_REQUESTED_EVENT = "APPROVAL_REQUESTED";
 const APPROVAL_REJECTED_EVENT = "APPROVAL_REJECTED";

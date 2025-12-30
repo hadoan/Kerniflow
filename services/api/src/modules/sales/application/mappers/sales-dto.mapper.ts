@@ -4,7 +4,7 @@ import type {
   SalesOrderDto,
   SalesPaymentDto,
   SalesSettingsDto,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { type QuoteAggregate } from "../../domain/quote.aggregate";
 import { type SalesOrderAggregate } from "../../domain/order.aggregate";
 import { type SalesInvoiceAggregate } from "../../domain/invoice.aggregate";

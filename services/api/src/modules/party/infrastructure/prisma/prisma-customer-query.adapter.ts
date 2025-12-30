@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import { CustomerQueryPort } from "../../application/ports/customer-query.port";
-import { CustomerBillingSnapshotDTO } from "@kerniflow/contracts";
+import { CustomerBillingSnapshotDTO } from "@corely/contracts";
 
 @Injectable()
 export class PrismaCustomerQueryAdapter implements CustomerQueryPort {

@@ -8,7 +8,7 @@ import {
   UnauthorizedError,
   ForbiddenError,
   RateLimitError,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 
 /**
  * Global exception filter that maps domain errors to proper HTTP responses

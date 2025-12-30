@@ -1,4 +1,4 @@
-import type { TaxCodeKind } from "@kerniflow/contracts";
+import type { TaxCodeKind } from "@corely/contracts";
 
 export interface TaxCodeEntity {
   id: string;

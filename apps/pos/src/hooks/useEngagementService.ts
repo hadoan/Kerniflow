@@ -18,7 +18,7 @@ export function useEngagementService() {
     }
 
     try {
-      const db = await SQLite.openDatabaseAsync("kerniflow-pos.db");
+      const db = await SQLite.openDatabaseAsync("corely-pos.db");
       engagementServiceInstance = new EngagementService(db as any);
       await engagementServiceInstance.initialize();
       setInitialized(true);

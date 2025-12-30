@@ -1,5 +1,5 @@
 -- ============================================================================
--- Kerniflow PostgreSQL Initialization Script
+-- Corely PostgreSQL Initialization Script
 -- ============================================================================
 -- This script runs automatically when the postgres container first starts.
 -- It ensures the database and required extensions are set up.

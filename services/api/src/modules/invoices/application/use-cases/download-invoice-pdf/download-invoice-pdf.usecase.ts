@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import type { UseCaseContext } from "@kerniflow/kernel";
+import type { UseCaseContext } from "@corely/kernel";
 import type { InvoiceRepoPort } from "../../ports/invoice-repository.port";
 import type { InvoicePdfModelPort } from "../../ports/invoice-pdf-model.port";
 import type { InvoicePdfRendererPort } from "../../ports/invoice-pdf-renderer.port";

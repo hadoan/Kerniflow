@@ -1,4 +1,4 @@
-# Kerniflow — Domain Event Catalog
+# Corely — Domain Event Catalog
 
 This catalog lists outbox events that are treated as public API.
 

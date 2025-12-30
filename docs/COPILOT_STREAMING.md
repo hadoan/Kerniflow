@@ -1,6 +1,6 @@
 # Copilot Streaming (AI SDK 5) Overview
 
-This document explains how the Kerniflow Copilot works end-to-end: streaming protocol, backend architecture, tool registration, idempotency, and how to add new tools or customize message rendering.
+This document explains how the Corely Copilot works end-to-end: streaming protocol, backend architecture, tool registration, idempotency, and how to add new tools or customize message rendering.
 
 ## Why Data Stream Protocol (AI SDK)
 

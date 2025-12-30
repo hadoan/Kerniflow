@@ -63,7 +63,7 @@ test.describe("Authentication", () => {
 
     // Generate unique test credentials
     const timestamp = Date.now();
-    const testEmail = `e2e-signup-${timestamp}@kerniflow.local`;
+    const testEmail = `e2e-signup-${timestamp}@corely.local`;
     const testPassword = "SignupTest123!";
     const testName = "E2E Test User";
     const testWorkspace = `E2E Test Workspace ${timestamp}`;

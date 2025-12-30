@@ -278,7 +278,7 @@ tags: ["sales", "billing", "finance"];
 ## Complete Example
 
 ```typescript
-import type { AppManifest } from "@kerniflow/contracts";
+import type { AppManifest } from "@corely/contracts";
 
 export const invoicesAppManifest: AppManifest = {
   appId: "invoices",

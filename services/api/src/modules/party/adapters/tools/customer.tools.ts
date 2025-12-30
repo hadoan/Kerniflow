@@ -4,7 +4,7 @@ import {
   GetCustomerInputSchema,
   SearchCustomersInputSchema,
   UpdateCustomerInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import { type PartyApplication } from "../../application/party.application";
 import { mapToolResult } from "../../../../shared/adapters/tools/tool-mappers";

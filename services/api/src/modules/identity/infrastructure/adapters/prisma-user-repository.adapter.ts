@@ -1,6 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { PrismaService, getPrismaClient } from "@kerniflow/data";
-import { TransactionContext } from "@kerniflow/kernel";
+import { PrismaService, getPrismaClient } from "@corely/data";
+import { TransactionContext } from "@corely/kernel";
 import { User } from "../../domain/entities/user.entity";
 import { UserRepositoryPort } from "../../application/ports/user-repository.port";
 

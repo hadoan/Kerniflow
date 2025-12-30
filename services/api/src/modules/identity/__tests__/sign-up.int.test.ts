@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { type PostgresTestDb, createTestDb, stopSharedContainer } from "@kerniflow/testkit";
-import type { PrismaService } from "@kerniflow/data";
+import { type PostgresTestDb, createTestDb, stopSharedContainer } from "@corely/testkit";
+import type { PrismaService } from "@corely/data";
 import { buildRequestContext } from "@shared/context/request-context";
 import { SignUpUseCase } from "../application/use-cases/sign-up.usecase";
 import { buildSignUpInput } from "../testkit/builders/build-signup-input";
@@ -40,7 +40,7 @@ describe("Sign Up integration (Postgres)", () => {
       import("../infrastructure/adapters/prisma-refresh-token-repository.adapter"),
       import("../infrastructure/security/bcrypt.password-hasher"),
       import("../infrastructure/security/jwt.token-service"),
-      import("@kerniflow/data"),
+      import("@corely/data"),
       import("../infrastructure/adapters/prisma-audit-repository.adapter"),
       import("../permissions/permission-catalog"),
       import("../../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter"),

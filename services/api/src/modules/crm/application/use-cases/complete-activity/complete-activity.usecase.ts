@@ -10,8 +10,8 @@ import {
   NotFoundError,
   ok,
   err,
-} from "@kerniflow/kernel";
-import type { CompleteActivityInput, CompleteActivityOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import type { CompleteActivityInput, CompleteActivityOutput } from "@corely/contracts";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
 import { toActivityDto } from "../../mappers/activity-dto.mapper";
 

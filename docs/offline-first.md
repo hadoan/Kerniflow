@@ -4,9 +4,9 @@ This repo now ships shared offline scaffolding that works across web (today) and
 
 ## Packages
 
-- `@kerniflow/offline-core`: pure TypeScript ports for the outbox, sync engine, locking, transports, and command registry. Includes a reference `SyncEngine` with backoff/lock handling plus an in-memory store for tests.
-- `@kerniflow/offline-web`: browser adapters: IndexedDB-backed `OutboxStore`, localStorage lock with TTL, network monitor using `navigator.onLine`, and an IndexedDB query persister for TanStack Query.
-- `@kerniflow/offline-rn`: React Native skeleton. Provides a `ReactNativeNetworkMonitor` that expects a NetInfo-like object; the outbox store is intentionally left unimplemented so a SQLite-backed adapter can be dropped in.
+- `@corely/offline-core`: pure TypeScript ports for the outbox, sync engine, locking, transports, and command registry. Includes a reference `SyncEngine` with backoff/lock handling plus an in-memory store for tests.
+- `@corely/offline-web`: browser adapters: IndexedDB-backed `OutboxStore`, localStorage lock with TTL, network monitor using `navigator.onLine`, and an IndexedDB query persister for TanStack Query.
+- `@corely/offline-rn`: React Native skeleton. Provides a `ReactNativeNetworkMonitor` that expects a NetInfo-like object; the outbox store is intentionally left unimplemented so a SQLite-backed adapter can be dropped in.
 
 ## Web wiring (current state)
 
@@ -29,5 +29,5 @@ This repo now ships shared offline scaffolding that works across web (today) and
 
 ## Testing
 
-- `@kerniflow/offline-core` ships unit tests for the sync engine (success, retry/backoff, conflict, lock contention) and an in-memory outbox store for contract tests.
+- `@corely/offline-core` ships unit tests for the sync engine (success, retry/backoff, conflict, lock contention) and an in-memory outbox store for contract tests.
 - To add web adapter tests, target IndexedDB CRUD, lock TTL behaviour, and network monitor events using `vitest` with `jsdom`.

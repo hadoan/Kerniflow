@@ -12,7 +12,7 @@ import {
 } from "fake-indexeddb";
 import { IndexedDbOutboxStore } from "../outbox/indexeddbOutboxStore";
 import { DEFAULT_DB_NAME, resetDb } from "../idb";
-import { OutboxCommand } from "@kerniflow/offline-core";
+import { OutboxCommand } from "@corely/offline-core";
 
 // Provide IndexedDB globals for idb library
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

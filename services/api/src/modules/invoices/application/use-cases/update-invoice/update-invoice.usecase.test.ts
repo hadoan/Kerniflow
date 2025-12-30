@@ -7,7 +7,7 @@ import {
   unwrap,
   FixedClock,
   NotFoundError,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { UpdateInvoiceUseCase } from "./update-invoice.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";

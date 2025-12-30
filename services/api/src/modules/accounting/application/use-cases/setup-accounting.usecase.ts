@@ -4,10 +4,10 @@ import {
   type IdGeneratorPort,
   type LoggerPort,
   ValidationError,
-} from "@kerniflow/kernel";
-import type { SetupAccountingInput, SetupAccountingOutput } from "@kerniflow/contracts";
-import type { Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
-import { ok, err } from "@kerniflow/kernel";
+} from "@corely/kernel";
+import type { SetupAccountingInput, SetupAccountingOutput } from "@corely/contracts";
+import type { Result, UseCaseContext, UseCaseError } from "@corely/kernel";
+import { ok, err } from "@corely/kernel";
 import type {
   AccountingSettingsRepoPort,
   LedgerAccountRepoPort,

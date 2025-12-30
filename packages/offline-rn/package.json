@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/offline-rn",
+  "name": "@corely/offline-rn",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -22,7 +22,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@kerniflow/offline-core": "workspace:*"
+    "@corely/offline-core": "workspace:*"
   },
   "peerDependencies": {
     "@react-native-community/netinfo": "^11.3.1"

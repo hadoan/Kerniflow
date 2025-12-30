@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { CreateCustomerInput, UpdateCustomerInput } from "@kerniflow/contracts";
+import type { CreateCustomerInput, UpdateCustomerInput } from "@corely/contracts";
 
 export const customerFormSchema = z.object({
   displayName: z.string().min(1, "Display name is required"),

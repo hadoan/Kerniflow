@@ -1,4 +1,4 @@
-import type { WorkspaceKind, WorkspaceOnboardingStatus } from "@kerniflow/contracts";
+import type { WorkspaceKind, WorkspaceOnboardingStatus } from "@corely/contracts";
 
 export interface WorkspaceAddress {
   line1: string;

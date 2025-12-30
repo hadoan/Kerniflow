@@ -1,9 +1,9 @@
 /**
  * Auth Client
- * Web platform wrapper around @kerniflow/auth-client
+ * Web platform wrapper around @corely/auth-client
  */
 
-import { AuthClient } from "@kerniflow/auth-client";
+import { AuthClient } from "@corely/auth-client";
 import { setActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
 import { WebStorageAdapter } from "./storage-adapter";
 
@@ -13,7 +13,7 @@ export type {
   SignInData,
   AuthResponse,
   CurrentUserResponse,
-} from "@kerniflow/auth-client";
+} from "@corely/auth-client";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 

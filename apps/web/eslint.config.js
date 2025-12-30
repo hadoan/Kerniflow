@@ -1,7 +1,7 @@
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
-import config from "@kerniflow/eslint-config";
+import config from "@corely/eslint-config";
 
 export default tseslint.config(
   { ignores: ["dist"] },

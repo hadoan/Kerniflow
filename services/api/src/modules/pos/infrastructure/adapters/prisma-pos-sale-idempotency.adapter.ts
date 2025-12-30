@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
-import type { SyncPosSaleOutput } from "@kerniflow/contracts";
+import { PrismaService } from "@corely/data";
+import type { SyncPosSaleOutput } from "@corely/contracts";
 import type { PosSaleIdempotencyPort } from "../../application/ports/pos-sale-idempotency.port";
 
 @Injectable()

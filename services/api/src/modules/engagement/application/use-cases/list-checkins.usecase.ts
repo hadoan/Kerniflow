@@ -7,8 +7,8 @@ import {
   ValidationError,
   ok,
   err,
-} from "@kerniflow/kernel";
-import { type ListCheckInEventsInput, type ListCheckInEventsOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type ListCheckInEventsInput, type ListCheckInEventsOutput } from "@corely/contracts";
 import { toCheckInEventDto } from "../mappers/engagement-dto.mappers";
 import type { CheckInRepositoryPort } from "../ports/checkin-repository.port";
 

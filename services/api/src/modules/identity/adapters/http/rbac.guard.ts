@@ -11,7 +11,10 @@ import type { MembershipRepositoryPort } from "../../application/ports/membershi
 import { MEMBERSHIP_REPOSITORY_TOKEN } from "../../application/ports/membership-repository.port";
 import type { RolePermissionGrantRepositoryPort } from "../../application/ports/role-permission-grant-repository.port";
 import { ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN } from "../../application/ports/role-permission-grant-repository.port";
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import {
+  computeEffectivePermissionSet,
+  hasPermission,
+} from "../../../../shared/permissions/effective-permissions";
 
 export const REQUIRE_PERMISSION = "require_permission";
 
@@ -52,8 +55,9 @@ export class RbacGuard implements CanActivate {
       throw new ForbiddenException("User is not a member of this tenant");
     }
 
-    const grants = await this.grantRepo.listByRole(tenantId, membership.getRoleId());
-    const canAccess = hasPermission(grants, requiredPermission);
+    const grants = await this.grantRepo.listByRoleIdsAndTenant(tenantId, [membership.getRoleId()]);
+    const grantSet = computeEffectivePermissionSet(grants);
+    const canAccess = hasPermission(grantSet, requiredPermission);
 
     if (!canAccess) {
       throw new ForbiddenException(`User does not have permission: ${requiredPermission}`);
@@ -62,37 +66,6 @@ export class RbacGuard implements CanActivate {
     return true;
   }
 }
-
-const hasPermission = (
-  grants: Array<{ key: string; effect: RolePermissionEffect }>,
-  required: string
-): boolean => {
-  const allow = new Set<string>();
-  const deny = new Set<string>();
-  let allowAll = false;
-
-  for (const grant of grants) {
-    if (grant.key === "*" && grant.effect === "ALLOW") {
-      allowAll = true;
-      continue;
-    }
-    if (grant.effect === "DENY") {
-      deny.add(grant.key);
-      continue;
-    }
-    allow.add(grant.key);
-  }
-
-  if (deny.has(required)) {
-    return false;
-  }
-
-  if (allowAll) {
-    return true;
-  }
-
-  return allow.has(required);
-};
 
 /**
  * Decorator to require a specific permission

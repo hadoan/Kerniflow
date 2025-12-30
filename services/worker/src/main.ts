@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { loadEnv } from "@kerniflow/config";
+import { loadEnv } from "@corely/config";
 import { NestFactory } from "@nestjs/core";
 import { WorkerModule } from "./worker.module";
-import { CONTRACTS_HELLO } from "@kerniflow/contracts";
+import { CONTRACTS_HELLO } from "@corely/contracts";
 
 // Load env files before anything else
 loadEnv();

@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { TimelineItem } from "@kerniflow/contracts";
+import type { TimelineItem } from "@corely/contracts";
 import { ActivityTypeIcon } from "./ActivityTypeIcon";
 import { ArrowRight } from "lucide-react";
 

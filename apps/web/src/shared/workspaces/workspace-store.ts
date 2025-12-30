@@ -1,4 +1,4 @@
-const STORAGE_KEY = "kerniflow-active-workspace";
+const STORAGE_KEY = "corely-active-workspace";
 
 let activeWorkspaceId: string | null = null;
 const subscribers = new Set<(workspaceId: string | null) => void>();

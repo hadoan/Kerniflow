@@ -1,4 +1,4 @@
-import { type Clock, type SyncLock } from "@kerniflow/offline-core";
+import { type Clock, type SyncLock } from "@corely/offline-core";
 
 interface LocalStorageSyncLockOptions {
   ttlMs?: number;
@@ -15,7 +15,7 @@ export class LocalStorageSyncLock implements SyncLock {
 
   constructor(options: LocalStorageSyncLockOptions = {}) {
     this.ttlMs = options.ttlMs ?? 15000;
-    this.keyPrefix = options.keyPrefix ?? "kerniflow_sync_lock";
+    this.keyPrefix = options.keyPrefix ?? "corely_sync_lock";
     this.clock = options.clock ?? { now: () => new Date() };
     this.storage = options.storage ?? window.localStorage;
   }

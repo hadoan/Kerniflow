@@ -1,4 +1,4 @@
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 export type QuoteStatus = "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "CONVERTED" | "EXPIRED";
 export type OrderStatus = "DRAFT" | "CONFIRMED" | "FULFILLED" | "INVOICED" | "CANCELED";

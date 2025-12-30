@@ -1,9 +1,10 @@
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import type { RolePermissionEffect } from "@corely/contracts";
+import { ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN } from "../../identity.tokens";
 
 export interface RolePermissionGrantRepositoryPort {
-  listByRole(
+  listByRoleIdsAndTenant(
     tenantId: string,
-    roleId: string
+    roleIds: string[]
   ): Promise<Array<{ key: string; effect: RolePermissionEffect }>>;
 
   replaceAll(
@@ -14,4 +15,4 @@ export interface RolePermissionGrantRepositoryPort {
   ): Promise<void>;
 }
 
-export const ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN = "identity/role-permission-grant-repository";
+export { ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN };

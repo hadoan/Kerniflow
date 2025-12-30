@@ -1,4 +1,4 @@
-import type { DealDto } from "@kerniflow/contracts";
+import type { DealDto } from "@corely/contracts";
 import type { DealAggregate } from "../../domain/deal.aggregate";
 
 export function toDealDto(deal: DealAggregate): DealDto {

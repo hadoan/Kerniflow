@@ -7,9 +7,9 @@ import {
   ValidationError,
   NotFoundError,
   ConflictError,
-} from "@kerniflow/kernel";
-import type { Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
-import { ok, err } from "@kerniflow/kernel";
+} from "@corely/kernel";
+import type { Result, UseCaseContext, UseCaseError } from "@corely/kernel";
+import { ok, err } from "@corely/kernel";
 import type {
   CreateLedgerAccountInput,
   CreateLedgerAccountOutput,
@@ -34,7 +34,7 @@ import type {
   UpdateAccountingSettingsInput,
   UpdateAccountingSettingsOutput,
   SetupStatusOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type {
   AccountingSettingsRepoPort,
   LedgerAccountRepoPort,

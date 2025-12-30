@@ -7,11 +7,11 @@ import {
   ValidationError,
   ok,
   err,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import {
   type CreateLoyaltyAdjustEntryInput,
   type CreateLoyaltyAdjustEntryOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { toLoyaltyLedgerEntryDto } from "../mappers/engagement-dto.mappers";
 import type { LoyaltyRepositoryPort } from "../ports/loyalty-repository.port";
 

@@ -1,13 +1,13 @@
-# @kerniflow/config
+# @corely/config
 
-Runtime configuration utilities for Kerniflow monorepo. This package provides type-safe environment variable management and configuration services for backend services.
+Runtime configuration utilities for Corely monorepo. This package provides type-safe environment variable management and configuration services for backend services.
 
 > **Note**: This is a **runtime-only** package. For development tooling configs (TypeScript, ESLint, Prettier, Vite), see `packages/tooling/*`.
 
 ## Installation
 
 ```bash
-pnpm add @kerniflow/config@workspace:*
+pnpm add @corely/config@workspace:*
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ pnpm add @kerniflow/config@workspace:*
 
 ```typescript
 // main.ts or app.module.ts
-import { EnvModule } from "@kerniflow/config";
+import { EnvModule } from "@corely/config";
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ export class AppModule {}
 ### Using EnvService
 
 ```typescript
-import { EnvService } from "@kerniflow/config";
+import { EnvService } from "@corely/config";
 
 @Injectable()
 export class SomeService {
@@ -49,7 +49,7 @@ export class SomeService {
 ### Standalone Usage
 
 ```typescript
-import { loadEnv, validateEnv } from "@kerniflow/config";
+import { loadEnv, validateEnv } from "@corely/config";
 
 // Load and validate environment variables
 const env = loadEnv();
@@ -185,4 +185,4 @@ For development tooling, use packages under `packages/tooling/*`.
 
 ## License
 
-Private package for Kerniflow monorepo.
+Private package for Corely monorepo.

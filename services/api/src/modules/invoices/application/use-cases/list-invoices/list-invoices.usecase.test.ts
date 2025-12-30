@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { ListInvoicesUseCase } from "./list-invoices.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
-import { FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
-import { TimeService } from "@kerniflow/kernel";
+import { FixedClock, NoopLogger, unwrap } from "@corely/kernel";
+import { TimeService } from "@corely/kernel";
 
 describe("ListInvoicesUseCase", () => {
   let repo: FakeInvoiceRepository;

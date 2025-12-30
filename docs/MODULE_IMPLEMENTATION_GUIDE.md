@@ -1,6 +1,6 @@
 # Module Implementation Guide
 
-This guide walks you through implementing a complete feature module in Kerniflow, from frontend to backend.
+This guide walks you through implementing a complete feature module in Corely, from frontend to backend.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ This guide walks you through implementing a complete feature module in Kerniflow
 
 ## Architecture Overview
 
-Kerniflow follows a clean architecture pattern with clear separation of concerns:
+Corely follows a clean architecture pattern with clear separation of concerns:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -265,7 +265,7 @@ export interface XFilters {
 
 ```typescript
 import { Injectable } from "@nestjs/common";
-import type { CreateXInput } from "@kerniflow/contracts";
+import type { CreateXInput } from "@corely/contracts";
 import { XRepoPort } from "../domain/{module}-repo.port";
 import { X, XEntity } from "../domain/{module}.entity";
 
@@ -407,7 +407,7 @@ export class PrismaXRepoAdapter implements XRepoPort {
 
 ```typescript
 import { Controller, Post, Get, Patch, Delete, Body, Param, UseGuards, Req } from "@nestjs/common";
-import { CreateXInputSchema, CreateXOutput, XDto } from "@kerniflow/contracts";
+import { CreateXInputSchema, CreateXOutput, XDto } from "@corely/contracts";
 import { JwtAuthGuard } from "@/shared/guards/jwt-auth.guard";
 import { CreateXUseCase } from "./application/create-{module}.use-case";
 
@@ -510,7 +510,7 @@ export class XModule {}
 **File: `apps/web/src/lib/{module}-api.ts`**
 
 ```typescript
-import type { CreateXInput, CreateXOutput, XDto } from "@kerniflow/contracts";
+import type { CreateXInput, CreateXOutput, XDto } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
 export class XApi {
@@ -578,8 +578,8 @@ export const xApi = new XApi();
 
 ```typescript
 import { z } from "zod";
-import type { CreateXInput } from "@kerniflow/contracts";
-import { CreateXInputSchema, XLineInputSchema } from "@kerniflow/contracts";
+import type { CreateXInput } from "@corely/contracts";
+import { CreateXInputSchema, XLineInputSchema } from "@corely/contracts";
 
 /**
  * Form schema for line items (extends contract with UI fields)
@@ -1087,7 +1087,7 @@ try {
 
 ✅ **DO:**
 
-- Import types from contracts: `import type { XDto } from "@kerniflow/contracts"`
+- Import types from contracts: `import type { XDto } from "@corely/contracts"`
 - Use transform functions: `toCreateXInput(formData)`
 - Let TypeScript catch mismatches
 

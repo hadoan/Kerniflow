@@ -1,7 +1,7 @@
 import { Controller, Post, Req, Res, HttpStatus, type RawBodyRequest } from "@nestjs/common";
 import { Request, type Response } from "express";
 import { Resend } from "resend";
-import { EnvService } from "@kerniflow/config";
+import { EnvService } from "@corely/config";
 import { PrismaInvoiceEmailDeliveryRepoAdapter } from "../../infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
 
 type ResendWebhookEvent = {

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Kerniflow POS",
-    "slug": "kerniflow-pos",
+    "name": "Corely POS",
+    "slug": "corely-pos",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,14 +14,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kerniflow.pos",
+      "bundleIdentifier": "com.corely.pos",
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to scan product barcodes.",
         "NSPhotoLibraryUsageDescription": "This app accesses your photo library to attach images to products."
       }
     },
     "android": {
-      "package": "com.kerniflow.pos",
+      "package": "com.corely.pos",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -40,13 +40,13 @@
       [
         "expo-barcode-scanner",
         {
-          "cameraPermission": "Allow Kerniflow POS to scan product barcodes"
+          "cameraPermission": "Allow Corely POS to scan product barcodes"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
     },
-    "scheme": "kerniflow-pos"
+    "scheme": "corely-pos"
   }
 }

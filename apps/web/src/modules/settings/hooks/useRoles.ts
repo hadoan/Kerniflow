@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { CreateRoleInput, UpdateRoleInput } from "@kerniflow/contracts";
+import type { CreateRoleInput, UpdateRoleInput } from "@corely/contracts";
 import { identityApi } from "@/lib/identity-api";
 import { settingsQueryKeys } from "./settings.queryKeys";
 

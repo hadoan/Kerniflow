@@ -31,7 +31,7 @@ export * from "./identity";
 export * from "./errors";
 export * from "./platform";
 
-export const CONTRACTS_HELLO = "Kerniflow contracts loaded ✅";
+export const CONTRACTS_HELLO = "Corely contracts loaded ✅";
 
 // Legacy helpers used by domain utils
 export type Currency = "EUR";

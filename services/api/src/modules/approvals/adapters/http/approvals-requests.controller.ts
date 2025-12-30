@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
-import { ApprovalDecisionInputSchema } from "@kerniflow/contracts";
+import { ApprovalDecisionInputSchema } from "@corely/contracts";
 import {
   CurrentTenantId,
   CurrentUserId,

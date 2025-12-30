@@ -1,4 +1,4 @@
-# Kerniflow — Module Template
+# Corely — Module Template
 
 Use this lightweight template when adding a new backend module. Keep it small and evolve incrementally.
 

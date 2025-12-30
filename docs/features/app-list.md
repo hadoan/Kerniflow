@@ -1,4 +1,4 @@
-# Kerniflow Apps & Templates (Priority Order)
+# Corely Apps & Templates (Priority Order)
 
 This list ranks **Apps (modules/bounded contexts)** and **Templates (configuration/presets)** from **most important → less important** for an SMB ERP baseline. It’s designed to help you build a country-neutral core first, then add deeper vertical capabilities later.
 

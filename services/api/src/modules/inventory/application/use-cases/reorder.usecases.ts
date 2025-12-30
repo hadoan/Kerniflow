@@ -11,7 +11,7 @@ import {
   type AuditPort,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   ListReorderPoliciesInput,
   ListReorderPoliciesOutput,
@@ -23,7 +23,7 @@ import type {
   GetReorderSuggestionsOutput,
   GetLowStockInput,
   GetLowStockOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { ReorderPolicyRepositoryPort } from "../ports/reorder-policy-repository.port";
 import type { ProductRepositoryPort } from "../ports/product-repository.port";
 import type { WarehouseRepositoryPort } from "../ports/warehouse-repository.port";

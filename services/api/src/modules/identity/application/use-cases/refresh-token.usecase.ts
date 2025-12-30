@@ -5,6 +5,8 @@ import type { TokenServicePort } from "../ports/token-service.port";
 import { TOKEN_SERVICE_TOKEN } from "../ports/token-service.port";
 import type { UserRepositoryPort } from "../ports/user-repository.port";
 import { USER_REPOSITORY_TOKEN } from "../ports/user-repository.port";
+import type { MembershipRepositoryPort } from "../ports/membership-repository.port";
+import { MEMBERSHIP_REPOSITORY_TOKEN } from "../ports/membership-repository.port";
 import type { AuditPort } from "../ports/audit.port";
 import { AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import type { ClockPort } from "../../../../shared/ports/clock.port";
@@ -31,6 +33,8 @@ export class RefreshTokenUseCase {
     private readonly refreshTokenRepo: RefreshTokenRepositoryPort,
     @Inject(TOKEN_SERVICE_TOKEN) private readonly tokenService: TokenServicePort,
     @Inject(USER_REPOSITORY_TOKEN) private readonly userRepo: UserRepositoryPort,
+    @Inject(MEMBERSHIP_REPOSITORY_TOKEN)
+    private readonly membershipRepo: MembershipRepositoryPort,
     @Inject(AUDIT_PORT_TOKEN) private readonly audit: AuditPort,
     @Inject(CLOCK_PORT_TOKEN) private readonly clock: ClockPort
   ) {}
@@ -58,10 +62,20 @@ export class RefreshTokenUseCase {
     }
 
     // 5. Generate new tokens
+    const membership = await this.membershipRepo.findByTenantAndUser(
+      storedToken.tenantId,
+      storedToken.userId
+    );
+
+    if (!membership) {
+      throw new Error("Membership not found for tenant while refreshing tokens");
+    }
+
     const accessToken = this.tokenService.generateAccessToken({
       userId: storedToken.userId,
       email: user.getEmail().getValue(),
       tenantId: storedToken.tenantId,
+      roleIds: [membership.getRoleId()],
     });
 
     const newRefreshToken = this.tokenService.generateRefreshToken();

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import { DealAggregate } from "../../domain/deal.aggregate";
-import { parseLocalDate } from "@kerniflow/kernel";
+import { parseLocalDate } from "@corely/kernel";
 import type {
   DealRepoPort,
   DealStageTransition,

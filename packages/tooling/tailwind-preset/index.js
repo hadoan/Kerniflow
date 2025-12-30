@@ -1,7 +1,7 @@
 import tailwindcssAnimate from "tailwindcss-animate";
 
 /**
- * Shared Tailwind preset for Kerniflow design system
+ * Shared Tailwind preset for Corely design system
  * @type {import('tailwindcss').Config}
  */
 export default {

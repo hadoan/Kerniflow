@@ -3,7 +3,7 @@ import { generateObject } from "ai";
 import type { LanguageModel } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import type { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
-import { ApprovalPolicySuggestionCardSchema } from "@kerniflow/contracts";
+import { ApprovalPolicySuggestionCardSchema } from "@corely/contracts";
 
 const validationError = (issues: unknown) => ({
   ok: false,

@@ -12,7 +12,7 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateSalesOrderInput,
   CreateSalesOrderOutput,
@@ -30,7 +30,7 @@ import type {
   GetSalesOrderOutput,
   ListSalesOrdersInput,
   ListSalesOrdersOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { SalesOrderAggregate } from "../../domain/order.aggregate";
 import { SalesInvoiceAggregate } from "../../domain/invoice.aggregate";
 import type { OrderLineItem } from "../../domain/sales.types";

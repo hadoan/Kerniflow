@@ -7,7 +7,7 @@ import type {
   CreateJournalEntryInput,
   UpdateJournalEntryInput,
   ReverseJournalEntryInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 // Query: List journal entries
 export function useJournalEntries(query?: ListJournalEntriesInput) {

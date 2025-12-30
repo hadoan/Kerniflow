@@ -35,7 +35,7 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Kerniflow POS</Text>
+        <Text style={styles.title}>Corely POS</Text>
         <Text style={styles.subtitle}>Sign in to continue</Text>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}

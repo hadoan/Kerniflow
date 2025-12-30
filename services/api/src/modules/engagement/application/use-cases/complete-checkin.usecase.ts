@@ -8,11 +8,11 @@ import {
   NotFoundError,
   ok,
   err,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import {
   type CompleteCheckInEventInput,
   type CompleteCheckInEventOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { toCheckInEventDto } from "../mappers/engagement-dto.mappers";
 import type { CheckInRepositoryPort } from "../ports/checkin-repository.port";
 

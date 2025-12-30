@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HttpError } from "@kerniflow/api-client";
+import { HttpError } from "@corely/api-client";
 import {
   determineErrorStrategy,
   getErrorDisplayMessage,
@@ -38,7 +38,7 @@ describe("determineErrorStrategy", () => {
   describe("Authentication errors", () => {
     it("should trigger auth flow for 401 errors", () => {
       const error = new HttpError("Unauthorized", 401, {
-        type: "https://errors.kerniflow.com/Common:Unauthorized",
+        type: "https://errors.corely.com/Common:Unauthorized",
         title: "Unauthorized",
         status: 401,
         detail: "Authentication required",
@@ -61,7 +61,7 @@ describe("determineErrorStrategy", () => {
   describe("Validation errors", () => {
     it("should show validation errors without retry", () => {
       const error = new HttpError("Validation Failed", 400, {
-        type: "https://errors.kerniflow.com/Common:ValidationFailed",
+        type: "https://errors.corely.com/Common:ValidationFailed",
         title: "Bad Request",
         status: 400,
         detail: "Validation failed",
@@ -86,7 +86,7 @@ describe("determineErrorStrategy", () => {
   describe("Conflict errors", () => {
     it("should show conflict errors without retry", () => {
       const error = new HttpError("Conflict", 409, {
-        type: "https://errors.kerniflow.com/Common:Conflict",
+        type: "https://errors.corely.com/Common:Conflict",
         title: "Conflict",
         status: 409,
         detail: "Resource already exists",
@@ -108,7 +108,7 @@ describe("determineErrorStrategy", () => {
   describe("Permission errors", () => {
     it("should show forbidden errors", () => {
       const error = new HttpError("Forbidden", 403, {
-        type: "https://errors.kerniflow.com/Common:Forbidden",
+        type: "https://errors.corely.com/Common:Forbidden",
         title: "Forbidden",
         status: 403,
         detail: "Insufficient permissions",
@@ -187,7 +187,7 @@ describe("determineErrorStrategy", () => {
 describe("getErrorDisplayMessage", () => {
   it("should extract message and trace ID from ProblemDetails", () => {
     const error = new HttpError("Not Found", 404, {
-      type: "https://errors.kerniflow.com/Common:NotFound",
+      type: "https://errors.corely.com/Common:NotFound",
       title: "Not Found",
       status: 404,
       detail: "Invoice not found",
@@ -237,7 +237,7 @@ describe("shouldQueueForOffline", () => {
 describe("isUserFixableError", () => {
   it("should return true for validation errors", () => {
     const error = new HttpError("Validation Failed", 400, {
-      type: "https://errors.kerniflow.com/Common:ValidationFailed",
+      type: "https://errors.corely.com/Common:ValidationFailed",
       title: "Bad Request",
       status: 400,
       detail: "Validation failed",

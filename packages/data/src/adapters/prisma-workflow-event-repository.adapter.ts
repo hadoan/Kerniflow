@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { getPrismaClient } from "../uow/prisma-unit-of-work.adapter";
-import type { TransactionContext } from "@kerniflow/kernel";
+import type { TransactionContext } from "@corely/kernel";
 
 export interface WorkflowEventCreateInput {
   tenantId: string;

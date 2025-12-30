@@ -1,4 +1,4 @@
-import type { TaxRoundingMode } from "@kerniflow/contracts";
+import type { TaxRoundingMode } from "@corely/contracts";
 
 /**
  * Rounding policy for tax calculations

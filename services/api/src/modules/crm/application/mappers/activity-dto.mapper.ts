@@ -1,4 +1,4 @@
-import type { ActivityDto } from "@kerniflow/contracts";
+import type { ActivityDto } from "@corely/contracts";
 import type { ActivityEntity } from "../../domain/activity.entity";
 
 export function toActivityDto(activity: ActivityEntity): ActivityDto {

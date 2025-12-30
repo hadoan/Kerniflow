@@ -1,12 +1,12 @@
 {
-  "extends": "@kerniflow/tsconfig/lib.json",
+  "extends": "@corely/tsconfig/lib.json",
   "compilerOptions": {
     "types": ["node"],
     "composite": false,
     "paths": {
-      "@kerniflow/contracts": ["../contracts/src"],
-      "@kerniflow/domain": ["../domain/src"],
-      "@kerniflow/kernel": ["../kernel/src"]
+      "@corely/contracts": ["../contracts/src"],
+      "@corely/domain": ["../domain/src"],
+      "@corely/kernel": ["../kernel/src"]
     }
   },
   "include": ["src"]

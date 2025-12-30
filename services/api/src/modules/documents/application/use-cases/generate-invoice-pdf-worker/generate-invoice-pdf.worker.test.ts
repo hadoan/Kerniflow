@@ -5,7 +5,7 @@ import { InMemoryFileRepo } from "../../../testkit/fakes/in-memory-file-repo";
 import { FakeObjectStoragePort } from "../../../testkit/fakes/fake-object-storage";
 import { FakePdfRenderer } from "../../../testkit/fakes/fake-pdf-renderer";
 import { FakeInvoicePdfModelPort } from "../../../testkit/fakes/fake-invoice-pdf-model";
-import { NoopLogger } from "@kerniflow/kernel";
+import { NoopLogger } from "@corely/kernel";
 import { DocumentAggregate } from "../../../domain/document.aggregate";
 
 describe("GenerateInvoicePdfWorker", () => {

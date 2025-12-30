@@ -12,7 +12,7 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreatePurchaseOrderInput,
   CreatePurchaseOrderOutput,
@@ -32,7 +32,7 @@ import type {
   GetPurchaseOrderOutput,
   ListPurchaseOrdersInput,
   ListPurchaseOrdersOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { PurchaseOrderAggregate } from "../../domain/purchase-order.aggregate";
 import type { PurchaseOrderLineItem } from "../../domain/purchasing.types";
 import type { PurchaseOrderRepositoryPort } from "../ports/purchase-order-repository.port";

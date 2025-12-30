@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { WorkspaceDto } from "@kerniflow/contracts";
+import type { WorkspaceDto } from "@corely/contracts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { workspacesApi } from "./workspaces-api";
 import { getActiveWorkspaceId, setActiveWorkspaceId, subscribeWorkspace } from "./workspace-store";

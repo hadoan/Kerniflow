@@ -166,7 +166,7 @@ export const WorkspaceOnboardingPage: React.FC = () => {
                     Workspace name <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    placeholder="e.g. Kerniflow GmbH"
+                    placeholder="e.g. Corely GmbH"
                     value={form.name}
                     onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                     data-testid="onboarding-name"

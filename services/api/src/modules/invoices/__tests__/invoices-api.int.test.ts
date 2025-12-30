@@ -1,14 +1,14 @@
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PostgresTestDb } from "@kerniflow/testkit";
+import type { PostgresTestDb } from "@corely/testkit";
 import {
   createApiTestApp,
   createCustomerParty,
   createTenant,
   createTestDb,
   stopSharedContainer,
-} from "@kerniflow/testkit";
+} from "@corely/testkit";
 import { JwtTokenService } from "../../identity/infrastructure/security/jwt.token-service";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
@@ -46,11 +46,16 @@ describe("Invoices API (HTTP + Postgres)", () => {
     await stopSharedContainer();
   });
 
-  const buildAuthHeader = (tenantId: string, userId = "user-123") => {
+  const buildAuthHeader = (
+    tenantId: string,
+    userId = "user-123",
+    roleIds: string[] = ["test-permission-role"]
+  ) => {
     const token = tokenService.generateAccessToken({
       userId,
       email: `${userId}@example.com`,
       tenantId,
+      roleIds,
     });
     return `Bearer ${token}`;
   };

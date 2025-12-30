@@ -10,7 +10,7 @@ export default function KioskWelcomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.brand}>Kerniflow Check-In</Text>
+        <Text style={styles.brand}>Corely Check-In</Text>
         <View style={styles.statusRow}>
           <View style={[styles.statusDot, { backgroundColor: isOnline ? "#4caf50" : "#d32f2f" }]} />
           <Text style={styles.statusText}>{isOnline ? "Online" : "Offline"}</Text>

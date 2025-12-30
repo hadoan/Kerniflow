@@ -3,7 +3,7 @@ import type {
   OutboxCommand,
   OutboxCommandStatus,
   OutboxError,
-} from "@kerniflow/offline-core";
+} from "@corely/offline-core";
 
 /**
  * SQLite Outbox Store for React Native

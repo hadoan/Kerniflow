@@ -17,7 +17,7 @@ import {
   UpdateWorkspaceInputSchema,
   type CreateWorkspaceInput,
   type UpdateWorkspaceInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { CreateWorkspaceUseCase } from "../../application/use-cases/create-workspace.usecase";
 import { ListWorkspacesUseCase } from "../../application/use-cases/list-workspaces.usecase";
 import { GetWorkspaceUseCase } from "../../application/use-cases/get-workspace.usecase";

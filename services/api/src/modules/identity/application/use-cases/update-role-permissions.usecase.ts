@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import type { RolePermissionEffect } from "@corely/contracts";
 import { NotFoundError, ValidationError } from "../../../../shared/errors/domain-errors";
 import type { RoleRepositoryPort } from "../ports/role-repository.port";
 import { ROLE_REPOSITORY_TOKEN } from "../ports/role-repository.port";

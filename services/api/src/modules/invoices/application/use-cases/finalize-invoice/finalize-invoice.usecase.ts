@@ -10,8 +10,8 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
-import { type FinalizeInvoiceInput, type FinalizeInvoiceOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type FinalizeInvoiceInput, type FinalizeInvoiceOutput } from "@corely/contracts";
 import { type InvoiceRepoPort } from "../../ports/invoice-repository.port";
 import { type InvoiceNumberingPort } from "../../ports/invoice-numbering.port";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";

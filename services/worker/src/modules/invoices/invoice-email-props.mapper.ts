@@ -1,4 +1,4 @@
-import type { InvoiceEmailProps } from "@kerniflow/email-templates/invoices";
+import type { InvoiceEmailProps } from "@corely/email-templates/invoices";
 
 type BillToFields = {
   billToName?: string | null;

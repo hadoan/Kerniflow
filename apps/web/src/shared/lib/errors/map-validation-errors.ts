@@ -1,5 +1,5 @@
-import type { ValidationErrorItem } from "@kerniflow/contracts";
-import { ApiError, normalizeError } from "@kerniflow/api-client";
+import type { ValidationErrorItem } from "@corely/contracts";
+import { ApiError, normalizeError } from "@corely/api-client";
 
 /**
  * Map API validation errors to form field errors

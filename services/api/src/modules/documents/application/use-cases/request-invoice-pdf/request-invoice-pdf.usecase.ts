@@ -10,8 +10,8 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
-import { type RequestInvoicePdfInput, type RequestInvoicePdfOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type RequestInvoicePdfInput, type RequestInvoicePdfOutput } from "@corely/contracts";
 import { type DocumentRepoPort } from "../../ports/document-repository.port";
 import { type FileRepoPort } from "../../ports/file-repository.port";
 import { type DocumentLinkRepoPort } from "../../ports/document-link.port";

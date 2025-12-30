@@ -6,7 +6,7 @@ import type {
   ListLedgerAccountsInput,
   CreateLedgerAccountInput,
   UpdateLedgerAccountInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 // Query: List accounts
 export function useAccounts(query?: ListLedgerAccountsInput) {

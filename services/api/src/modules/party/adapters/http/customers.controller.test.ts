@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CustomersHttpController } from "./customers.controller";
 import { PartyApplication } from "../../application/party.application";
-import { err, NotFoundError, ok } from "@kerniflow/kernel";
+import { err, NotFoundError, ok } from "@corely/kernel";
 import { HttpException } from "@nestjs/common";
 
 const customer = {

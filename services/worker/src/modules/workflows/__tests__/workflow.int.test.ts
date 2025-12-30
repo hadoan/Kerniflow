@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { PostgresTestDb, createTestDb, stopSharedContainer } from "@kerniflow/testkit";
+import { PostgresTestDb, createTestDb, stopSharedContainer } from "@corely/testkit";
 import {
   PrismaService,
   WorkflowDefinitionRepository,
@@ -7,7 +7,7 @@ import {
   WorkflowInstanceRepository,
   WorkflowTaskRepository,
   resetPrisma,
-} from "@kerniflow/data";
+} from "@corely/data";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 

@@ -4,7 +4,7 @@ import { InMemoryDocumentRepo } from "../../../testkit/fakes/in-memory-document-
 import { InMemoryFileRepo } from "../../../testkit/fakes/in-memory-file-repo";
 import { FakeObjectStoragePort } from "../../../testkit/fakes/fake-object-storage";
 import { DocumentAggregate } from "../../../domain/document.aggregate";
-import { FixedClock, NoopLogger, unwrap, isErr } from "@kerniflow/kernel";
+import { FixedClock, NoopLogger, unwrap, isErr } from "@corely/kernel";
 
 describe("CompleteUploadUseCase", () => {
   let documentRepo: InMemoryDocumentRepo;

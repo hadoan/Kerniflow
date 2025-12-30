@@ -1,4 +1,4 @@
-import type { TaxSourceType } from "@kerniflow/contracts";
+import type { TaxSourceType } from "@corely/contracts";
 import { TaxSnapshotRepoPort } from "../../domain/ports";
 import type { TaxSnapshotEntity } from "../../domain/entities";
 

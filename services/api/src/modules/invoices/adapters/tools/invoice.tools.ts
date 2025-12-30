@@ -7,7 +7,7 @@ import {
   RecordPaymentInputSchema,
   SendInvoiceInputSchema,
   UpdateInvoiceInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import { type InvoicesApplication } from "../../application/invoices.application";
 import { mapToolResult } from "./mappers";

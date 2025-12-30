@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type {
   InventoryDocumentRepositoryPort,
   ListDocumentsFilters,
@@ -7,7 +7,7 @@ import type {
 } from "../../application/ports/document-repository.port";
 import { InventoryDocumentAggregate } from "../../domain/inventory-document.aggregate";
 import type { InventoryDocumentLine } from "../../domain/inventory.types";
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 const toPrismaDate = (localDate: LocalDate | null | undefined): Date | null =>
   localDate ? new Date(`${localDate}T00:00:00.000Z`) : null;

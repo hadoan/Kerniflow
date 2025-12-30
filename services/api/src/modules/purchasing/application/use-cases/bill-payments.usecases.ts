@@ -12,7 +12,7 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   RecordBillPaymentInput,
   RecordBillPaymentOutput,
@@ -20,7 +20,7 @@ import type {
   ListBillPaymentsOutput,
   CreateJournalEntryInput,
   PostJournalEntryInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { VendorBillRepositoryPort } from "../ports/vendor-bill-repository.port";
 import type { BillPaymentRepositoryPort } from "../ports/bill-payment-repository.port";
 import type { PurchasingSettingsRepositoryPort } from "../ports/settings-repository.port";

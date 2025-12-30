@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";
 import { workspacesApi } from "@/shared/workspaces/workspaces-api";
 import { useToast } from "@/shared/ui/use-toast";
-import type { WorkspaceMemberDto } from "@kerniflow/contracts";
+import type { WorkspaceMemberDto } from "@corely/contracts";
 
 export const WorkspaceMembersPage: React.FC = () => {
   const { activeWorkspaceId } = useWorkspace();

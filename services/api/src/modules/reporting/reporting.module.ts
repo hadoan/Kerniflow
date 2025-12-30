@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { ReportingController } from "./adapters/http/reporting.controller";
 import { REPORTING_QUERY_PORT } from "./application/ports/reporting-query.port";
 import { GetDashboardReportUseCase } from "./application/use-cases/get-dashboard-report.usecase";

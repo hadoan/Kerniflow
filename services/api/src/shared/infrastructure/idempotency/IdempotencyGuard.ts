@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 
 @Injectable()
 export class IdempotencyGuard implements CanActivate {

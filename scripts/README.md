@@ -88,7 +88,7 @@ Both scripts use `docker-compose.di-test.yml` which provides:
 
 Tests use `.env.di-test` which configures:
 
-- `DATABASE_URL=postgresql://kerniflow:kerniflow@localhost:5433/kerniflow_test`
+- `DATABASE_URL=postgresql://corely:corely@localhost:5433/corely_test`
 - `REDIS_URL=redis://localhost:6380`
 - Test-specific JWT secrets
 - Mock email provider

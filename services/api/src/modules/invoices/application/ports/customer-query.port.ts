@@ -1,4 +1,4 @@
-import { type CustomerBillingSnapshotDTO } from "@kerniflow/contracts";
+import { type CustomerBillingSnapshotDTO } from "@corely/contracts";
 
 export interface CustomerQueryPort {
   getCustomerBillingSnapshot(

@@ -1,6 +1,6 @@
-import type { LinkDocumentInput, LinkDocumentOutput } from "@kerniflow/contracts";
-import { BaseUseCase, ValidationError, NotFoundError, err, ok } from "@kerniflow/kernel";
-import type { LoggerPort, Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
+import type { LinkDocumentInput, LinkDocumentOutput } from "@corely/contracts";
+import { BaseUseCase, ValidationError, NotFoundError, err, ok } from "@corely/kernel";
+import type { LoggerPort, Result, UseCaseContext, UseCaseError } from "@corely/kernel";
 import type { DocumentLinkRepoPort } from "../../ports/document-link.port";
 import type { DocumentRepoPort } from "../../ports/document-repository.port";
 

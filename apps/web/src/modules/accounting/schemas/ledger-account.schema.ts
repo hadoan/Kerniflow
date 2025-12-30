@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountTypeSchema } from "@kerniflow/contracts";
+import { AccountTypeSchema } from "@corely/contracts";
 
 /**
  * Frontend form schema for creating/editing ledger accounts

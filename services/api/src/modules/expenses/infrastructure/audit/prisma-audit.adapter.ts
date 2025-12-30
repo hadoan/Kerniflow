@@ -1,7 +1,7 @@
 // import { Injectable } from "@nestjs/common";
-// import { AuditPort, TransactionContext } from "@kerniflow/kernel";
-// import { PrismaService } from "@kerniflow/data";
-// import { getPrismaClient } from "@kerniflow/data";
+// import { AuditPort, TransactionContext } from "@corely/kernel";
+// import { PrismaService } from "@corely/data";
+// import { getPrismaClient } from "@corely/data";
 
 // @Injectable()
 // export class PrismaAuditAdapter implements AuditPort {

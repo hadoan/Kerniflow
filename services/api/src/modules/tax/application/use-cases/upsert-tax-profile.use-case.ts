@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { UpsertTaxProfileInput } from "@kerniflow/contracts";
+import type { UpsertTaxProfileInput } from "@corely/contracts";
 import type { TaxProfileEntity } from "../../domain/entities";
 import { TaxProfileRepoPort } from "../../domain/ports";
 import type { UseCaseContext } from "./use-case-context";

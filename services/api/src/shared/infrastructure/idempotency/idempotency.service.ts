@@ -1,5 +1,5 @@
 import { Injectable, Optional } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 
 export type IdempotencyStatus = "IN_PROGRESS" | "COMPLETED" | "FAILED";
 

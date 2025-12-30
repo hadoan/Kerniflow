@@ -6,36 +6,36 @@ services:
   # ============================================================================
   postgres:
     image: postgres:17-alpine
-    container_name: kerniflow_e2e_postgres
+    container_name: corely_e2e_postgres
     restart: unless-stopped
     env_file:
       - .env.e2e
     environment:
-      # Explicit values so local .env overrides (e.g., POSTGRES_DB=kerniflow) don't
+      # Explicit values so local .env overrides (e.g., POSTGRES_DB=corely) don't
       # point the e2e stack at a database name that doesn't exist.
-      POSTGRES_DB: kerniflow_e2e
-      POSTGRES_USER: kerniflow
-      POSTGRES_PASSWORD: kerniflow
+      POSTGRES_DB: corely_e2e
+      POSTGRES_USER: corely
+      POSTGRES_PASSWORD: corely
     ports:
       - "5433:5432"
     volumes:
       - postgres_e2e_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corely}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - kerniflow_e2e
+      - corely_e2e
 
   # ============================================================================
   # REDIS CACHE & QUEUE (E2E)
   # ============================================================================
   redis:
     image: redis:7-alpine
-    container_name: kerniflow_e2e_redis
+    container_name: corely_e2e_redis
     restart: unless-stopped
     env_file:
       - .env.e2e
@@ -50,7 +50,7 @@ services:
       retries: 5
       start_period: 5s
     networks:
-      - kerniflow_e2e
+      - corely_e2e
 
   # ============================================================================
   # NESTJS API (E2E - NODE_ENV=test)
@@ -59,12 +59,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-    container_name: kerniflow_e2e_api
+    container_name: corely_e2e_api
     env_file:
       - .env.e2e
     command: >
       sh -c "cd /app/packages/data && /app/node_modules/.bin/prisma migrate deploy &&
-             pnpm --filter @kerniflow/api dev"
+             pnpm --filter @corely/api dev"
     restart: unless-stopped
     depends_on:
       postgres:
@@ -73,7 +73,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-test}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/corely_e2e?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       TEST_HARNESS_SECRET: ${TEST_HARNESS_SECRET:-test-secret-key}
@@ -83,7 +83,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - kerniflow_e2e
+      - corely_e2e
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 15s
@@ -98,12 +98,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    container_name: kerniflow_e2e_worker
+    container_name: corely_e2e_worker
     env_file:
       - .env.e2e
     command: >
       sh -c "cd /app/packages/data && /app/node_modules/.bin/prisma migrate deploy &&
-             pnpm --filter @kerniflow/worker dev"
+             pnpm --filter @corely/worker dev"
     restart: unless-stopped
     depends_on:
       postgres:
@@ -112,13 +112,13 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-test}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/corely_e2e?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       RESEND_API_KEY: ${RESEND_API_KEY:-dummy_key_for_e2e}
       NODE_OPTIONS: --enable-source-maps
     networks:
-      - kerniflow_e2e
+      - corely_e2e
 
   # ============================================================================
   # VITE WEB FRONTEND (E2E)
@@ -127,7 +127,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    container_name: kerniflow_e2e_web
+    container_name: corely_e2e_web
     env_file:
       - .env.e2e
     restart: unless-stopped
@@ -140,12 +140,12 @@ services:
     ports:
       - "5173:8080"
     networks:
-      - kerniflow_e2e
+      - corely_e2e
 
 volumes:
   postgres_e2e_data:
   redis_e2e_data:
 
 networks:
-  kerniflow_e2e:
+  corely_e2e:
     driver: bridge

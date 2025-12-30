@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/core",
+  "name": "@corely/core",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -23,7 +23,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@kerniflow/contracts": "workspace:*",
+    "@corely/contracts": "workspace:*",
     "xstate": "catalog:"
   },
   "devDependencies": {

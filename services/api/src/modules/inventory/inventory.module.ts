@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { InventoryController } from "./adapters/http/inventory.controller";
 import { InventoryApplication } from "./application/inventory.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
-import { AUDIT_PORT, AuditPort } from "@kerniflow/kernel";
+import { AUDIT_PORT, AuditPort } from "@corely/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
 import {

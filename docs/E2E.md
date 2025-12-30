@@ -1,6 +1,6 @@
-# E2E Testing Guide for Kerniflow
+# E2E Testing Guide for Corely
 
-This document describes the End-to-End (E2E) testing infrastructure for Kerniflow, including how to run tests locally, in CI/CD pipelines, and how the test harness works.
+This document describes the End-to-End (E2E) testing infrastructure for Corely, including how to run tests locally, in CI/CD pipelines, and how the test harness works.
 
 ## Overview
 
@@ -87,7 +87,7 @@ environment:
 
 ```json
 {
-  "email": "e2e-test@kerniflow.local",
+  "email": "e2e-test@corely.local",
   "password": "E2ETestPassword123!",
   "tenantName": "E2E Test Tenant"
 }
@@ -101,7 +101,7 @@ environment:
   "tenantName": "E2E Test Tenant",
   "userId": "cuid456...",
   "userName": "Test User",
-  "email": "e2e-test@kerniflow.local"
+  "email": "e2e-test@corely.local"
 }
 ```
 
@@ -385,7 +385,7 @@ In CI, set:
 ```bash
 CI=true
 NODE_ENV=test
-DATABASE_URL=postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public
+DATABASE_URL=postgresql://corely:corely@postgres:5432/corely_e2e?schema=public
 REDIS_URL=redis://redis:6379
 TEST_HARNESS_SECRET=test-secret-key
 JWT_SECRET=test-jwt-secret-change-me
@@ -437,7 +437,7 @@ curl -X POST http://localhost:3000/test/health \
 
 ```bash
 docker compose -f docker-compose.e2e.yml exec postgres \
-  dropdb -U kerniflow kerniflow_e2e && createdb -U kerniflow kerniflow_e2e
+  dropdb -U corely corely_e2e && createdb -U corely corely_e2e
 ```
 
 ### Port Already in Use
@@ -536,7 +536,7 @@ pnpm e2e:ui
 
 - [Playwright Documentation](https://playwright.dev)
 - [Docker Compose Docs](https://docs.docker.com/compose/)
-- [Kerniflow Architecture](./overall-structure.md)
+- [Corely Architecture](./overall-structure.md)
 - [API Documentation](../services/api/README.md)
 
 ---

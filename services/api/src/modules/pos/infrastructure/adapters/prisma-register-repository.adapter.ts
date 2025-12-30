@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import { Register } from "../../domain/register.aggregate";
 import type { RegisterRepositoryPort } from "../../application/ports/register-repository.port";
 

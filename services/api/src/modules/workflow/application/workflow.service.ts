@@ -7,15 +7,15 @@ import {
   type ListWorkflowInstancesQuery,
   type SendWorkflowEventInput,
   type StartWorkflowInstanceInput,
-} from "@kerniflow/contracts";
-import { getInitialSnapshot, serializeSnapshot } from "@kerniflow/core";
+} from "@corely/contracts";
+import { getInitialSnapshot, serializeSnapshot } from "@corely/core";
 import {
   PrismaService,
   WorkflowDefinitionRepository,
   WorkflowEventRepository,
   WorkflowInstanceRepository,
   WorkflowTaskRepository,
-} from "@kerniflow/data";
+} from "@corely/data";
 import { WorkflowQueueClient } from "../infrastructure/workflow-queue.client";
 
 @Injectable()

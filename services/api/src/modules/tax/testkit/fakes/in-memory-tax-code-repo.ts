@@ -1,4 +1,4 @@
-import type { TaxCodeKind } from "@kerniflow/contracts";
+import type { TaxCodeKind } from "@corely/contracts";
 import { TaxCodeRepoPort } from "../../domain/ports";
 import type { TaxCodeEntity } from "../../domain/entities";
 

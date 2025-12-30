@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import NetInfo from "@react-native-community/netinfo";
 import * as SQLite from "expo-sqlite";
 import { v4 as uuidv4 } from "@lukeed/uuid";
-import { SyncEngine, type OutboxCommand, type SyncEngineEvent } from "@kerniflow/offline-core";
-import { SqliteOutboxStore, ReactNativeNetworkMonitor } from "@kerniflow/offline-rn";
+import { SyncEngine, type OutboxCommand, type SyncEngineEvent } from "@corely/offline-core";
+import { SqliteOutboxStore, ReactNativeNetworkMonitor } from "@corely/offline-rn";
 import { useAuthStore } from "@/stores/authStore";
 import { InMemorySyncLock } from "@/lib/offline/syncLock";
 import { PosSyncTransport } from "@/lib/offline/posSyncTransport";
@@ -30,7 +30,7 @@ export function useSyncEngine() {
 
   const initializeSync = async () => {
     if (!outboxStoreInstance) {
-      const db = await SQLite.openDatabaseAsync("kerniflow-pos.db");
+      const db = await SQLite.openDatabaseAsync("corely-pos.db");
       outboxStoreInstance = new SqliteOutboxStore(db as any);
       await outboxStoreInstance.initialize();
     }

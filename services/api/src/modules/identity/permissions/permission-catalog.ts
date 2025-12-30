@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import type { PermissionGroup } from "@kerniflow/contracts";
+import type { PermissionGroup } from "@corely/contracts";
 import { ValidationError } from "../../../shared/errors/domain-errors";
 import type { PermissionCatalogPort } from "../application/ports/permission-catalog.port";
 import { identityPermissions } from "./identity.permissions";

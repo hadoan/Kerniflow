@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { PrismaService } from "@kerniflow/data";
+import type { PrismaService } from "@corely/data";
 
 @Injectable()
 export class PrismaInvoiceEmailRepository {

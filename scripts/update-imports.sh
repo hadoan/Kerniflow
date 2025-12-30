@@ -1,10 +1,10 @@
 #!/bin/bash
-# Import path updater for Kerniflow naming refactor
+# Import path updater for Corely naming refactor
 # Uses sed for find-and-replace across all TypeScript files
 
 set -e
 
-BASE_DIR="d:/Working/Kerniflow"
+BASE_DIR="d:/Working/Corely"
 cd "$BASE_DIR"
 
 echo "Starting import path updates..."

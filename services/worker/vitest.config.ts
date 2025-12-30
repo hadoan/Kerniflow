@@ -12,9 +12,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@kerniflow/testkit": path.resolve(__dirname, "../..", "packages/testkit/src"),
-      "@kerniflow/kernel": path.resolve(__dirname, "../..", "packages/kernel/src"),
-      "@kerniflow/data": path.resolve(__dirname, "../..", "packages/data/src"),
+      "@corely/testkit": path.resolve(__dirname, "../..", "packages/testkit/src"),
+      "@corely/kernel": path.resolve(__dirname, "../..", "packages/kernel/src"),
+      "@corely/data": path.resolve(__dirname, "../..", "packages/data/src"),
     },
   },
 });

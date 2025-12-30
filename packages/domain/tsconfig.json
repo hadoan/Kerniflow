@@ -1,4 +1,4 @@
 {
-  "extends": "@kerniflow/tsconfig/lib.json",
+  "extends": "@corely/tsconfig/lib.json",
   "include": ["src"]
 }

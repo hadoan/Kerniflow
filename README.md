@@ -1,6 +1,6 @@
-# Kerniflow
+# Corely
 
-Kerniflow is an **AI-native modular ERP kernel** designed to start small (freelancer workflows like **expenses + invoices + assistant**) and scale into full ERP domains (restaurant/hotel/factory packs) without forking code.
+Corely is an **AI-native modular ERP kernel** designed to start small (freelancer workflows like **expenses + invoices + assistant**) and scale into full ERP domains (restaurant/hotel/factory packs) without forking code.
 
 This repo is a **pnpm monorepo** with clear boundaries:
 

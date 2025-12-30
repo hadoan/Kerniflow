@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { PackDefinition } from "@kerniflow/contracts";
+import type { PackDefinition } from "@corely/contracts";
 import type { PackRegistryPort } from "../../application/ports/pack-registry.port";
 
 /**

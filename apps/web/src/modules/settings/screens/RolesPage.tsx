@@ -19,7 +19,7 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
 import { useCreateRole, useDeleteRole, useRoles, useUpdateRole } from "../hooks/useRoles";
-import type { RoleDto } from "@kerniflow/contracts";
+import type { RoleDto } from "@corely/contracts";
 
 export default function RolesPage() {
   const { data: roles = [], isLoading } = useRoles();

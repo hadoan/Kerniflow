@@ -1,13 +1,13 @@
 #!/bin/bash
-# Automated file renaming script for Kerniflow naming conventions refactor
+# Automated file renaming script for Corely naming conventions refactor
 # This script uses git mv to preserve file history
 
 set -e  # Exit on error
 
-BASE_DIR="d:/Working/Kerniflow"
+BASE_DIR="d:/Working/Corely"
 cd "$BASE_DIR"
 
-echo "Starting Kerniflow naming conventions refactor..."
+echo "Starting Corely naming conventions refactor..."
 echo "=============================================="
 
 # Function to safely git mv (only if source exists)

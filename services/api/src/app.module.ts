@@ -1,6 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
-import { EnvModule } from "@kerniflow/config";
-import { DataModule } from "@kerniflow/data";
+import { EnvModule } from "@corely/config";
+import { DataModule } from "@corely/data";
 import { AppController } from "./app.controller";
 import { IdentityModule } from "./modules/identity";
 import { ExpensesModule } from "./modules/expenses";

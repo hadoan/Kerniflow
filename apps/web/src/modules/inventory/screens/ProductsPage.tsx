@@ -7,7 +7,7 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Badge } from "@/shared/ui/badge";
 import { inventoryApi } from "@/lib/inventory-api";
-import type { ProductType } from "@kerniflow/contracts";
+import type { ProductType } from "@corely/contracts";
 import { inventoryQueryKeys } from "../queries/inventory.queryKeys";
 import { useNavigate } from "react-router-dom";
 

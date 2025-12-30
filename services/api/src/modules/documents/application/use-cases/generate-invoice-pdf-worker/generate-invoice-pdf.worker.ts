@@ -1,4 +1,4 @@
-import { type LoggerPort } from "@kerniflow/kernel";
+import { type LoggerPort } from "@corely/kernel";
 import { type DocumentRepoPort } from "../../ports/document-repository.port";
 import { type FileRepoPort } from "../../ports/file-repository.port";
 import { type ObjectStoragePort } from "../../ports/object-storage.port";

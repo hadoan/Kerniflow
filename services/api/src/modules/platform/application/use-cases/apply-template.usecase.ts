@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import type { TemplateResult } from "@kerniflow/contracts";
+import type { TemplateResult } from "@corely/contracts";
 import type { TemplateRegistryPort } from "../ports/template-registry.port";
 import type { TemplateExecutorPort } from "../ports/template-executor.port";
 import type { TenantTemplateInstallRepositoryPort } from "../ports/tenant-template-install-repository.port";
@@ -7,7 +7,7 @@ import { TEMPLATE_REGISTRY_TOKEN } from "../ports/template-registry.port";
 import { TENANT_TEMPLATE_INSTALL_REPOSITORY_TOKEN } from "../ports/tenant-template-install-repository.port";
 import { TenantEntitlementService } from "../services/tenant-entitlement.service";
 import { TemplateExecutorRegistry } from "../../infrastructure/registries/template-executor-registry";
-import { ForbiddenError } from "@kerniflow/kernel";
+import { ForbiddenError } from "@corely/kernel";
 import { randomUUID } from "crypto";
 
 export interface ApplyTemplateInput {

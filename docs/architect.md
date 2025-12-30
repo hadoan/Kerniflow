@@ -88,7 +88,7 @@ All API errors use **RFC 7807 Problem Details** as the wire format. This ensures
 
 ```typescript
 {
-  type: "https://errors.kerniflow.com/Invoices:Locked",
+  type: "https://errors.corely.com/Invoices:Locked",
   title: "Conflict",
   status: 409,
   detail: "This invoice has already been finalized",  // safe to show

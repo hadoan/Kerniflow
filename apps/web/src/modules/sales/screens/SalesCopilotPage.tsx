@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createIdempotencyKey } from "@kerniflow/api-client";
+import { createIdempotencyKey } from "@corely/api-client";
 import {
   QuoteDraftProposalCardSchema,
   LineItemsProposalCardSchema,
@@ -14,7 +14,7 @@ import {
   type LineItemsProposalCard,
   type MessageDraftCard,
   type Provenance,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Textarea } from "@/shared/ui/textarea";

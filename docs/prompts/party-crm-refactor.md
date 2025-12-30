@@ -1,6 +1,6 @@
 ### Prompt: Analyze `party-crm` module and decide **Rename to `crm`** vs **Split into `party` + `crm`** (DDD + RBAC safe)
 
-You are an expert DDD/NestJS/Prisma + Vite-React architect working in the Kerniflow monorepo. We currently have a module folder named **`party-crm`** (or similarly named). Your task is to **analyze the actual repository state** and make a **correct, low-risk decision**:
+You are an expert DDD/NestJS/Prisma + Vite-React architect working in the Corely monorepo. We currently have a module folder named **`party-crm`** (or similarly named). Your task is to **analyze the actual repository state** and make a **correct, low-risk decision**:
 
 - **Option 1:** Rename `party-crm` → `crm`
 - **Option 2:** Split into two bounded contexts: `party` (Tier 0 kernel) + `crm` (Tier 2 revenue engine, depends on party)

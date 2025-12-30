@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { ApiError, normalizeError } from "@kerniflow/api-client";
+import { ApiError, normalizeError } from "@corely/api-client";
 import { toast } from "../hooks/use-toast";
 
 /**

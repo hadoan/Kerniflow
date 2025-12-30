@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import type { SalesOrderDto } from "@kerniflow/contracts";
+import type { SalesOrderDto } from "@corely/contracts";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";

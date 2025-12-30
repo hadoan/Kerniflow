@@ -6,7 +6,7 @@ import type {
   RolePermissionsResponse,
   UpdateRolePermissionsRequest,
   PermissionCatalogResponse,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export const identityApi = {
   async listRoles(): Promise<RoleDto[]> {

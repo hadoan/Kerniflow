@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ShiftSession } from "@kerniflow/contracts";
+import type { ShiftSession } from "@corely/contracts";
 import { useAuthStore } from "./authStore";
 
 interface ShiftState {

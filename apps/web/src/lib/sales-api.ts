@@ -36,7 +36,7 @@ import type {
   GetSalesSettingsOutput,
   UpdateSalesSettingsInput,
   UpdateSalesSettingsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export class SalesApi {
   async listQuotes(params?: {

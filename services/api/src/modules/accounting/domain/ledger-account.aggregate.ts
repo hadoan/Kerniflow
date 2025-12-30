@@ -1,4 +1,4 @@
-import type { AccountType } from "@kerniflow/contracts";
+import type { AccountType } from "@corely/contracts";
 import type { LedgerAccountProps } from "./accounting.types";
 
 export class LedgerAccountAggregate {

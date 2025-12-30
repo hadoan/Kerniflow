@@ -17,12 +17,18 @@ export class JwtTokenService implements TokenServicePort {
   private readonly refreshTokenExpiresIn: StringValue =
     (process.env.JWT_REFRESH_EXPIRES_IN as StringValue | undefined) || "30d";
 
-  generateAccessToken(data: { userId: string; email: string; tenantId: string }): string {
+  generateAccessToken(data: {
+    userId: string;
+    email: string;
+    tenantId: string;
+    roleIds: string[];
+  }): string {
     return jwt.sign(
       {
         userId: data.userId,
         email: data.email,
         tenantId: data.tenantId,
+        roleIds: Array.isArray(data.roleIds) ? data.roleIds : [],
       },
       this.accessTokenSecret,
       {
@@ -48,6 +54,7 @@ export class JwtTokenService implements TokenServicePort {
     userId: string;
     email: string;
     tenantId: string;
+    roleIds: string[];
     iat: number;
     exp: number;
   } | null> {
@@ -56,10 +63,19 @@ export class JwtTokenService implements TokenServicePort {
         userId: string;
         email: string;
         tenantId: string;
+        roleIds?: string[];
         iat: number;
         exp: number;
       };
-      return decoded;
+
+      return {
+        userId: decoded.userId,
+        email: decoded.email,
+        tenantId: decoded.tenantId,
+        roleIds: Array.isArray(decoded.roleIds) ? decoded.roleIds : [],
+        iat: decoded.iat,
+        exp: decoded.exp,
+      };
     } catch (error) {
       return null;
     }

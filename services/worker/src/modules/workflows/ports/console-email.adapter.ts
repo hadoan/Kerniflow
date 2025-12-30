@@ -1,5 +1,5 @@
 import { Logger } from "@nestjs/common";
-import type { EmailPort } from "@kerniflow/core";
+import type { EmailPort } from "@corely/core";
 
 export class ConsoleEmailAdapter implements EmailPort {
   private readonly logger = new Logger(ConsoleEmailAdapter.name);

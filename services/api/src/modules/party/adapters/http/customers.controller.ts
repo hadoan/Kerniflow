@@ -8,7 +8,7 @@ import {
   SearchCustomersInputSchema,
   UnarchiveCustomerInputSchema,
   UpdateCustomerInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { PartyApplication } from "../../application/party.application";
 import { buildUseCaseContext, mapResultToHttp } from "../../../../shared/http/usecase-mappers";
 import { AuthGuard } from "../../../identity";

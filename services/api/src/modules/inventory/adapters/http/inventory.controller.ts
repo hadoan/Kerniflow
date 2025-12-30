@@ -30,7 +30,7 @@ import {
   UpdateReorderPolicyInputSchema,
   GetReorderSuggestionsInputSchema,
   GetLowStockInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { InventoryApplication } from "../../application/inventory.application";
 import { buildUseCaseContext, mapResultToHttp } from "./http-mappers";
 import { AuthGuard } from "../../../identity";

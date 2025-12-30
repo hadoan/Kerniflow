@@ -1,6 +1,6 @@
 ## Prompt: Implement Role Permissions Management (Web + Backend only)
 
-You are an expert TypeScript/NestJS + React (Vite) architect working in the **Kerniflow pnpm monorepo**. Implement an **ABP-style “Role Permissions”** feature for **Web + Backend API only** (explicitly **NOT** in POS / React Native). Follow the repo structure and DDD/hexagonal rules: modules own their catalogs and persistence is done via ports/adapters.
+You are an expert TypeScript/NestJS + React (Vite) architect working in the **Corely pnpm monorepo**. Implement an **ABP-style “Role Permissions”** feature for **Web + Backend API only** (explicitly **NOT** in POS / React Native). Follow the repo structure and DDD/hexagonal rules: modules own their catalogs and persistence is done via ports/adapters.
 
 ### Goal
 

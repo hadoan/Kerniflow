@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { ArgumentsHost, HttpStatus } from "@nestjs/common";
 import { ProblemDetailsExceptionFilter } from "../problem-details.filter.js";
-import { UserFriendlyError, ValidationFailedError, NotFoundError } from "@kerniflow/domain";
+import { UserFriendlyError, ValidationFailedError, NotFoundError } from "@corely/domain";
 
 describe("ProblemDetailsExceptionFilter", () => {
   let filter: ProblemDetailsExceptionFilter;

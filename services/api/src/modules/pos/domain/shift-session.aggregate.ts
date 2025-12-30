@@ -1,4 +1,4 @@
-import type { ShiftSession as ShiftSessionDto } from "@kerniflow/contracts";
+import type { ShiftSession as ShiftSessionDto } from "@corely/contracts";
 
 /**
  * Shift Session Aggregate - Register operating session

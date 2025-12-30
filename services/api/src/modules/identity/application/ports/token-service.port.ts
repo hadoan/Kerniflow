@@ -6,7 +6,12 @@ export interface TokenServicePort {
   /**
    * Generate access token (short-lived)
    */
-  generateAccessToken(data: { userId: string; email: string; tenantId: string }): string;
+  generateAccessToken(data: {
+    userId: string;
+    email: string;
+    tenantId: string;
+    roleIds: string[];
+  }): string;
 
   /**
    * Generate refresh token (long-lived)
@@ -20,6 +25,7 @@ export interface TokenServicePort {
     userId: string;
     email: string;
     tenantId: string;
+    roleIds: string[];
     iat: number;
     exp: number;
   } | null>;

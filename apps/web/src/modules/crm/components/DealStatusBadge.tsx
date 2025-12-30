@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Badge } from "@/shared/ui/badge";
-import type { DealStatus } from "@kerniflow/contracts";
+import type { DealStatus } from "@corely/contracts";
 
 interface DealStatusBadgeProps {
   status: DealStatus;

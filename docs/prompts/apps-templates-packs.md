@@ -1,6 +1,6 @@
 ## Prompt: Implement “Apps + Templates + Packs” Tenant Entitlements + Server-Driven Menu (Core Platform)
 
-You are an expert TypeScript/NestJS + Prisma + React (Vite) architect working in the **Kerniflow monorepo**. Implement the **core platform feature** that allows **per-tenant** enabling/disabling **Apps (modules/bounded contexts)**, installing **Templates (configuration presets)**, and installing **Packs (bundles of apps + templates)**, with a **server-driven menu** filtered by **RBAC** and tenant entitlements.
+You are an expert TypeScript/NestJS + Prisma + React (Vite) architect working in the **Corely monorepo**. Implement the **core platform feature** that allows **per-tenant** enabling/disabling **Apps (modules/bounded contexts)**, installing **Templates (configuration presets)**, and installing **Packs (bundles of apps + templates)**, with a **server-driven menu** filtered by **RBAC** and tenant entitlements.
 
 ### Non-negotiable constraints (do not violate)
 

@@ -1,6 +1,6 @@
-# Docker Setup for Kerniflow
+# Docker Setup for Corely
 
-Complete Docker Compose setup for Kerniflow monorepo with two deployment profiles.
+Complete Docker Compose setup for Corely monorepo with two deployment profiles.
 
 ---
 
@@ -155,10 +155,10 @@ All variables are loaded from `.env` file. Key variables:
 NODE_ENV=development
 
 # Database (PostgreSQL)
-POSTGRES_DB=kerniflow
-POSTGRES_USER=kerniflow
-POSTGRES_PASSWORD=kerniflow
-DATABASE_URL=postgresql://kerniflow:kerniflow@postgres:5432/kerniflow?schema=public
+POSTGRES_DB=corely
+POSTGRES_USER=corely
+POSTGRES_PASSWORD=corely
+DATABASE_URL=postgresql://corely:corely@postgres:5432/corely?schema=public
 
 # Cache & Queue (Redis)
 REDIS_URL=redis://redis:6379
@@ -274,10 +274,10 @@ docker compose logs web
 
 ```bash
 # Check if postgres is healthy
-docker compose exec postgres pg_isready -U kerniflow
+docker compose exec postgres pg_isready -U corely
 
 # Connect to database
-docker compose exec postgres psql -U kerniflow -d kerniflow
+docker compose exec postgres psql -U corely -d corely
 
 # View database
 \dt  # list tables
@@ -358,7 +358,7 @@ All services are configured with hot-reload in development:
 
 ### Building Packages
 
-The Dockerfiles automatically build shared packages (`@kerniflow/contracts`, `@kerniflow/domain`, `@kerniflow/data`).
+The Dockerfiles automatically build shared packages (`@corely/contracts`, `@corely/domain`, `@corely/data`).
 
 ### Testing
 
@@ -401,8 +401,8 @@ Modify Dockerfiles to use `RUN pnpm build` instead of dev servers:
 
 ```dockerfile
 # For web:
-RUN pnpm --filter @kerniflow/web build
-CMD ["pnpm", "--filter", "@kerniflow/web", "preview", "--host", "0.0.0.0"]
+RUN pnpm --filter @corely/web build
+CMD ["pnpm", "--filter", "@corely/web", "preview", "--host", "0.0.0.0"]
 
 # For api/worker:
 # Add build step and use `npm start` instead of dev
@@ -420,10 +420,10 @@ CMD ["pnpm", "--filter", "@kerniflow/web", "preview", "--host", "0.0.0.0"]
 
 ```bash
 # Backup database
-docker compose exec postgres pg_dump -U kerniflow kerniflow > backup.sql
+docker compose exec postgres pg_dump -U corely corely > backup.sql
 
 # Restore database
-docker compose exec -T postgres psql -U kerniflow kerniflow < backup.sql
+docker compose exec -T postgres psql -U corely corely < backup.sql
 ```
 
 ---
@@ -455,7 +455,7 @@ docker system prune -a
 ## File Structure
 
 ```
-kerniflow/
+corely/
 ├── docker-compose.yml          # Compose configuration
 ├── .env.example                # Example environment variables
 ├── Dockerfile.web              # Frontend container
@@ -488,5 +488,5 @@ kerniflow/
 For project-specific issues, check:
 
 - Logs: `docker compose logs -f`
-- Database: `docker compose exec postgres psql -U kerniflow -d kerniflow`
+- Database: `docker compose exec postgres psql -U corely -d corely`
 - Redis: `docker compose exec redis redis-cli`

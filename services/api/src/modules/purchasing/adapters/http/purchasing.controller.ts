@@ -24,7 +24,7 @@ import {
   ListAccountMappingsInputSchema,
   UpsertAccountMappingInputSchema,
   ListSuppliersInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { PurchasingApplication } from "../../application/purchasing.application";
 import { buildUseCaseContext, mapResultToHttp } from "./http-mappers";
 import { AuthGuard } from "../../../identity";

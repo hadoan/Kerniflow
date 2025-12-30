@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type {
   WorkspaceRepositoryPort,
   CreateLegalEntityInput,

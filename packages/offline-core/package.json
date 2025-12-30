@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/offline-core",
+  "name": "@corely/offline-core",
   "private": true,
   "version": "0.0.0",
   "type": "module",

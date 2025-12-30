@@ -1,1 +1,1 @@
-export { default } from "@kerniflow/prettier-config";
+export { default } from "@corely/prettier-config";

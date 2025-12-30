@@ -21,7 +21,7 @@
   - Settings: `getSettings()`, `updateSettings()`, `listPeriods()`, `closePeriod()`, `reopenPeriod()`
   - Reports: `getTrialBalance()`, `getGeneralLedger()`, `getProfitLoss()`, `getBalanceSheet()`
 - ✅ Auto-generates idempotency keys and correlation IDs
-- ✅ Properly typed with `@kerniflow/contracts`
+- ✅ Properly typed with `@corely/contracts`
 
 ### 3. React Query Hooks (Data Layer)
 
@@ -331,7 +331,7 @@ Need to create AI-related hooks and components:
 
 ### Pattern Consistency
 
-All implemented code follows existing Kerniflow patterns:
+All implemented code follows existing Corely patterns:
 
 - ✅ React Query for data fetching
 - ✅ react-hook-form + Zod for forms

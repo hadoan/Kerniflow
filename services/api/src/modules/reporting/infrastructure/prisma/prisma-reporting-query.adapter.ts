@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type { ReportingQueryPort } from "../../application/ports/reporting-query.port";
 
 @Injectable()

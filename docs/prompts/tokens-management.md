@@ -1,6 +1,6 @@
-Refactor Kerniflow NestJS DI (tokens + modules + providers) into a stable best-practice pattern
+Refactor Corely NestJS DI (tokens + modules + providers) into a stable best-practice pattern
 
-You are a senior NestJS architect working inside the **Kerniflow pnpm monorepo**. The backend DI is currently brittle and failing with `UnknownDependenciesException` (e.g., `EnableAppUseCase` cannot resolve `ID_GENERATOR_TOKEN` in `PlatformModule` context). Your task is to **analyze the current repository** and refactor DI into a scalable best-practice setup:
+You are a senior NestJS architect working inside the **Corely pnpm monorepo**. The backend DI is currently brittle and failing with `UnknownDependenciesException` (e.g., `EnableAppUseCase` cannot resolve `ID_GENERATOR_TOKEN` in `PlatformModule` context). Your task is to **analyze the current repository** and refactor DI into a scalable best-practice setup:
 
 - **Cross-module tokens are centralized** (single canonical source of truth).
 - **Module-private tokens remain local** to their bounded context/module.

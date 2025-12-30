@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type { InventorySettingsRepositoryPort } from "../../application/ports/settings-repository.port";
 import { InventorySettingsAggregate } from "../../domain/settings.aggregate";
 

@@ -1,6 +1,6 @@
 # PROMPT: Implement “Engagement: Check-In (Kiosk Mode) + Loyalty v1” inside the React Native POS app (`apps/pos`) — AI-Native first, offline-first, reuse current infra
 
-You are an AI engineering agent working inside the **Kerniflow** pnpm monorepo. Your task is to implement **Customer Engagement: Check-In (Kiosk Mode) + Loyalty v1** as a **mode inside the existing React Native POS app** (`apps/pos`), NOT a separate app.
+You are an AI engineering agent working inside the **Corely** pnpm monorepo. Your task is to implement **Customer Engagement: Check-In (Kiosk Mode) + Loyalty v1** as a **mode inside the existing React Native POS app** (`apps/pos`), NOT a separate app.
 
 This feature must be:
 

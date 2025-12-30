@@ -1,4 +1,4 @@
-declare module "@kerniflow/api-client" {
+declare module "@corely/api-client" {
   import type {
     RetryPolicyOptions,
     RetryableResult,
@@ -20,7 +20,7 @@ declare module "@kerniflow/api-client" {
   export function createIdempotencyKey(): string;
 }
 
-declare module "@kerniflow/offline-core" {
+declare module "@corely/offline-core" {
   export type { Clock } from "../../../packages/offline-core/src/platform/clock.port";
   export type { IdGenerator } from "../../../packages/offline-core/src/platform/idGenerator.port";
   export type { Logger } from "../../../packages/offline-core/src/platform/logger.port";
@@ -31,7 +31,7 @@ declare module "@kerniflow/offline-core" {
   export * from "../../../packages/offline-core/src/outbox/outboxTypes";
 }
 
-declare module "@kerniflow/offline-web" {
+declare module "@corely/offline-web" {
   export { LocalStorageSyncLock } from "../../../packages/offline-web/src/locks/localStorageSyncLock";
   export { IndexedDbOutboxStore } from "../../../packages/offline-web/src/outbox/indexeddbOutboxStore";
   export { WebNetworkMonitor } from "../../../packages/offline-web/src/network/webNetworkMonitor";

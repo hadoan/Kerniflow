@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { GetCurrentShiftInput, GetCurrentShiftOutput } from "@kerniflow/contracts";
+import type { GetCurrentShiftInput, GetCurrentShiftOutput } from "@corely/contracts";
 import {
   BaseUseCase,
   NoopLogger,
@@ -9,7 +9,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import {
   SHIFT_SESSION_REPOSITORY_PORT,
   type ShiftSessionRepositoryPort,

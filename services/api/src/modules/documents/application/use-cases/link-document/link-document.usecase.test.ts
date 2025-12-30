@@ -3,7 +3,7 @@ import { LinkDocumentUseCase } from "./link-document.usecase";
 import { InMemoryDocumentRepo } from "../../../testkit/fakes/in-memory-document-repo";
 import { InMemoryDocumentLinkRepo } from "../../../testkit/fakes/in-memory-document-link-repo";
 import { DocumentAggregate } from "../../../domain/document.aggregate";
-import { NoopLogger, unwrap, isErr } from "@kerniflow/kernel";
+import { NoopLogger, unwrap, isErr } from "@corely/kernel";
 
 describe("LinkDocumentUseCase", () => {
   let documentRepo: InMemoryDocumentRepo;

@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { EnvModule } from "@kerniflow/config";
-import { DataModule } from "@kerniflow/data";
+import { EnvModule } from "@corely/config";
+import { DataModule } from "@corely/data";
 import { OutboxModule } from "./modules/outbox/outbox.module";
 import { WorkflowsModule } from "./modules/workflows/workflows.module";
 

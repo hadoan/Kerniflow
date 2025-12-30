@@ -6,15 +6,15 @@ import {
   IndexedDbOutboxStore,
   WebNetworkMonitor,
   createIndexedDbPersister,
-} from "@kerniflow/offline-web";
+} from "@corely/offline-web";
 import {
   type Clock,
   type IdGenerator,
   type Logger,
   SyncEngine,
   type SyncTransport,
-} from "@kerniflow/offline-core";
-import { computeBackoffDelayMs, defaultRetryPolicy } from "@kerniflow/api-client";
+} from "@corely/offline-core";
+import { computeBackoffDelayMs, defaultRetryPolicy } from "@corely/api-client";
 import { useAuth } from "@/lib/auth-provider";
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";
 
@@ -54,7 +54,7 @@ export const OfflineProvider: React.FC<OfflineProviderProps> = ({ queryClient, c
   const { user } = useAuth();
   const { activeWorkspaceId } = useWorkspace();
   const persisterKey = useMemo(
-    () => `kerniflow-cache:${user?.userId ?? "anon"}:${activeWorkspaceId ?? "workspace"}`,
+    () => `corely-cache:${user?.userId ?? "anon"}:${activeWorkspaceId ?? "workspace"}`,
     [user?.userId, activeWorkspaceId]
   );
 

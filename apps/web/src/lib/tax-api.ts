@@ -24,7 +24,7 @@ import type {
   TaxRateDto,
   TaxBreakdownDto,
   TaxSnapshotDto,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { apiClient } from "./api-client";
 
 export class TaxApi {

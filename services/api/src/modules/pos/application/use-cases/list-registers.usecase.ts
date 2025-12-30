@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { ListRegistersInput, ListRegistersOutput } from "@kerniflow/contracts";
+import type { ListRegistersInput, ListRegistersOutput } from "@corely/contracts";
 import {
   BaseUseCase,
   NoopLogger,
@@ -9,7 +9,7 @@ import {
   ValidationError,
   ok,
   err,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import {
   REGISTER_REPOSITORY_PORT,
   type RegisterRepositoryPort,

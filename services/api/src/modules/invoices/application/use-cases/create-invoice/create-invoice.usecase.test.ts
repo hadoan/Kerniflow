@@ -8,8 +8,8 @@ import {
   unwrap,
   isErr,
   NotFoundError,
-} from "@kerniflow/kernel";
-import { TimeService } from "@kerniflow/kernel";
+} from "@corely/kernel";
+import { TimeService } from "@corely/kernel";
 import { FakeCustomerQueryPort } from "../../../testkit/fakes/fake-customer-query";
 
 describe("CreateInvoiceUseCase", () => {

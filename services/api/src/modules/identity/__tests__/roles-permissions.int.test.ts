@@ -7,7 +7,7 @@ import {
   createTestDb,
   seedDefaultTenant,
   stopSharedContainer,
-} from "@kerniflow/testkit";
+} from "@corely/testkit";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 

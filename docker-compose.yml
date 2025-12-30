@@ -4,32 +4,32 @@ services:
   # ============================================================================
   postgres:
     image: postgres:17-alpine
-    container_name: kerniflow_postgres
+    container_name: corely_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-kerniflow}
-      POSTGRES_USER: ${POSTGRES_USER:-kerniflow}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kerniflow}
+      POSTGRES_DB: ${POSTGRES_DB:-corely}
+      POSTGRES_USER: ${POSTGRES_USER:-corely}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-corely}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corely}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - kerniflow
+      - corely
 
   # ============================================================================
   # REDIS CACHE & QUEUE
   # ============================================================================
   redis:
     image: redis:7-alpine
-    container_name: kerniflow_redis
+    container_name: corely_redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -42,7 +42,7 @@ services:
       retries: 5
       start_period: 5s
     networks:
-      - kerniflow
+      - corely
 
   # ============================================================================
   # NESTJS API (DEMO & FULL PROFILES)
@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-    container_name: kerniflow_api
+    container_name: corely_api
     restart: unless-stopped
     profiles:
       - full
@@ -62,7 +62,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/corely?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: debug
     ports:
@@ -73,7 +73,7 @@ services:
       - ./packages/contracts/src:/app/packages/contracts/src
       - ./packages/domain/src:/app/packages/domain/src
     networks:
-      - kerniflow
+      - corely
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 15s
@@ -88,7 +88,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.worker
-    container_name: kerniflow_worker
+    container_name: corely_worker
     restart: unless-stopped
     profiles:
       - full
@@ -99,7 +99,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/corely?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: debug
     volumes:
@@ -108,7 +108,7 @@ services:
       - ./packages/contracts/src:/app/packages/contracts/src
       - ./packages/domain/src:/app/packages/domain/src
     networks:
-      - kerniflow
+      - corely
 
   # ============================================================================
   # VITE FRONTEND (DEMO & FULL PROFILES)
@@ -119,7 +119,7 @@ services:
       dockerfile: Dockerfile.web
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:4000}
-    container_name: kerniflow_web
+    container_name: corely_web
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-5173}:5173"
@@ -132,7 +132,7 @@ services:
       - ./apps/web/vite.config.ts:/app/apps/web/vite.config.ts
       - ./packages/contracts/src:/app/packages/contracts/src
     networks:
-      - kerniflow
+      - corely
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
       interval: 15s
@@ -145,5 +145,5 @@ volumes:
   redis_data:
 
 networks:
-  kerniflow:
+  corely:
     driver: bridge

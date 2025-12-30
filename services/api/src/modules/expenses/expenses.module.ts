@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
-import { OUTBOX_PORT, AUDIT_PORT } from "@kerniflow/kernel";
+import { OUTBOX_PORT, AUDIT_PORT } from "@corely/kernel";
 import {
   DataModule,
   CustomFieldDefinitionRepository,
   CustomFieldIndexRepository,
-} from "@kerniflow/data";
+} from "@corely/data";
 import { ExpensesController } from "./adapters/http/expenses.controller";
 import {
   IdempotencyStoragePort,

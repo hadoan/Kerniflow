@@ -161,7 +161,7 @@ function checkPackageCycles() {
     for (const filePath of files) {
       const source = fs.readFileSync(filePath, "utf-8");
       for (const spec of extractImports(source)) {
-        if (!spec.startsWith("@kerniflow/")) {
+        if (!spec.startsWith("@corely/")) {
           continue;
         }
         const target = spec.split("/")[1];

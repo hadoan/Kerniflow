@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { PermissionCatalogResponse } from "@kerniflow/contracts";
+import type { PermissionCatalogResponse } from "@corely/contracts";
 import type { PermissionCatalogPort } from "../ports/permission-catalog.port";
 import { PERMISSION_CATALOG_PORT } from "../ports/permission-catalog.port";
 

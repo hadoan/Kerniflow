@@ -66,7 +66,7 @@ export default function ReceiptScreen() {
       <ScrollView style={styles.content}>
         <View style={styles.receipt}>
           <View style={styles.receiptHeader}>
-            <Text style={styles.storeName}>Kerniflow POS</Text>
+            <Text style={styles.storeName}>Corely POS</Text>
             <Text style={styles.receiptNumber}>{mockSale.receiptNumber}</Text>
             <Text style={styles.dateTime}>{format(mockSale.createdAt, "MMM d, yyyy h:mm a")}</Text>
           </View>

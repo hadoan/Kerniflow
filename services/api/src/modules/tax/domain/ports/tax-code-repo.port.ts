@@ -1,5 +1,5 @@
 import type { TaxCodeEntity } from "../entities";
-import type { TaxCodeKind } from "@kerniflow/contracts";
+import type { TaxCodeKind } from "@corely/contracts";
 
 export abstract class TaxCodeRepoPort {
   /**

@@ -1,5 +1,5 @@
-import type { AuditPort as KernelAuditPort } from "@kerniflow/kernel";
-import { AUDIT_PORT } from "@kerniflow/kernel";
+import type { AuditPort as KernelAuditPort } from "@corely/kernel";
+import { AUDIT_PORT } from "@corely/kernel";
 
 export type AuditPort = KernelAuditPort;
 export type AuditEntry = Parameters<KernelAuditPort["log"]>[0];

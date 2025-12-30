@@ -1,5 +1,5 @@
 {
-  "extends": "@kerniflow/tsconfig/node.json",
+  "extends": "@corely/tsconfig/node.json",
   "compilerOptions": {
     "strict": false,
     "strictNullChecks": false,

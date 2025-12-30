@@ -1,4 +1,4 @@
-import { type TransactionContext } from "@kerniflow/kernel";
+import { type TransactionContext } from "@corely/kernel";
 import { type User } from "../../domain/entities/user.entity";
 
 /**

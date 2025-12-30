@@ -16,7 +16,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useShiftStore } from "@/stores/shiftStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useSalesService } from "@/hooks/useSalesService";
-import type { PosSalePayment } from "@kerniflow/contracts";
+import type { PosSalePayment } from "@corely/contracts";
 
 type PaymentMethod = "CASH" | "CARD" | "BANK_TRANSFER" | "OTHER";
 

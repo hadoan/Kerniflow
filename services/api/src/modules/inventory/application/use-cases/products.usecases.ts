@@ -11,7 +11,7 @@ import {
   type AuditPort,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateProductInput,
   CreateProductOutput,
@@ -25,7 +25,7 @@ import type {
   ActivateProductOutput,
   DeactivateProductInput,
   DeactivateProductOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { ProductRepositoryPort } from "../ports/product-repository.port";
 import { toProductDto } from "../mappers/inventory-dto.mapper";
 import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";

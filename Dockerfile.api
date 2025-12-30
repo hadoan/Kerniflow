@@ -33,15 +33,15 @@ ARG DATABASE_URL_BUILD=postgresql://dummy:dummy@localhost:5432/dummy
 RUN cd /app/packages/data && DATABASE_URL=$DATABASE_URL_BUILD /app/node_modules/.bin/prisma generate
 
 # Build shared packages (now that Prisma client is generated)
-RUN pnpm --filter @kerniflow/config build \
- && pnpm --filter @kerniflow/contracts build \
- && pnpm --filter @kerniflow/domain build \
- && pnpm --filter @kerniflow/kernel build \
- && pnpm --filter @kerniflow/data build
+RUN pnpm --filter @corely/config build \
+ && pnpm --filter @corely/contracts build \
+ && pnpm --filter @corely/domain build \
+ && pnpm --filter @corely/kernel build \
+ && pnpm --filter @corely/data build
 
 EXPOSE 3000
 
 # Environment variables are set by docker-compose or .env files
 # NODE_ENV, DATABASE_URL, REDIS_URL, LOG_LEVEL, etc.
 
-CMD ["pnpm", "--filter", "@kerniflow/api", "dev"]
+CMD ["pnpm", "--filter", "@corely/api", "dev"]

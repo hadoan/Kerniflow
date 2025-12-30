@@ -35,7 +35,7 @@ export default defineConfig({
 
   webServer: [
     {
-      command: "pnpm --filter @kerniflow/web dev --host 0.0.0.0 --port 5173",
+      command: "pnpm --filter @corely/web dev --host 0.0.0.0 --port 5173",
       url: baseURL,
       reuseExistingServer: !isCI,
       timeout: 60_000,

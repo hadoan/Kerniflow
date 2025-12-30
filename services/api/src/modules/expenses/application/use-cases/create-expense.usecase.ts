@@ -1,4 +1,4 @@
-import type { OutboxPort } from "@kerniflow/kernel";
+import type { OutboxPort } from "@corely/kernel";
 import type { AuditPort } from "../../../../shared/ports/audit.port";
 import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import type { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
@@ -9,7 +9,7 @@ import {
   type CustomFieldIndexPort,
   buildCustomFieldIndexes,
   validateAndNormalizeCustomValues,
-} from "@kerniflow/domain";
+} from "@corely/domain";
 import { Expense } from "../../domain/expense.entity";
 import type { ExpenseRepositoryPort } from "../ports/expense-repository.port";
 

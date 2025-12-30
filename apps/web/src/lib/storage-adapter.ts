@@ -1,9 +1,9 @@
-import type { TokenStorage } from "@kerniflow/auth-client";
+import type { TokenStorage } from "@corely/auth-client";
 import { getActiveWorkspaceId, setActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
 
 /**
  * Web Storage Adapter
- * Integrates @kerniflow/auth-client with workspace-store
+ * Integrates @corely/auth-client with workspace-store
  */
 export class WebStorageAdapter implements TokenStorage {
   private readonly ACCESS_TOKEN_KEY = "accessToken";

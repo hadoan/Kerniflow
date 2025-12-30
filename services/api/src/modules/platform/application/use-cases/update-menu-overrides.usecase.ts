@@ -1,6 +1,6 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
-import type { MenuOverrides } from "@kerniflow/contracts";
+import type { MenuOverrides } from "@corely/contracts";
 import {
   TENANT_MENU_OVERRIDE_REPOSITORY_TOKEN,
   type TenantMenuOverrideRepositoryPort,

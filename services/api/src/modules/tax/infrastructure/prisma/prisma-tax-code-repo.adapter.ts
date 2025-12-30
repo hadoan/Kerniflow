@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
-import type { TaxCodeKind } from "@kerniflow/contracts";
+import { PrismaService } from "@corely/data";
+import type { TaxCodeKind } from "@corely/contracts";
 import { TaxCodeRepoPort } from "../../domain/ports";
 import type { TaxCodeEntity } from "../../domain/entities";
 

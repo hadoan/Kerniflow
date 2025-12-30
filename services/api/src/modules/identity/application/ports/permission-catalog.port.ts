@@ -1,4 +1,4 @@
-import type { PermissionGroup } from "@kerniflow/contracts";
+import type { PermissionGroup } from "@corely/contracts";
 
 export interface PermissionCatalogPort {
   getCatalog(): PermissionGroup[];

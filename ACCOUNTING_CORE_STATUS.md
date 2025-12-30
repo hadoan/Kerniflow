@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document tracks the implementation of the comprehensive AI-Native Accounting Core for Kerniflow, as specified in the detailed product requirements.
+This document tracks the implementation of the comprehensive AI-Native Accounting Core for Corely, as specified in the detailed product requirements.
 
 **Status:** Backend ~75% Complete | Frontend 0% | AI Features ~25% (stubs)
 

@@ -4,7 +4,7 @@ import {
   type UseCaseError,
   isErr,
   type LoggerPort,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { type Request } from "express";
 import { toHttpException } from "./usecase-error.mapper";
 import { NestLoggerAdapter } from "../adapters/logger/nest-logger.adapter";

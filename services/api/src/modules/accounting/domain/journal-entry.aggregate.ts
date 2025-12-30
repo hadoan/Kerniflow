@@ -1,4 +1,4 @@
-import type { EntryStatus, SourceType } from "@kerniflow/contracts";
+import type { EntryStatus, SourceType } from "@corely/contracts";
 import type { JournalEntryProps, JournalLineProps } from "./accounting.types";
 
 export class JournalEntryAggregate {

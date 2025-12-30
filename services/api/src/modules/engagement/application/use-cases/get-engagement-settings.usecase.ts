@@ -7,11 +7,11 @@ import {
   ValidationError,
   ok,
   err,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import {
   type GetEngagementSettingsInput,
   type GetEngagementSettingsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { toEngagementSettingsDto } from "../mappers/engagement-dto.mappers";
 import type { EngagementSettingsRepositoryPort } from "../ports/engagement-settings-repository.port";
 import type { EngagementSettingsRecord } from "../../domain/engagement.types";

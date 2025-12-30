@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { SyncPosSaleInput, SyncPosSaleOutput } from "@kerniflow/contracts";
+import type { SyncPosSaleInput, SyncPosSaleOutput } from "@corely/contracts";
 import {
   BaseUseCase,
   ConflictError,
@@ -10,7 +10,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import {
   POS_SALE_IDEMPOTENCY_PORT,
   type PosSaleIdempotencyPort,

@@ -48,7 +48,7 @@ function findMonorepoRoot(): string {
     if (existsSync(packageJsonPath)) {
       try {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
-        if (packageJson.workspaces || packageJson.name === "kerniflow") {
+        if (packageJson.workspaces || packageJson.name === "corely") {
           return currentDir;
         }
       } catch {

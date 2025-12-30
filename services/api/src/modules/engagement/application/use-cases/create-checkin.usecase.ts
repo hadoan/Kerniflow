@@ -8,8 +8,8 @@ import {
   ConflictError,
   ok,
   err,
-} from "@kerniflow/kernel";
-import { type CreateCheckInEventInput, type CreateCheckInEventOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type CreateCheckInEventInput, type CreateCheckInEventOutput } from "@corely/contracts";
 import { toCheckInEventDto } from "../mappers/engagement-dto.mappers";
 import type { CheckInRepositoryPort } from "../ports/checkin-repository.port";
 import type { LoyaltyRepositoryPort } from "../ports/loyalty-repository.port";

@@ -1,5 +1,5 @@
 import { Module, OnModuleInit } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
 
@@ -43,7 +43,6 @@ import { TENANT_APP_INSTALL_REPOSITORY_TOKEN } from "./application/ports/tenant-
 import { TENANT_TEMPLATE_INSTALL_REPOSITORY_TOKEN } from "./application/ports/tenant-template-install-repository.port";
 import { TENANT_MENU_OVERRIDE_REPOSITORY_TOKEN } from "./application/ports/tenant-menu-override-repository.port";
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-record-meta-repository.port";
-import { ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN } from "../identity/application/ports/role-permission-grant-repository.port";
 
 @Module({
   imports: [DataModule, KernelModule, IdentityModule],
@@ -105,10 +104,6 @@ import { ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN } from "../identity/application/
 
     // Guards
     EntitlementGuard,
-    {
-      provide: "platform/role-permission-grant-repository",
-      useExisting: ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN,
-    },
   ],
   exports: [
     TenantEntitlementService,

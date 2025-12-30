@@ -5,8 +5,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@kerniflow/api-client": path.resolve(__dirname, "../../packages/api-client/src"),
-      "@kerniflow/auth-client": path.resolve(__dirname, "../../packages/auth-client/src"),
+      "@corely/api-client": path.resolve(__dirname, "../../packages/api-client/src"),
+      "@corely/auth-client": path.resolve(__dirname, "../../packages/auth-client/src"),
     },
   },
   test: {

@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { IdentityModule } from "../identity";
 import { CustomersHttpController } from "./adapters/http/customers.controller";
 import { PrismaPartyRepoAdapter } from "./infrastructure/prisma/prisma-party-repo.adapter";

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import type { CalculateTaxInput, TaxBreakdownDto } from "@kerniflow/contracts";
+import type { CalculateTaxInput, TaxBreakdownDto } from "@corely/contracts";
 import { TaxProfileRepoPort } from "../../domain/ports";
 import { TaxProfile } from "../../domain/entities";
 import { DEPackV1 } from "./jurisdictions/de-pack.v1";

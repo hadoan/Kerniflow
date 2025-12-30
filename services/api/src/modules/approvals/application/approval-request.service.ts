@@ -1,13 +1,13 @@
 import { ForbiddenException, Injectable, NotFoundException, Inject } from "@nestjs/common";
-import { type ApprovalDecisionInput } from "@kerniflow/contracts";
-import { AUDIT_PORT, OUTBOX_PORT } from "@kerniflow/kernel";
-import type { AuditPort, OutboxPort } from "@kerniflow/kernel";
+import { type ApprovalDecisionInput } from "@corely/contracts";
+import { AUDIT_PORT, OUTBOX_PORT } from "@corely/kernel";
+import type { AuditPort, OutboxPort } from "@corely/kernel";
 import {
   DomainEventRepository,
   PrismaService,
   WorkflowInstanceRepository,
   WorkflowTaskRepository,
-} from "@kerniflow/data";
+} from "@corely/data";
 import { WorkflowService } from "../../workflow/application/workflow.service";
 import {
   MEMBERSHIP_REPOSITORY_TOKEN,
@@ -17,7 +17,7 @@ import {
   ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN,
   type RolePermissionGrantRepositoryPort,
 } from "../../identity/application/ports/role-permission-grant-repository.port";
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import { toAllowedPermissionKeys } from "../../../shared/permissions/effective-permissions";
 
 @Injectable()
 export class ApprovalRequestService {
@@ -163,28 +163,7 @@ export class ApprovalRequestService {
   }
 
   private async getAllowedPermissions(tenantId: string, roleId: string): Promise<string[]> {
-    const grants = await this.grants.listByRole(tenantId, roleId);
+    const grants = await this.grants.listByRoleIdsAndTenant(tenantId, [roleId]);
     return toAllowedPermissionKeys(grants);
   }
 }
-
-const toAllowedPermissionKeys = (
-  grants: Array<{ key: string; effect: RolePermissionEffect }>
-): string[] => {
-  const allow = new Set<string>();
-  const deny = new Set<string>();
-
-  for (const grant of grants) {
-    if (grant.effect === "DENY") {
-      deny.add(grant.key);
-      continue;
-    }
-    allow.add(grant.key);
-  }
-
-  for (const key of deny) {
-    allow.delete(key);
-  }
-
-  return Array.from(allow);
-};

@@ -7,7 +7,7 @@ import { MockIdempotencyStoragePort } from "@shared/testkit/mocks/mock-idempoten
 import { FakeIdGenerator } from "@shared/testkit/fakes/fake-id-generator";
 import { FakeClock } from "@shared/testkit/fakes/fake-clock";
 import { buildCreateExpenseInput } from "../../../testkit/builders/build-create-expense-input";
-import { CustomFieldDefinitionPort, CustomFieldIndexPort } from "@kerniflow/domain";
+import { CustomFieldDefinitionPort, CustomFieldIndexPort } from "@corely/domain";
 
 let useCase: CreateExpenseUseCase;
 let repo: FakeExpenseRepository;

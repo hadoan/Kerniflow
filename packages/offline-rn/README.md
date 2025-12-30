@@ -1,6 +1,6 @@
-# @kerniflow/offline-rn
+# @corely/offline-rn
 
-React Native adapters for offline-first sync with Kerniflow.
+React Native adapters for offline-first sync with Corely.
 
 ## Purpose
 
@@ -14,7 +14,7 @@ This package provides React Native-specific implementations of offline-core port
 ### Network Monitoring
 
 ```typescript
-import { RnNetworkMonitor } from "@kerniflow/offline-rn";
+import { RnNetworkMonitor } from "@corely/offline-rn";
 
 const networkMonitor = new RnNetworkMonitor();
 
@@ -31,7 +31,7 @@ const currentStatus = await networkMonitor.getCurrent();
 
 ```typescript
 import * as SQLite from "expo-sqlite";
-import { SqliteOutboxStore } from "@kerniflow/offline-rn";
+import { SqliteOutboxStore } from "@corely/offline-rn";
 
 // Open database
 const db = SQLite.openDatabaseSync("pos-outbox.db");
@@ -63,6 +63,6 @@ pnpm add @react-native-community/netinfo expo-sqlite
 
 ## Design Notes
 
-- **Platform-specific adapters only** - Business logic stays in `@kerniflow/offline-core`
+- **Platform-specific adapters only** - Business logic stays in `@corely/offline-core`
 - **Minimal API surface** - Implements core ports, nothing more
-- **Type-safe** - All types come from `@kerniflow/offline-core`
+- **Type-safe** - All types come from `@corely/offline-core`

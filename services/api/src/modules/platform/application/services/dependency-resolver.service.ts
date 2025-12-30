@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ValidationError } from "@kerniflow/kernel";
+import { ValidationError } from "@corely/kernel";
 import type { AppRegistryPort } from "../ports/app-registry.port";
 
 /**

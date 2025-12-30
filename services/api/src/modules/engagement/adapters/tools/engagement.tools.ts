@@ -4,8 +4,8 @@ import {
   EngagementCheckInAssistantInputSchema,
   EngagementLoyaltyNextBestActionInputSchema,
   EngagementExplainLoyaltyInputSchema,
-} from "@kerniflow/contracts";
-import { isErr } from "@kerniflow/kernel";
+} from "@corely/contracts";
+import { isErr } from "@corely/kernel";
 import type { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import { type PartyApplication } from "../../../party/application/party.application";
 import { type EngagementApplication } from "../../application/engagement.application";

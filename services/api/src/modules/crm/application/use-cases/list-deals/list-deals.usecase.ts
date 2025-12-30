@@ -8,8 +8,8 @@ import {
   ValidationError,
   ok,
   err,
-} from "@kerniflow/kernel";
-import type { ListDealsInput, ListDealsOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import type { ListDealsInput, ListDealsOutput } from "@corely/contracts";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
 import { toDealDto } from "../../mappers/deal-dto.mapper";
 

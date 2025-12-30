@@ -50,7 +50,7 @@ The e2e environment uses different ports to avoid conflicts:
 
 - Web: http://localhost:5173
 - API: http://localhost:3000
-- Postgres: localhost:5433 (database: `kerniflow_e2e`)
+- Postgres: localhost:5433 (database: `corely_e2e`)
 - Redis: localhost:6380
 
 ## Environment Files

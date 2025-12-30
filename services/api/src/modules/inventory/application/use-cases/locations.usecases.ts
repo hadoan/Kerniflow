@@ -11,7 +11,7 @@ import {
   type AuditPort,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateLocationInput,
   CreateLocationOutput,
@@ -19,7 +19,7 @@ import type {
   UpdateLocationOutput,
   ListLocationsInput,
   ListLocationsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { LocationRepositoryPort } from "../ports/location-repository.port";
 import type { WarehouseRepositoryPort } from "../ports/warehouse-repository.port";
 import { toLocationDto } from "../mappers/inventory-dto.mapper";

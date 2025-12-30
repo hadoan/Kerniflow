@@ -3,7 +3,7 @@ import type {
   LoyaltyAccount,
   LoyaltyLedgerEntry,
   EngagementSettings,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type {
   LoyaltyAccountRecord,
   LoyaltyLedgerEntryRecord,

@@ -1,13 +1,13 @@
 {
-  "name": "@kerniflow/worker",
+  "name": "@corely/worker",
   "private": true,
   "version": "0.0.0",
   "dependencies": {
-    "@kerniflow/config": "workspace:*",
-    "@kerniflow/contracts": "workspace:*",
-    "@kerniflow/core": "workspace:*",
-    "@kerniflow/data": "workspace:*",
-    "@kerniflow/email-templates": "workspace:*",
+    "@corely/config": "workspace:*",
+    "@corely/contracts": "workspace:*",
+    "@corely/core": "workspace:*",
+    "@corely/data": "workspace:*",
+    "@corely/email-templates": "workspace:*",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
     "@prisma/client": "catalog:",
@@ -18,7 +18,7 @@
     "rxjs": "catalog:"
   },
   "devDependencies": {
-    "@kerniflow/testkit": "workspace:*",
+    "@corely/testkit": "workspace:*",
     "@types/react": "catalog:",
     "msw": "catalog:"
   },

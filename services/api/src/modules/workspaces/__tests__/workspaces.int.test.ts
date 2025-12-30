@@ -4,8 +4,8 @@ import { WorkspacesModule } from "../workspaces.module";
 import { CreateWorkspaceUseCase } from "../application/use-cases/create-workspace.usecase";
 import { ListWorkspacesUseCase } from "../application/use-cases/list-workspaces.usecase";
 import { GetWorkspaceUseCase } from "../application/use-cases/get-workspace.usecase";
-import { DataModule, PrismaService } from "@kerniflow/data";
-import { createTestDb, type PostgresTestDb, stopSharedContainer } from "@kerniflow/testkit";
+import { DataModule, PrismaService } from "@corely/data";
+import { createTestDb, type PostgresTestDb, stopSharedContainer } from "@corely/testkit";
 
 describe("Workspaces Module Integration", () => {
   vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });

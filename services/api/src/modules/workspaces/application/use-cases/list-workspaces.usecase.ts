@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { ListWorkspacesOutput } from "@kerniflow/contracts";
+import type { ListWorkspacesOutput } from "@corely/contracts";
 import type { WorkspaceRepositoryPort } from "../ports/workspace-repository.port";
 import { WORKSPACE_REPOSITORY_PORT } from "../ports/workspace-repository.port";
 

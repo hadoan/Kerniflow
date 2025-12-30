@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { MenuContribution, MenuItem, MenuOverrides } from "@kerniflow/contracts";
+import type { MenuContribution, MenuItem, MenuOverrides } from "@corely/contracts";
 import { TenantEntitlementService } from "./tenant-entitlement.service";
 import { APP_REGISTRY_TOKEN, type AppRegistryPort } from "../ports/app-registry.port";
 import {

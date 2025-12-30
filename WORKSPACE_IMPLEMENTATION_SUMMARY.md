@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully implemented the complete **Workspace & Legal Entity** feature for Kerniflow, including:
+Successfully implemented the complete **Workspace & Legal Entity** feature for Corely, including:
 
 - Backend API with full CRUD operations
 - Prisma database schema with normalized LegalEntity separation

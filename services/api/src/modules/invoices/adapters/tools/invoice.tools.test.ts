@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { buildInvoiceTools } from "./invoice.tools";
 import { InvoicesApplication } from "../../application/invoices.application";
-import { NotFoundError, err, ok } from "@kerniflow/kernel";
+import { NotFoundError, err, ok } from "@corely/kernel";
 
 const invoice = {
   id: "inv-1",

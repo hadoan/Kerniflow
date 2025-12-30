@@ -1,6 +1,6 @@
 import { describe, beforeEach, it, expect, vi } from "vitest";
 import { Test } from "@nestjs/testing";
-import { EnvModule } from "@kerniflow/config";
+import { EnvModule } from "@corely/config";
 import { WorkflowQueueClient } from "../workflow-queue.client";
 
 // Mock bullmq so we don't open real connections

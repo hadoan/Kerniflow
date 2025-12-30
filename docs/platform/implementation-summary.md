@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes the implementation of the Platform module (Apps + Templates + Packs) system for Kerniflow.
+This document summarizes the implementation of the Platform module (Apps + Templates + Packs) system for Corely.
 
 ## Status: Backend Foundation Complete ✅
 

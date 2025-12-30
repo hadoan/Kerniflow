@@ -7,7 +7,7 @@ import {
   CustomFieldDefinitionRepository,
   EntityLayoutRepository,
   CustomFieldIndexRepository,
-} from "@kerniflow/data";
+} from "@corely/data";
 import { IdentityModule } from "../identity/identity.module";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 

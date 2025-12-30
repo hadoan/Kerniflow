@@ -4,7 +4,7 @@ import { DEPackV1 } from "../jurisdictions/de-pack.v1";
 import { InMemoryTaxProfileRepo } from "../../../testkit/fakes/in-memory-tax-profile-repo";
 import { InMemoryTaxCodeRepo } from "../../../testkit/fakes/in-memory-tax-code-repo";
 import { InMemoryTaxRateRepo } from "../../../testkit/fakes/in-memory-tax-rate-repo";
-import type { CalculateTaxInput } from "@kerniflow/contracts";
+import type { CalculateTaxInput } from "@corely/contracts";
 
 describe("TaxEngineService", () => {
   let taxEngine: TaxEngineService;

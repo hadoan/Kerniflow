@@ -1,5 +1,5 @@
 import { useAuth } from "@/lib/auth-provider";
-import type { RolePermissionState } from "@kerniflow/contracts";
+import type { RolePermissionState } from "@corely/contracts";
 
 export const useActiveRoleId = () => {
   const { user } = useAuth();
