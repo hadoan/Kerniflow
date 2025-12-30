@@ -96,6 +96,7 @@ export class EnvModule {
         // Provide safe defaults for test environment
         NODE_ENV: "test",
         DATABASE_URL: "postgresql://test:test@localhost:5432/test",
+        REDIS_URL: "redis://localhost:6379",
         ...overrides,
       },
     });

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
-import React, { useState } from "react";
+import React, { useState, act } from "react";
 import { describe, it, expect } from "vitest";
-import { act } from "react-dom/test-utils";
 import { createRoot } from "react-dom/client";
 import type { PermissionGroup } from "@kerniflow/contracts";
 import { RolePermissionsEditor } from "./RolePermissionsEditor";

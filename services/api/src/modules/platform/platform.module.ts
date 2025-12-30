@@ -1,5 +1,6 @@
 import { Module, OnModuleInit } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule, PrismaAuditAdapter } from "@kerniflow/data";
+import { AUDIT_PORT } from "@kerniflow/kernel";
 
 // Infrastructure
 import { AppRegistry } from "./infrastructure/registries/app-registry";
@@ -10,6 +11,8 @@ import { PrismaTenantAppInstallRepositoryAdapter } from "./infrastructure/adapte
 import { PrismaTenantTemplateInstallRepositoryAdapter } from "./infrastructure/adapters/prisma-tenant-template-install-repository.adapter";
 import { PrismaTenantMenuOverrideRepositoryAdapter } from "./infrastructure/adapters/prisma-tenant-menu-override-repository.adapter";
 import { PrismaSeededRecordMetaRepositoryAdapter } from "./infrastructure/adapters/prisma-seeded-record-meta-repository.adapter";
+import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
+import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 
 // Application Services
 import { TenantEntitlementService } from "./application/services/tenant-entitlement.service";
@@ -84,6 +87,16 @@ import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-
     {
       provide: SEEDED_RECORD_META_REPOSITORY_TOKEN,
       useExisting: PrismaSeededRecordMetaRepositoryAdapter,
+    },
+    PrismaAuditAdapter,
+    {
+      provide: AUDIT_PORT,
+      useExisting: PrismaAuditAdapter,
+    },
+    SystemIdGenerator,
+    {
+      provide: ID_GENERATOR_TOKEN,
+      useExisting: SystemIdGenerator,
     },
 
     // Application Services

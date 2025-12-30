@@ -20,7 +20,7 @@ export const envSchema = z.object({
   // ============================================================================
   // REDIS CACHE & QUEUE
   // ============================================================================
-  REDIS_URL: z.string().url("REDIS_URL must be a valid Redis connection string").optional(),
+  REDIS_URL: z.string().url("REDIS_URL must be a valid Redis connection string"),
 
   // ============================================================================
   // PORTS

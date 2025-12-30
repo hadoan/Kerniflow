@@ -53,6 +53,10 @@ export class ProblemDetailsExceptionFilter implements ExceptionFilter {
     tenantId: string | undefined,
     request: Request
   ) {
+    if (process.env.NODE_ENV === "test" || process.env.KERNIFLOW_TEST === "true") {
+      return;
+    }
+
     const logContext = {
       traceId: problemDetails.traceId,
       tenantId,

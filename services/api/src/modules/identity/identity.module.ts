@@ -1,7 +1,8 @@
 /* eslint @typescript-eslint/no-explicit-any: "error" */
 import { Module } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { DataModule } from "@kerniflow/data";
+import { DataModule, PrismaOutboxAdapter } from "@kerniflow/data";
+import { OUTBOX_PORT } from "@kerniflow/kernel";
 
 // Controllers
 import { AuthController } from "./adapters/http/auth.controller";
@@ -30,7 +31,6 @@ import { JwtTokenService } from "./infrastructure/security/jwt.token-service";
 // Ports / Tokens
 import { PASSWORD_HASHER_TOKEN } from "./application/ports/password-hasher.port";
 import { TOKEN_SERVICE_TOKEN } from "./application/ports/token-service.port";
-import { OUTBOX_PORT } from "./application/ports/outbox.port";
 import { AUDIT_PORT_TOKEN } from "./application/ports/audit.port";
 import { PrismaAuditRepository } from "./infrastructure/adapters/prisma-audit-repository.adapter";
 import { PrismaMembershipRepository } from "./infrastructure/adapters/prisma-membership-repository.adapter";
@@ -67,6 +67,7 @@ import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-rol
     PrismaRoleRepository,
     PrismaRolePermissionGrantRepository,
     PrismaAuditRepository,
+    PrismaOutboxAdapter,
     AuthGuard,
     RbacGuard,
 
@@ -118,6 +119,10 @@ import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-rol
       useExisting: PrismaAuditRepository,
     },
     {
+      provide: OUTBOX_PORT,
+      useExisting: PrismaOutboxAdapter,
+    },
+    {
       provide: PERMISSION_CATALOG_PORT,
       useExisting: PermissionCatalogRegistry,
     },
@@ -158,7 +163,6 @@ import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-rol
     ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN,
     PASSWORD_HASHER_TOKEN,
     TOKEN_SERVICE_TOKEN,
-    OUTBOX_PORT,
     AUDIT_PORT_TOKEN,
     PERMISSION_CATALOG_PORT,
     SignUpUseCase,

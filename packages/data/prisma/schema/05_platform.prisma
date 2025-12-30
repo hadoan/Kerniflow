@@ -23,7 +23,6 @@ model AppCatalog {
 
   @@index([tier])
   @@index([updatedAt])
-  @@map("app_catalog")
 }
 
 // =============================================================================
@@ -47,10 +46,9 @@ model TenantAppInstall {
   // Relations
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@unique([tenantId, appId], map: "tenant_app_install_tenant_id_app_id_key")
-  @@index([tenantId, enabled], map: "tenant_app_install_tenant_id_enabled_idx")
-  @@index([tenantId, createdAt], map: "tenant_app_install_tenant_id_created_at_idx")
-  @@map("tenant_app_install")
+  @@unique([tenantId, appId])
+  @@index([tenantId, enabled])
+  @@index([tenantId, createdAt])
 }
 
 // =============================================================================
@@ -71,7 +69,6 @@ model TemplateCatalog {
 
   @@index([category])
   @@index([updatedAt])
-  @@map("template_catalog")
 }
 
 // =============================================================================
@@ -94,9 +91,8 @@ model TenantTemplateInstall {
   // Relations
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@unique([tenantId, templateId], map: "tenant_template_install_tenant_id_template_id_key")
-  @@index([tenantId, createdAt], map: "tenant_template_install_tenant_id_created_at_idx")
-  @@map("tenant_template_install")
+  @@unique([tenantId, templateId])
+  @@index([tenantId, createdAt])
 }
 
 // =============================================================================
@@ -113,7 +109,6 @@ model PackCatalog {
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([updatedAt])
-  @@map("pack_catalog")
 }
 
 // =============================================================================
@@ -126,8 +121,6 @@ enum PackInstallStatus {
   RUNNING
   FAILED
   COMPLETED
-
-  @@map("pack_install_status")
 }
 
 model TenantPackInstall {
@@ -148,10 +141,9 @@ model TenantPackInstall {
   // Relations
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@unique([tenantId, packId, version], map: "tenant_pack_install_tenant_id_pack_id_version_key")
-  @@index([tenantId, status], map: "tenant_pack_install_tenant_id_status_idx")
-  @@index([tenantId, createdAt], map: "tenant_pack_install_tenant_id_created_at_idx")
-  @@map("tenant_pack_install")
+  @@unique([tenantId, packId, version])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
 }
 
 // =============================================================================
@@ -161,8 +153,6 @@ model TenantPackInstall {
 enum MenuScope {
   WEB
   POS
-
-  @@map("menu_scope")
 }
 
 model TenantMenuOverride {
@@ -177,9 +167,8 @@ model TenantMenuOverride {
   // Relations
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@unique([tenantId, scope], map: "tenant_menu_override_tenant_id_scope_key")
-  @@index([tenantId], map: "tenant_menu_override_tenant_id_idx")
-  @@map("tenant_menu_override")
+  @@unique([tenantId, scope])
+  @@index([tenantId])
 }
 
 // =============================================================================
@@ -204,8 +193,7 @@ model SeededRecordMeta {
   // Relations
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@unique([tenantId, targetTable, targetId], map: "seeded_record_meta_tenant_id_target_table_target_id_key")
-  @@index([tenantId, sourceTemplateId], map: "seeded_record_meta_tenant_id_source_template_id_idx")
-  @@index([tenantId, targetTable, isCustomized], map: "seeded_record_meta_tenant_id_target_table_is_customized_idx")
-  @@map("seeded_record_meta")
+  @@unique([tenantId, targetTable, targetId])
+  @@index([tenantId, sourceTemplateId])
+  @@index([tenantId, targetTable, isCustomized])
 }

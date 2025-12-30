@@ -7,8 +7,14 @@ import { config } from "dotenv";
  * Production environments should NOT load .env files - they use injected process.env.
  */
 function isProductionEnvironment(): boolean {
-  // Check if NODE_ENV is production or test (test environments use injected env vars)
-  if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
+  // Always allow .env loading in development and test environments
+  const nodeEnv = process.env.NODE_ENV;
+  if (nodeEnv === "development" || nodeEnv === "test") {
+    return false;
+  }
+
+  // Check if NODE_ENV is production
+  if (nodeEnv === "production") {
     return true;
   }
 

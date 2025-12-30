@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Query } from "@nestjs/common";
 import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
-import { RbacGuard } from "../../../identity/adapters/http/rbac.guard";
-import { RequirePermission } from "../../../identity/adapters/http/rbac.decorator";
+import { RbacGuard, RequirePermission } from "../../../identity/adapters/http/rbac.guard";
 import {
   CurrentTenantId,
   CurrentUserId,

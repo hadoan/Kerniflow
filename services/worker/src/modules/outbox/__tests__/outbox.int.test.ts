@@ -71,11 +71,14 @@ describe("Outbox reliability (worker + Postgres)", () => {
     });
     const [event] = await repo.fetchPending(5);
 
+    // Call markFailed three times to reach maxAttempts and mark as FAILED
+    await repo.markFailed(event.id, "network error");
+    await repo.markFailed(event.id, "network error");
     await repo.markFailed(event.id, "network error");
 
     const stored = await prisma.outboxEvent.findUniqueOrThrow({ where: { id: event.id } });
     expect(stored.status).toBe("FAILED");
-    expect(stored.attempts).toBeGreaterThanOrEqual(1);
+    expect(stored.attempts).toBeGreaterThanOrEqual(3);
   });
 
   it("only surfaces events whose availableAt is due", async () => {
