@@ -32,7 +32,6 @@
     "dist"
   ],
   "dependencies": {
-    "@kerniflow/contracts": "workspace:*",
     "date-fns": "catalog:",
     "date-fns-tz": "catalog:"
   },

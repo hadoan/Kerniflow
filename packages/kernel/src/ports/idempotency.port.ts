@@ -6,4 +6,4 @@ export interface IdempotencyPort {
   run<T>(key: string, fn: () => Promise<T>): Promise<T>;
 }
 
-export { IDEMPOTENCY_PORT } from "@kerniflow/contracts";
+export const IDEMPOTENCY_PORT = "kernel/idempotency-port";

@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
+import { AUDIT_PORT } from "@kerniflow/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
+import { IdentityModule } from "../identity";
 import { SalesController } from "./adapters/http/sales.controller";
 import { SalesApplication } from "./application/sales.application";
 import { PrismaQuoteRepositoryAdapter } from "./infrastructure/adapters/prisma-quote-repository.adapter";
@@ -61,7 +63,7 @@ import {
 } from "./application/use-cases/settings.usecases";
 
 @Module({
-  imports: [DataModule, KernelModule, PartyModule, AccountingModule],
+  imports: [DataModule, KernelModule, PartyModule, AccountingModule, IdentityModule],
   controllers: [SalesController],
   providers: [
     PrismaQuoteRepositoryAdapter,

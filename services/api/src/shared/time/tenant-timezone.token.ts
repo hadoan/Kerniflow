@@ -1,1 +1,1 @@
-export { TENANT_TIMEZONE_PORT } from "@kerniflow/contracts";
+export const TENANT_TIMEZONE_PORT = "api/tenant-timezone-port";

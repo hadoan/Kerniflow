@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Optional } from "@nestjs/common";
 import { PrismaService } from "@kerniflow/data";
 
 export type IdempotencyStatus = "IN_PROGRESS" | "COMPLETED" | "FAILED";
@@ -16,7 +16,7 @@ const LOCK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 export class IdempotencyService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly now: () => Date = () => new Date()
+    @Optional() private readonly now: () => Date = () => new Date()
   ) {}
 
   async startOrReplay(params: {

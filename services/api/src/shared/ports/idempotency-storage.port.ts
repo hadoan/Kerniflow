@@ -13,4 +13,4 @@ export interface IdempotencyStoragePort {
   ): Promise<void>;
 }
 
-export { IDEMPOTENCY_STORAGE_PORT_TOKEN } from "@kerniflow/contracts";
+export const IDEMPOTENCY_STORAGE_PORT_TOKEN = "api/idempotency-storage-port";

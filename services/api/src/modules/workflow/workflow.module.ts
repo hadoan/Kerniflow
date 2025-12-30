@@ -12,5 +12,6 @@ import { WorkflowQueueClient } from "./infrastructure/workflow-queue.client";
     WorkflowTasksController,
   ],
   providers: [WorkflowService, WorkflowQueueClient],
+  exports: [WorkflowService],
 })
 export class WorkflowModule {}

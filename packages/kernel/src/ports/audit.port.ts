@@ -14,4 +14,4 @@ export interface AuditPort {
   ): Promise<void>;
 }
 
-export { AUDIT_PORT } from "@kerniflow/contracts";
+export const AUDIT_PORT = "kernel/audit-port";

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
+import { IdentityModule } from "../identity";
 import { EngagementController } from "./adapters/http/engagement.controller";
 import { PrismaCheckInRepositoryAdapter } from "./infrastructure/adapters/prisma-checkin-repository.adapter";
 import { PrismaLoyaltyRepositoryAdapter } from "./infrastructure/adapters/prisma-loyalty-repository.adapter";
@@ -21,7 +22,7 @@ import { EngagementApplication } from "./application/engagement.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 
 @Module({
-  imports: [DataModule],
+  imports: [DataModule, IdentityModule],
   controllers: [EngagementController],
   providers: [
     PrismaCheckInRepositoryAdapter,

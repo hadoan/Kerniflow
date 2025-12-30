@@ -30,7 +30,6 @@ export * from "./approvals";
 export * from "./identity";
 export * from "./errors";
 export * from "./platform";
-export * from "./di/tokens";
 
 export const CONTRACTS_HELLO = "Kerniflow contracts loaded ✅";
 
