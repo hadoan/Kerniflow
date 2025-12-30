@@ -5,6 +5,9 @@
 
 set -e  # Exit on error
 
+# Set PATH early
+export PATH="/opt/homebrew/bin:/usr/bin:$PATH"
+
 # Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -27,7 +30,7 @@ if [ -z "$POSTGRES_RUNNING" ] || [ -z "$REDIS_RUNNING" ]; then
   sleep 8
 
   echo -e "${YELLOW}Running migrations...${NC}"
-  export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow_test?schema=public"
+  export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow?schema=public"
   pnpm --filter @kerniflow/data exec prisma migrate deploy
 else
   echo -e "${GREEN}✓ Services already running${NC}"
@@ -46,8 +49,7 @@ fi
 
 # Run tests
 echo -e "\n${YELLOW}Running tests...${NC}"
-export PATH="/opt/homebrew/bin:/usr/bin:$PATH"
-export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow_test?schema=public"
+export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow?schema=public"
 export REDIS_URL="redis://localhost:6380"
 
 pnpm test:int

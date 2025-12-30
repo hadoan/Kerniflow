@@ -5,6 +5,9 @@
 
 set -e  # Exit on error
 
+# Set PATH early for all commands
+export PATH="/opt/homebrew/bin:/usr/bin:$PATH"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -75,9 +78,9 @@ fi
 
 # Step 3: Run migrations
 echo -e "${YELLOW}[3/5] Running database migrations...${NC}"
-export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow_test?schema=public"
+export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow?schema=public"
 
-if pnpm --filter @kerniflow/data exec prisma migrate deploy 2>/dev/null; then
+if pnpm --filter @kerniflow/data exec prisma migrate deploy; then
   echo -e "${GREEN}      ✓ Migrations applied${NC}"
 else
   echo -e "${RED}      ✗ Migration failed${NC}"
@@ -102,7 +105,6 @@ echo -e "${GREEN}      ✓ Integration test suite ready${NC}"
 
 # Step 5: Run tests
 echo -e "${YELLOW}[5/5] Running DI integration tests...${NC}"
-export PATH="/opt/homebrew/bin:/usr/bin:$PATH"
 export REDIS_URL="redis://localhost:6380"
 
 echo ""

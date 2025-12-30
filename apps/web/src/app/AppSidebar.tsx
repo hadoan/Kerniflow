@@ -40,7 +40,9 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
 
   // Group server menu items by section
   const menuSections = useMemo(() => {
-    if (!serverMenu?.items) {return null;}
+    if (!serverMenu?.items) {
+      return null;
+    }
 
     const sections: Record<string, typeof serverMenu.items> = {};
     serverMenu.items.forEach((item) => {
@@ -242,7 +244,10 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
                 {(() => {
                   const userName = (user?.name ?? "").trim();
                   const userInitials = userName
-                    ? userName.split(/\s+/).map((n) => n[0]).join("")
+                    ? userName
+                        .split(/\s+/)
+                        .map((n) => n[0])
+                        .join("")
                     : "?";
 
                   return (
@@ -253,7 +258,7 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
                 })()}
                 <div className="flex-1 text-left">
                   <div className="text-sm font-medium text-sidebar-foreground truncate">
-                    {user.name}
+                    {user?.name ?? "Unknown"}
                   </div>
                   <div className="text-xs text-muted-foreground truncate">
                     {activeWorkspace?.name || ""}
