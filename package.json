@@ -28,6 +28,7 @@
     "lint:fix": "eslint . --fix",
     "arch:check": "node scripts/architecture-check.mjs",
     "check": "pnpm lint && pnpm typecheck",
+    "catalog:sync": "pnpm --filter @kerniflow/api exec tsx src/scripts/catalog-sync.ts",
     "e2e:api:up": "docker compose -f docker-compose.e2e.yml up -d api",
     "e2e:up": "docker compose -f docker-compose.e2e.yml up -d --build",
     "e2e:down": "docker compose -f docker-compose.e2e.yml down -v",
