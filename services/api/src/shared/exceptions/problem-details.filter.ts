@@ -19,11 +19,6 @@ import { ExceptionToProblemDetailsMapper } from "./exception-to-problem-details.
 @Catch()
 export class ProblemDetailsExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(ProblemDetailsExceptionFilter.name);
-  private readonly isProduction: boolean;
-
-  constructor() {
-    this.isProduction = process.env.NODE_ENV === "production";
-  }
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -38,7 +33,8 @@ export class ProblemDetailsExceptionFilter implements ExceptionFilter {
     const tenantId = (request as any).tenantId || (request as any).user?.tenantId;
 
     // Map exception to ProblemDetails
-    const mapper = new ExceptionToProblemDetailsMapper(traceId, instance, this.isProduction);
+    const isProduction = process.env.NODE_ENV === "production";
+    const mapper = new ExceptionToProblemDetailsMapper(traceId, instance, isProduction);
     const problemDetails = mapper.map(exception);
 
     // Log the error with appropriate level

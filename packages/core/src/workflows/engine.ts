@@ -1,4 +1,4 @@
-import { createMachine } from "xstate";
+import { createMachine, initialTransition, transition as xstateTransition } from "xstate";
 import type { AnyEventObject, StateMachine } from "xstate";
 import type {
   WorkflowActionSpec,
@@ -109,7 +109,7 @@ export function getInitialSnapshot(
   inputContext?: Record<string, unknown>
 ): WorkflowSnapshot {
   const machine = buildWorkflowMachine(spec);
-  const snapshot = machine.getInitialSnapshot();
+  const [snapshot] = initialTransition(machine);
   const mergedContext = {
     ...(snapshot.context as Record<string, unknown>),
     ...(inputContext ?? {}),
@@ -160,7 +160,7 @@ function applyAssignActions(
 }
 
 function normalizeSnapshot(machine: StateMachine<any, AnyEventObject>, snapshot: WorkflowSnapshot) {
-  const base = machine.getInitialSnapshot();
+  const [base] = initialTransition(machine);
 
   return {
     ...base,
@@ -180,7 +180,9 @@ export function applyWorkflowEvents(
   const actions: WorkflowActionSpec[] = [];
 
   for (const event of events) {
-    const next = machine.transition(current, event);
+    const [next] = xstateTransition(machine, current, event);
+    const transitionData = machine.getTransitionData(current, event);
+    const eventActions = transitionData.flatMap((transition) => transition.actions ?? []);
 
     if (next.changed) {
       transitions.push({
@@ -190,15 +192,15 @@ export function applyWorkflowEvents(
       });
     }
 
-    if (next.actions?.length) {
-      actions.push(...(next.actions as WorkflowActionSpec[]));
+    if (eventActions.length) {
+      actions.push(...(eventActions as WorkflowActionSpec[]));
     }
 
     current = {
       ...next,
       context: applyAssignActions(
         (next.context ?? {}) as Record<string, unknown>,
-        next.actions as WorkflowActionSpec[]
+        eventActions as WorkflowActionSpec[]
       ),
     } as typeof next;
   }

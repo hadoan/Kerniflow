@@ -49,6 +49,7 @@ catalog:
   lint-staged: ^15.2.10
   msw: ^2.6.6
   nanoid: ^5.1.6
+  neverthrow: ^8.2.0
   pg: ^8.13.1
   postcss: ^8.5.6
   prettier: ^3.3.3

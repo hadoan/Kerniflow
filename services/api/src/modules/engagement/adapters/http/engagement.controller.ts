@@ -13,16 +13,16 @@ import {
   ListLoyaltyLedgerInputSchema,
   UpdateEngagementSettingsInputSchema,
 } from "@kerniflow/contracts";
-import { JwtAuthGuard } from "../../../identity/adapters/http/guards/jwt-auth.guard";
+import { AuthGuard } from "../../../identity";
 import { EngagementApplication } from "../../application/engagement.application";
-import { toHttpException } from "../../../shared/http/usecase-error.mapper";
+import { toHttpException } from "../../../../shared/http/usecase-error.mapper";
 
 type RequestWithUser = Request & { user?: { workspaceId?: string; userId?: string } };
 
 @ApiTags("Engagement")
 @ApiBearerAuth()
 @Controller("engagement")
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class EngagementController {
   constructor(private readonly app: EngagementApplication) {}
 

@@ -1,6 +1,13 @@
+import path from "path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@kerniflow/api-client": path.resolve(__dirname, "../../packages/api-client/src"),
+    },
+  },
   test: {
     name: "web",
     environment: "node",

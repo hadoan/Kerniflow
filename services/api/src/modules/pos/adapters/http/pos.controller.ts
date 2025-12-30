@@ -16,7 +16,7 @@ import type {
   GetCatalogSnapshotInput,
   GetCatalogSnapshotOutput,
 } from "@kerniflow/contracts";
-import { JwtAuthGuard } from "../../../identity/adapters/http/guards/jwt-auth.guard";
+import { AuthGuard } from "../../../identity";
 import { CreateRegisterUseCase } from "../../application/use-cases/create-register.usecase";
 import { ListRegistersUseCase } from "../../application/use-cases/list-registers.usecase";
 import { OpenShiftUseCase } from "../../application/use-cases/open-shift.usecase";
@@ -28,7 +28,7 @@ import { GetCatalogSnapshotUseCase } from "../../application/use-cases/get-catal
 @ApiTags("POS")
 @ApiBearerAuth()
 @Controller("pos")
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class PosController {
   constructor(
     private createRegister: CreateRegisterUseCase,

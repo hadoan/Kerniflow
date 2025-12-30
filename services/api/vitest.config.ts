@@ -12,6 +12,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@": path.resolve(__dirname, "src"),
       "@shared": path.resolve(__dirname, "src/shared"),
       "@kerniflow/kernel": path.resolve(__dirname, "../..", "packages/kernel/src"),
       "@kerniflow/testkit": path.resolve(__dirname, "../..", "packages/testkit/src"),

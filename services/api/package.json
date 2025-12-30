@@ -25,6 +25,7 @@
     "express": "5.1.0",
     "jsonwebtoken": "catalog:",
     "nanoid": "catalog:",
+    "neverthrow": "catalog:",
     "pdf-lib": "^1.17.1",
     "playwright": "^1.57.0",
     "reflect-metadata": "catalog:",
