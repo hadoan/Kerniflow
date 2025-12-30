@@ -4,8 +4,7 @@ import { IdentityModule } from "../identity";
 import { CustomersHttpController } from "./adapters/http/customers.controller";
 import { PrismaPartyRepoAdapter } from "./infrastructure/prisma/prisma-party-repo.adapter";
 import { PrismaCustomerQueryAdapter } from "./infrastructure/prisma/prisma-customer-query.adapter";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { PartyApplication } from "./application/party.application";
@@ -20,19 +19,15 @@ import { UnarchiveCustomerUseCase } from "./application/use-cases/unarchive-cust
 import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/update-customer.usecase";
 
 @Module({
-  imports: [DataModule, IdentityModule],
+  imports: [DataModule, KernelModule, IdentityModule],
   controllers: [CustomersHttpController],
   providers: [
     PrismaPartyRepoAdapter,
     PrismaCustomerQueryAdapter,
-    SystemIdGenerator,
-    SystemClock,
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     { provide: CUSTOMER_QUERY_PORT, useExisting: PrismaCustomerQueryAdapter },
     {
       provide: CreateCustomerUseCase,
-      useFactory: (repo: PrismaPartyRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
+      useFactory: (repo: PrismaPartyRepoAdapter, idGen: any, clock: any) =>
         new CreateCustomerUseCase({
           logger: new NestLoggerAdapter(),
           partyRepo: repo,
@@ -43,7 +38,7 @@ import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/u
     },
     {
       provide: UpdateCustomerUseCase,
-      useFactory: (repo: PrismaPartyRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
+      useFactory: (repo: PrismaPartyRepoAdapter, idGen: any, clock: any) =>
         new UpdateCustomerUseCase({
           logger: new NestLoggerAdapter(),
           partyRepo: repo,
@@ -54,7 +49,7 @@ import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/u
     },
     {
       provide: ArchiveCustomerUseCase,
-      useFactory: (repo: PrismaPartyRepoAdapter, clock: SystemClock) =>
+      useFactory: (repo: PrismaPartyRepoAdapter, clock: any) =>
         new ArchiveCustomerUseCase({
           logger: new NestLoggerAdapter(),
           partyRepo: repo,
@@ -64,7 +59,7 @@ import { UpdateCustomerUseCase } from "./application/use-cases/update-customer/u
     },
     {
       provide: UnarchiveCustomerUseCase,
-      useFactory: (repo: PrismaPartyRepoAdapter, clock: SystemClock) =>
+      useFactory: (repo: PrismaPartyRepoAdapter, clock: any) =>
         new UnarchiveCustomerUseCase({
           logger: new NestLoggerAdapter(),
           partyRepo: repo,

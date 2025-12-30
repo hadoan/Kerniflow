@@ -1,6 +1,6 @@
 import { Module, OnModuleInit } from "@nestjs/common";
-import { DataModule, PrismaAuditAdapter } from "@kerniflow/data";
-import { AUDIT_PORT } from "@kerniflow/kernel";
+import { DataModule } from "@kerniflow/data";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 
 // Infrastructure
 import { AppRegistry } from "./infrastructure/registries/app-registry";
@@ -11,8 +11,6 @@ import { PrismaTenantAppInstallRepositoryAdapter } from "./infrastructure/adapte
 import { PrismaTenantTemplateInstallRepositoryAdapter } from "./infrastructure/adapters/prisma-tenant-template-install-repository.adapter";
 import { PrismaTenantMenuOverrideRepositoryAdapter } from "./infrastructure/adapters/prisma-tenant-menu-override-repository.adapter";
 import { PrismaSeededRecordMetaRepositoryAdapter } from "./infrastructure/adapters/prisma-seeded-record-meta-repository.adapter";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 
 // Application Services
 import { TenantEntitlementService } from "./application/services/tenant-entitlement.service";
@@ -46,7 +44,7 @@ import { TENANT_MENU_OVERRIDE_REPOSITORY_TOKEN } from "./application/ports/tenan
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-record-meta-repository.port";
 
 @Module({
-  imports: [DataModule],
+  imports: [DataModule, KernelModule],
   controllers: [PlatformController, MenuController, TemplateController],
   providers: [
     // Infrastructure - Registries
@@ -87,16 +85,6 @@ import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-
     {
       provide: SEEDED_RECORD_META_REPOSITORY_TOKEN,
       useExisting: PrismaSeededRecordMetaRepositoryAdapter,
-    },
-    PrismaAuditAdapter,
-    {
-      provide: AUDIT_PORT,
-      useExisting: PrismaAuditAdapter,
-    },
-    SystemIdGenerator,
-    {
-      provide: ID_GENERATOR_TOKEN,
-      useExisting: SystemIdGenerator,
     },
 
     // Application Services

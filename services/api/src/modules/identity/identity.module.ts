@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { DataModule, PrismaOutboxAdapter } from "@kerniflow/data";
 import { OUTBOX_PORT } from "@kerniflow/kernel";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 
 // Controllers
 import { AuthController } from "./adapters/http/auth.controller";
@@ -10,12 +11,6 @@ import { RolesController } from "./adapters/http/roles.controller";
 import { PermissionsController } from "./adapters/http/permissions.controller";
 
 // Infrastructure adapters
-import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
-import { IDEMPOTENCY_STORAGE_PORT_TOKEN } from "../../shared/ports/idempotency-storage.port";
-import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { SignUpUseCase } from "./application/use-cases/sign-up.usecase";
 import { SignInUseCase } from "./application/use-cases/sign-in.usecase";
 import { RefreshTokenUseCase } from "./application/use-cases/refresh-token.usecase";
@@ -56,7 +51,7 @@ import { GetRolePermissionsUseCase } from "./application/use-cases/get-role-perm
 import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-role-permissions.usecase";
 
 @Module({
-  imports: [DataModule],
+  imports: [DataModule, KernelModule],
   controllers: [AuthController, RolesController, PermissionsController],
   providers: [
     // Repositories - NestJS will auto-inject Prisma adapters based on @Injectable()
@@ -75,10 +70,7 @@ import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-rol
     BcryptPasswordHasher,
     JwtTokenService,
 
-    // System infrastructure
-    SystemClock,
-    SystemIdGenerator,
-    PrismaIdempotencyStorageAdapter,
+    // Reflector
     Reflector,
 
     // Token bindings for DI
@@ -126,15 +118,6 @@ import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-rol
       provide: PERMISSION_CATALOG_PORT,
       useExisting: PermissionCatalogRegistry,
     },
-    {
-      provide: ID_GENERATOR_TOKEN,
-      useExisting: SystemIdGenerator,
-    },
-    {
-      provide: IDEMPOTENCY_STORAGE_PORT_TOKEN,
-      useExisting: PrismaIdempotencyStorageAdapter,
-    },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
 
     // Use Cases
     SignUpUseCase,
@@ -172,8 +155,6 @@ import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-rol
     SwitchTenantUseCase,
     AuthGuard,
     RbacGuard,
-    ID_GENERATOR_TOKEN,
-    IDEMPOTENCY_STORAGE_PORT_TOKEN,
   ],
 })
 export class IdentityModule {}

@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { DataModule, PrismaAuditAdapter } from "@kerniflow/data";
-import { AUDIT_PORT } from "@kerniflow/kernel";
+import { DataModule } from "@kerniflow/data";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 import { SalesController } from "./adapters/http/sales.controller";
 import { SalesApplication } from "./application/sales.application";
 import { PrismaQuoteRepositoryAdapter } from "./infrastructure/adapters/prisma-quote-repository.adapter";
@@ -13,11 +13,8 @@ import { SALES_ORDER_REPOSITORY_PORT } from "./application/ports/order-repositor
 import { SALES_INVOICE_REPOSITORY_PORT } from "./application/ports/invoice-repository.port";
 import { SALES_PAYMENT_REPOSITORY_PORT } from "./application/ports/payment-repository.port";
 import { SALES_SETTINGS_REPOSITORY_PORT } from "./application/ports/settings-repository.port";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
-import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
 import { IDEMPOTENCY_STORAGE_PORT_TOKEN } from "../../shared/ports/idempotency-storage.port";
 import { PartyModule } from "../party";
 import { CUSTOMER_QUERY_PORT } from "../party/application/ports/customer-query.port";
@@ -64,7 +61,7 @@ import {
 } from "./application/use-cases/settings.usecases";
 
 @Module({
-  imports: [DataModule, PartyModule, AccountingModule],
+  imports: [DataModule, KernelModule, PartyModule, AccountingModule],
   controllers: [SalesController],
   providers: [
     PrismaQuoteRepositoryAdapter,
@@ -72,20 +69,12 @@ import {
     PrismaSalesInvoiceRepositoryAdapter,
     PrismaSalesPaymentRepositoryAdapter,
     PrismaSalesSettingsRepositoryAdapter,
-    SystemIdGenerator,
-    SystemClock,
-    PrismaIdempotencyStorageAdapter,
-    PrismaAuditAdapter,
 
     { provide: QUOTE_REPOSITORY_PORT, useExisting: PrismaQuoteRepositoryAdapter },
     { provide: SALES_ORDER_REPOSITORY_PORT, useExisting: PrismaSalesOrderRepositoryAdapter },
     { provide: SALES_INVOICE_REPOSITORY_PORT, useExisting: PrismaSalesInvoiceRepositoryAdapter },
     { provide: SALES_PAYMENT_REPOSITORY_PORT, useExisting: PrismaSalesPaymentRepositoryAdapter },
     { provide: SALES_SETTINGS_REPOSITORY_PORT, useExisting: PrismaSalesSettingsRepositoryAdapter },
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
-    { provide: IDEMPOTENCY_STORAGE_PORT_TOKEN, useExisting: PrismaIdempotencyStorageAdapter },
-    { provide: AUDIT_PORT, useExisting: PrismaAuditAdapter },
 
     {
       provide: CreateQuoteUseCase,

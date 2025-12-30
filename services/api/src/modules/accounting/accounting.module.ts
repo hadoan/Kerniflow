@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 
 // Infrastructure
 import {
@@ -49,18 +50,14 @@ import { AccountingApplication } from "./application/accounting.application";
 import { AccountingController } from "./adapters/http/accounting.controller";
 
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 
 @Module({
-  imports: [DataModule],
+  imports: [DataModule, KernelModule],
   controllers: [AccountingController],
   providers: [
-    // Infrastructure - Kernel services
-    SystemIdGenerator,
-    SystemClock,
+    // Infrastructure - Logging
     NestLoggerAdapter,
 
     // Infrastructure - Repositories
@@ -71,8 +68,6 @@ import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
     PrismaAccountingReportQueryAdapter,
 
     // Ports
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     { provide: ACCOUNTING_SETTINGS_REPO_PORT, useExisting: PrismaAccountingSettingsRepository },
     { provide: LEDGER_ACCOUNT_REPO_PORT, useExisting: PrismaLedgerAccountRepository },
     { provide: JOURNAL_ENTRY_REPO_PORT, useExisting: PrismaJournalEntryRepository },

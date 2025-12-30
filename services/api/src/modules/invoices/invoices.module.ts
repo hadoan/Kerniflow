@@ -3,13 +3,12 @@ import { DataModule } from "@kerniflow/data";
 import { OUTBOX_PORT } from "@kerniflow/kernel";
 import type { OutboxPort } from "@kerniflow/kernel";
 import { chromium } from "playwright";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 import { InvoicesHttpController } from "./adapters/http/invoices.controller";
 import { ResendWebhookController } from "./adapters/webhooks/resend-webhook.controller";
 import { PrismaInvoiceEmailDeliveryRepoAdapter } from "./infrastructure/prisma/prisma-invoice-email-delivery-repo.adapter";
 import { InvoicesApplication } from "./application/invoices.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import {
   INVOICE_NUMBERING_PORT,
   InvoiceNumberingPort,
@@ -41,19 +40,15 @@ import { PlaywrightInvoicePdfRendererAdapter } from "./infrastructure/pdf/playwr
 import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs/gcs-object-storage.adapter";
 
 @Module({
-  imports: [DataModule, IdentityModule, PartyModule, DocumentsModule],
+  imports: [DataModule, KernelModule, IdentityModule, PartyModule, DocumentsModule],
   controllers: [InvoicesHttpController, ResendWebhookController],
   providers: [
     PrismaInvoiceRepoAdapter,
-    SystemIdGenerator,
-    SystemClock,
     PrismaTenantTimeZoneAdapter,
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     { provide: TENANT_TIMEZONE_PORT, useExisting: PrismaTenantTimeZoneAdapter },
     {
       provide: TimeService,
-      useFactory: (clock: SystemClock, tenantTz: PrismaTenantTimeZoneAdapter) =>
+      useFactory: (clock: any, tenantTz: PrismaTenantTimeZoneAdapter) =>
         new TimeService(clock, tenantTz),
       inject: [CLOCK_PORT_TOKEN, TENANT_TIMEZONE_PORT],
     },
@@ -75,8 +70,8 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
       provide: CreateInvoiceUseCase,
       useFactory: (
         repo: PrismaInvoiceRepoAdapter,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         timeService: TimeService,
         customerQuery: CustomerQueryPort
       ) =>
@@ -100,8 +95,8 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
       provide: UpdateInvoiceUseCase,
       useFactory: (
         repo: PrismaInvoiceRepoAdapter,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         customerQuery: CustomerQueryPort
       ) =>
         new UpdateInvoiceUseCase({
@@ -118,7 +113,7 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
       useFactory: (
         repo: PrismaInvoiceRepoAdapter,
         numbering: InvoiceNumberingPort,
-        clock: SystemClock,
+        clock: any,
         customerQuery: CustomerQueryPort
       ) =>
         new FinalizeInvoiceUseCase({
@@ -141,7 +136,7 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
         repo: PrismaInvoiceRepoAdapter,
         deliveryRepo: PrismaInvoiceEmailDeliveryRepoAdapter,
         outbox: OutboxPort,
-        idGen: SystemIdGenerator
+        idGen: any
       ) =>
         new SendInvoiceUseCase({
           logger: new NestLoggerAdapter(),
@@ -159,7 +154,7 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
     },
     {
       provide: RecordPaymentUseCase,
-      useFactory: (repo: PrismaInvoiceRepoAdapter, idGen: SystemIdGenerator, clock: SystemClock) =>
+      useFactory: (repo: PrismaInvoiceRepoAdapter, idGen: any, clock: any) =>
         new RecordPaymentUseCase({
           logger: new NestLoggerAdapter(),
           invoiceRepo: repo,
@@ -170,7 +165,7 @@ import { GcsObjectStorageAdapter } from "../documents/infrastructure/storage/gcs
     },
     {
       provide: CancelInvoiceUseCase,
-      useFactory: (repo: PrismaInvoiceRepoAdapter, clock: SystemClock) =>
+      useFactory: (repo: PrismaInvoiceRepoAdapter, clock: any) =>
         new CancelInvoiceUseCase({
           logger: new NestLoggerAdapter(),
           invoiceRepo: repo,

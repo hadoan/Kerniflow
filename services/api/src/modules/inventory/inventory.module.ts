@@ -1,19 +1,17 @@
 import { Module } from "@nestjs/common";
-import { DataModule, PrismaAuditAdapter } from "@kerniflow/data";
+import { DataModule } from "@kerniflow/data";
 import { InventoryController } from "./adapters/http/inventory.controller";
 import { InventoryApplication } from "./application/inventory.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
-import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
+import { AUDIT_PORT, AuditPort } from "@kerniflow/kernel";
+import { KernelModule } from "../../shared/kernel/kernel.module";
+import { IdentityModule } from "../identity";
 import {
   IdempotencyStoragePort,
   IDEMPOTENCY_STORAGE_PORT_TOKEN,
 } from "../../shared/ports/idempotency-storage.port";
-import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
-import { AUDIT_PORT, AuditPort } from "@kerniflow/kernel";
-import { IdentityModule } from "../identity";
+import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
+import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 
 import { PrismaProductRepository } from "./infrastructure/adapters/prisma-product-repository.adapter";
 import { PrismaWarehouseRepository } from "./infrastructure/adapters/prisma-warehouse-repository.adapter";
@@ -76,7 +74,7 @@ import {
 } from "./application/use-cases/reorder.usecases";
 
 @Module({
-  imports: [DataModule, IdentityModule],
+  imports: [DataModule, KernelModule, IdentityModule],
   controllers: [InventoryController],
   providers: [
     PrismaProductRepository,
@@ -87,10 +85,6 @@ import {
     PrismaStockReservationRepository,
     PrismaReorderPolicyRepository,
     PrismaInventorySettingsRepository,
-    PrismaAuditAdapter,
-    PrismaIdempotencyStorageAdapter,
-    SystemIdGenerator,
-    SystemClock,
     { provide: PRODUCT_REPO, useExisting: PrismaProductRepository },
     { provide: WAREHOUSE_REPO, useExisting: PrismaWarehouseRepository },
     { provide: LOCATION_REPO, useExisting: PrismaLocationRepository },
@@ -99,17 +93,13 @@ import {
     { provide: STOCK_RESERVATION_REPO, useExisting: PrismaStockReservationRepository },
     { provide: REORDER_POLICY_REPO, useExisting: PrismaReorderPolicyRepository },
     { provide: INVENTORY_SETTINGS_REPO, useExisting: PrismaInventorySettingsRepository },
-    { provide: AUDIT_PORT, useExisting: PrismaAuditAdapter },
-    { provide: IDEMPOTENCY_STORAGE_PORT_TOKEN, useExisting: PrismaIdempotencyStorageAdapter },
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     {
       provide: CreateProductUseCase,
       useFactory: (
         repo: PrismaProductRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new CreateProductUseCase({
@@ -133,8 +123,8 @@ import {
       useFactory: (
         repo: PrismaProductRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new UpdateProductUseCase({
@@ -158,8 +148,8 @@ import {
       useFactory: (
         repo: PrismaProductRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new ActivateProductUseCase({
@@ -183,8 +173,8 @@ import {
       useFactory: (
         repo: PrismaProductRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new DeactivateProductUseCase({
@@ -208,8 +198,8 @@ import {
       useFactory: (
         repo: PrismaProductRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new GetProductUseCase({
@@ -233,8 +223,8 @@ import {
       useFactory: (
         repo: PrismaProductRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new ListProductsUseCase({
@@ -259,8 +249,8 @@ import {
         repo: PrismaWarehouseRepository,
         locationRepo: PrismaLocationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new CreateWarehouseUseCase({
@@ -287,8 +277,8 @@ import {
         repo: PrismaWarehouseRepository,
         locationRepo: PrismaLocationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new UpdateWarehouseUseCase({
@@ -315,8 +305,8 @@ import {
         repo: PrismaWarehouseRepository,
         locationRepo: PrismaLocationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new GetWarehouseUseCase({
@@ -343,8 +333,8 @@ import {
         repo: PrismaWarehouseRepository,
         locationRepo: PrismaLocationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new ListWarehousesUseCase({
@@ -371,8 +361,8 @@ import {
         repo: PrismaLocationRepository,
         warehouseRepo: PrismaWarehouseRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new CreateLocationUseCase({
@@ -399,8 +389,8 @@ import {
         repo: PrismaLocationRepository,
         warehouseRepo: PrismaWarehouseRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new UpdateLocationUseCase({
@@ -427,8 +417,8 @@ import {
         repo: PrismaLocationRepository,
         warehouseRepo: PrismaWarehouseRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new ListLocationsUseCase({
@@ -460,8 +450,8 @@ import {
         reservationRepo: PrismaStockReservationRepository,
         settingsRepo: PrismaInventorySettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new CreateInventoryDocumentUseCase({
@@ -503,8 +493,8 @@ import {
         reservationRepo: PrismaStockReservationRepository,
         settingsRepo: PrismaInventorySettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new UpdateInventoryDocumentUseCase({
@@ -546,8 +536,8 @@ import {
         reservationRepo: PrismaStockReservationRepository,
         settingsRepo: PrismaInventorySettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new ConfirmInventoryDocumentUseCase({
@@ -589,8 +579,8 @@ import {
         reservationRepo: PrismaStockReservationRepository,
         settingsRepo: PrismaInventorySettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new PostInventoryDocumentUseCase({
@@ -632,8 +622,8 @@ import {
         reservationRepo: PrismaStockReservationRepository,
         settingsRepo: PrismaInventorySettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new CancelInventoryDocumentUseCase({
@@ -675,8 +665,8 @@ import {
         reservationRepo: PrismaStockReservationRepository,
         settingsRepo: PrismaInventorySettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new GetInventoryDocumentUseCase({
@@ -718,8 +708,8 @@ import {
         reservationRepo: PrismaStockReservationRepository,
         settingsRepo: PrismaInventorySettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new ListInventoryDocumentsUseCase({
@@ -820,8 +810,8 @@ import {
         moveRepo: PrismaStockMoveRepository,
         reservationRepo: PrismaStockReservationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new ListReorderPoliciesUseCase({
@@ -860,8 +850,8 @@ import {
         moveRepo: PrismaStockMoveRepository,
         reservationRepo: PrismaStockReservationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new CreateReorderPolicyUseCase({
@@ -900,8 +890,8 @@ import {
         moveRepo: PrismaStockMoveRepository,
         reservationRepo: PrismaStockReservationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new UpdateReorderPolicyUseCase({
@@ -940,8 +930,8 @@ import {
         moveRepo: PrismaStockMoveRepository,
         reservationRepo: PrismaStockReservationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new GetReorderSuggestionsUseCase({
@@ -980,8 +970,8 @@ import {
         moveRepo: PrismaStockMoveRepository,
         reservationRepo: PrismaStockReservationRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         audit: AuditPort
       ) =>
         new GetLowStockUseCase({

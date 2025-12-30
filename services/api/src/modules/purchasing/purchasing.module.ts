@@ -3,16 +3,14 @@ import { DataModule, PrismaAuditAdapter } from "@kerniflow/data";
 import { PurchasingController } from "./adapters/http/purchasing.controller";
 import { PurchasingApplication } from "./application/purchasing.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
-import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
+import { AUDIT_PORT, AuditPort } from "@kerniflow/kernel";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 import {
   IdempotencyStoragePort,
   IDEMPOTENCY_STORAGE_PORT_TOKEN,
 } from "../../shared/ports/idempotency-storage.port";
-import { PrismaIdempotencyStorageAdapter } from "../../shared/infrastructure/persistence/prisma-idempotency-storage.adapter";
-import { AUDIT_PORT, AuditPort } from "@kerniflow/kernel";
+import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
+import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { AccountingModule } from "../accounting";
 import { AccountingApplication } from "../accounting/application/accounting.application";
 import { IdentityModule } from "../identity";
@@ -66,7 +64,7 @@ import {
 import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases";
 
 @Module({
-  imports: [DataModule, IdentityModule, AccountingModule],
+  imports: [DataModule, KernelModule, IdentityModule, AccountingModule],
   controllers: [PurchasingController],
   providers: [
     PrismaPurchaseOrderRepository,
@@ -75,10 +73,6 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
     PrismaPurchasingSettingsRepository,
     PrismaPurchasingAccountMappingRepository,
     PrismaSupplierQueryAdapter,
-    PrismaAuditAdapter,
-    PrismaIdempotencyStorageAdapter,
-    SystemIdGenerator,
-    SystemClock,
     { provide: PURCHASE_ORDER_REPO, useExisting: PrismaPurchaseOrderRepository },
     { provide: VENDOR_BILL_REPO, useExisting: PrismaVendorBillRepository },
     { provide: BILL_PAYMENT_REPO, useExisting: PrismaBillPaymentRepository },
@@ -88,18 +82,14 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
       useExisting: PrismaPurchasingAccountMappingRepository,
     },
     { provide: SUPPLIER_QUERY_PORT, useExisting: PrismaSupplierQueryAdapter },
-    { provide: AUDIT_PORT, useExisting: PrismaAuditAdapter },
-    { provide: IDEMPOTENCY_STORAGE_PORT_TOKEN, useExisting: PrismaIdempotencyStorageAdapter },
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     {
       provide: CreatePurchaseOrderUseCase,
       useFactory: (
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -129,8 +119,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -160,8 +150,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -191,8 +181,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -222,8 +212,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -253,8 +243,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -284,8 +274,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -315,8 +305,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -346,8 +336,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         repo: PrismaPurchaseOrderRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         audit: AuditPort
       ) =>
@@ -378,8 +368,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         settingsRepo: PrismaPurchasingSettingsRepository,
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         accounting: AccountingApplication,
         audit: AuditPort
@@ -415,8 +405,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         settingsRepo: PrismaPurchasingSettingsRepository,
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         accounting: AccountingApplication,
         audit: AuditPort
@@ -452,8 +442,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         settingsRepo: PrismaPurchasingSettingsRepository,
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         accounting: AccountingApplication,
         audit: AuditPort
@@ -489,8 +479,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         settingsRepo: PrismaPurchasingSettingsRepository,
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         accounting: AccountingApplication,
         audit: AuditPort
@@ -526,8 +516,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         settingsRepo: PrismaPurchasingSettingsRepository,
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         accounting: AccountingApplication,
         audit: AuditPort
@@ -563,8 +553,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         settingsRepo: PrismaPurchasingSettingsRepository,
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         accounting: AccountingApplication,
         audit: AuditPort
@@ -600,8 +590,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         settingsRepo: PrismaPurchasingSettingsRepository,
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         supplierQuery: PrismaSupplierQueryAdapter,
         accounting: AccountingApplication,
         audit: AuditPort
@@ -637,8 +627,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         paymentRepo: PrismaBillPaymentRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         accounting: AccountingApplication,
         audit: AuditPort
       ) =>
@@ -671,8 +661,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
         paymentRepo: PrismaBillPaymentRepository,
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock,
+        idGen: any,
+        clock: any,
         accounting: AccountingApplication,
         audit: AuditPort
       ) =>
@@ -703,8 +693,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
       useFactory: (
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock
+        idGen: any,
+        clock: any
       ) =>
         new GetPurchasingSettingsUseCase({
           logger: new NestLoggerAdapter(),
@@ -725,8 +715,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
       useFactory: (
         settingsRepo: PrismaPurchasingSettingsRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock
+        idGen: any,
+        clock: any
       ) =>
         new UpdatePurchasingSettingsUseCase({
           logger: new NestLoggerAdapter(),
@@ -747,8 +737,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
       useFactory: (
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock
+        idGen: any,
+        clock: any
       ) =>
         new ListAccountMappingsUseCase({
           logger: new NestLoggerAdapter(),
@@ -769,8 +759,8 @@ import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases
       useFactory: (
         mappingRepo: PrismaPurchasingAccountMappingRepository,
         idempotency: IdempotencyStoragePort,
-        idGen: SystemIdGenerator,
-        clock: SystemClock
+        idGen: any,
+        clock: any
       ) =>
         new UpsertAccountMappingUseCase({
           logger: new NestLoggerAdapter(),

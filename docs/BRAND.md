@@ -1,9 +1,11 @@
-# Bizflow Brand Guidelines
+# Corely Brand Guidelines
 
 ## Brand Identity
 
-**Name:** Bizflow  
-**Tagline:** "Run your business, end-to-end."  
+**Name:** Corely
+**Domain:** corely.one
+**Tagline:** "Run your business, clearly."
+_(Alt tagline if you want to keep the old one: "Run your business, end-to-end.")_
 **Positioning:** AI-native business OS for freelancers scaling to full ERP
 
 ## Brand Personality

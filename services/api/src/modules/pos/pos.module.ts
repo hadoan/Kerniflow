@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 import { PosController } from "./adapters/http/pos.controller";
 import { CreateRegisterUseCase } from "./application/use-cases/create-register.usecase";
 import { ListRegistersUseCase } from "./application/use-cases/list-registers.usecase";
@@ -14,24 +15,20 @@ import { PrismaPosSaleIdempotencyAdapter } from "./infrastructure/adapters/prism
 import { REGISTER_REPOSITORY_PORT } from "./application/ports/register-repository.port";
 import { SHIFT_SESSION_REPOSITORY_PORT } from "./application/ports/shift-session-repository.port";
 import { POS_SALE_IDEMPOTENCY_PORT } from "./application/ports/pos-sale-idempotency.port";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 
 @Module({
-  imports: [DataModule],
+  imports: [DataModule, KernelModule],
   controllers: [PosController],
   providers: [
     // Infrastructure adapters
     PrismaRegisterRepositoryAdapter,
     PrismaShiftSessionRepositoryAdapter,
     PrismaPosSaleIdempotencyAdapter,
-    SystemIdGenerator,
 
     // Port bindings
     { provide: REGISTER_REPOSITORY_PORT, useExisting: PrismaRegisterRepositoryAdapter },
     { provide: SHIFT_SESSION_REPOSITORY_PORT, useExisting: PrismaShiftSessionRepositoryAdapter },
     { provide: POS_SALE_IDEMPOTENCY_PORT, useExisting: PrismaPosSaleIdempotencyAdapter },
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
 
     // Use cases
     CreateRegisterUseCase,

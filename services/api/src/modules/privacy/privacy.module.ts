@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { KernelModule } from "../../shared/kernel/kernel.module";
 import { PrivacyController } from "./adapters/http/privacy.controller";
 import { RequestPersonalDataExportUseCase } from "./application/use-cases/request-personal-data-export/request-personal-data-export.usecase";
 import { RequestAccountErasureUseCase } from "./application/use-cases/request-account-erasure/request-account-erasure.usecase";
@@ -8,8 +9,6 @@ import { PrismaPrivacyRequestRepoAdapter } from "./infrastructure/prisma/prisma-
 import { OUTBOX_PORT } from "@kerniflow/kernel";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
-import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
-import { SystemClock } from "../../shared/infrastructure/system-clock";
 import type { DocumentsPort } from "./application/ports/documents.port";
 import type { PersonalDataCollectorPort } from "./application/ports/personal-data-collector.port";
 import type { PersonalDataEraserPort } from "./application/ports/personal-data-eraser.port";
@@ -32,13 +31,10 @@ class NoopDocumentsPort implements DocumentsPort {
 class NoopIdentityPort implements IdentityPort {}
 
 @Module({
+  imports: [KernelModule],
   controllers: [PrivacyController],
   providers: [
     PrismaPrivacyRequestRepoAdapter,
-    SystemIdGenerator,
-    SystemClock,
-    { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
-    { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
     { provide: DOCUMENTS_PORT, useClass: NoopDocumentsPort },
     { provide: IDENTITY_PORT, useClass: NoopIdentityPort },
     { provide: PERSONAL_DATA_COLLECTORS, useValue: [] },
