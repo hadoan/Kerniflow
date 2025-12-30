@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../lib/auth-provider";
+import { useAuth } from "@/lib/auth-provider";
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";
 
 export const RequireAuth: React.FC = () => {

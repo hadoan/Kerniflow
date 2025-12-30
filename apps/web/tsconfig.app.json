@@ -19,6 +19,8 @@
     "paths": {
       "@/*": ["web/src/*"],
       "@kerniflow/api-client": ["packages/api-client/src/index.ts"],
+      "@kerniflow/contracts": ["packages/contracts/src/index.ts"],
+      "@kerniflow/domain": ["packages/domain/src/index.ts"],
       "@kerniflow/offline-core": ["packages/offline-core/src/index.ts"],
       "@kerniflow/offline-web": ["packages/offline-web/src/index.ts"]
     }
