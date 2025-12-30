@@ -51,6 +51,12 @@ import {
 import { SettingsPage, RolesPage, RolePermissionsPage } from "../../modules/settings";
 import { RequirePermission } from "../../modules/settings/components/RequirePermission";
 import { TaxSettingsPage } from "../../modules/tax";
+import {
+  PlatformPage,
+  AppsManagementPage,
+  TemplatesPage,
+  MenuCustomizerPage,
+} from "../../modules/platform";
 import NotFound from "../../shared/components/NotFound";
 import { LoginPage } from "../../routes/auth/login";
 import SignupPage from "../../routes/auth/signup";
@@ -137,6 +143,38 @@ export const Router = () => (
             element={
               <RequirePermission permission="settings.roles.manage">
                 <RolePermissionsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/settings/platform"
+            element={
+              <RequirePermission permission="platform.apps.manage">
+                <PlatformPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/settings/platform/apps"
+            element={
+              <RequirePermission permission="platform.apps.manage">
+                <AppsManagementPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/settings/platform/templates"
+            element={
+              <RequirePermission permission="platform.templates.apply">
+                <TemplatesPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/settings/platform/menu"
+            element={
+              <RequirePermission permission="platform.menu.customize">
+                <MenuCustomizerPage />
               </RequirePermission>
             }
           />

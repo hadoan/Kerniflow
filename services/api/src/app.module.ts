@@ -20,6 +20,7 @@ import { PurchasingModule } from "./modules/purchasing";
 import { InventoryModule } from "./modules/inventory";
 import { ApprovalsModule } from "./modules/approvals";
 import { EngagementModule } from "./modules/engagement/engagement.module";
+import { PlatformModule } from "./modules/platform";
 import { TraceIdMiddleware } from "./shared/trace/trace-id.middleware.js";
 import { TraceIdService } from "./shared/trace/trace-id.service.js";
 
@@ -32,6 +33,7 @@ import { TraceIdService } from "./shared/trace/trace-id.service.js";
     // DataModule must be imported for global providers (OUTBOX_PORT, AUDIT_PORT, etc.)
     DataModule,
     IdentityModule,
+    PlatformModule,
     PartyModule,
     CrmModule,
     WorkspacesModule,

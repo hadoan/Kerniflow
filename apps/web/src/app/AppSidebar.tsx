@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, Moon, Sun, Globe, LogOut } from "lucide-react";
@@ -17,6 +17,8 @@ import {
 } from "@/shared/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth-provider";
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";
+import { useMenu } from "@/modules/platform/hooks/useMenu";
+import { getIconByName } from "@/shared/utils/iconMapping";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -30,8 +32,31 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
   const { user } = useAuth();
   const { activeWorkspace } = useWorkspace();
 
+  // Try to use server-driven menu, fallback to static registry
+  const { data: serverMenu } = useMenu("web");
+
   const enabledModules = getEnabledModules();
   const comingSoonModules = getComingSoonModules();
+
+  // Group server menu items by section
+  const menuSections = useMemo(() => {
+    if (!serverMenu?.items) {return null;}
+
+    const sections: Record<string, typeof serverMenu.items> = {};
+    serverMenu.items.forEach((item) => {
+      if (!sections[item.section]) {
+        sections[item.section] = [];
+      }
+      sections[item.section].push(item);
+    });
+
+    // Sort items within each section by order
+    Object.keys(sections).forEach((section) => {
+      sections[section].sort((a, b) => a.order - b.order);
+    });
+
+    return sections;
+  }, [serverMenu]);
 
   const changeLanguage = (lang: string) => {
     void i18n.changeLanguage(lang);
@@ -73,52 +98,88 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
         className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin"
         data-testid={`sidebar-nav${variant === "mobile" ? "-mobile" : ""}`}
       >
-        {/* Enabled modules */}
-        <div className="space-y-1">
-          {enabledModules.flatMap((module) =>
-            module.navItems.map((item) => (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                data-testid={`nav-${item.id}`}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                  )
-                }
-              >
-                <item.icon className="h-5 w-5 shrink-0" />
-                {!collapsed && <span>{t(item.labelKey)}</span>}
-              </NavLink>
-            ))
-          )}
-        </div>
-
-        {/* Coming soon modules */}
-        {!collapsed && comingSoonModules.length > 0 && (
-          <div className="mt-6">
-            <div className="px-3 mb-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {t("common.comingSoon")}
-              </span>
-            </div>
+        {menuSections ? (
+          /* Server-driven menu */
+          <div className="space-y-1">
+            {Object.entries(menuSections).map(([section, items]) => (
+              <div key={section}>
+                {items.map((item) => {
+                  const Icon = getIconByName(item.icon);
+                  return (
+                    <NavLink
+                      key={item.id}
+                      to={item.route || "#"}
+                      data-testid={`nav-${item.id}`}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )
+                      }
+                    >
+                      <Icon className="h-5 w-5 shrink-0" />
+                      {!collapsed && <span>{item.label}</span>}
+                      {!collapsed && item.pinned && (
+                        <span className="ml-auto text-xs text-muted-foreground">📌</span>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Fallback to static registry */
+          <>
             <div className="space-y-1">
-              {comingSoonModules.flatMap((module) =>
+              {enabledModules.flatMap((module) =>
                 module.navItems.map((item) => (
-                  <div
+                  <NavLink
                     key={item.id}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/40 cursor-not-allowed"
+                    to={item.path}
+                    data-testid={`nav-${item.id}`}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                      )
+                    }
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
-                    <span>{t(item.labelKey)}</span>
-                  </div>
+                    {!collapsed && <span>{t(item.labelKey)}</span>}
+                  </NavLink>
                 ))
               )}
             </div>
-          </div>
+
+            {/* Coming soon modules */}
+            {!collapsed && comingSoonModules.length > 0 && (
+              <div className="mt-6">
+                <div className="px-3 mb-2">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    {t("common.comingSoon")}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {comingSoonModules.flatMap((module) =>
+                    module.navItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/40 cursor-not-allowed"
+                      >
+                        <item.icon className="h-5 w-5 shrink-0" />
+                        <span>{t(item.labelKey)}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </nav>
 

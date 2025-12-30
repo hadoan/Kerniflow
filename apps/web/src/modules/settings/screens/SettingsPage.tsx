@@ -26,6 +26,20 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Platform Management</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-muted-foreground">
+            Manage apps, templates, and workspace customizations.
+          </div>
+          <Button variant="accent" asChild>
+            <Link to="/settings/platform">Platform Settings</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Access control</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

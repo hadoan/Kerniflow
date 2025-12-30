@@ -1,10 +1,13 @@
-import { Controller, Get, Query, UseGuards, Inject } from "@nestjs/common";
+import { Controller, Get, Put, Delete, Query, Body, UseGuards, Inject } from "@nestjs/common";
 import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
 import {
   CurrentTenantId,
   CurrentUserId,
 } from "../../../identity/adapters/http/current-user.decorator";
 import { ComposeMenuUseCase } from "../../application/use-cases/compose-menu.usecase";
+import { UpdateMenuOverridesUseCase } from "../../application/use-cases/update-menu-overrides.usecase";
+import { ResetMenuOverridesUseCase } from "../../application/use-cases/reset-menu-overrides.usecase";
+import type { MenuOverrides } from "@kerniflow/contracts";
 
 /**
  * Temporary interface for role permission grant repository
@@ -24,6 +27,8 @@ const ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN = Symbol("ROLE_PERMISSION_GRANT_REP
 export class MenuController {
   constructor(
     private readonly composeMenuUseCase: ComposeMenuUseCase,
+    private readonly updateMenuOverridesUseCase: UpdateMenuOverridesUseCase,
+    private readonly resetMenuOverridesUseCase: ResetMenuOverridesUseCase,
     @Inject(ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN)
     private readonly grantRepo: RolePermissionGrantRepositoryPort
   ) {}
@@ -50,6 +55,32 @@ export class MenuController {
       tenantId,
       userId,
       permissions,
+      scope,
+    });
+  }
+
+  @Put("overrides")
+  async updateOverrides(
+    @Query("scope") scope: "web" | "pos" = "web",
+    @Body("overrides") overrides: MenuOverrides,
+    @CurrentTenantId() tenantId: string,
+    @CurrentUserId() userId: string
+  ) {
+    return await this.updateMenuOverridesUseCase.execute({
+      tenantId,
+      userId,
+      scope,
+      overrides,
+    });
+  }
+
+  @Delete("overrides")
+  async resetOverrides(
+    @Query("scope") scope: "web" | "pos" = "web",
+    @CurrentTenantId() tenantId: string
+  ) {
+    return await this.resetMenuOverridesUseCase.execute({
+      tenantId,
       scope,
     });
   }

@@ -9,10 +9,14 @@
 
 import { PrismaService } from "@kerniflow/data";
 import { AppRegistry } from "../modules/platform/infrastructure/registries/app-registry";
+import { TemplateRegistry } from "../modules/platform/infrastructure/registries/template-registry";
+import { PackRegistry } from "../modules/platform/infrastructure/registries/pack-registry";
 
 async function syncCatalog() {
   const prisma = new PrismaService();
   const appRegistry = new AppRegistry();
+  const templateRegistry = new TemplateRegistry();
+  const packRegistry = new PackRegistry();
 
   try {
     // eslint-disable-next-line no-console
@@ -20,6 +24,8 @@ async function syncCatalog() {
 
     // Load manifests
     appRegistry.loadManifests();
+    templateRegistry.loadTemplates();
+    packRegistry.loadPacks();
 
     // Sync apps
     // eslint-disable-next-line no-console
@@ -74,13 +80,107 @@ async function syncCatalog() {
     // eslint-disable-next-line no-console
     console.log(`   ✅ ${appsCreated} apps created, ${appsUpdated} apps updated`);
 
-    // TODO: Sync templates when template registry is implemented
+    // Sync templates
     // eslint-disable-next-line no-console
-    console.log("\n📄 Template sync: skipped (not yet implemented)");
+    console.log("\n📄 Syncing template catalog...");
+    const templates = templateRegistry.list();
+    let templatesCreated = 0;
+    let templatesUpdated = 0;
 
-    // TODO: Sync packs when pack registry is implemented
+    for (const template of templates) {
+      // @ts-expect-error - templateCatalog table will exist after migration is run
+      const existing = await prisma.templateCatalog.findUnique({
+        where: { templateId: template.templateId },
+      });
+
+      // @ts-expect-error - templateCatalog table will exist after migration is run
+      await prisma.templateCatalog.upsert({
+        where: { templateId: template.templateId },
+        create: {
+          templateId: template.templateId,
+          name: template.name,
+          category: template.category,
+          version: template.version,
+          description: template.description ?? null,
+          requiresAppsJson: JSON.stringify(template.requiresApps),
+          paramsSchemaJson: JSON.stringify(template.paramsSchema),
+          upgradePolicyJson: JSON.stringify(template.upgradePolicy),
+        },
+        update: {
+          name: template.name,
+          category: template.category,
+          version: template.version,
+          description: template.description ?? null,
+          requiresAppsJson: JSON.stringify(template.requiresApps),
+          paramsSchemaJson: JSON.stringify(template.paramsSchema),
+          upgradePolicyJson: JSON.stringify(template.upgradePolicy),
+        },
+      });
+
+      if (existing) {
+        templatesUpdated++;
+      } else {
+        templatesCreated++;
+      }
+    }
+
     // eslint-disable-next-line no-console
-    console.log("📦 Pack sync: skipped (not yet implemented)");
+    console.log(
+      `   ✅ ${templatesCreated} templates created, ${templatesUpdated} templates updated`
+    );
+
+    // Sync packs
+    // eslint-disable-next-line no-console
+    console.log("\n📦 Syncing pack catalog...");
+    const packs = packRegistry.list();
+    let packsCreated = 0;
+    let packsUpdated = 0;
+
+    for (const pack of packs) {
+      // @ts-expect-error - packCatalog table will exist after migration is run
+      const existing = await prisma.packCatalog.findUnique({
+        where: { packId: pack.packId },
+      });
+
+      // @ts-expect-error - packCatalog table will exist after migration is run
+      await prisma.packCatalog.upsert({
+        where: { packId: pack.packId },
+        create: {
+          packId: pack.packId,
+          name: pack.name,
+          version: pack.version,
+          description: pack.description ?? null,
+          appsToEnableJson: JSON.stringify(pack.appsToEnable),
+          templatesToApplyJson: JSON.stringify(pack.templatesToApply),
+          featureFlagsJson: pack.featureFlags ? JSON.stringify(pack.featureFlags) : null,
+          menuPresetTemplateId: pack.menuPresetTemplateId ?? null,
+          postInstallChecksJson: pack.postInstallChecks
+            ? JSON.stringify(pack.postInstallChecks)
+            : null,
+        },
+        update: {
+          name: pack.name,
+          version: pack.version,
+          description: pack.description ?? null,
+          appsToEnableJson: JSON.stringify(pack.appsToEnable),
+          templatesToApplyJson: JSON.stringify(pack.templatesToApply),
+          featureFlagsJson: pack.featureFlags ? JSON.stringify(pack.featureFlags) : null,
+          menuPresetTemplateId: pack.menuPresetTemplateId ?? null,
+          postInstallChecksJson: pack.postInstallChecks
+            ? JSON.stringify(pack.postInstallChecks)
+            : null,
+        },
+      });
+
+      if (existing) {
+        packsUpdated++;
+      } else {
+        packsCreated++;
+      }
+    }
+
+    // eslint-disable-next-line no-console
+    console.log(`   ✅ ${packsCreated} packs created, ${packsUpdated} packs updated`);
 
     // eslint-disable-next-line no-console
     console.log("\n✨ Catalog sync completed successfully!");
