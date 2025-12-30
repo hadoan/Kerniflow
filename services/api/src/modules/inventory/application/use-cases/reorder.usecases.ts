@@ -31,7 +31,7 @@ import type { StockMoveRepositoryPort } from "../ports/stock-move-repository.por
 import type { StockReservationRepositoryPort } from "../ports/stock-reservation-repository.port";
 import type { LocationRepositoryPort } from "../ports/location-repository.port";
 import { toReorderPolicyDto, toReorderSuggestionDto } from "../mappers/inventory-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 
 const sumByProduct = (rows: Array<{ productId: string; value: number }>) => {
@@ -134,8 +134,8 @@ export class ListReorderPoliciesUseCase extends BaseUseCase<
   ListReorderPoliciesInput,
   ListReorderPoliciesOutput
 > {
-  constructor(private readonly deps: ReorderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly reorderDeps: ReorderDeps) {
+    super({ logger: reorderDeps.logger });
   }
 
   protected async handle(
@@ -146,7 +146,7 @@ export class ListReorderPoliciesUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const policies = await this.deps.repo.list(ctx.tenantId, {
+    const policies = await this.reorderDeps.repo.list(ctx.tenantId, {
       productId: input.productId,
       warehouseId: input.warehouseId,
     });
@@ -159,8 +159,8 @@ export class CreateReorderPolicyUseCase extends BaseUseCase<
   CreateReorderPolicyInput,
   CreateReorderPolicyOutput
 > {
-  constructor(private readonly deps: ReorderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly reorderDeps: ReorderDeps) {
+    super({ logger: reorderDeps.logger });
   }
 
   protected async handle(
@@ -172,7 +172,7 @@ export class CreateReorderPolicyUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreateReorderPolicyOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.reorderDeps.idempotency,
       actionKey: "inventory.create-reorder-policy",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -181,17 +181,20 @@ export class CreateReorderPolicyUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const product = await this.deps.productRepo.findById(ctx.tenantId, input.productId);
+    const product = await this.reorderDeps.productRepo.findById(ctx.tenantId, input.productId);
     if (!product) {
       return err(new NotFoundError("Product not found"));
     }
 
-    const warehouse = await this.deps.warehouseRepo.findById(ctx.tenantId, input.warehouseId);
+    const warehouse = await this.reorderDeps.warehouseRepo.findById(
+      ctx.tenantId,
+      input.warehouseId
+    );
     if (!warehouse) {
       return err(new NotFoundError("Warehouse not found"));
     }
 
-    const existing = await this.deps.repo.findByProductWarehouse(
+    const existing = await this.reorderDeps.repo.findByProductWarehouse(
       ctx.tenantId,
       input.productId,
       input.warehouseId
@@ -200,9 +203,9 @@ export class CreateReorderPolicyUseCase extends BaseUseCase<
       return err(new ValidationError("Reorder policy already exists"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.reorderDeps.clock.now();
     const policy = {
-      id: this.deps.idGenerator.newId(),
+      id: this.reorderDeps.idGenerator.newId(),
       tenantId: ctx.tenantId,
       productId: input.productId,
       warehouseId: input.warehouseId,
@@ -216,8 +219,8 @@ export class CreateReorderPolicyUseCase extends BaseUseCase<
       updatedAt: now,
     };
 
-    await this.deps.repo.create(ctx.tenantId, policy);
-    await this.deps.audit.log({
+    await this.reorderDeps.repo.create(ctx.tenantId, policy);
+    await this.reorderDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.reorder-policy.created",
@@ -227,7 +230,7 @@ export class CreateReorderPolicyUseCase extends BaseUseCase<
 
     const result = { policy: toReorderPolicyDto(policy) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.reorderDeps.idempotency,
       actionKey: "inventory.create-reorder-policy",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -242,8 +245,8 @@ export class UpdateReorderPolicyUseCase extends BaseUseCase<
   UpdateReorderPolicyInput,
   UpdateReorderPolicyOutput
 > {
-  constructor(private readonly deps: ReorderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly reorderDeps: ReorderDeps) {
+    super({ logger: reorderDeps.logger });
   }
 
   protected async handle(
@@ -254,7 +257,7 @@ export class UpdateReorderPolicyUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const policy = await this.deps.repo.findById(ctx.tenantId, input.reorderPolicyId);
+    const policy = await this.reorderDeps.repo.findById(ctx.tenantId, input.reorderPolicyId);
     if (!policy) {
       return err(new NotFoundError("Reorder policy not found"));
     }
@@ -277,11 +280,11 @@ export class UpdateReorderPolicyUseCase extends BaseUseCase<
           ? (input.patch.leadTimeDays ?? null)
           : (policy.leadTimeDays ?? null),
       isActive: input.patch.isActive ?? policy.isActive,
-      updatedAt: this.deps.clock.now(),
+      updatedAt: this.reorderDeps.clock.now(),
     };
 
-    await this.deps.repo.save(ctx.tenantId, updated);
-    await this.deps.audit.log({
+    await this.reorderDeps.repo.save(ctx.tenantId, updated);
+    await this.reorderDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.reorder-policy.updated",
@@ -297,8 +300,8 @@ export class GetReorderSuggestionsUseCase extends BaseUseCase<
   GetReorderSuggestionsInput,
   GetReorderSuggestionsOutput
 > {
-  constructor(private readonly deps: ReorderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly reorderDeps: ReorderDeps) {
+    super({ logger: reorderDeps.logger });
   }
 
   protected async handle(
@@ -309,7 +312,7 @@ export class GetReorderSuggestionsUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const policies = await this.deps.repo.list(ctx.tenantId, {
+    const policies = await this.reorderDeps.repo.list(ctx.tenantId, {
       warehouseId: input.warehouseId,
     });
 
@@ -317,17 +320,17 @@ export class GetReorderSuggestionsUseCase extends BaseUseCase<
       tenantId: ctx.tenantId,
       policies,
       thresholdMode: "REORDER_POINT",
-      locationRepo: this.deps.locationRepo,
-      moveRepo: this.deps.moveRepo,
-      reservationRepo: this.deps.reservationRepo,
+      locationRepo: this.reorderDeps.locationRepo,
+      moveRepo: this.reorderDeps.moveRepo,
+      reservationRepo: this.reorderDeps.reservationRepo,
     });
     return ok({ items });
   }
 }
 
 export class GetLowStockUseCase extends BaseUseCase<GetLowStockInput, GetLowStockOutput> {
-  constructor(private readonly deps: ReorderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly reorderDeps: ReorderDeps) {
+    super({ logger: reorderDeps.logger });
   }
 
   protected async handle(
@@ -338,7 +341,7 @@ export class GetLowStockUseCase extends BaseUseCase<GetLowStockInput, GetLowStoc
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const policies = await this.deps.repo.list(ctx.tenantId, {
+    const policies = await this.reorderDeps.repo.list(ctx.tenantId, {
       warehouseId: input.warehouseId,
     });
 
@@ -347,9 +350,9 @@ export class GetLowStockUseCase extends BaseUseCase<GetLowStockInput, GetLowStoc
       tenantId: ctx.tenantId,
       policies,
       thresholdMode,
-      locationRepo: this.deps.locationRepo,
-      moveRepo: this.deps.moveRepo,
-      reservationRepo: this.deps.reservationRepo,
+      locationRepo: this.reorderDeps.locationRepo,
+      moveRepo: this.reorderDeps.moveRepo,
+      reservationRepo: this.reorderDeps.reservationRepo,
     });
 
     return ok({ items });

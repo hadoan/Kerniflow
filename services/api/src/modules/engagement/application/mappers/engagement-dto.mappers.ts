@@ -11,13 +11,15 @@ import type {
 import type { EngagementSettingsRecord } from "../../domain/engagement.types";
 import type { CheckInEventRecord as CheckInRecord } from "../ports/checkin-repository.port";
 
+const toIsoString = (value: Date) => value.toISOString();
+
 export const toCheckInEventDto = (record: CheckInRecord): CheckInEvent => ({
   tenantId: record.tenantId,
   checkInEventId: record.checkInEventId,
   customerPartyId: record.customerPartyId,
   registerId: record.registerId,
   kioskDeviceId: record.kioskDeviceId ?? null,
-  checkedInAt: record.checkedInAt,
+  checkedInAt: toIsoString(record.checkedInAt),
   checkedInByType: record.checkedInByType,
   checkedInByEmployeePartyId: record.checkedInByEmployeePartyId ?? null,
   status: record.status,
@@ -26,8 +28,8 @@ export const toCheckInEventDto = (record: CheckInRecord): CheckInEvent => ({
   tags: record.tags ?? [],
   posSaleId: record.posSaleId ?? null,
   notes: record.notes ?? null,
-  createdAt: record.createdAt,
-  updatedAt: record.updatedAt,
+  createdAt: toIsoString(record.createdAt),
+  updatedAt: toIsoString(record.updatedAt),
 });
 
 export const toLoyaltyAccountDto = (record: LoyaltyAccountRecord): LoyaltyAccount => ({
@@ -36,8 +38,8 @@ export const toLoyaltyAccountDto = (record: LoyaltyAccountRecord): LoyaltyAccoun
   customerPartyId: record.customerPartyId,
   status: record.status,
   currentPointsBalance: record.currentPointsBalance,
-  createdAt: record.createdAt,
-  updatedAt: record.updatedAt,
+  createdAt: toIsoString(record.createdAt),
+  updatedAt: toIsoString(record.updatedAt),
 });
 
 export const toLoyaltyLedgerEntryDto = (record: LoyaltyLedgerEntryRecord): LoyaltyLedgerEntry => ({
@@ -49,7 +51,7 @@ export const toLoyaltyLedgerEntryDto = (record: LoyaltyLedgerEntryRecord): Loyal
   reasonCode: record.reasonCode,
   sourceType: record.sourceType ?? null,
   sourceId: record.sourceId ?? null,
-  createdAt: record.createdAt,
+  createdAt: toIsoString(record.createdAt),
   createdByEmployeePartyId: record.createdByEmployeePartyId ?? null,
 });
 
@@ -59,9 +61,16 @@ export const toEngagementSettingsDto = (record: EngagementSettingsRecord): Engag
   checkInDuplicateWindowMinutes: record.checkInDuplicateWindowMinutes,
   loyaltyEnabled: record.loyaltyEnabled,
   pointsPerVisit: record.pointsPerVisit,
-  rewardRules: record.rewardRules ?? [],
+  rewardRules:
+    record.rewardRules?.map((rule) => ({
+      rewardId: rule.rewardId,
+      label: rule.label,
+      pointsCost: rule.pointsCost,
+      rewardValueCents: rule.rewardValueCents ?? undefined,
+      active: rule.active ?? true,
+    })) ?? [],
   aiEnabled: record.aiEnabled,
   kioskBranding: record.kioskBranding ?? null,
-  createdAt: record.createdAt,
-  updatedAt: record.updatedAt,
+  createdAt: toIsoString(record.createdAt),
+  updatedAt: toIsoString(record.updatedAt),
 });

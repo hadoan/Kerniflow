@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
+import { isErr } from "@kerniflow/kernel";
 import {
   CancelCheckInEventInputSchema,
   CompleteCheckInEventInputSchema,
@@ -39,7 +40,7 @@ export class EngagementController {
   async createCheckIn(@Body() body: unknown, @Req() req: RequestWithUser) {
     const input = CreateCheckInEventInputSchema.parse(body);
     const result = await this.app.createCheckIn.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -57,7 +58,7 @@ export class EngagementController {
       pageSize: query.pageSize ? Number(query.pageSize) : undefined,
     });
     const result = await this.app.listCheckIns.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -67,7 +68,7 @@ export class EngagementController {
   async completeCheckIn(@Param("id") id: string, @Req() req: RequestWithUser) {
     const input = CompleteCheckInEventInputSchema.parse({ checkInEventId: id });
     const result = await this.app.completeCheckIn.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -80,7 +81,7 @@ export class EngagementController {
       reason: body?.reason,
     });
     const result = await this.app.cancelCheckIn.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -90,7 +91,7 @@ export class EngagementController {
   async getLoyalty(@Param("customerPartyId") customerPartyId: string, @Req() req: RequestWithUser) {
     const input = GetLoyaltySummaryInputSchema.parse({ customerPartyId });
     const result = await this.app.getLoyaltySummary.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -108,7 +109,7 @@ export class EngagementController {
       pageSize: query.pageSize ? Number(query.pageSize) : undefined,
     });
     const result = await this.app.listLoyaltyLedger.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -118,7 +119,7 @@ export class EngagementController {
   async createLoyaltyEarn(@Body() body: unknown, @Req() req: RequestWithUser) {
     const input = CreateLoyaltyEarnEntryInputSchema.parse(body);
     const result = await this.app.createLoyaltyEarn.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -128,7 +129,7 @@ export class EngagementController {
   async createLoyaltyAdjust(@Body() body: unknown, @Req() req: RequestWithUser) {
     const input = CreateLoyaltyAdjustEntryInputSchema.parse(body);
     const result = await this.app.createLoyaltyAdjust.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -138,7 +139,7 @@ export class EngagementController {
   async getSettings(@Req() req: RequestWithUser) {
     const input = GetEngagementSettingsInputSchema.parse({});
     const result = await this.app.getSettings.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;
@@ -148,7 +149,7 @@ export class EngagementController {
   async updateSettings(@Body() body: unknown, @Req() req: RequestWithUser) {
     const input = UpdateEngagementSettingsInputSchema.parse(body);
     const result = await this.app.updateSettings.execute(input, this.buildCtx(req));
-    if (!result.ok) {
+    if (isErr(result)) {
       throw toHttpException(result.error);
     }
     return result.value;

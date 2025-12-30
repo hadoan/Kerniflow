@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@kerniflow/data";
 import { DealAggregate } from "../../domain/deal.aggregate";
+import { parseLocalDate } from "@kerniflow/kernel";
 import type {
   DealRepoPort,
   DealStageTransition,
@@ -39,7 +40,7 @@ const toAggregate = (row: DealRow): DealAggregate => {
     amountCents: row.amountCents,
     currency: row.currency,
     expectedCloseDate: row.expectedCloseDate
-      ? row.expectedCloseDate.toISOString().split("T")[0]
+      ? parseLocalDate(row.expectedCloseDate.toISOString().split("T")[0])
       : null,
     probability: row.probability,
     status: row.status,
@@ -92,10 +93,10 @@ export class PrismaDealRepoAdapter implements DealRepoPort {
       orderBy: { createdAt: "desc" },
     });
 
-    const deals = results.map((row) => toAggregate(row as DealRow));
-    const nextCursor = deals.length === pageSize ? (deals.at(-1)?.id ?? null) : null;
+    const items = results.map((row) => toAggregate(row as DealRow));
+    const nextCursor = items.length === pageSize ? (items.at(-1)?.id ?? null) : null;
 
-    return { deals, nextCursor };
+    return { items, nextCursor };
   }
 
   async create(tenantId: string, deal: DealAggregate): Promise<void> {

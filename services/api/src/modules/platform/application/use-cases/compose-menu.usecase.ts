@@ -2,14 +2,14 @@ import { Injectable } from "@nestjs/common";
 import type { MenuItem } from "@kerniflow/contracts";
 import { MenuComposerService } from "../services/menu-composer.service";
 
-interface ComposeMenuInput {
+export interface ComposeMenuInput {
   tenantId: string;
   userId: string;
   permissions: string[];
   scope: "web" | "pos";
 }
 
-interface ComposeMenuOutput {
+export interface ComposeMenuOutput {
   scope: string;
   items: MenuItem[];
   computedAt: string;

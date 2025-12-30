@@ -1,5 +1,5 @@
 // Report Use Cases
-import { BaseUseCase, type LoggerPort } from "@kerniflow/kernel";
+import { BaseUseCase, type LoggerPort, ValidationError, NotFoundError } from "@kerniflow/kernel";
 import type { Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
 import { ok, err } from "@kerniflow/kernel";
 import type {
@@ -33,7 +33,7 @@ export class GetTrialBalanceUseCase extends BaseUseCase<
   GetTrialBalanceInput,
   GetTrialBalanceOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -42,12 +42,12 @@ export class GetTrialBalanceUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<GetTrialBalanceOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
-      return err({ type: "NotFoundError", message: "Accounting not set up" });
+      return err(new NotFoundError("Accounting not set up"));
     }
 
     // Get all accounts
@@ -120,7 +120,7 @@ export class GetGeneralLedgerUseCase extends BaseUseCase<
   GetGeneralLedgerInput,
   GetGeneralLedgerOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -129,17 +129,17 @@ export class GetGeneralLedgerUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<GetGeneralLedgerOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
-      return err({ type: "NotFoundError", message: "Accounting not set up" });
+      return err(new NotFoundError("Accounting not set up"));
     }
 
     const account = await this.deps.accountRepo.findById(ctx.tenantId, input.accountId);
     if (!account) {
-      return err({ type: "NotFoundError", message: "Account not found" });
+      return err(new NotFoundError("Account not found"));
     }
 
     // Get lines for this account in date range
@@ -208,7 +208,7 @@ export class GetGeneralLedgerUseCase extends BaseUseCase<
 
 // ===== Profit & Loss =====
 export class GetProfitLossUseCase extends BaseUseCase<GetProfitLossInput, GetProfitLossOutput> {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -217,12 +217,12 @@ export class GetProfitLossUseCase extends BaseUseCase<GetProfitLossInput, GetPro
     ctx: UseCaseContext
   ): Promise<Result<GetProfitLossOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
-      return err({ type: "NotFoundError", message: "Accounting not set up" });
+      return err(new NotFoundError("Accounting not set up"));
     }
 
     const { accounts } = await this.deps.accountRepo.list(ctx.tenantId, { limit: 1000 });
@@ -318,7 +318,7 @@ export class GetBalanceSheetUseCase extends BaseUseCase<
   GetBalanceSheetInput,
   GetBalanceSheetOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -327,12 +327,12 @@ export class GetBalanceSheetUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<GetBalanceSheetOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
-      return err({ type: "NotFoundError", message: "Accounting not set up" });
+      return err(new NotFoundError("Accounting not set up"));
     }
 
     const { accounts } = await this.deps.accountRepo.list(ctx.tenantId, { limit: 1000 });

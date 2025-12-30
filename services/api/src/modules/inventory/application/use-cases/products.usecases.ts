@@ -28,7 +28,7 @@ import type {
 } from "@kerniflow/contracts";
 import type { ProductRepositoryPort } from "../ports/product-repository.port";
 import { toProductDto } from "../mappers/inventory-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 
 type ProductDeps = {
@@ -41,8 +41,8 @@ type ProductDeps = {
 };
 
 export class CreateProductUseCase extends BaseUseCase<CreateProductInput, CreateProductOutput> {
-  constructor(private readonly deps: ProductDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly productDeps: ProductDeps) {
+    super({ logger: productDeps.logger });
   }
 
   protected async handle(
@@ -54,7 +54,7 @@ export class CreateProductUseCase extends BaseUseCase<CreateProductInput, Create
     }
 
     const cached = await getIdempotentResult<CreateProductOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.productDeps.idempotency,
       actionKey: "inventory.create-product",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -63,14 +63,14 @@ export class CreateProductUseCase extends BaseUseCase<CreateProductInput, Create
       return ok(cached);
     }
 
-    const existing = await this.deps.repo.findBySku(ctx.tenantId, input.sku);
+    const existing = await this.productDeps.repo.findBySku(ctx.tenantId, input.sku);
     if (existing) {
       return err(new ValidationError("SKU already exists", { sku: input.sku }));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.productDeps.clock.now();
     const product = {
-      id: this.deps.idGenerator.newId(),
+      id: this.productDeps.idGenerator.newId(),
       tenantId: ctx.tenantId,
       sku: input.sku,
       name: input.name,
@@ -85,9 +85,9 @@ export class CreateProductUseCase extends BaseUseCase<CreateProductInput, Create
       updatedAt: now,
     };
 
-    await this.deps.repo.create(ctx.tenantId, product);
+    await this.productDeps.repo.create(ctx.tenantId, product);
 
-    await this.deps.audit.log({
+    await this.productDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.product.created",
@@ -97,7 +97,7 @@ export class CreateProductUseCase extends BaseUseCase<CreateProductInput, Create
 
     const result = { product: toProductDto(product) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.productDeps.idempotency,
       actionKey: "inventory.create-product",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -109,8 +109,8 @@ export class CreateProductUseCase extends BaseUseCase<CreateProductInput, Create
 }
 
 export class UpdateProductUseCase extends BaseUseCase<UpdateProductInput, UpdateProductOutput> {
-  constructor(private readonly deps: ProductDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly productDeps: ProductDeps) {
+    super({ logger: productDeps.logger });
   }
 
   protected async handle(
@@ -121,13 +121,13 @@ export class UpdateProductUseCase extends BaseUseCase<UpdateProductInput, Update
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const product = await this.deps.repo.findById(ctx.tenantId, input.productId);
+    const product = await this.productDeps.repo.findById(ctx.tenantId, input.productId);
     if (!product) {
       return err(new NotFoundError("Product not found"));
     }
 
     if (input.patch.sku && input.patch.sku !== product.sku) {
-      const existing = await this.deps.repo.findBySku(ctx.tenantId, input.patch.sku);
+      const existing = await this.productDeps.repo.findBySku(ctx.tenantId, input.patch.sku);
       if (existing) {
         return err(new ValidationError("SKU already exists", { sku: input.patch.sku }));
       }
@@ -153,11 +153,11 @@ export class UpdateProductUseCase extends BaseUseCase<UpdateProductInput, Update
           : (product.defaultPurchaseCostCents ?? null),
       isActive: input.patch.isActive ?? product.isActive,
       tags: input.patch.tags ?? product.tags,
-      updatedAt: this.deps.clock.now(),
+      updatedAt: this.productDeps.clock.now(),
     };
 
-    await this.deps.repo.save(ctx.tenantId, updated);
-    await this.deps.audit.log({
+    await this.productDeps.repo.save(ctx.tenantId, updated);
+    await this.productDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.product.updated",
@@ -173,8 +173,8 @@ export class ActivateProductUseCase extends BaseUseCase<
   ActivateProductInput,
   ActivateProductOutput
 > {
-  constructor(private readonly deps: ProductDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly productDeps: ProductDeps) {
+    super({ logger: productDeps.logger });
   }
 
   protected async handle(
@@ -185,14 +185,14 @@ export class ActivateProductUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const product = await this.deps.repo.findById(ctx.tenantId, input.productId);
+    const product = await this.productDeps.repo.findById(ctx.tenantId, input.productId);
     if (!product) {
       return err(new NotFoundError("Product not found"));
     }
 
-    const updated = { ...product, isActive: true, updatedAt: this.deps.clock.now() };
-    await this.deps.repo.save(ctx.tenantId, updated);
-    await this.deps.audit.log({
+    const updated = { ...product, isActive: true, updatedAt: this.productDeps.clock.now() };
+    await this.productDeps.repo.save(ctx.tenantId, updated);
+    await this.productDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.product.activated",
@@ -208,8 +208,8 @@ export class DeactivateProductUseCase extends BaseUseCase<
   DeactivateProductInput,
   DeactivateProductOutput
 > {
-  constructor(private readonly deps: ProductDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly productDeps: ProductDeps) {
+    super({ logger: productDeps.logger });
   }
 
   protected async handle(
@@ -220,14 +220,14 @@ export class DeactivateProductUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const product = await this.deps.repo.findById(ctx.tenantId, input.productId);
+    const product = await this.productDeps.repo.findById(ctx.tenantId, input.productId);
     if (!product) {
       return err(new NotFoundError("Product not found"));
     }
 
-    const updated = { ...product, isActive: false, updatedAt: this.deps.clock.now() };
-    await this.deps.repo.save(ctx.tenantId, updated);
-    await this.deps.audit.log({
+    const updated = { ...product, isActive: false, updatedAt: this.productDeps.clock.now() };
+    await this.productDeps.repo.save(ctx.tenantId, updated);
+    await this.productDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.product.deactivated",
@@ -240,8 +240,8 @@ export class DeactivateProductUseCase extends BaseUseCase<
 }
 
 export class GetProductUseCase extends BaseUseCase<GetProductInput, GetProductOutput> {
-  constructor(private readonly deps: ProductDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly productDeps: ProductDeps) {
+    super({ logger: productDeps.logger });
   }
 
   protected async handle(
@@ -252,7 +252,7 @@ export class GetProductUseCase extends BaseUseCase<GetProductInput, GetProductOu
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const product = await this.deps.repo.findById(ctx.tenantId, input.productId);
+    const product = await this.productDeps.repo.findById(ctx.tenantId, input.productId);
     if (!product) {
       return err(new NotFoundError("Product not found"));
     }
@@ -262,8 +262,8 @@ export class GetProductUseCase extends BaseUseCase<GetProductInput, GetProductOu
 }
 
 export class ListProductsUseCase extends BaseUseCase<ListProductsInput, ListProductsOutput> {
-  constructor(private readonly deps: ProductDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly productDeps: ProductDeps) {
+    super({ logger: productDeps.logger });
   }
 
   protected async handle(
@@ -274,7 +274,7 @@ export class ListProductsUseCase extends BaseUseCase<ListProductsInput, ListProd
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.repo.list(ctx.tenantId, {
+    const result = await this.productDeps.repo.list(ctx.tenantId, {
       search: input.search,
       type: input.type,
       isActive: input.isActive,

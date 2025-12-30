@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { generateObject } from "ai";
+import type { LanguageModel } from "ai";
+import { isErr, isOk } from "@kerniflow/kernel";
 import { anthropic } from "@ai-sdk/anthropic";
 import type { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import type { PartyApplication } from "../../../party/application/party.application";
@@ -18,6 +20,8 @@ const validationError = (issues: unknown) => ({
   message: "Invalid input for tool call",
   details: issues,
 });
+
+const defaultModel = anthropic("claude-3-5-sonnet-20241022") as unknown as LanguageModel;
 
 const buildCtx = (tenantId: string, userId: string, toolCallId?: string, runId?: string) => ({
   tenantId,
@@ -57,7 +61,7 @@ export const buildCrmAiTools = (deps: {
 
       // Use LLM to extract structured party data
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           displayName: z.string().describe("Full name or company name"),
           roles: z.array(z.enum(["CUSTOMER", "SUPPLIER", "EMPLOYEE", "CONTACT"])),
@@ -93,7 +97,7 @@ export const buildCrmAiTools = (deps: {
           { q: object.email, pageSize: 5 },
           buildCtx(tenantId, userId, toolCallId, runId)
         );
-        if (searchResult.isOk()) {
+        if (isOk(searchResult)) {
           duplicates.push(
             ...searchResult.value.items.map((customer) => ({
               id: customer.id,
@@ -156,7 +160,7 @@ export const buildCrmAiTools = (deps: {
 
       // Use LLM to extract structured deal data
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           title: z.string().describe("Deal title/name"),
           stageId: z
@@ -232,21 +236,21 @@ export const buildCrmAiTools = (deps: {
         { dealId },
         buildCtx(tenantId, userId, toolCallId, runId)
       );
-      if (dealResult.isErr()) {
+      if (isErr(dealResult)) {
         return { ok: false, code: "DEAL_NOT_FOUND", message: "Deal not found" };
       }
       const deal = dealResult.value.deal;
 
       // Fetch existing activities for the deal
       const activitiesResult = await deps.crm.listActivities.execute(
-        { dealId, pageSize: 10 },
+        { dealId, limit: 10 },
         buildCtx(tenantId, userId, toolCallId, runId)
       );
-      const existingActivities = activitiesResult.isOk() ? activitiesResult.value.activities : [];
+      const existingActivities = isOk(activitiesResult) ? activitiesResult.value.items : [];
 
       // Use LLM to generate follow-up suggestions
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           activities: z.array(
             z.object({

@@ -3,6 +3,7 @@ import {
   type ClockPort,
   type IdGeneratorPort,
   type LoggerPort,
+  ValidationError,
 } from "@kerniflow/kernel";
 import type { SetupAccountingInput, SetupAccountingOutput } from "@kerniflow/contracts";
 import type { Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
@@ -30,7 +31,7 @@ export class SetupAccountingUseCase extends BaseUseCase<
   SetupAccountingInput,
   SetupAccountingOutput
 > {
-  constructor(private readonly deps: Deps) {
+  constructor(protected readonly deps: Deps) {
     super({ logger: deps.logger });
   }
 
@@ -39,7 +40,7 @@ export class SetupAccountingUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<SetupAccountingOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     // Check if already setup

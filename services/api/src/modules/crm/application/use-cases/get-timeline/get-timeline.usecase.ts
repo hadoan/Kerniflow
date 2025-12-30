@@ -1,22 +1,22 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
+import { Injectable } from "@nestjs/common";
+import {
+  BaseUseCase,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  ok,
+  err,
+} from "@kerniflow/kernel";
 import type { GetTimelineInput, GetTimelineOutput } from "@kerniflow/contracts";
-import { BaseUseCase, UseCaseContext, UseCaseError, ValidationError } from "@/shared/application";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
-import { ACTIVITY_REPO_PORT } from "../../ports/activity-repository.port";
-
-type Deps = {
-  activityRepo: ActivityRepoPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class GetTimelineUseCase extends BaseUseCase<GetTimelineInput, GetTimelineOutput> {
   constructor(
-    @Inject(ACTIVITY_REPO_PORT) private readonly activityRepo: ActivityRepoPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly activityRepo: ActivityRepoPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }
@@ -43,13 +43,18 @@ export class GetTimelineUseCase extends BaseUseCase<GetTimelineInput, GetTimelin
       ctx.tenantId,
       input.entityType,
       input.entityId,
-      input.pageSize,
+      input.limit,
       input.cursor
     );
 
+    const items = result.items.map((item) => ({
+      ...item,
+      timestamp: item.timestamp.toISOString(),
+    }));
+
     return ok({
-      items: result.items,
-      nextCursor: result.nextCursor,
+      items,
+      nextCursor: result.nextCursor ?? null,
     });
   }
 }

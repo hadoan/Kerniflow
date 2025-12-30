@@ -38,7 +38,7 @@ export class GetEngagementSettingsUseCase extends BaseUseCase<
   GetEngagementSettingsInput,
   GetEngagementSettingsOutput
 > {
-  constructor(private readonly deps: Deps) {
+  constructor(protected readonly deps: Deps) {
     super({ logger: deps.logger });
   }
 

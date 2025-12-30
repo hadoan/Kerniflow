@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ForbiddenError } from "@kerniflow/domain";
+import { ForbiddenError } from "@kerniflow/kernel";
 import { TenantEntitlement } from "../../domain/entitlement.aggregate";
 import { APP_REGISTRY_TOKEN, type AppRegistryPort } from "../ports/app-registry.port";
 import {

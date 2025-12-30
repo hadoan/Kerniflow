@@ -25,7 +25,7 @@ import type {
 import type { WarehouseRepositoryPort } from "../ports/warehouse-repository.port";
 import type { LocationRepositoryPort } from "../ports/location-repository.port";
 import { toWarehouseDto } from "../mappers/inventory-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 
 const DEFAULT_LOCATIONS = [
@@ -48,8 +48,8 @@ export class CreateWarehouseUseCase extends BaseUseCase<
   CreateWarehouseInput,
   CreateWarehouseOutput
 > {
-  constructor(private readonly deps: WarehouseDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly warehouseDeps: WarehouseDeps) {
+    super({ logger: warehouseDeps.logger });
   }
 
   protected async handle(
@@ -61,7 +61,7 @@ export class CreateWarehouseUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreateWarehouseOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.warehouseDeps.idempotency,
       actionKey: "inventory.create-warehouse",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -70,12 +70,12 @@ export class CreateWarehouseUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const existingDefault = await this.deps.repo.findDefault(ctx.tenantId);
+    const existingDefault = await this.warehouseDeps.repo.findDefault(ctx.tenantId);
     const isDefault = input.isDefault ?? !existingDefault;
 
-    const now = this.deps.clock.now();
+    const now = this.warehouseDeps.clock.now();
     const warehouse = {
-      id: this.deps.idGenerator.newId(),
+      id: this.warehouseDeps.idGenerator.newId(),
       tenantId: ctx.tenantId,
       name: input.name,
       isDefault,
@@ -84,11 +84,11 @@ export class CreateWarehouseUseCase extends BaseUseCase<
       updatedAt: now,
     };
 
-    await this.deps.repo.create(ctx.tenantId, warehouse);
+    await this.warehouseDeps.repo.create(ctx.tenantId, warehouse);
 
     for (const loc of DEFAULT_LOCATIONS) {
-      await this.deps.locationRepo.create(ctx.tenantId, {
-        id: this.deps.idGenerator.newId(),
+      await this.warehouseDeps.locationRepo.create(ctx.tenantId, {
+        id: this.warehouseDeps.idGenerator.newId(),
         tenantId: ctx.tenantId,
         warehouseId: warehouse.id,
         name: loc.name,
@@ -99,7 +99,7 @@ export class CreateWarehouseUseCase extends BaseUseCase<
       });
     }
 
-    await this.deps.audit.log({
+    await this.warehouseDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.warehouse.created",
@@ -109,7 +109,7 @@ export class CreateWarehouseUseCase extends BaseUseCase<
 
     const result = { warehouse: toWarehouseDto(warehouse) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.warehouseDeps.idempotency,
       actionKey: "inventory.create-warehouse",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -124,8 +124,8 @@ export class UpdateWarehouseUseCase extends BaseUseCase<
   UpdateWarehouseInput,
   UpdateWarehouseOutput
 > {
-  constructor(private readonly deps: WarehouseDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly warehouseDeps: WarehouseDeps) {
+    super({ logger: warehouseDeps.logger });
   }
 
   protected async handle(
@@ -136,7 +136,7 @@ export class UpdateWarehouseUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const warehouse = await this.deps.repo.findById(ctx.tenantId, input.warehouseId);
+    const warehouse = await this.warehouseDeps.repo.findById(ctx.tenantId, input.warehouseId);
     if (!warehouse) {
       return err(new NotFoundError("Warehouse not found"));
     }
@@ -149,11 +149,11 @@ export class UpdateWarehouseUseCase extends BaseUseCase<
         input.patch.address !== undefined
           ? (input.patch.address ?? null)
           : (warehouse.address ?? null),
-      updatedAt: this.deps.clock.now(),
+      updatedAt: this.warehouseDeps.clock.now(),
     };
 
-    await this.deps.repo.save(ctx.tenantId, updated);
-    await this.deps.audit.log({
+    await this.warehouseDeps.repo.save(ctx.tenantId, updated);
+    await this.warehouseDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.warehouse.updated",
@@ -166,8 +166,8 @@ export class UpdateWarehouseUseCase extends BaseUseCase<
 }
 
 export class GetWarehouseUseCase extends BaseUseCase<GetWarehouseInput, GetWarehouseOutput> {
-  constructor(private readonly deps: WarehouseDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly warehouseDeps: WarehouseDeps) {
+    super({ logger: warehouseDeps.logger });
   }
 
   protected async handle(
@@ -178,7 +178,7 @@ export class GetWarehouseUseCase extends BaseUseCase<GetWarehouseInput, GetWareh
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const warehouse = await this.deps.repo.findById(ctx.tenantId, input.warehouseId);
+    const warehouse = await this.warehouseDeps.repo.findById(ctx.tenantId, input.warehouseId);
     if (!warehouse) {
       return err(new NotFoundError("Warehouse not found"));
     }
@@ -188,8 +188,8 @@ export class GetWarehouseUseCase extends BaseUseCase<GetWarehouseInput, GetWareh
 }
 
 export class ListWarehousesUseCase extends BaseUseCase<ListWarehousesInput, ListWarehousesOutput> {
-  constructor(private readonly deps: WarehouseDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly warehouseDeps: WarehouseDeps) {
+    super({ logger: warehouseDeps.logger });
   }
 
   protected async handle(
@@ -200,7 +200,7 @@ export class ListWarehousesUseCase extends BaseUseCase<ListWarehousesInput, List
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.repo.list(ctx.tenantId, {
+    const result = await this.warehouseDeps.repo.list(ctx.tenantId, {
       cursor: input.cursor,
       pageSize: input.pageSize,
     });

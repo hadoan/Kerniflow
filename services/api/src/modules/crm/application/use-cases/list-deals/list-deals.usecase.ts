@@ -1,23 +1,23 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
+import { Injectable } from "@nestjs/common";
+import {
+  BaseUseCase,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  ok,
+  err,
+} from "@kerniflow/kernel";
 import type { ListDealsInput, ListDealsOutput } from "@kerniflow/contracts";
-import { BaseUseCase, UseCaseContext, UseCaseError, ValidationError } from "@/shared/application";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
-import { DEAL_REPO_PORT } from "../../ports/deal-repository.port";
 import { toDealDto } from "../../mappers/deal-dto.mapper";
-
-type Deps = {
-  dealRepo: DealRepoPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class ListDealsUseCase extends BaseUseCase<ListDealsInput, ListDealsOutput> {
   constructor(
-    @Inject(DEAL_REPO_PORT) private readonly dealRepo: DealRepoPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly dealRepo: DealRepoPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }
@@ -41,11 +41,11 @@ export class ListDealsUseCase extends BaseUseCase<ListDealsInput, ListDealsOutpu
       ownerUserId: input.ownerUserId,
     };
 
-    const result = await this.dealRepo.list(ctx.tenantId, filters, input.pageSize, input.cursor);
+    const result = await this.dealRepo.list(ctx.tenantId, filters, input.limit, input.cursor);
 
     return ok({
-      deals: result.deals.map(toDealDto),
-      nextCursor: result.nextCursor,
+      items: result.items.map(toDealDto),
+      nextCursor: result.nextCursor ?? null,
     });
   }
 }

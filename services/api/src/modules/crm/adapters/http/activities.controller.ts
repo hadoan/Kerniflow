@@ -29,7 +29,10 @@ export class ActivitiesHttpController {
   @Patch(":id")
   @RequirePermission("crm.activities.manage")
   async update(@Param("id") id: string, @Body() body: unknown, @Req() req: Request) {
-    const input = UpdateActivityInputSchema.parse({ activityId: id, ...body });
+    const input = UpdateActivityInputSchema.parse({
+      activityId: id,
+      ...(body as Record<string, unknown>),
+    });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.updateActivity.execute(input, ctx);
     return mapResultToHttp(result).activity;
@@ -38,7 +41,10 @@ export class ActivitiesHttpController {
   @Post(":id/complete")
   @RequirePermission("crm.activities.manage")
   async complete(@Param("id") id: string, @Body() body: unknown, @Req() req: Request) {
-    const input = CompleteActivityInputSchema.parse({ activityId: id, ...body });
+    const input = CompleteActivityInputSchema.parse({
+      activityId: id,
+      ...(body as Record<string, unknown>),
+    });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.completeActivity.execute(input, ctx);
     return mapResultToHttp(result).activity;
@@ -54,7 +60,7 @@ export class ActivitiesHttpController {
       status: query.status,
       assignedToUserId: query.assignedToUserId,
       cursor: query.cursor,
-      pageSize: query.pageSize ? Number(query.pageSize) : undefined,
+      limit: query.pageSize ? Number(query.pageSize) : undefined,
     });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.listActivities.execute(input, ctx);
@@ -79,7 +85,7 @@ export class TimelineHttpController {
       entityType,
       entityId,
       cursor: query.cursor,
-      pageSize: query.pageSize ? Number(query.pageSize) : undefined,
+      limit: query.pageSize ? Number(query.pageSize) : undefined,
     });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.getTimeline.execute(input, ctx);

@@ -31,7 +31,10 @@ export class DealsHttpController {
   @Patch(":id")
   @RequirePermission("crm.deals.manage")
   async update(@Param("id") id: string, @Body() body: unknown, @Req() req: Request) {
-    const input = UpdateDealInputSchema.parse({ dealId: id, ...body });
+    const input = UpdateDealInputSchema.parse({
+      dealId: id,
+      ...(body as Record<string, unknown>),
+    });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.updateDeal.execute(input, ctx);
     return mapResultToHttp(result).deal;
@@ -40,7 +43,10 @@ export class DealsHttpController {
   @Post(":id/move-stage")
   @RequirePermission("crm.deals.manage")
   async moveStage(@Param("id") id: string, @Body() body: unknown, @Req() req: Request) {
-    const input = MoveDealStageInputSchema.parse({ dealId: id, ...body });
+    const input = MoveDealStageInputSchema.parse({
+      dealId: id,
+      ...(body as Record<string, unknown>),
+    });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.moveDealStage.execute(input, ctx);
     return mapResultToHttp(result).deal;
@@ -49,7 +55,10 @@ export class DealsHttpController {
   @Post(":id/mark-won")
   @RequirePermission("crm.deals.manage")
   async markWon(@Param("id") id: string, @Body() body: unknown, @Req() req: Request) {
-    const input = MarkDealWonInputSchema.parse({ dealId: id, ...body });
+    const input = MarkDealWonInputSchema.parse({
+      dealId: id,
+      ...(body as Record<string, unknown>),
+    });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.markDealWon.execute(input, ctx);
     return mapResultToHttp(result).deal;
@@ -58,7 +67,10 @@ export class DealsHttpController {
   @Post(":id/mark-lost")
   @RequirePermission("crm.deals.manage")
   async markLost(@Param("id") id: string, @Body() body: unknown, @Req() req: Request) {
-    const input = MarkDealLostInputSchema.parse({ dealId: id, ...body });
+    const input = MarkDealLostInputSchema.parse({
+      dealId: id,
+      ...(body as Record<string, unknown>),
+    });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.markDealLost.execute(input, ctx);
     return mapResultToHttp(result).deal;
@@ -82,7 +94,7 @@ export class DealsHttpController {
       status: query.status,
       ownerUserId: query.ownerUserId,
       cursor: query.cursor,
-      pageSize: query.pageSize ? Number(query.pageSize) : undefined,
+      limit: query.pageSize ? Number(query.pageSize) : undefined,
     });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.listDeals.execute(input, ctx);

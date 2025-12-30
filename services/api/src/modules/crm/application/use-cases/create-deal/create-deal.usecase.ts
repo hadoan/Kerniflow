@@ -1,32 +1,29 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
+import { Injectable } from "@nestjs/common";
+import {
+  BaseUseCase,
+  type ClockPort,
+  type IdGeneratorPort,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  parseLocalDate,
+  ok,
+  err,
+} from "@kerniflow/kernel";
 import type { CreateDealInput, CreateDealOutput } from "@kerniflow/contracts";
-import { BaseUseCase, UseCaseContext, UseCaseError, ValidationError } from "@/shared/application";
-import type { ClockPort } from "@/shared/ports/clock.port";
-import { CLOCK_PORT } from "@/shared/ports/clock.port";
-import type { IdGeneratorPort } from "@/shared/ports/id-generator.port";
-import { ID_GENERATOR_PORT } from "@/shared/ports/id-generator.port";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
-import { DEAL_REPO_PORT } from "../../ports/deal-repository.port";
 import { DealAggregate } from "../../../domain/deal.aggregate";
 import { toDealDto } from "../../mappers/deal-dto.mapper";
-
-type Deps = {
-  dealRepo: DealRepoPort;
-  clock: ClockPort;
-  idGenerator: IdGeneratorPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class CreateDealUseCase extends BaseUseCase<CreateDealInput, CreateDealOutput> {
   constructor(
-    @Inject(DEAL_REPO_PORT) private readonly dealRepo: DealRepoPort,
-    @Inject(CLOCK_PORT) private readonly clock: ClockPort,
-    @Inject(ID_GENERATOR_PORT) private readonly idGenerator: IdGeneratorPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly dealRepo: DealRepoPort,
+    private readonly clock: ClockPort,
+    private readonly idGenerator: IdGeneratorPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }
@@ -66,7 +63,7 @@ export class CreateDealUseCase extends BaseUseCase<CreateDealInput, CreateDealOu
       stageId: input.stageId,
       amountCents: input.amountCents,
       currency: input.currency,
-      expectedCloseDate: input.expectedCloseDate,
+      expectedCloseDate: input.expectedCloseDate ? parseLocalDate(input.expectedCloseDate) : null,
       probability: input.probability,
       ownerUserId: input.ownerUserId ?? ctx.userId ?? null,
       notes: input.notes,

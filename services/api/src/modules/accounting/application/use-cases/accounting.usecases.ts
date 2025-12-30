@@ -4,6 +4,9 @@ import {
   type ClockPort,
   type IdGeneratorPort,
   type LoggerPort,
+  ValidationError,
+  NotFoundError,
+  ConflictError,
 } from "@kerniflow/kernel";
 import type { Result, UseCaseContext, UseCaseError } from "@kerniflow/kernel";
 import { ok, err } from "@kerniflow/kernel";
@@ -53,7 +56,7 @@ type BaseDeps = {
 
 // ===== Setup Status =====
 export class GetSetupStatusUseCase extends BaseUseCase<void, SetupStatusOutput> {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -62,7 +65,7 @@ export class GetSetupStatusUseCase extends BaseUseCase<void, SetupStatusOutput> 
     ctx: UseCaseContext
   ): Promise<Result<SetupStatusOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
@@ -79,7 +82,7 @@ export class CreateLedgerAccountUseCase extends BaseUseCase<
   CreateLedgerAccountInput,
   CreateLedgerAccountOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -88,13 +91,13 @@ export class CreateLedgerAccountUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<CreateLedgerAccountOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     // Check for duplicate code
     const existing = await this.deps.accountRepo.findByCode(ctx.tenantId, input.code);
     if (existing) {
-      return err({ type: "ConflictError", message: "Account code already exists" });
+      return err(new ConflictError("Account code already exists"));
     }
 
     const now = this.deps.clock.now();
@@ -120,7 +123,7 @@ export class UpdateLedgerAccountUseCase extends BaseUseCase<
   UpdateLedgerAccountInput,
   UpdateLedgerAccountOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -129,12 +132,12 @@ export class UpdateLedgerAccountUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<UpdateLedgerAccountOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const account = await this.deps.accountRepo.findById(ctx.tenantId, input.accountId);
     if (!account) {
-      return err({ type: "NotFoundError", message: "Account not found" });
+      return err(new NotFoundError("Account not found"));
     }
 
     const now = this.deps.clock.now();
@@ -161,7 +164,7 @@ export class ListLedgerAccountsUseCase extends BaseUseCase<
   ListLedgerAccountsInput,
   ListLedgerAccountsOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -170,7 +173,7 @@ export class ListLedgerAccountsUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<ListLedgerAccountsOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const result = await this.deps.accountRepo.list(ctx.tenantId, input);
@@ -188,7 +191,7 @@ export class CreateJournalEntryUseCase extends BaseUseCase<
   CreateJournalEntryInput,
   CreateJournalEntryOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -197,23 +200,17 @@ export class CreateJournalEntryUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<CreateJournalEntryOutput, UseCaseError>> {
     if (!ctx.tenantId || !ctx.userId) {
-      return err({ type: "ValidationError", message: "tenantId and userId are required" });
+      return err(new ValidationError("tenantId and userId are required"));
     }
 
     // Validate accounts exist and are active
     for (const line of input.lines) {
       const account = await this.deps.accountRepo.findById(ctx.tenantId, line.ledgerAccountId);
       if (!account) {
-        return err({
-          type: "ValidationError",
-          message: `Account ${line.ledgerAccountId} not found`,
-        });
+        return err(new ValidationError(`Account ${line.ledgerAccountId} not found`));
       }
       if (!account.isActive) {
-        return err({
-          type: "ValidationError",
-          message: `Account ${account.code} ${account.name} is inactive`,
-        });
+        return err(new ValidationError(`Account ${account.code} ${account.name} is inactive`));
       }
     }
 
@@ -252,7 +249,7 @@ export class UpdateJournalEntryUseCase extends BaseUseCase<
   UpdateJournalEntryInput,
   UpdateJournalEntryOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -261,16 +258,16 @@ export class UpdateJournalEntryUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<UpdateJournalEntryOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const entry = await this.deps.entryRepo.findById(ctx.tenantId, input.entryId);
     if (!entry) {
-      return err({ type: "NotFoundError", message: "Journal entry not found" });
+      return err(new NotFoundError("Journal entry not found"));
     }
 
     if (entry.status !== "Draft") {
-      return err({ type: "ValidationError", message: "Only draft entries can be updated" });
+      return err(new ValidationError("Only draft entries can be updated"));
     }
 
     const now = this.deps.clock.now();
@@ -304,7 +301,7 @@ export class PostJournalEntryUseCase extends BaseUseCase<
   PostJournalEntryInput,
   PostJournalEntryOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -313,12 +310,12 @@ export class PostJournalEntryUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<PostJournalEntryOutput, UseCaseError>> {
     if (!ctx.tenantId || !ctx.userId) {
-      return err({ type: "ValidationError", message: "tenantId and userId are required" });
+      return err(new ValidationError("tenantId and userId are required"));
     }
 
     const entry = await this.deps.entryRepo.findById(ctx.tenantId, input.entryId);
     if (!entry) {
-      return err({ type: "NotFoundError", message: "Journal entry not found" });
+      return err(new NotFoundError("Journal entry not found"));
     }
 
     // Check period locking
@@ -329,19 +326,20 @@ export class PostJournalEntryUseCase extends BaseUseCase<
         entry.postingDate
       );
       if (!period) {
-        return err({ type: "ValidationError", message: "No period found for posting date" });
+        return err(new ValidationError("No period found for posting date"));
       }
       if (period.status === "Closed") {
-        return err({
-          type: "ValidationError",
-          message: `Posting date ${entry.postingDate} is in closed period ${period.name}`,
-        });
+        return err(
+          new ValidationError(
+            `Posting date ${entry.postingDate} is in closed period ${period.name}`
+          )
+        );
       }
     }
 
     // Allocate entry number
     if (!settings) {
-      return err({ type: "ValidationError", message: "Accounting not set up" });
+      return err(new ValidationError("Accounting not set up"));
     }
     const entryNumber = settings.allocateEntryNumber();
     await this.deps.settingsRepo.save(settings);
@@ -351,7 +349,7 @@ export class PostJournalEntryUseCase extends BaseUseCase<
     try {
       entry.post({ entryNumber, postedBy: ctx.userId, now });
     } catch (error) {
-      return err({ type: "ValidationError", message: (error as Error).message });
+      return err(new ValidationError((error as Error).message));
     }
 
     await this.deps.entryRepo.save(entry);
@@ -364,7 +362,7 @@ export class ReverseJournalEntryUseCase extends BaseUseCase<
   ReverseJournalEntryInput,
   ReverseJournalEntryOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -373,20 +371,20 @@ export class ReverseJournalEntryUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<ReverseJournalEntryOutput, UseCaseError>> {
     if (!ctx.tenantId || !ctx.userId) {
-      return err({ type: "ValidationError", message: "tenantId and userId are required" });
+      return err(new ValidationError("tenantId and userId are required"));
     }
 
     const originalEntry = await this.deps.entryRepo.findById(ctx.tenantId, input.entryId);
     if (!originalEntry) {
-      return err({ type: "NotFoundError", message: "Journal entry not found" });
+      return err(new NotFoundError("Journal entry not found"));
     }
 
     if (originalEntry.status !== "Posted") {
-      return err({ type: "ValidationError", message: "Only posted entries can be reversed" });
+      return err(new ValidationError("Only posted entries can be reversed"));
     }
 
     if (originalEntry.reversedByEntryId) {
-      return err({ type: "ValidationError", message: "Entry has already been reversed" });
+      return err(new ValidationError("Entry has already been reversed"));
     }
 
     // Check period locking for reversal date
@@ -397,13 +395,14 @@ export class ReverseJournalEntryUseCase extends BaseUseCase<
         input.reversalDate
       );
       if (!period) {
-        return err({ type: "ValidationError", message: "No period found for reversal date" });
+        return err(new ValidationError("No period found for reversal date"));
       }
       if (period.status === "Closed") {
-        return err({
-          type: "ValidationError",
-          message: `Reversal date ${input.reversalDate} is in closed period ${period.name}`,
-        });
+        return err(
+          new ValidationError(
+            `Reversal date ${input.reversalDate} is in closed period ${period.name}`
+          )
+        );
       }
     }
 
@@ -422,7 +421,7 @@ export class ReverseJournalEntryUseCase extends BaseUseCase<
 
     // Auto-post the reversal
     if (!settings) {
-      return err({ type: "ValidationError", message: "Accounting not set up" });
+      return err(new ValidationError("Accounting not set up"));
     }
     const entryNumber = settings.allocateEntryNumber();
     await this.deps.settingsRepo.save(settings);
@@ -447,7 +446,7 @@ export class ListJournalEntriesUseCase extends BaseUseCase<
   ListJournalEntriesInput,
   ListJournalEntriesOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -456,7 +455,7 @@ export class ListJournalEntriesUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<ListJournalEntriesOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const result = await this.deps.entryRepo.list(ctx.tenantId, input);
@@ -475,7 +474,7 @@ export class ListJournalEntriesUseCase extends BaseUseCase<
 
 // ===== Period Management =====
 export class ClosePeriodUseCase extends BaseUseCase<ClosePeriodInput, ClosePeriodOutput> {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -484,12 +483,12 @@ export class ClosePeriodUseCase extends BaseUseCase<ClosePeriodInput, ClosePerio
     ctx: UseCaseContext
   ): Promise<Result<ClosePeriodOutput, UseCaseError>> {
     if (!ctx.tenantId || !ctx.userId) {
-      return err({ type: "ValidationError", message: "tenantId and userId are required" });
+      return err(new ValidationError("tenantId and userId are required"));
     }
 
     const period = await this.deps.periodRepo.findById(ctx.tenantId, input.periodId);
     if (!period) {
-      return err({ type: "NotFoundError", message: "Period not found" });
+      return err(new NotFoundError("Period not found"));
     }
 
     const now = this.deps.clock.now();
@@ -497,7 +496,7 @@ export class ClosePeriodUseCase extends BaseUseCase<ClosePeriodInput, ClosePerio
     try {
       period.close(ctx.userId, now);
     } catch (error) {
-      return err({ type: "ValidationError", message: (error as Error).message });
+      return err(new ValidationError((error as Error).message));
     }
 
     await this.deps.periodRepo.save(period);
@@ -507,7 +506,7 @@ export class ClosePeriodUseCase extends BaseUseCase<ClosePeriodInput, ClosePerio
 }
 
 export class ReopenPeriodUseCase extends BaseUseCase<ReopenPeriodInput, ReopenPeriodOutput> {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -516,12 +515,12 @@ export class ReopenPeriodUseCase extends BaseUseCase<ReopenPeriodInput, ReopenPe
     ctx: UseCaseContext
   ): Promise<Result<ReopenPeriodOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const period = await this.deps.periodRepo.findById(ctx.tenantId, input.periodId);
     if (!period) {
-      return err({ type: "NotFoundError", message: "Period not found" });
+      return err(new NotFoundError("Period not found"));
     }
 
     const now = this.deps.clock.now();
@@ -529,7 +528,7 @@ export class ReopenPeriodUseCase extends BaseUseCase<ReopenPeriodInput, ReopenPe
     try {
       period.reopen(now);
     } catch (error) {
-      return err({ type: "ValidationError", message: (error as Error).message });
+      return err(new ValidationError((error as Error).message));
     }
 
     await this.deps.periodRepo.save(period);
@@ -543,7 +542,7 @@ export class UpdateAccountingSettingsUseCase extends BaseUseCase<
   UpdateAccountingSettingsInput,
   UpdateAccountingSettingsOutput
 > {
-  constructor(private readonly deps: BaseDeps) {
+  constructor(protected readonly deps: BaseDeps) {
     super({ logger: deps.logger });
   }
 
@@ -552,12 +551,12 @@ export class UpdateAccountingSettingsUseCase extends BaseUseCase<
     ctx: UseCaseContext
   ): Promise<Result<UpdateAccountingSettingsOutput, UseCaseError>> {
     if (!ctx.tenantId) {
-      return err({ type: "ValidationError", message: "tenantId is required" });
+      return err(new ValidationError("tenantId is required"));
     }
 
     const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
-      return err({ type: "NotFoundError", message: "Accounting settings not found" });
+      return err(new NotFoundError("Accounting settings not found"));
     }
 
     const now = this.deps.clock.now();

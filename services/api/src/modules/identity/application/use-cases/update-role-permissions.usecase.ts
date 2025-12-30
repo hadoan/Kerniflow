@@ -72,7 +72,9 @@ export class UpdateRolePermissionsUseCase {
       targetType: "Role",
       targetId: command.roleId,
       context: command.context,
-      details: `Updated ${normalized.length} permission grants`,
+      metadataJson: JSON.stringify({
+        details: `Updated ${normalized.length} permission grants`,
+      }),
     });
   }
 }

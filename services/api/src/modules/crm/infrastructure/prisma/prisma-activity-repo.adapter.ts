@@ -84,10 +84,10 @@ export class PrismaActivityRepoAdapter implements ActivityRepoPort {
       orderBy: { createdAt: "desc" },
     });
 
-    const activities = results.map((row) => toEntity(row as ActivityRow));
-    const nextCursor = activities.length === pageSize ? (activities.at(-1)?.id ?? null) : null;
+    const items = results.map((row) => toEntity(row as ActivityRow));
+    const nextCursor = items.length === pageSize ? (items.at(-1)?.id ?? null) : null;
 
-    return { activities, nextCursor };
+    return { items, nextCursor };
   }
 
   async create(tenantId: string, activity: ActivityEntity): Promise<void> {

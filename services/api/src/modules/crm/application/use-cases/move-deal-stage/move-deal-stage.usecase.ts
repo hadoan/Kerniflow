@@ -1,33 +1,26 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
-import type { MoveDealStageInput, MoveDealStageOutput } from "@kerniflow/contracts";
+import { Injectable } from "@nestjs/common";
 import {
   BaseUseCase,
-  UseCaseContext,
-  UseCaseError,
+  type ClockPort,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
   ValidationError,
   NotFoundError,
-} from "@/shared/application";
-import type { ClockPort } from "@/shared/ports/clock.port";
-import { CLOCK_PORT } from "@/shared/ports/clock.port";
+  ok,
+  err,
+} from "@kerniflow/kernel";
+import type { MoveDealStageInput, MoveDealStageOutput } from "@kerniflow/contracts";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
-import { DEAL_REPO_PORT } from "../../ports/deal-repository.port";
 import { toDealDto } from "../../mappers/deal-dto.mapper";
-
-type Deps = {
-  dealRepo: DealRepoPort;
-  clock: ClockPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class MoveDealStageUseCase extends BaseUseCase<MoveDealStageInput, MoveDealStageOutput> {
   constructor(
-    @Inject(DEAL_REPO_PORT) private readonly dealRepo: DealRepoPort,
-    @Inject(CLOCK_PORT) private readonly clock: ClockPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly dealRepo: DealRepoPort,
+    private readonly clock: ClockPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@kerniflow/data";
+import { EntryStatus } from "@prisma/client";
 import type {
   AccountingReportQueryPort,
   AccountActivityQuery,
@@ -18,8 +19,10 @@ export class PrismaAccountingReportQueryAdapter implements AccountingReportQuery
       tenantId: query.tenantId,
       ledgerAccountId: query.accountId,
       journalEntry: {
-        status: "Posted",
-        ...(postingDate ? { postingDate } : {}),
+        is: {
+          status: EntryStatus.Posted,
+          ...(postingDate ? { postingDate } : {}),
+        },
       },
     };
 
@@ -56,10 +59,12 @@ export class PrismaAccountingReportQueryAdapter implements AccountingReportQuery
         tenantId: query.tenantId,
         ledgerAccountId: query.accountId,
         journalEntry: {
-          status: "Posted",
-          postingDate: {
-            gte: new Date(query.fromDate),
-            lte: new Date(query.toDate),
+          is: {
+            status: EntryStatus.Posted,
+            postingDate: {
+              gte: new Date(query.fromDate),
+              lte: new Date(query.toDate),
+            },
           },
         },
       },

@@ -1,32 +1,28 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
+import { Injectable } from "@nestjs/common";
+import {
+  BaseUseCase,
+  type ClockPort,
+  type IdGeneratorPort,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  ok,
+  err,
+} from "@kerniflow/kernel";
 import type { CreateActivityInput, CreateActivityOutput } from "@kerniflow/contracts";
-import { BaseUseCase, UseCaseContext, UseCaseError, ValidationError } from "@/shared/application";
-import type { ClockPort } from "@/shared/ports/clock.port";
-import { CLOCK_PORT } from "@/shared/ports/clock.port";
-import type { IdGeneratorPort } from "@/shared/ports/id-generator.port";
-import { ID_GENERATOR_PORT } from "@/shared/ports/id-generator.port";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
-import { ACTIVITY_REPO_PORT } from "../../ports/activity-repository.port";
 import { ActivityEntity } from "../../../domain/activity.entity";
 import { toActivityDto } from "../../mappers/activity-dto.mapper";
-
-type Deps = {
-  activityRepo: ActivityRepoPort;
-  clock: ClockPort;
-  idGenerator: IdGeneratorPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class CreateActivityUseCase extends BaseUseCase<CreateActivityInput, CreateActivityOutput> {
   constructor(
-    @Inject(ACTIVITY_REPO_PORT) private readonly activityRepo: ActivityRepoPort,
-    @Inject(CLOCK_PORT) private readonly clock: ClockPort,
-    @Inject(ID_GENERATOR_PORT) private readonly idGenerator: IdGeneratorPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly activityRepo: ActivityRepoPort,
+    private readonly clock: ClockPort,
+    private readonly idGenerator: IdGeneratorPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }

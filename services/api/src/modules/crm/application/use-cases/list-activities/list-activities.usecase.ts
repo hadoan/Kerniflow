@@ -1,23 +1,23 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
+import { Injectable } from "@nestjs/common";
+import {
+  BaseUseCase,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  ok,
+  err,
+} from "@kerniflow/kernel";
 import type { ListActivitiesInput, ListActivitiesOutput } from "@kerniflow/contracts";
-import { BaseUseCase, UseCaseContext, UseCaseError, ValidationError } from "@/shared/application";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
-import { ACTIVITY_REPO_PORT } from "../../ports/activity-repository.port";
 import { toActivityDto } from "../../mappers/activity-dto.mapper";
-
-type Deps = {
-  activityRepo: ActivityRepoPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class ListActivitiesUseCase extends BaseUseCase<ListActivitiesInput, ListActivitiesOutput> {
   constructor(
-    @Inject(ACTIVITY_REPO_PORT) private readonly activityRepo: ActivityRepoPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly activityRepo: ActivityRepoPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }
@@ -42,16 +42,11 @@ export class ListActivitiesUseCase extends BaseUseCase<ListActivitiesInput, List
       assignedToUserId: input.assignedToUserId,
     };
 
-    const result = await this.activityRepo.list(
-      ctx.tenantId,
-      filters,
-      input.pageSize,
-      input.cursor
-    );
+    const result = await this.activityRepo.list(ctx.tenantId, filters, input.limit, input.cursor);
 
     return ok({
-      activities: result.activities.map(toActivityDto),
-      nextCursor: result.nextCursor,
+      items: result.items.map(toActivityDto),
+      nextCursor: result.nextCursor ?? null,
     });
   }
 }

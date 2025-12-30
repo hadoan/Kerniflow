@@ -101,7 +101,10 @@ export class AccountingController {
     @Body() body: unknown,
     @Req() req: RequestWithAuth
   ) {
-    const input = UpdateLedgerAccountInputSchema.parse({ ...body, accountId });
+    const input = UpdateLedgerAccountInputSchema.parse({
+      ...(body as Record<string, unknown>),
+      accountId,
+    });
     const result = await this.app.updateLedgerAccount.execute(input, buildContext(req));
     if (!isOk(result)) {
       throw new HttpException(result.error.message, HttpStatus.BAD_REQUEST);
@@ -136,7 +139,10 @@ export class AccountingController {
     @Body() body: unknown,
     @Req() req: RequestWithAuth
   ) {
-    const input = UpdateJournalEntryInputSchema.parse({ ...body, entryId });
+    const input = UpdateJournalEntryInputSchema.parse({
+      ...(body as Record<string, unknown>),
+      entryId,
+    });
     const result = await this.app.updateJournalEntry.execute(input, buildContext(req));
     if (!isOk(result)) {
       throw new HttpException(result.error.message, HttpStatus.BAD_REQUEST);
@@ -150,7 +156,10 @@ export class AccountingController {
     @Body() body: unknown,
     @Req() req: RequestWithAuth
   ) {
-    const input = PostJournalEntryInputSchema.parse({ ...body, entryId });
+    const input = PostJournalEntryInputSchema.parse({
+      ...(body as Record<string, unknown>),
+      entryId,
+    });
     const result = await this.app.postJournalEntry.execute(input, buildContext(req));
     if (!isOk(result)) {
       throw new HttpException(result.error.message, HttpStatus.BAD_REQUEST);
@@ -164,7 +173,10 @@ export class AccountingController {
     @Body() body: unknown,
     @Req() req: RequestWithAuth
   ) {
-    const input = ReverseJournalEntryInputSchema.parse({ ...body, entryId });
+    const input = ReverseJournalEntryInputSchema.parse({
+      ...(body as Record<string, unknown>),
+      entryId,
+    });
     const result = await this.app.reverseJournalEntry.execute(input, buildContext(req));
     if (!isOk(result)) {
       throw new HttpException(result.error.message, HttpStatus.BAD_REQUEST);
@@ -220,7 +232,10 @@ export class AccountingController {
     @Body() body: unknown,
     @Req() req: RequestWithAuth
   ) {
-    const input = ClosePeriodInputSchema.parse({ ...body, periodId });
+    const input = ClosePeriodInputSchema.parse({
+      ...(body as Record<string, unknown>),
+      periodId,
+    });
     const result = await this.app.closePeriod.execute(input, buildContext(req));
     if (!isOk(result)) {
       throw new HttpException(result.error.message, HttpStatus.BAD_REQUEST);
@@ -234,7 +249,10 @@ export class AccountingController {
     @Body() body: unknown,
     @Req() req: RequestWithAuth
   ) {
-    const input = ReopenPeriodInputSchema.parse({ ...body, periodId });
+    const input = ReopenPeriodInputSchema.parse({
+      ...(body as Record<string, unknown>),
+      periodId,
+    });
     const result = await this.app.reopenPeriod.execute(input, buildContext(req));
     if (!isOk(result)) {
       throw new HttpException(result.error.message, HttpStatus.BAD_REQUEST);

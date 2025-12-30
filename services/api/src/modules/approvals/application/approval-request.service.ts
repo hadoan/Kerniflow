@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException, Inject } from "@nestjs/common";
 import { type ApprovalDecisionInput } from "@kerniflow/contracts";
-import { AuditPort, OutboxPort, AUDIT_PORT, OUTBOX_PORT } from "@kerniflow/kernel";
+import { AUDIT_PORT, OUTBOX_PORT } from "@kerniflow/kernel";
+import type { AuditPort, OutboxPort } from "@kerniflow/kernel";
 import {
   DomainEventRepository,
   PrismaService,

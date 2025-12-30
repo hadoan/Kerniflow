@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Inject } from "@nestjs/common";
 import { type ApprovalPolicyInput, type ApprovalRules } from "@kerniflow/contracts";
-import { AuditPort, OutboxPort, AUDIT_PORT, OUTBOX_PORT } from "@kerniflow/kernel";
+import { AUDIT_PORT, OUTBOX_PORT } from "@kerniflow/kernel";
+import type { AuditPort, OutboxPort } from "@kerniflow/kernel";
 import { WorkflowService } from "../../workflow/application/workflow.service";
 import { DomainEventRepository } from "@kerniflow/data";
 import { IdempotencyService } from "../../../shared/infrastructure/idempotency/idempotency.service";

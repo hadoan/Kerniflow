@@ -40,7 +40,7 @@ import type { StockReservationRepositoryPort } from "../ports/stock-reservation-
 import type { InventorySettingsRepositoryPort } from "../ports/settings-repository.port";
 import { InventorySettingsAggregate } from "../../domain/settings.aggregate";
 import { toInventoryDocumentDto } from "../mappers/inventory-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import { allocateUniqueNumber } from "./numbering";
 import type { InventoryDocumentType, StockMove } from "../../domain/inventory.types";
@@ -84,6 +84,16 @@ const buildLineItems = (params: {
   }));
 
 const localDateFromIso = (value?: string | null) => (value ? parseLocalDate(value) : null);
+
+const optionalLocalDate = (value?: string | null) => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  return parseLocalDate(value);
+};
 
 const requireLocation = (value: string | null | undefined, label: string) => {
   if (!value) {
@@ -225,8 +235,8 @@ export class CreateInventoryDocumentUseCase extends BaseUseCase<
   CreateInventoryDocumentInput,
   CreateInventoryDocumentOutput
 > {
-  constructor(private readonly deps: DocumentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly documentDeps: DocumentDeps) {
+    super({ logger: documentDeps.logger });
   }
 
   protected async handle(
@@ -238,7 +248,7 @@ export class CreateInventoryDocumentUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreateInventoryDocumentOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.create-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -247,15 +257,15 @@ export class CreateInventoryDocumentUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    const settings = await this.documentDeps.settingsRepo.findByTenant(ctx.tenantId);
     let lineItems = buildLineItems({
-      idGenerator: this.deps.idGenerator,
+      idGenerator: this.documentDeps.idGenerator,
       lineItems: input.lineItems,
     });
 
     await validateProducts({
       tenantId: ctx.tenantId,
-      productRepo: this.deps.productRepo,
+      productRepo: this.documentDeps.productRepo,
       lines: lineItems,
     });
     lineItems = await validateLineLocations({
@@ -263,13 +273,13 @@ export class CreateInventoryDocumentUseCase extends BaseUseCase<
       documentType: input.documentType,
       lines: lineItems,
       settings,
-      warehouseRepo: this.deps.warehouseRepo,
-      locationRepo: this.deps.locationRepo,
+      warehouseRepo: this.documentDeps.warehouseRepo,
+      locationRepo: this.documentDeps.locationRepo,
     });
 
-    const now = this.deps.clock.now();
+    const now = this.documentDeps.clock.now();
     const document = InventoryDocumentAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.documentDeps.idGenerator.newId(),
       tenantId: ctx.tenantId,
       documentType: input.documentType,
       reference: input.reference ?? null,
@@ -283,8 +293,8 @@ export class CreateInventoryDocumentUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.repo.create(ctx.tenantId, document);
-    await this.deps.audit.log({
+    await this.documentDeps.repo.create(ctx.tenantId, document);
+    await this.documentDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.document.created",
@@ -295,7 +305,7 @@ export class CreateInventoryDocumentUseCase extends BaseUseCase<
 
     const result = { document: toInventoryDocumentDto(document) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.create-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -310,8 +320,8 @@ export class UpdateInventoryDocumentUseCase extends BaseUseCase<
   UpdateInventoryDocumentInput,
   UpdateInventoryDocumentOutput
 > {
-  constructor(private readonly deps: DocumentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly documentDeps: DocumentDeps) {
+    super({ logger: documentDeps.logger });
   }
 
   protected async handle(
@@ -322,23 +332,19 @@ export class UpdateInventoryDocumentUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const document = await this.deps.repo.findById(ctx.tenantId, input.documentId);
+    const document = await this.documentDeps.repo.findById(ctx.tenantId, input.documentId);
     if (!document) {
       return err(new NotFoundError("Document not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.documentDeps.clock.now();
     if (input.headerPatch) {
       document.updateHeader(
         {
           partyId: input.headerPatch.partyId,
           reference: input.headerPatch.reference,
-          scheduledDate: input.headerPatch.scheduledDate
-            ? parseLocalDate(input.headerPatch.scheduledDate)
-            : input.headerPatch.scheduledDate,
-          postingDate: input.headerPatch.postingDate
-            ? parseLocalDate(input.headerPatch.postingDate)
-            : input.headerPatch.postingDate,
+          scheduledDate: optionalLocalDate(input.headerPatch.scheduledDate),
+          postingDate: optionalLocalDate(input.headerPatch.postingDate),
           notes: input.headerPatch.notes,
           sourceType: input.headerPatch.sourceType,
           sourceId: input.headerPatch.sourceId,
@@ -349,28 +355,28 @@ export class UpdateInventoryDocumentUseCase extends BaseUseCase<
 
     if (input.lineItems) {
       let lineItems = buildLineItems({
-        idGenerator: this.deps.idGenerator,
+        idGenerator: this.documentDeps.idGenerator,
         lineItems: input.lineItems,
       });
       await validateProducts({
         tenantId: ctx.tenantId,
-        productRepo: this.deps.productRepo,
+        productRepo: this.documentDeps.productRepo,
         lines: lineItems,
       });
-      const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+      const settings = await this.documentDeps.settingsRepo.findByTenant(ctx.tenantId);
       lineItems = await validateLineLocations({
         tenantId: ctx.tenantId,
         documentType: document.documentType,
         lines: lineItems,
         settings,
-        warehouseRepo: this.deps.warehouseRepo,
-        locationRepo: this.deps.locationRepo,
+        warehouseRepo: this.documentDeps.warehouseRepo,
+        locationRepo: this.documentDeps.locationRepo,
       });
       document.replaceLineItems(lineItems, now);
     }
 
-    await this.deps.repo.save(ctx.tenantId, document);
-    await this.deps.audit.log({
+    await this.documentDeps.repo.save(ctx.tenantId, document);
+    await this.documentDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.document.updated",
@@ -386,8 +392,8 @@ export class ConfirmInventoryDocumentUseCase extends BaseUseCase<
   ConfirmInventoryDocumentInput,
   ConfirmInventoryDocumentOutput
 > {
-  constructor(private readonly deps: DocumentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly documentDeps: DocumentDeps) {
+    super({ logger: documentDeps.logger });
   }
 
   protected async handle(
@@ -399,7 +405,7 @@ export class ConfirmInventoryDocumentUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<ConfirmInventoryDocumentOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.confirm-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -408,26 +414,27 @@ export class ConfirmInventoryDocumentUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const document = await this.deps.repo.findById(ctx.tenantId, input.documentId);
+    const document = await this.documentDeps.repo.findById(ctx.tenantId, input.documentId);
     if (!document) {
       return err(new NotFoundError("Document not found"));
     }
 
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    let settings = await this.documentDeps.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = InventorySettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.documentDeps.idGenerator.newId(),
         tenantId: ctx.tenantId,
-        now: this.deps.clock.now(),
+        now: this.documentDeps.clock.now(),
       });
     }
 
     const documentNumber = await allocateUniqueNumber({
       next: () => settings!.allocateDocumentNumber(document.documentType),
-      isTaken: (candidate) => this.deps.repo.isDocumentNumberTaken(ctx.tenantId!, candidate),
+      isTaken: (candidate) =>
+        this.documentDeps.repo.isDocumentNumberTaken(ctx.tenantId!, candidate),
     });
 
-    const now = this.deps.clock.now();
+    const now = this.documentDeps.clock.now();
     try {
       document.confirm(documentNumber, now, now);
     } catch (error) {
@@ -446,14 +453,17 @@ export class ConfirmInventoryDocumentUseCase extends BaseUseCase<
       const productIds = document.lines.map((line) => line.productId);
       const locationIds = document.lines.map((line) => line.fromLocationId!).filter(Boolean);
 
-      const onHand = await this.deps.moveRepo.sumByProductLocation(ctx.tenantId, {
+      const onHand = await this.documentDeps.moveRepo.sumByProductLocation(ctx.tenantId, {
         productIds,
         locationIds,
       });
-      const reserved = await this.deps.reservationRepo.sumActiveByProductLocation(ctx.tenantId, {
-        productIds,
-        locationIds,
-      });
+      const reserved = await this.documentDeps.reservationRepo.sumActiveByProductLocation(
+        ctx.tenantId,
+        {
+          productIds,
+          locationIds,
+        }
+      );
 
       const key = (productId: string, locationId: string) => `${productId}:${locationId}`;
       const onHandMap = new Map<string, number>();
@@ -492,7 +502,7 @@ export class ConfirmInventoryDocumentUseCase extends BaseUseCase<
       }
 
       const reservations = document.lines.map((line) => ({
-        id: this.deps.idGenerator.newId(),
+        id: this.documentDeps.idGenerator.newId(),
         tenantId: ctx.tenantId!,
         productId: line.productId,
         locationId: line.fromLocationId!,
@@ -505,13 +515,13 @@ export class ConfirmInventoryDocumentUseCase extends BaseUseCase<
         createdByUserId: ctx.userId!,
       }));
 
-      await this.deps.reservationRepo.createMany(ctx.tenantId, reservations);
+      await this.documentDeps.reservationRepo.createMany(ctx.tenantId, reservations);
     }
 
-    await this.deps.repo.save(ctx.tenantId, document);
-    await this.deps.settingsRepo.save(settings);
+    await this.documentDeps.repo.save(ctx.tenantId, document);
+    await this.documentDeps.settingsRepo.save(settings);
 
-    await this.deps.audit.log({
+    await this.documentDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.document.confirmed",
@@ -522,7 +532,7 @@ export class ConfirmInventoryDocumentUseCase extends BaseUseCase<
 
     const result = { document: toInventoryDocumentDto(document) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.confirm-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -537,8 +547,8 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
   PostInventoryDocumentInput,
   PostInventoryDocumentOutput
 > {
-  constructor(private readonly deps: DocumentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly documentDeps: DocumentDeps) {
+    super({ logger: documentDeps.logger });
   }
 
   protected async handle(
@@ -550,7 +560,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<PostInventoryDocumentOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.post-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -559,17 +569,17 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const document = await this.deps.repo.findById(ctx.tenantId, input.documentId);
+    const document = await this.documentDeps.repo.findById(ctx.tenantId, input.documentId);
     if (!document) {
       return err(new NotFoundError("Document not found"));
     }
 
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    let settings = await this.documentDeps.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = InventorySettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.documentDeps.idGenerator.newId(),
         tenantId: ctx.tenantId,
-        now: this.deps.clock.now(),
+        now: this.documentDeps.clock.now(),
       });
     }
 
@@ -590,7 +600,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
         .map((line) => line.fromLocationId)
         .filter((value): value is string => Boolean(value));
 
-      const onHand = await this.deps.moveRepo.sumByProductLocation(ctx.tenantId, {
+      const onHand = await this.documentDeps.moveRepo.sumByProductLocation(ctx.tenantId, {
         productIds,
         locationIds,
       });
@@ -642,7 +652,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
       if (document.documentType === "RECEIPT") {
         requireLocation(line.toLocationId, "toLocationId");
         moves.push({
-          id: this.deps.idGenerator.newId(),
+          id: this.documentDeps.idGenerator.newId(),
           tenantId: ctx.tenantId,
           postingDate: postingLocalDate,
           productId: line.productId,
@@ -652,7 +662,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
           documentId: document.id,
           lineId: line.id,
           reasonCode: "RECEIPT",
-          createdAt: this.deps.clock.now(),
+          createdAt: this.documentDeps.clock.now(),
           createdByUserId: ctx.userId,
         });
       }
@@ -660,7 +670,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
       if (document.documentType === "DELIVERY") {
         requireLocation(line.fromLocationId, "fromLocationId");
         moves.push({
-          id: this.deps.idGenerator.newId(),
+          id: this.documentDeps.idGenerator.newId(),
           tenantId: ctx.tenantId,
           postingDate: postingLocalDate,
           productId: line.productId,
@@ -670,7 +680,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
           documentId: document.id,
           lineId: line.id,
           reasonCode: "SHIPMENT",
-          createdAt: this.deps.clock.now(),
+          createdAt: this.documentDeps.clock.now(),
           createdByUserId: ctx.userId,
         });
       }
@@ -679,7 +689,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
         requireLocation(line.fromLocationId, "fromLocationId");
         requireLocation(line.toLocationId, "toLocationId");
         moves.push({
-          id: this.deps.idGenerator.newId(),
+          id: this.documentDeps.idGenerator.newId(),
           tenantId: ctx.tenantId,
           postingDate: postingLocalDate,
           productId: line.productId,
@@ -689,11 +699,11 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
           documentId: document.id,
           lineId: line.id,
           reasonCode: "TRANSFER",
-          createdAt: this.deps.clock.now(),
+          createdAt: this.documentDeps.clock.now(),
           createdByUserId: ctx.userId,
         });
         moves.push({
-          id: this.deps.idGenerator.newId(),
+          id: this.documentDeps.idGenerator.newId(),
           tenantId: ctx.tenantId,
           postingDate: postingLocalDate,
           productId: line.productId,
@@ -703,7 +713,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
           documentId: document.id,
           lineId: line.id,
           reasonCode: "TRANSFER",
-          createdAt: this.deps.clock.now(),
+          createdAt: this.documentDeps.clock.now(),
           createdByUserId: ctx.userId,
         });
       }
@@ -711,7 +721,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
       if (document.documentType === "ADJUSTMENT") {
         if (line.toLocationId) {
           moves.push({
-            id: this.deps.idGenerator.newId(),
+            id: this.documentDeps.idGenerator.newId(),
             tenantId: ctx.tenantId,
             postingDate: postingLocalDate,
             productId: line.productId,
@@ -721,12 +731,12 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
             documentId: document.id,
             lineId: line.id,
             reasonCode: "ADJUSTMENT",
-            createdAt: this.deps.clock.now(),
+            createdAt: this.documentDeps.clock.now(),
             createdByUserId: ctx.userId,
           });
         } else if (line.fromLocationId) {
           moves.push({
-            id: this.deps.idGenerator.newId(),
+            id: this.documentDeps.idGenerator.newId(),
             tenantId: ctx.tenantId,
             postingDate: postingLocalDate,
             productId: line.productId,
@@ -736,14 +746,14 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
             documentId: document.id,
             lineId: line.id,
             reasonCode: "ADJUSTMENT",
-            createdAt: this.deps.clock.now(),
+            createdAt: this.documentDeps.clock.now(),
             createdByUserId: ctx.userId,
           });
         }
       }
     }
 
-    const now = this.deps.clock.now();
+    const now = this.documentDeps.clock.now();
     document.setPostingDate(postingLocalDate, now);
     try {
       document.post(now, now);
@@ -751,16 +761,16 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
       return err(new ValidationError((error as Error).message));
     }
 
-    await this.deps.moveRepo.createMany(ctx.tenantId, moves);
+    await this.documentDeps.moveRepo.createMany(ctx.tenantId, moves);
 
     if (document.documentType === "DELIVERY") {
-      await this.deps.reservationRepo.fulfillByDocument(ctx.tenantId, document.id, now);
+      await this.documentDeps.reservationRepo.fulfillByDocument(ctx.tenantId, document.id, now);
     }
 
-    await this.deps.repo.save(ctx.tenantId, document);
-    await this.deps.settingsRepo.save(settings);
+    await this.documentDeps.repo.save(ctx.tenantId, document);
+    await this.documentDeps.settingsRepo.save(settings);
 
-    await this.deps.audit.log({
+    await this.documentDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.document.posted",
@@ -771,7 +781,7 @@ export class PostInventoryDocumentUseCase extends BaseUseCase<
 
     const result = { document: toInventoryDocumentDto(document) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.post-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -786,8 +796,8 @@ export class CancelInventoryDocumentUseCase extends BaseUseCase<
   CancelInventoryDocumentInput,
   CancelInventoryDocumentOutput
 > {
-  constructor(private readonly deps: DocumentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly documentDeps: DocumentDeps) {
+    super({ logger: documentDeps.logger });
   }
 
   protected async handle(
@@ -799,7 +809,7 @@ export class CancelInventoryDocumentUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CancelInventoryDocumentOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.cancel-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -808,12 +818,12 @@ export class CancelInventoryDocumentUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const document = await this.deps.repo.findById(ctx.tenantId, input.documentId);
+    const document = await this.documentDeps.repo.findById(ctx.tenantId, input.documentId);
     if (!document) {
       return err(new NotFoundError("Document not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.documentDeps.clock.now();
     try {
       document.cancel(now, now);
     } catch (error) {
@@ -821,11 +831,11 @@ export class CancelInventoryDocumentUseCase extends BaseUseCase<
     }
 
     if (document.documentType === "DELIVERY") {
-      await this.deps.reservationRepo.releaseByDocument(ctx.tenantId, document.id, now);
+      await this.documentDeps.reservationRepo.releaseByDocument(ctx.tenantId, document.id, now);
     }
 
-    await this.deps.repo.save(ctx.tenantId, document);
-    await this.deps.audit.log({
+    await this.documentDeps.repo.save(ctx.tenantId, document);
+    await this.documentDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.document.canceled",
@@ -836,7 +846,7 @@ export class CancelInventoryDocumentUseCase extends BaseUseCase<
 
     const result = { document: toInventoryDocumentDto(document) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.documentDeps.idempotency,
       actionKey: "inventory.cancel-document",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -851,8 +861,8 @@ export class GetInventoryDocumentUseCase extends BaseUseCase<
   GetInventoryDocumentInput,
   GetInventoryDocumentOutput
 > {
-  constructor(private readonly deps: DocumentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly documentDeps: DocumentDeps) {
+    super({ logger: documentDeps.logger });
   }
 
   protected async handle(
@@ -863,7 +873,7 @@ export class GetInventoryDocumentUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const document = await this.deps.repo.findById(ctx.tenantId, input.documentId);
+    const document = await this.documentDeps.repo.findById(ctx.tenantId, input.documentId);
     if (!document) {
       return err(new NotFoundError("Document not found"));
     }
@@ -876,8 +886,8 @@ export class ListInventoryDocumentsUseCase extends BaseUseCase<
   ListInventoryDocumentsInput,
   ListInventoryDocumentsOutput
 > {
-  constructor(private readonly deps: DocumentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly documentDeps: DocumentDeps) {
+    super({ logger: documentDeps.logger });
   }
 
   protected async handle(
@@ -888,12 +898,12 @@ export class ListInventoryDocumentsUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.repo.list(ctx.tenantId, {
+    const result = await this.documentDeps.repo.list(ctx.tenantId, {
       type: input.type,
       status: input.status,
       partyId: input.partyId,
-      fromDate: input.fromDate,
-      toDate: input.toDate,
+      fromDate: input.fromDate ? parseLocalDate(input.fromDate) : undefined,
+      toDate: input.toDate ? parseLocalDate(input.toDate) : undefined,
       search: input.search,
       cursor: input.cursor,
       pageSize: input.pageSize,

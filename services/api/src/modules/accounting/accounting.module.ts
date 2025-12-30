@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
-import { KernelModule } from "@kerniflow/kernel";
 
 // Infrastructure
 import {
@@ -49,18 +48,14 @@ import { AccountingApplication } from "./application/accounting.application";
 // Controllers
 import { AccountingController } from "./adapters/http/accounting.controller";
 
-// From Kernel
-import {
-  CLOCK_PORT_TOKEN,
-  ID_GENERATOR_TOKEN,
-  LOGGER_TOKEN,
-  NestLoggerAdapter,
-  SystemClock,
-  SystemIdGenerator,
-} from "@kerniflow/kernel";
+import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
+import { SystemClock } from "../../shared/infrastructure/system-clock";
+import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
+import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
+import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 
 @Module({
-  imports: [DataModule, KernelModule],
+  imports: [DataModule],
   controllers: [AccountingController],
   providers: [
     // Infrastructure - Kernel services
@@ -78,7 +73,6 @@ import {
     // Ports
     { provide: ID_GENERATOR_TOKEN, useExisting: SystemIdGenerator },
     { provide: CLOCK_PORT_TOKEN, useExisting: SystemClock },
-    { provide: LOGGER_TOKEN, useExisting: NestLoggerAdapter },
     { provide: ACCOUNTING_SETTINGS_REPO_PORT, useExisting: PrismaAccountingSettingsRepository },
     { provide: LEDGER_ACCOUNT_REPO_PORT, useExisting: PrismaLedgerAccountRepository },
     { provide: JOURNAL_ENTRY_REPO_PORT, useExisting: PrismaJournalEntryRepository },
@@ -98,7 +92,7 @@ import {
           idGenerator: null as any,
           clock: null as any,
         }),
-      inject: [LOGGER_TOKEN, ACCOUNTING_SETTINGS_REPO_PORT],
+      inject: [NestLoggerAdapter, ACCOUNTING_SETTINGS_REPO_PORT],
     },
     {
       provide: SetupAccountingUseCase,
@@ -112,7 +106,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         ACCOUNTING_PERIOD_REPO_PORT,
@@ -135,7 +129,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -157,7 +151,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -179,7 +173,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -203,7 +197,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -225,7 +219,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -247,7 +241,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -269,7 +263,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -291,7 +285,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -313,7 +307,7 @@ import {
           reportQuery,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -331,7 +325,7 @@ import {
           reportQuery,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -349,7 +343,7 @@ import {
           reportQuery,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -367,7 +361,7 @@ import {
           reportQuery,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -389,7 +383,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -411,7 +405,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,
@@ -433,7 +427,7 @@ import {
           clock,
         }),
       inject: [
-        LOGGER_TOKEN,
+        NestLoggerAdapter,
         ACCOUNTING_SETTINGS_REPO_PORT,
         LEDGER_ACCOUNT_REPO_PORT,
         JOURNAL_ENTRY_REPO_PORT,

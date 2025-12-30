@@ -1,5 +1,6 @@
 import {
   BaseUseCase,
+  parseLocalDate,
   type LoggerPort,
   type Result,
   type UseCaseContext,
@@ -54,7 +55,7 @@ type StockDeps = {
 };
 
 export class GetOnHandUseCase extends BaseUseCase<GetOnHandInput, GetOnHandOutput> {
-  constructor(private readonly deps: StockDeps) {
+  constructor(protected readonly deps: StockDeps) {
     super({ logger: deps.logger });
   }
 
@@ -106,7 +107,7 @@ export class GetOnHandUseCase extends BaseUseCase<GetOnHandInput, GetOnHandOutpu
 }
 
 export class GetAvailableUseCase extends BaseUseCase<GetAvailableInput, GetAvailableOutput> {
-  constructor(private readonly deps: StockDeps) {
+  constructor(protected readonly deps: StockDeps) {
     super({ logger: deps.logger });
   }
 
@@ -158,7 +159,7 @@ export class GetAvailableUseCase extends BaseUseCase<GetAvailableInput, GetAvail
 }
 
 export class ListStockMovesUseCase extends BaseUseCase<ListStockMovesInput, ListStockMovesOutput> {
-  constructor(private readonly deps: StockDeps) {
+  constructor(protected readonly deps: StockDeps) {
     super({ logger: deps.logger });
   }
 
@@ -180,8 +181,8 @@ export class ListStockMovesUseCase extends BaseUseCase<ListStockMovesInput, List
     const result = await this.deps.moveRepo.list(ctx.tenantId, {
       productId: input.productId,
       locationIds,
-      fromDate: input.fromDate,
-      toDate: input.toDate,
+      fromDate: input.fromDate ? parseLocalDate(input.fromDate) : undefined,
+      toDate: input.toDate ? parseLocalDate(input.toDate) : undefined,
       cursor: input.cursor,
       pageSize: input.pageSize,
     });
@@ -197,7 +198,7 @@ export class ListReservationsUseCase extends BaseUseCase<
   ListReservationsInput,
   ListReservationsOutput
 > {
-  constructor(private readonly deps: StockDeps) {
+  constructor(protected readonly deps: StockDeps) {
     super({ logger: deps.logger });
   }
 

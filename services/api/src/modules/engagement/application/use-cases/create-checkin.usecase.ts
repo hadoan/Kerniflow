@@ -44,7 +44,7 @@ export class CreateCheckInEventUseCase extends BaseUseCase<
   CreateCheckInEventInput,
   CreateCheckInEventOutput
 > {
-  constructor(private readonly deps: Deps) {
+  constructor(protected readonly deps: Deps) {
     super({ logger: deps.logger });
   }
 
@@ -65,7 +65,7 @@ export class CreateCheckInEventUseCase extends BaseUseCase<
       });
     }
 
-    const checkedInAt = input.checkedInAt ?? new Date();
+    const checkedInAt = input.checkedInAt ? new Date(input.checkedInAt) : new Date();
     const existingSettings = await this.deps.settings.getByTenant(tenantId);
     const settings = existingSettings ?? defaultSettings(tenantId);
 

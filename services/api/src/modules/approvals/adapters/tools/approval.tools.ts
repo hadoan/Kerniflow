@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { generateObject } from "ai";
+import type { LanguageModel } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import type { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import { ApprovalPolicySuggestionCardSchema } from "@kerniflow/contracts";
@@ -10,6 +11,8 @@ const validationError = (issues: unknown) => ({
   message: "Invalid input for tool call",
   details: issues,
 });
+
+const defaultModel = anthropic("claude-3-5-sonnet-20241022") as unknown as LanguageModel;
 
 export const buildApprovalTools = (): DomainToolPort[] => [
   {
@@ -36,7 +39,7 @@ export const buildApprovalTools = (): DomainToolPort[] => [
       const { actionKey, description, samplePayload } = parsed.data;
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           name: z.string(),
           description: z.string().optional(),

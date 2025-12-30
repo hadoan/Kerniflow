@@ -8,8 +8,11 @@ import {
   type MenuScope,
 } from "../../application/ports/tenant-menu-override-repository.port";
 
+type PrismaTransactionContext = TransactionContext & { prisma: PrismaService };
+
 function getPrismaClient(prisma: PrismaService, tx?: TransactionContext) {
-  return tx?.prisma ?? prisma;
+  const prismaTx = tx as PrismaTransactionContext | undefined;
+  return prismaTx?.prisma ?? prisma;
 }
 
 @Injectable()

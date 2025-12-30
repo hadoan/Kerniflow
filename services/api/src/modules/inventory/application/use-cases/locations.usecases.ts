@@ -23,7 +23,7 @@ import type {
 import type { LocationRepositoryPort } from "../ports/location-repository.port";
 import type { WarehouseRepositoryPort } from "../ports/warehouse-repository.port";
 import { toLocationDto } from "../mappers/inventory-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 
 type LocationDeps = {
@@ -37,8 +37,8 @@ type LocationDeps = {
 };
 
 export class CreateLocationUseCase extends BaseUseCase<CreateLocationInput, CreateLocationOutput> {
-  constructor(private readonly deps: LocationDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly locationDeps: LocationDeps) {
+    super({ logger: locationDeps.logger });
   }
 
   protected async handle(
@@ -50,7 +50,7 @@ export class CreateLocationUseCase extends BaseUseCase<CreateLocationInput, Crea
     }
 
     const cached = await getIdempotentResult<CreateLocationOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.locationDeps.idempotency,
       actionKey: "inventory.create-location",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -59,14 +59,17 @@ export class CreateLocationUseCase extends BaseUseCase<CreateLocationInput, Crea
       return ok(cached);
     }
 
-    const warehouse = await this.deps.warehouseRepo.findById(ctx.tenantId, input.warehouseId);
+    const warehouse = await this.locationDeps.warehouseRepo.findById(
+      ctx.tenantId,
+      input.warehouseId
+    );
     if (!warehouse) {
       return err(new NotFoundError("Warehouse not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.locationDeps.clock.now();
     const location = {
-      id: this.deps.idGenerator.newId(),
+      id: this.locationDeps.idGenerator.newId(),
       tenantId: ctx.tenantId,
       warehouseId: input.warehouseId,
       name: input.name,
@@ -76,8 +79,8 @@ export class CreateLocationUseCase extends BaseUseCase<CreateLocationInput, Crea
       updatedAt: now,
     };
 
-    await this.deps.repo.create(ctx.tenantId, location);
-    await this.deps.audit.log({
+    await this.locationDeps.repo.create(ctx.tenantId, location);
+    await this.locationDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.location.created",
@@ -87,7 +90,7 @@ export class CreateLocationUseCase extends BaseUseCase<CreateLocationInput, Crea
 
     const result = { location: toLocationDto(location) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.locationDeps.idempotency,
       actionKey: "inventory.create-location",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -99,8 +102,8 @@ export class CreateLocationUseCase extends BaseUseCase<CreateLocationInput, Crea
 }
 
 export class UpdateLocationUseCase extends BaseUseCase<UpdateLocationInput, UpdateLocationOutput> {
-  constructor(private readonly deps: LocationDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly locationDeps: LocationDeps) {
+    super({ logger: locationDeps.logger });
   }
 
   protected async handle(
@@ -111,7 +114,7 @@ export class UpdateLocationUseCase extends BaseUseCase<UpdateLocationInput, Upda
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const location = await this.deps.repo.findById(ctx.tenantId, input.locationId);
+    const location = await this.locationDeps.repo.findById(ctx.tenantId, input.locationId);
     if (!location) {
       return err(new NotFoundError("Location not found"));
     }
@@ -121,11 +124,11 @@ export class UpdateLocationUseCase extends BaseUseCase<UpdateLocationInput, Upda
       name: input.patch.name ?? location.name,
       locationType: input.patch.locationType ?? location.locationType,
       isActive: input.patch.isActive ?? location.isActive,
-      updatedAt: this.deps.clock.now(),
+      updatedAt: this.locationDeps.clock.now(),
     };
 
-    await this.deps.repo.save(ctx.tenantId, updated);
-    await this.deps.audit.log({
+    await this.locationDeps.repo.save(ctx.tenantId, updated);
+    await this.locationDeps.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "inventory.location.updated",
@@ -138,8 +141,8 @@ export class UpdateLocationUseCase extends BaseUseCase<UpdateLocationInput, Upda
 }
 
 export class ListLocationsUseCase extends BaseUseCase<ListLocationsInput, ListLocationsOutput> {
-  constructor(private readonly deps: LocationDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly locationDeps: LocationDeps) {
+    super({ logger: locationDeps.logger });
   }
 
   protected async handle(
@@ -150,7 +153,7 @@ export class ListLocationsUseCase extends BaseUseCase<ListLocationsInput, ListLo
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const locations = await this.deps.repo.listByWarehouse(ctx.tenantId, input.warehouseId);
+    const locations = await this.locationDeps.repo.listByWarehouse(ctx.tenantId, input.warehouseId);
     return ok({ items: locations.map(toLocationDto) });
   }
 }

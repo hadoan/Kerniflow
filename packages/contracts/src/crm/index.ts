@@ -20,7 +20,8 @@ export * from "./get-deal.schema";
 export * from "./create-activity.schema";
 export * from "./complete-activity.schema";
 export * from "./get-timeline.schema";
-// TODO: Add remaining activity schemas (update-activity, list-activities)
+export * from "./update-activity.schema";
+export * from "./list-activities.schema";
 
 // AI Proposals
 export * from "./ai-proposals/party-proposal.types";

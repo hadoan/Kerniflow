@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ValidationError, NotFoundError } from "@kerniflow/domain";
-import { AuditPort, AUDIT_PORT_TOKEN } from "@kerniflow/kernel";
+import { ValidationError, NotFoundError, AUDIT_PORT } from "@kerniflow/kernel";
+import type { AuditPort } from "@kerniflow/kernel";
 import { APP_REGISTRY_TOKEN, type AppRegistryPort } from "../ports/app-registry.port";
 import {
   TENANT_APP_INSTALL_REPOSITORY_TOKEN,
@@ -8,14 +8,14 @@ import {
 } from "../ports/tenant-app-install-repository.port";
 import { DependencyResolverService } from "../services/dependency-resolver.service";
 
-interface DisableAppInput {
+export interface DisableAppInput {
   tenantId: string;
   appId: string;
   actorUserId: string;
   force?: boolean;
 }
 
-interface DisableAppOutput {
+export interface DisableAppOutput {
   appId: string;
   disabledDependents: string[];
 }
@@ -28,7 +28,7 @@ export class DisableAppUseCase {
     @Inject(TENANT_APP_INSTALL_REPOSITORY_TOKEN)
     private readonly appInstallRepo: TenantAppInstallRepositoryPort,
     private readonly dependencyResolver: DependencyResolverService,
-    @Inject(AUDIT_PORT_TOKEN)
+    @Inject(AUDIT_PORT)
     private readonly audit: AuditPort
   ) {}
 

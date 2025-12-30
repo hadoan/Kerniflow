@@ -1,33 +1,26 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
-import type { UpdateActivityInput, UpdateActivityOutput } from "@kerniflow/contracts";
+import { Injectable } from "@nestjs/common";
 import {
   BaseUseCase,
-  UseCaseContext,
-  UseCaseError,
+  type ClockPort,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
   ValidationError,
   NotFoundError,
-} from "@/shared/application";
-import type { ClockPort } from "@/shared/ports/clock.port";
-import { CLOCK_PORT } from "@/shared/ports/clock.port";
+  ok,
+  err,
+} from "@kerniflow/kernel";
+import type { UpdateActivityInput, UpdateActivityOutput } from "@kerniflow/contracts";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
-import { ACTIVITY_REPO_PORT } from "../../ports/activity-repository.port";
 import { toActivityDto } from "../../mappers/activity-dto.mapper";
-
-type Deps = {
-  activityRepo: ActivityRepoPort;
-  clock: ClockPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class UpdateActivityUseCase extends BaseUseCase<UpdateActivityInput, UpdateActivityOutput> {
   constructor(
-    @Inject(ACTIVITY_REPO_PORT) private readonly activityRepo: ActivityRepoPort,
-    @Inject(CLOCK_PORT) private readonly clock: ClockPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly activityRepo: ActivityRepoPort,
+    private readonly clock: ClockPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }

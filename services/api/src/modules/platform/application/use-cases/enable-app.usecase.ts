@@ -1,21 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ValidationError, NotFoundError } from "@kerniflow/domain";
-import { AuditPort, AUDIT_PORT_TOKEN } from "@kerniflow/kernel";
-import { IdGeneratorPort, ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+import { ValidationError, NotFoundError, AUDIT_PORT } from "@kerniflow/kernel";
+import type { AuditPort, IdGeneratorPort } from "@kerniflow/kernel";
 import { APP_REGISTRY_TOKEN, type AppRegistryPort } from "../ports/app-registry.port";
 import {
   TENANT_APP_INSTALL_REPOSITORY_TOKEN,
   type TenantAppInstallRepositoryPort,
 } from "../ports/tenant-app-install-repository.port";
 import { DependencyResolverService } from "../services/dependency-resolver.service";
+import { ID_GENERATOR_TOKEN } from "../../../../shared/ports/id-generator.port";
 
-interface EnableAppInput {
+export interface EnableAppInput {
   tenantId: string;
   appId: string;
   actorUserId: string;
 }
 
-interface EnableAppOutput {
+export interface EnableAppOutput {
   appId: string;
   enabledDependencies: string[];
 }
@@ -28,7 +28,7 @@ export class EnableAppUseCase {
     @Inject(TENANT_APP_INSTALL_REPOSITORY_TOKEN)
     private readonly appInstallRepo: TenantAppInstallRepositoryPort,
     private readonly dependencyResolver: DependencyResolverService,
-    @Inject(AUDIT_PORT_TOKEN)
+    @Inject(AUDIT_PORT)
     private readonly audit: AuditPort,
     @Inject(ID_GENERATOR_TOKEN)
     private readonly idGenerator: IdGeneratorPort

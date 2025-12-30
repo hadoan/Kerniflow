@@ -1,29 +1,24 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ok, err, Result } from "neverthrow";
-import type { Logger } from "@kerniflow/kernel";
-import { LOGGER } from "@kerniflow/kernel";
-import type { GetDealInput, GetDealOutput } from "@kerniflow/contracts";
+import { Injectable } from "@nestjs/common";
 import {
   BaseUseCase,
-  UseCaseContext,
-  UseCaseError,
+  type LoggerPort,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
   ValidationError,
   NotFoundError,
-} from "@/shared/application";
+  ok,
+  err,
+} from "@kerniflow/kernel";
+import type { GetDealInput, GetDealOutput } from "@kerniflow/contracts";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
-import { DEAL_REPO_PORT } from "../../ports/deal-repository.port";
 import { toDealDto } from "../../mappers/deal-dto.mapper";
-
-type Deps = {
-  dealRepo: DealRepoPort;
-  logger: Logger;
-};
 
 @Injectable()
 export class GetDealByIdUseCase extends BaseUseCase<GetDealInput, GetDealOutput> {
   constructor(
-    @Inject(DEAL_REPO_PORT) private readonly dealRepo: DealRepoPort,
-    @Inject(LOGGER) logger: Logger
+    private readonly dealRepo: DealRepoPort,
+    logger: LoggerPort
   ) {
     super({ logger });
   }

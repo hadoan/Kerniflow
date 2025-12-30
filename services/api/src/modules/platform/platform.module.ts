@@ -1,6 +1,5 @@
 import { Module, OnModuleInit } from "@nestjs/common";
 import { DataModule } from "@kerniflow/data";
-import { KernelModule } from "@kerniflow/kernel";
 
 // Infrastructure
 import { AppRegistry } from "./infrastructure/registries/app-registry";
@@ -32,7 +31,7 @@ import { TENANT_MENU_OVERRIDE_REPOSITORY_TOKEN } from "./application/ports/tenan
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-record-meta-repository.port";
 
 @Module({
-  imports: [DataModule, KernelModule],
+  imports: [DataModule],
   controllers: [PlatformController, MenuController],
   providers: [
     // Infrastructure - Registries

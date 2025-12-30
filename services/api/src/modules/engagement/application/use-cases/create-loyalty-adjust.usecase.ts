@@ -21,7 +21,7 @@ export class CreateLoyaltyAdjustEntryUseCase extends BaseUseCase<
   CreateLoyaltyAdjustEntryInput,
   CreateLoyaltyAdjustEntryOutput
 > {
-  constructor(private readonly deps: Deps) {
+  constructor(protected readonly deps: Deps) {
     super({ logger: deps.logger });
   }
 

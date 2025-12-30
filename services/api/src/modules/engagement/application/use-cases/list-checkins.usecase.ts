@@ -18,7 +18,7 @@ export class ListCheckInEventsUseCase extends BaseUseCase<
   ListCheckInEventsInput,
   ListCheckInEventsOutput
 > {
-  constructor(private readonly deps: Deps) {
+  constructor(protected readonly deps: Deps) {
     super({ logger: deps.logger });
   }
 

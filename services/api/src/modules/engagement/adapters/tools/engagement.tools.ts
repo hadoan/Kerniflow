@@ -5,6 +5,7 @@ import {
   EngagementLoyaltyNextBestActionInputSchema,
   EngagementExplainLoyaltyInputSchema,
 } from "@kerniflow/contracts";
+import { isErr } from "@kerniflow/kernel";
 import type { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import { type PartyApplication } from "../../../party/application/party.application";
 import { type EngagementApplication } from "../../application/engagement.application";
@@ -35,7 +36,7 @@ export const buildEngagementTools = (
         { q: parsed.data.searchText, pageSize: parsed.data.limit },
         buildCtx(tenantId, userId, toolCallId, runId)
       );
-      if (!result.ok) {
+      if (isErr(result)) {
         return { ok: false, code: result.error.code, message: result.error.message };
       }
 

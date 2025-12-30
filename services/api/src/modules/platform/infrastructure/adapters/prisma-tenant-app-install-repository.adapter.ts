@@ -8,8 +8,11 @@ import {
   type UpdateTenantAppInstallDto,
 } from "../../application/ports/tenant-app-install-repository.port";
 
+type PrismaTransactionContext = TransactionContext & { prisma: PrismaService };
+
 function getPrismaClient(prisma: PrismaService, tx?: TransactionContext) {
-  return tx?.prisma ?? prisma;
+  const prismaTx = tx as PrismaTransactionContext | undefined;
+  return prismaTx?.prisma ?? prisma;
 }
 
 @Injectable()

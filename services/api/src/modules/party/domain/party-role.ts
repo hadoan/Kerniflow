@@ -1,1 +1,1 @@
-export { PartyRoleType } from "@kerniflow/kernel";
+export type { PartyRoleType } from "@kerniflow/kernel";

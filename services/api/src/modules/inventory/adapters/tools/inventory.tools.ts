@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { generateObject } from "ai";
+import type { LanguageModel } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import type { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import type { InventoryApplication } from "../../application/inventory.application";
@@ -20,6 +21,8 @@ const validationError = (issues: unknown) => ({
   details: issues,
 });
 
+const defaultModel = anthropic("claude-3-5-sonnet-20241022") as unknown as LanguageModel;
+
 export const buildInventoryTools = (_app: InventoryApplication): DomainToolPort[] => [
   {
     name: "inventory_createProductFromText",
@@ -37,7 +40,7 @@ export const buildInventoryTools = (_app: InventoryApplication): DomainToolPort[
       const { sourceText } = parsed.data;
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           sku: z.string().optional(),
           name: z.string(),
@@ -93,7 +96,7 @@ export const buildInventoryTools = (_app: InventoryApplication): DomainToolPort[
       const { sourceText } = parsed.data;
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           supplierName: z.string().optional(),
           scheduledDate: z.string().optional(),
@@ -151,7 +154,7 @@ export const buildInventoryTools = (_app: InventoryApplication): DomainToolPort[
       const { sourceText } = parsed.data;
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           customerName: z.string().optional(),
           scheduledDate: z.string().optional(),
@@ -214,7 +217,7 @@ export const buildInventoryTools = (_app: InventoryApplication): DomainToolPort[
       }
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: defaultModel,
         schema: z.object({
           minQty: z.number().nonnegative(),
           maxQty: z.number().nonnegative().optional(),
