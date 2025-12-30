@@ -1,4 +1,4 @@
-import type { TaxSourceType, TaxRegime, TaxRoundingMode } from "@kerniflow/contracts";
+import type { TaxSourceType, TaxRegime, TaxRoundingMode } from "@corely/contracts";
 
 export interface TaxSnapshotEntity {
   id: string;

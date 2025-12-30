@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { RoleDto } from "@kerniflow/contracts";
+import type { RoleDto } from "@corely/contracts";
 import type { RoleRepositoryPort } from "../ports/role-repository.port";
 import { ROLE_REPOSITORY_TOKEN } from "../ports/role-repository.port";
 

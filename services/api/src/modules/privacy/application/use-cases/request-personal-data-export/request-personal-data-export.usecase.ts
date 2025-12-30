@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { PrivacyRequestRepoPort } from "../../ports/privacy-request-repository.port";
-import type { OutboxPort } from "@kerniflow/kernel";
+import type { OutboxPort } from "@corely/kernel";
 import type { IdGeneratorPort } from "@shared/ports/id-generator.port";
 import type { ClockPort } from "@shared/ports/clock.port";
 import { PrivacyRequest } from "../../../domain/privacy-request.entity";

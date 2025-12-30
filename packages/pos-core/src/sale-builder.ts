@@ -3,7 +3,7 @@ import type {
   PosSalePayment,
   PosSale,
   PosTicketLineItem,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 /**
  * Sale Builder - Core POS sale calculation and validation logic

@@ -9,8 +9,8 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
-import { type ListInvoicesInput, type ListInvoicesOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type ListInvoicesInput, type ListInvoicesOutput } from "@corely/contracts";
 import { type InvoiceRepoPort } from "../../ports/invoice-repository.port";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";
 

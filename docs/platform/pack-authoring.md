@@ -21,7 +21,7 @@ A pack definition includes:
 Create a `*.pack.ts` file in `services/api/src/modules/platform/packs/`:
 
 ```typescript
-import type { PackDefinition } from "@kerniflow/contracts";
+import type { PackDefinition } from "@corely/contracts";
 
 export const myPack: PackDefinition = {
   packId: "my-pack",

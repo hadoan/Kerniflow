@@ -1,4 +1,4 @@
-// import type { AuditPort } from "@kerniflow/kernel";
+// import type { AuditPort } from "@corely/kernel";
 // import type { AuditEntry } from "@shared/ports/audit.port";
 
 // export class PrismaAuditAdapter implements AuditPort {
@@ -18,10 +18,10 @@
 // }
 
 import { Injectable } from "@nestjs/common";
-import { AuditPort } from "@kerniflow/kernel";
-import type { TransactionContext } from "@kerniflow/kernel";
-import { PrismaService } from "@kerniflow/data";
-import { getPrismaClient } from "@kerniflow/data";
+import { AuditPort } from "@corely/kernel";
+import type { TransactionContext } from "@corely/kernel";
+import { PrismaService } from "@corely/data";
+import { getPrismaClient } from "@corely/data";
 
 @Injectable()
 export class PrismaAuditAdapter implements AuditPort {

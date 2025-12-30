@@ -1,5 +1,5 @@
 import { Module, OnModuleInit } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
 

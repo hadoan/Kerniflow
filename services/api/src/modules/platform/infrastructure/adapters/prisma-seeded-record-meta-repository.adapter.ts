@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
-import type { TransactionContext } from "@kerniflow/kernel";
+import { PrismaService } from "@corely/data";
+import type { TransactionContext } from "@corely/kernel";
 import {
   type SeededRecordMetaRepositoryPort,
   type SeededRecordMetaEntity,

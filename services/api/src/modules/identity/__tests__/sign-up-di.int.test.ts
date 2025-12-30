@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { type PostgresTestDb, createTestDb, stopSharedContainer } from "@kerniflow/testkit";
-import { PrismaService } from "@kerniflow/data";
+import { type PostgresTestDb, createTestDb, stopSharedContainer } from "@corely/testkit";
+import { PrismaService } from "@corely/data";
 import { SignUpUseCase } from "../application/use-cases/sign-up.usecase";
 import { buildSignUpInput } from "../testkit/builders/build-signup-input";
 import { IdentityModule } from "../identity.module";

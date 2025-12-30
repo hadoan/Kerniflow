@@ -1,4 +1,4 @@
-import type { HttpPort } from "@kerniflow/core";
+import type { HttpPort } from "@corely/core";
 
 export class SystemHttpAdapter implements HttpPort {
   async request(input: {

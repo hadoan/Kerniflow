@@ -6,7 +6,7 @@ import {
   CompleteActivityInputSchema,
   ListActivitiesInputSchema,
   GetTimelineInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { CrmApplication } from "../../application/crm.application";
 import { buildUseCaseContext, mapResultToHttp } from "../../../../shared/http/usecase-mappers";
 import { AuthGuard } from "../../../identity";

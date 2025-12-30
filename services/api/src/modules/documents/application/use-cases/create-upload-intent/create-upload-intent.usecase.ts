@@ -9,8 +9,8 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
-import { type CreateUploadIntentInput, type CreateUploadIntentOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type CreateUploadIntentInput, type CreateUploadIntentOutput } from "@corely/contracts";
 import { type DocumentRepoPort } from "../../ports/document-repository.port";
 import { type FileRepoPort } from "../../ports/file-repository.port";
 import { type ObjectStoragePort } from "../../ports/object-storage.port";

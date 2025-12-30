@@ -2,7 +2,7 @@ import type { LedgerAccountAggregate } from "../../domain/ledger-account.aggrega
 import type { JournalEntryAggregate } from "../../domain/journal-entry.aggregate";
 import type { AccountingSettingsAggregate } from "../../domain/accounting-settings.aggregate";
 import type { AccountingPeriodAggregate } from "../../domain/accounting-period.aggregate";
-import type { AccountType, EntryStatus } from "@kerniflow/contracts";
+import type { AccountType, EntryStatus } from "@corely/contracts";
 
 // Repository ports for Accounting aggregates
 

@@ -9,8 +9,8 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
-import { type UnarchiveCustomerInput, type UnarchiveCustomerOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type UnarchiveCustomerInput, type UnarchiveCustomerOutput } from "@corely/contracts";
 import { type PartyRepoPort } from "../../ports/party-repository.port";
 import { toCustomerDto } from "../../mappers/customer-dto.mapper";
 

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { TemplateDefinition } from "@kerniflow/contracts";
+import type { TemplateDefinition } from "@corely/contracts";
 import type { TemplateRegistryPort } from "../../application/ports/template-registry.port";
 
 /**

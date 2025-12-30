@@ -58,7 +58,7 @@
 
 - Created crmApi client with full CRUD operations for Deals and Activities
 - Timeline operations for unified view
-- All methods use TypeScript types from @kerniflow/contracts
+- All methods use TypeScript types from @corely/contracts
 - Query parameter building for filters and pagination support
 
 **Phase 10: Frontend Components** (Commit: afe4d10)
@@ -86,7 +86,7 @@
 **REQUIRED BEFORE TESTING:**
 
 ```bash
-pnpm --filter @kerniflow/data prisma migrate dev --name add_crm_deals_activities
+pnpm --filter @corely/data prisma migrate dev --name add_crm_deals_activities
 ```
 
 This will create:
@@ -241,20 +241,20 @@ SELECT id, tenantId FROM Activity WHERE tenantId IS NULL;
 ### 1. Database Migration
 
 ```bash
-pnpm --filter @kerniflow/data prisma migrate dev --name add_crm_deals_activities
-pnpm --filter @kerniflow/data prisma generate
+pnpm --filter @corely/data prisma migrate dev --name add_crm_deals_activities
+pnpm --filter @corely/data prisma generate
 ```
 
 ### 2. Build Backend
 
 ```bash
-pnpm --filter @kerniflow/api build
+pnpm --filter @corely/api build
 ```
 
 ### 3. Build Frontend
 
 ```bash
-pnpm --filter @kerniflow/web build
+pnpm --filter @corely/web build
 ```
 
 ### 4. Start Services
@@ -315,7 +315,7 @@ CRM v1 is **COMPLETE** when:
 1. **Run Migration:**
 
    ```bash
-   pnpm --filter @kerniflow/data prisma migrate dev --name add_crm_deals_activities
+   pnpm --filter @corely/data prisma migrate dev --name add_crm_deals_activities
    ```
 
 2. **Start Development Server:**

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { generateObject } from "ai";
 import type { LanguageModel } from "ai";
-import { isErr, isOk } from "@kerniflow/kernel";
+import { isErr, isOk } from "@corely/kernel";
 import { anthropic } from "@ai-sdk/anthropic";
 import type { DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import type { PartyApplication } from "../../../party/application/party.application";
@@ -12,7 +12,7 @@ import {
   DealProposalSchema,
   DealProposalCardSchema,
   ActivityProposalCardSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 const validationError = (issues: unknown) => ({
   ok: false,

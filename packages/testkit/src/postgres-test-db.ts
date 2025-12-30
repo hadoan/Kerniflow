@@ -4,7 +4,7 @@ import { PostgreSqlContainer } from "@testcontainers/postgresql";
 
 import { fileURLToPath } from "url";
 import path from "path";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 
 let sharedContainer: StartedPostgreSqlContainer | null = null;
 let activeDbCount = 0;
@@ -26,8 +26,8 @@ export class PostgresTestDb {
     if (!sharedContainer) {
       sharedContainer = await new PostgreSqlContainer("postgres:16-alpine")
         .withDatabase("kerniflow_test")
-        .withUsername("kerniflow")
-        .withPassword("kerniflow")
+        .withUsername("corely")
+        .withPassword("corely")
         .start();
     }
 
@@ -67,7 +67,7 @@ export class PostgresTestDb {
 
   /**
    * Applies Prisma migrations to the test DB.
-   * This uses the @kerniflow/data Prisma schema to keep DB shape accurate.
+   * This uses the @corely/data Prisma schema to keep DB shape accurate.
    */
   async migrate(): Promise<void> {
     if (!this.connectionString) {
@@ -84,7 +84,7 @@ export class PostgresTestDb {
 
     await execa(
       "pnpm",
-      ["--filter", "@kerniflow/data", "exec", "prisma", "migrate", "deploy", "--schema", schemaDir],
+      ["--filter", "@corely/data", "exec", "prisma", "migrate", "deploy", "--schema", schemaDir],
       {
         env: { ...process.env, DATABASE_URL: this.connectionString },
         stdout: "inherit",
@@ -94,7 +94,7 @@ export class PostgresTestDb {
 
     await execa(
       "pnpm",
-      ["--filter", "@kerniflow/data", "exec", "prisma", "generate", "--schema", schemaDir],
+      ["--filter", "@corely/data", "exec", "prisma", "generate", "--schema", schemaDir],
       {
         env: { ...process.env, DATABASE_URL: this.connectionString },
         stdout: "inherit",

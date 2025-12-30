@@ -19,7 +19,7 @@ packages/
 
 ## Created Packages
 
-### 1. @kerniflow/tsconfig
+### 1. @corely/tsconfig
 
 **Purpose:** Centralized TypeScript configurations for all project types
 
@@ -35,7 +35,7 @@ packages/
 
 ```json
 {
-  "extends": "@kerniflow/tsconfig/node.json",
+  "extends": "@corely/tsconfig/node.json",
   "compilerOptions": {
     "paths": { "@/*": ["./src/*"] }
   }
@@ -48,7 +48,7 @@ packages/
 - Project references support
 - Consistent module resolution across workspace
 
-### 2. @kerniflow/prettier-config
+### 2. @corely/prettier-config
 
 **Purpose:** Shareable Prettier configuration
 
@@ -63,10 +63,10 @@ packages/
 
 ```javascript
 // prettier.config.js
-export { default } from "@kerniflow/prettier-config";
+export { default } from "@corely/prettier-config";
 ```
 
-### 3. @kerniflow/eslint-config
+### 3. @corely/eslint-config
 
 **Purpose:** Composable ESLint configs for flat config format
 
@@ -81,7 +81,7 @@ export { default } from "@kerniflow/prettier-config";
 **Usage:**
 
 ```javascript
-import config from "@kerniflow/eslint-config";
+import config from "@corely/eslint-config";
 export default [config.base, config.typescript, config.node];
 ```
 
@@ -92,7 +92,7 @@ export default [config.base, config.typescript, config.node];
 - Composable - mix and match modules
 - Consistent rules across all projects
 
-### 4. @kerniflow/vite-config
+### 4. @corely/vite-config
 
 **Purpose:** Reusable Vite and Vitest configuration helpers
 
@@ -105,7 +105,7 @@ export default [config.base, config.typescript, config.node];
 **Usage:**
 
 ```typescript
-import { createBaseViteConfig, createBaseVitestConfig } from "@kerniflow/vite-config";
+import { createBaseViteConfig, createBaseVitestConfig } from "@corely/vite-config";
 
 export default {
   ...createBaseViteConfig({
@@ -118,7 +118,7 @@ export default {
 };
 ```
 
-### 5. @kerniflow/tailwind-preset
+### 5. @corely/tailwind-preset
 
 **Purpose:** Shared Tailwind design system with Kerniflow brand
 
@@ -134,7 +134,7 @@ export default {
 
 ```javascript
 export default {
-  presets: [require("@kerniflow/tailwind-preset")],
+  presets: [require("@corely/tailwind-preset")],
   content: ["./src/**/*.{ts,tsx}"],
   // Optional overrides
 };
@@ -146,11 +146,11 @@ export default {
 
 **Migrated Configurations:**
 
-- ✅ All TypeScript configs → `@kerniflow/tsconfig/*`
-- ✅ All ESLint configs → `@kerniflow/eslint-config`
-- ✅ Prettier config → `@kerniflow/prettier-config`
-- ✅ Vite config (web app) → `@kerniflow/vite-config`
-- ✅ Tailwind config (web app) → `@kerniflow/tailwind-preset`
+- ✅ All TypeScript configs → `@corely/tsconfig/*`
+- ✅ All ESLint configs → `@corely/eslint-config`
+- ✅ Prettier config → `@corely/prettier-config`
+- ✅ Vite config (web app) → `@corely/vite-config`
+- ✅ Tailwind config (web app) → `@corely/tailwind-preset`
 
 ## Validation Results
 
@@ -188,7 +188,7 @@ pnpm typecheck
 
 ```json
 {
-  "extends": "@kerniflow/tsconfig/lib.json",
+  "extends": "@corely/tsconfig/lib.json",
   "compilerOptions": {
     "strict": false // For gradual migration
   }
@@ -211,10 +211,10 @@ pnpm typecheck
 
 ### For New Projects
 
-1. Choose appropriate TypeScript profile from `@kerniflow/tsconfig`
-2. Import relevant ESLint modules from `@kerniflow/eslint-config`
-3. Use `@kerniflow/prettier-config` for formatting
-4. For React apps: use `@kerniflow/vite-config` and `@kerniflow/tailwind-preset`
+1. Choose appropriate TypeScript profile from `@corely/tsconfig`
+2. Import relevant ESLint modules from `@corely/eslint-config`
+3. Use `@corely/prettier-config` for formatting
+4. For React apps: use `@corely/vite-config` and `@corely/tailwind-preset`
 
 ### For Existing Projects
 
@@ -254,7 +254,7 @@ pnpm typecheck
 ### Updating Shared Configs
 
 1. Edit the relevant package in `packages/tooling/*`
-2. Run `pnpm --filter @kerniflow/[package] build`
+2. Run `pnpm --filter @corely/[package] build`
 3. Test changes in a sample project
 4. Update version if publishing (though currently `private: true`)
 5. Changes propagate automatically on next `pnpm install`

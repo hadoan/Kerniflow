@@ -74,12 +74,12 @@ This document tracks the implementation progress of the AI-Native, Offline-First
 - **No framework dependencies** - Pure TypeScript
 - **No platform-specific code** - Works in any JS environment
 - **Fully testable** - Pure functions and simple classes
-- **Type-safe** - Uses `@kerniflow/contracts`
+- **Type-safe** - Uses `@corely/contracts`
 
 **Example Usage:**
 
 ```typescript
-import { SaleBuilder } from "@kerniflow/pos-core";
+import { SaleBuilder } from "@corely/pos-core";
 
 const builder = new SaleBuilder();
 const lineTotal = builder.calculateLineTotal(2, 1000, 100); // $19.00
@@ -442,10 +442,10 @@ pnpm install
 ### Build Shared Packages
 
 ```bash
-pnpm --filter @kerniflow/contracts build
-pnpm --filter @kerniflow/pos-core build
-pnpm --filter @kerniflow/offline-core build
-pnpm --filter @kerniflow/offline-rn build
+pnpm --filter @corely/contracts build
+pnpm --filter @corely/pos-core build
+pnpm --filter @corely/offline-core build
+pnpm --filter @corely/offline-rn build
 ```
 
 ### Run Prisma Migration
@@ -458,7 +458,7 @@ pnpm prisma migrate dev --name add_pos_tables
 ### Start Backend API
 
 ```bash
-pnpm --filter @kerniflow/api dev
+pnpm --filter @corely/api dev
 ```
 
 ### Start RN App (When Created)

@@ -122,7 +122,7 @@ In your module (e.g., `services/api/src/modules/invoices/`):
 
 ```typescript
 // invoices.manifest.ts
-import type { AppManifest } from "@kerniflow/contracts";
+import type { AppManifest } from "@corely/contracts";
 
 export const invoicesAppManifest: AppManifest = {
   appId: "invoices",
@@ -195,7 +195,7 @@ Example pack:
 **Solution**: Ensure `.env` file exists at project root with `DATABASE_URL` set:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/kerniflow"
+DATABASE_URL="postgresql://user:password@localhost:5432/corely"
 ```
 
 ### Catalog Sync Fails

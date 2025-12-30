@@ -87,7 +87,7 @@ environment:
 
 ```json
 {
-  "email": "e2e-test@kerniflow.local",
+  "email": "e2e-test@corely.local",
   "password": "E2ETestPassword123!",
   "tenantName": "E2E Test Tenant"
 }
@@ -101,7 +101,7 @@ environment:
   "tenantName": "E2E Test Tenant",
   "userId": "cuid456...",
   "userName": "Test User",
-  "email": "e2e-test@kerniflow.local"
+  "email": "e2e-test@corely.local"
 }
 ```
 
@@ -385,7 +385,7 @@ In CI, set:
 ```bash
 CI=true
 NODE_ENV=test
-DATABASE_URL=postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public
+DATABASE_URL=postgresql://corely:corely@postgres:5432/kerniflow_e2e?schema=public
 REDIS_URL=redis://redis:6379
 TEST_HARNESS_SECRET=test-secret-key
 JWT_SECRET=test-jwt-secret-change-me
@@ -437,7 +437,7 @@ curl -X POST http://localhost:3000/test/health \
 
 ```bash
 docker compose -f docker-compose.e2e.yml exec postgres \
-  dropdb -U kerniflow kerniflow_e2e && createdb -U kerniflow kerniflow_e2e
+  dropdb -U corely kerniflow_e2e && createdb -U corely kerniflow_e2e
 ```
 
 ### Port Already in Use

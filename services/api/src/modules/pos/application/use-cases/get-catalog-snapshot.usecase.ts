@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { GetCatalogSnapshotInput, GetCatalogSnapshotOutput } from "@kerniflow/contracts";
+import type { GetCatalogSnapshotInput, GetCatalogSnapshotOutput } from "@corely/contracts";
 import {
   BaseUseCase,
   NoopLogger,
@@ -9,7 +9,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 
 // Note: In production, inject InventoryApplication to fetch products
 // For now, this is a placeholder structure showing the integration pattern

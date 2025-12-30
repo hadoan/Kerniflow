@@ -1,4 +1,4 @@
-import type { ClockPort } from "@kerniflow/kernel";
+import type { ClockPort } from "@corely/kernel";
 
 export class SystemClock implements ClockPort {
   now(): Date {

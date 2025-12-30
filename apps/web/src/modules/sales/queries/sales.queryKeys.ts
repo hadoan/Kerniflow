@@ -2,7 +2,7 @@ import type {
   ListQuotesInput,
   ListSalesOrdersInput,
   ListSalesInvoicesInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export const salesQueryKeys = {
   all: ["sales"] as const,

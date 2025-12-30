@@ -1,11 +1,11 @@
 import { Injectable, Inject, NotFoundException } from "@nestjs/common";
-import type { TemplatePlan } from "@kerniflow/contracts";
+import type { TemplatePlan } from "@corely/contracts";
 import type { TemplateRegistryPort } from "../ports/template-registry.port";
 import type { TemplateExecutorPort } from "../ports/template-executor.port";
 import { TEMPLATE_REGISTRY_TOKEN } from "../ports/template-registry.port";
 import { TenantEntitlementService } from "../services/tenant-entitlement.service";
 import { TemplateExecutorRegistry } from "../../infrastructure/registries/template-executor-registry";
-import { ForbiddenError } from "@kerniflow/kernel";
+import { ForbiddenError } from "@corely/kernel";
 
 export interface PlanTemplateInput {
   tenantId: string;

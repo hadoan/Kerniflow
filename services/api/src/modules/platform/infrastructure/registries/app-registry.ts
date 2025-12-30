@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { AppManifest } from "@kerniflow/contracts";
+import type { AppManifest } from "@corely/contracts";
 import type { AppRegistryPort } from "../../application/ports/app-registry.port";
 
 /**

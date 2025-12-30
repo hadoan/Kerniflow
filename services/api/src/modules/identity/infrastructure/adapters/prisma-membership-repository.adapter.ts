@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import { Membership } from "../../domain/entities/membership.entity";
 import { MembershipRepositoryPort } from "../../application/ports/membership-repository.port";
 

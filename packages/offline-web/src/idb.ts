@@ -1,6 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 import type { PersistedClient } from "@tanstack/query-persist-client-core";
-import type { SerializedCommand } from "@kerniflow/offline-core";
+import type { SerializedCommand } from "@corely/offline-core";
 
 export interface OfflineWebDb extends DBSchema {
   outbox: {

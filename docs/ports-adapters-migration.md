@@ -313,7 +313,7 @@ Create port in the application layer:
 
 ```typescript
 // services/api/src/modules/foo/application/ports/foo-repository.port.ts
-import { TransactionContext } from "@kerniflow/kernel";
+import { TransactionContext } from "@corely/kernel";
 import { Foo } from "../../domain/entities/Foo";
 
 export interface FooRepositoryPort {
@@ -336,8 +336,8 @@ export const FOO_REPOSITORY = Symbol("FOO_REPOSITORY");
 ```typescript
 // services/api/src/modules/foo/infrastructure/persistence/PrismaFooRepository.ts
 import { Injectable } from "@nestjs/common";
-import { PrismaService, getPrismaClient } from "@kerniflow/data";
-import { TransactionContext } from "@kerniflow/kernel";
+import { PrismaService, getPrismaClient } from "@corely/data";
+import { TransactionContext } from "@corely/kernel";
 import { Foo } from "../../domain/entities/Foo";
 import { FooRepositoryPort } from "../../application/ports/foo-repository.port";
 
@@ -390,8 +390,8 @@ export class PrismaFooRepository implements FooRepositoryPort {
 ```typescript
 // services/api/src/modules/foo/foo.module.ts
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
-import { OUTBOX_PORT, AUDIT_PORT, UNIT_OF_WORK } from "@kerniflow/kernel";
+import { DataModule } from "@corely/data";
+import { OUTBOX_PORT, AUDIT_PORT, UNIT_OF_WORK } from "@corely/kernel";
 import { PrismaFooRepository } from "./infrastructure/persistence/PrismaFooRepository";
 import { FOO_REPOSITORY } from "./application/ports/foo-repository.port";
 import { CreateFooUseCase } from "./application/use-cases/CreateFooUseCase";
@@ -419,7 +419,7 @@ export class FooModule {}
 ```typescript
 // services/api/src/modules/foo/application/use-cases/CreateFooUseCase.ts
 import { Inject, Injectable } from "@nestjs/common";
-import { UnitOfWorkPort, UNIT_OF_WORK, OutboxPort, OUTBOX_PORT } from "@kerniflow/kernel";
+import { UnitOfWorkPort, UNIT_OF_WORK, OutboxPort, OUTBOX_PORT } from "@corely/kernel";
 import { FooRepositoryPort, FOO_REPOSITORY } from "../ports/foo-repository.port";
 
 @Injectable()
@@ -487,12 +487,12 @@ describe("PrismaFooRepository", () => {
 
 ### Integration Testing with Real Database
 
-Use `PostgresTestDb` from `@kerniflow/testkit`:
+Use `PostgresTestDb` from `@corely/testkit`:
 
 ```typescript
 import { Test } from "@nestjs/testing";
-import { DataModule, PrismaService } from "@kerniflow/data";
-import { PostgresTestDb, createTestDb } from "@kerniflow/testkit";
+import { DataModule, PrismaService } from "@corely/data";
+import { PostgresTestDb, createTestDb } from "@corely/testkit";
 
 describe("FooRepository Integration", () => {
   let testDb: PostgresTestDb;
@@ -742,7 +742,7 @@ Worker module:
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 
 @Module({
   imports: [DataModule],

@@ -11,18 +11,18 @@ services:
     env_file:
       - .env.e2e
     environment:
-      # Explicit values so local .env overrides (e.g., POSTGRES_DB=kerniflow) don't
+      # Explicit values so local .env overrides (e.g., POSTGRES_DB=corely) don't
       # point the e2e stack at a database name that doesn't exist.
       POSTGRES_DB: kerniflow_e2e
-      POSTGRES_USER: kerniflow
-      POSTGRES_PASSWORD: kerniflow
+      POSTGRES_USER: corely
+      POSTGRES_PASSWORD: corely
     ports:
       - "5433:5432"
     volumes:
       - postgres_e2e_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corely}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -64,7 +64,7 @@ services:
       - .env.e2e
     command: >
       sh -c "cd /app/packages/data && /app/node_modules/.bin/prisma migrate deploy &&
-             pnpm --filter @kerniflow/api dev"
+             pnpm --filter @corely/api dev"
     restart: unless-stopped
     depends_on:
       postgres:
@@ -73,7 +73,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-test}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/kerniflow_e2e?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       TEST_HARNESS_SECRET: ${TEST_HARNESS_SECRET:-test-secret-key}
@@ -103,7 +103,7 @@ services:
       - .env.e2e
     command: >
       sh -c "cd /app/packages/data && /app/node_modules/.bin/prisma migrate deploy &&
-             pnpm --filter @kerniflow/worker dev"
+             pnpm --filter @corely/worker dev"
     restart: unless-stopped
     depends_on:
       postgres:
@@ -112,7 +112,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-test}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://kerniflow:kerniflow@postgres:5432/kerniflow_e2e?schema=public}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://corely:corely@postgres:5432/kerniflow_e2e?schema=public}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       RESEND_API_KEY: ${RESEND_API_KEY:-dummy_key_for_e2e}

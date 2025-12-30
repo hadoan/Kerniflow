@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shared/ui/card";
-import type { DealDto } from "@kerniflow/contracts";
+import type { DealDto } from "@corely/contracts";
 import { DealStatusBadge } from "./DealStatusBadge";
 
 interface DealCardProps {

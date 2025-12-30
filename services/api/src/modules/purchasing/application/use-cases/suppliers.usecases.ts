@@ -7,8 +7,8 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
-import type { ListSuppliersInput, ListSuppliersOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import type { ListSuppliersInput, ListSuppliersOutput } from "@corely/contracts";
 import type { SupplierQueryPort } from "../ports/supplier-query.port";
 
 type SupplierDeps = {

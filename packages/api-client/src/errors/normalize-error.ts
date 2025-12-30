@@ -1,5 +1,5 @@
-import { isProblemDetails } from "@kerniflow/contracts";
-import type { ProblemDetails } from "@kerniflow/contracts";
+import { isProblemDetails } from "@corely/contracts";
+import type { ProblemDetails } from "@corely/contracts";
 import { HttpError } from "../http/request";
 import { ApiError } from "./api-error";
 

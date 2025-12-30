@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import { FileRepoPort } from "../../application/ports/file-repository.port";
 import { FileEntity } from "../../domain/file.entity";
 import { FileKind } from "../../domain/document.types";

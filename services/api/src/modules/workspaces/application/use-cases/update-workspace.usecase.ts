@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
-import type { UpdateWorkspaceInput, UpdateWorkspaceOutput } from "@kerniflow/contracts";
+import type { UpdateWorkspaceInput, UpdateWorkspaceOutput } from "@corely/contracts";
 import type { WorkspaceRepositoryPort } from "../ports/workspace-repository.port";
 import { WORKSPACE_REPOSITORY_PORT } from "../ports/workspace-repository.port";
 import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";

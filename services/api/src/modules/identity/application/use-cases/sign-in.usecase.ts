@@ -13,7 +13,7 @@ import {
   type RefreshTokenRepositoryPort,
   REFRESH_TOKEN_REPOSITORY_TOKEN,
 } from "../ports/refresh-token-repository.port";
-import { type OutboxPort, OUTBOX_PORT } from "@kerniflow/kernel";
+import { type OutboxPort, OUTBOX_PORT } from "@corely/kernel";
 import { type AuditPort, AUDIT_PORT_TOKEN } from "../ports/audit.port";
 import {
   type IdempotencyStoragePort,

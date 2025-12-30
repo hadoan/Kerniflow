@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
-import { OutboxRepository } from "@kerniflow/data";
+import { OutboxRepository } from "@corely/data";
 import { EventHandler } from "./event-handler.interface";
 
 @Injectable()

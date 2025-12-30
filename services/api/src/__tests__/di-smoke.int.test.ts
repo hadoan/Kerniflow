@@ -17,7 +17,7 @@ import { AppModule } from "../app.module";
 import { PlatformModule } from "../modules/platform/platform.module";
 import { IdentityModule } from "../modules/identity/identity.module";
 import { KernelModule } from "../shared/kernel/kernel.module";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 
 // Import critical use cases to verify they can be resolved
 import { EnableAppUseCase } from "../modules/platform/application/use-cases/enable-app.usecase";
@@ -128,7 +128,7 @@ describe("DI Smoke Tests", () => {
   describe("Token Identity", () => {
     it("should have consistent token identity for ID_GENERATOR_TOKEN", async () => {
       // Import from different locations
-      const { ID_GENERATOR_TOKEN: token1 } = await import("@kerniflow/kernel");
+      const { ID_GENERATOR_TOKEN: token1 } = await import("@corely/kernel");
       const { ID_GENERATOR_TOKEN: token2 } = await import("../shared/ports/id-generator.port");
 
       // All should resolve to the same string value
@@ -137,7 +137,7 @@ describe("DI Smoke Tests", () => {
     });
 
     it("should have consistent token identity for AUDIT_PORT", async () => {
-      const { AUDIT_PORT: token1 } = await import("@kerniflow/kernel");
+      const { AUDIT_PORT: token1 } = await import("@corely/kernel");
       const { AUDIT_PORT: token2 } = await import("../shared/ports/audit.port");
 
       expect(token1).toBe(token2);

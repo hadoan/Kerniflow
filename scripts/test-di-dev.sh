@@ -30,8 +30,8 @@ if [ -z "$POSTGRES_RUNNING" ] || [ -z "$REDIS_RUNNING" ]; then
   sleep 8
 
   echo -e "${YELLOW}Running migrations...${NC}"
-  export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow?schema=public"
-  pnpm --filter @kerniflow/data exec prisma migrate deploy
+  export DATABASE_URL="postgresql://corely:corely@localhost:5433/corely?schema=public"
+  pnpm --filter @corely/data exec prisma migrate deploy
 else
   echo -e "${GREEN}✓ Services already running${NC}"
 fi
@@ -49,7 +49,7 @@ fi
 
 # Run tests
 echo -e "\n${YELLOW}Running tests...${NC}"
-export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow?schema=public"
+export DATABASE_URL="postgresql://corely:corely@localhost:5433/corely?schema=public"
 export REDIS_URL="redis://localhost:6380"
 
 pnpm test:int

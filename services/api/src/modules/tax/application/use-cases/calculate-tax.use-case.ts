@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { CalculateTaxInput, TaxBreakdownDto } from "@kerniflow/contracts";
+import type { CalculateTaxInput, TaxBreakdownDto } from "@corely/contracts";
 import { TaxEngineService } from "../services/tax-engine.service";
 import type { UseCaseContext } from "./use-case-context";
 

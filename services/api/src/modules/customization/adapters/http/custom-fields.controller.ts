@@ -11,12 +11,12 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import type { CustomEntityType } from "@kerniflow/contracts";
+import type { CustomEntityType } from "@corely/contracts";
 import {
   CustomEntityTypes,
   CreateCustomFieldDefinitionSchema,
   UpdateCustomFieldDefinitionSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
 import {
   CurrentTenantId,

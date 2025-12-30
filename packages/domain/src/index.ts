@@ -1,4 +1,4 @@
-import type { Receipt } from "@kerniflow/contracts";
+import type { Receipt } from "@corely/contracts";
 
 export function vatCents(receipt: Receipt): number {
   // net = total / (1 + rate), vat = total - net

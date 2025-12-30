@@ -1,4 +1,4 @@
-import type { PeriodStatus } from "@kerniflow/contracts";
+import type { PeriodStatus } from "@corely/contracts";
 import type { AccountingPeriodProps } from "./accounting.types";
 
 export class AccountingPeriodAggregate {

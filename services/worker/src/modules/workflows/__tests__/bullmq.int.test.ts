@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Queue, QueueEvents, Worker } from "bullmq";
-import { RedisTestServer } from "@kerniflow/testkit";
+import { RedisTestServer } from "@corely/testkit";
 
 function buildRedisConnection(redisUrl: string) {
   const url = new URL(redisUrl);

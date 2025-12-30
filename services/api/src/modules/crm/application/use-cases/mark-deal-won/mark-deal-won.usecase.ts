@@ -10,8 +10,8 @@ import {
   NotFoundError,
   ok,
   err,
-} from "@kerniflow/kernel";
-import type { MarkDealWonInput, MarkDealWonOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import type { MarkDealWonInput, MarkDealWonOutput } from "@corely/contracts";
 import type { DealRepoPort } from "../../ports/deal-repository.port";
 import { toDealDto } from "../../mappers/deal-dto.mapper";
 

@@ -10,8 +10,8 @@ import {
   ValidationError,
   ok,
   err,
-} from "@kerniflow/kernel";
-import type { CreateActivityInput, CreateActivityOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import type { CreateActivityInput, CreateActivityOutput } from "@corely/contracts";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
 import { ActivityEntity } from "../../../domain/activity.entity";
 import { toActivityDto } from "../../mappers/activity-dto.mapper";

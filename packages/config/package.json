@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/config",
+  "name": "@corely/config",
   "private": true,
   "version": "0.0.0",
   "main": "./dist/index.cjs",

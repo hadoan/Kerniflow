@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/e2e",
+  "name": "@corely/e2e",
   "private": true,
   "version": "0.0.0",
   "type": "module",

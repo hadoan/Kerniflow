@@ -1,2 +1,2 @@
-export { BaseUseCase, UseCaseError, ValidationError } from "@kerniflow/kernel";
-export type { UseCaseContext } from "@kerniflow/kernel";
+export { BaseUseCase, UseCaseError, ValidationError } from "@corely/kernel";
+export type { UseCaseContext } from "@corely/kernel";

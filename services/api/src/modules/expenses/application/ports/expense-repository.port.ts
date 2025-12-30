@@ -1,4 +1,4 @@
-import { type TransactionContext } from "@kerniflow/kernel";
+import { type TransactionContext } from "@corely/kernel";
 import { type Expense } from "../../domain/expense.entity";
 
 export interface ExpenseRepositoryPort {

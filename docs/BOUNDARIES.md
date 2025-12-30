@@ -40,7 +40,7 @@ Rules:
 - Prisma access happens only in `infrastructure/` or `adapters/`.
 - Modules do not read or write another module's tables directly.
 - Cross-module collaboration uses:
-  - contracts (`@kerniflow/contracts`)
+  - contracts (`@corely/contracts`)
   - domain events via outbox
   - explicit ports (rare; document when used)
 

@@ -1,5 +1,5 @@
-import { type PrismaService } from "@kerniflow/data";
-import { type IdempotencyPort } from "@kerniflow/kernel";
+import { type PrismaService } from "@corely/data";
+import { type IdempotencyPort } from "@corely/kernel";
 
 /**
  * Database-backed idempotency cache. The provided key should already encode

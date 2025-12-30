@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { UnitOfWorkPort, TransactionContext } from "@kerniflow/kernel";
+import { UnitOfWorkPort, TransactionContext } from "@corely/kernel";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 

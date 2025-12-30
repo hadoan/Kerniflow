@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { ProcessPrivacyRequestHandler } from "../process-privacy-request.handler";
 import { FakePrivacyRequestRepo } from "../../../testkit/fakes/fake-privacy-request-repo";
-import { FixedClock } from "@kerniflow/kernel";
+import { FixedClock } from "@corely/kernel";
 import { FakeDocumentsPort } from "../../../testkit/fakes/fake-documents-port";
 import { PersonalDataCollectorPort } from "../../ports/personal-data-collector.port";
 import { PersonalDataEraserPort } from "../../ports/personal-data-eraser.port";

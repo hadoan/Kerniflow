@@ -7,8 +7,8 @@ import {
   ValidationError,
   ok,
   err,
-} from "@kerniflow/kernel";
-import { type GetLoyaltySummaryInput, type GetLoyaltySummaryOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type GetLoyaltySummaryInput, type GetLoyaltySummaryOutput } from "@corely/contracts";
 import { toLoyaltyAccountDto } from "../mappers/engagement-dto.mappers";
 import type { LoyaltyRepositoryPort } from "../ports/loyalty-repository.port";
 

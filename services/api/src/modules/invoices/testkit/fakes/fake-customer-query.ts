@@ -1,4 +1,4 @@
-import { type CustomerBillingSnapshotDTO } from "@kerniflow/contracts";
+import { type CustomerBillingSnapshotDTO } from "@corely/contracts";
 import { type CustomerQueryPort } from "../../application/ports/customer-query.port";
 
 export class FakeCustomerQueryPort implements CustomerQueryPort {

@@ -7,7 +7,7 @@ import { Label } from "@/shared/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { AccountSelect } from "./AccountSelect";
 import { Money } from "./Money";
-import type { LineDirection } from "@kerniflow/contracts";
+import type { LineDirection } from "@corely/contracts";
 
 interface JournalLine {
   ledgerAccountId: string;

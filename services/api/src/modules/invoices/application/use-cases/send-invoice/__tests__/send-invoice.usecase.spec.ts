@@ -4,7 +4,7 @@ import { FakeInvoiceRepository } from "../../../../testkit/fakes/fake-invoice-re
 import { FakeInvoiceEmailDeliveryRepository } from "../../../../testkit/fakes/fake-invoice-email-delivery-repo";
 import { FakeOutbox } from "../../../../testkit/fakes/fake-outbox";
 import { InvoiceAggregate } from "../../../../domain/invoice.aggregate";
-import { FakeIdGenerator, NoopLogger, unwrap, isErr } from "@kerniflow/kernel";
+import { FakeIdGenerator, NoopLogger, unwrap, isErr } from "@corely/kernel";
 
 describe("SendInvoiceUseCase", () => {
   let invoiceRepo: FakeInvoiceRepository;

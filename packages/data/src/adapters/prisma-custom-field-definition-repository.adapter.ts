@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import type { CustomEntityType } from "@kerniflow/contracts";
-import type { CustomFieldDefinition, CustomFieldDefinitionPort } from "@kerniflow/domain";
+import type { CustomEntityType } from "@corely/contracts";
+import type { CustomFieldDefinition, CustomFieldDefinitionPort } from "@corely/domain";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()

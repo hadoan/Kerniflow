@@ -1,11 +1,11 @@
-# @kerniflow/vite-config
+# @corely/vite-config
 
 Shared Vite and Vitest configuration helpers for the Kerniflow monorepo.
 
 ## Installation
 
 ```bash
-pnpm add -D @kerniflow/vite-config@workspace:* vite vitest
+pnpm add -D @corely/vite-config@workspace:* vite vitest
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ pnpm add -D @kerniflow/vite-config@workspace:* vite vitest
 // vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import { createBaseViteConfig } from "@kerniflow/vite-config";
+import { createBaseViteConfig } from "@corely/vite-config";
 import path from "path";
 
 export default defineConfig(({ mode }) => {
@@ -26,8 +26,8 @@ export default defineConfig(({ mode }) => {
     aliases: {
       "@": path.resolve(__dirname, "./src"),
     },
-    excludeFromOptimizeDeps: ["@kerniflow/contracts", "@kerniflow/domain"],
-    watchWorkspacePackages: ["@kerniflow/*"],
+    excludeFromOptimizeDeps: ["@corely/contracts", "@corely/domain"],
+    watchWorkspacePackages: ["@corely/*"],
   });
 
   return {
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
 ```typescript
 // vitest.config.ts
 import { defineConfig } from "vitest/config";
-import { createBaseVitestConfig } from "@kerniflow/vite-config";
+import { createBaseVitestConfig } from "@corely/vite-config";
 
 export default defineConfig({
   ...createBaseVitestConfig({
@@ -62,7 +62,7 @@ import {
   createBaseViteConfig,
   createBaseVitestConfig,
   mergeViteAndVitest,
-} from "@kerniflow/vite-config";
+} from "@corely/vite-config";
 
 export default defineConfig(() => {
   const viteConfig = createBaseViteConfig({

@@ -4,7 +4,7 @@ import {
   TaxRegimeSchema,
   VatFilingFrequencySchema,
   type UpsertTaxProfileInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 /**
  * Form schema for tax profile

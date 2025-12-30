@@ -12,8 +12,8 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
-import { type UpdateInvoiceInput, type UpdateInvoiceOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type UpdateInvoiceInput, type UpdateInvoiceOutput } from "@corely/contracts";
 import { type InvoiceRepoPort } from "../../ports/invoice-repository.port";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";
 import { type CustomerQueryPort } from "../../ports/customer-query.port";

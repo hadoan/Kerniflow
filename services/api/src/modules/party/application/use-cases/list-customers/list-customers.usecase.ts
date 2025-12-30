@@ -7,8 +7,8 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
-import { type ListCustomersInput, type ListCustomersOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type ListCustomersInput, type ListCustomersOutput } from "@corely/contracts";
 import { type PartyRepoPort } from "../../ports/party-repository.port";
 import { toCustomerDto } from "../../mappers/customer-dto.mapper";
 

@@ -5,7 +5,7 @@ import { InMemoryFileRepo } from "../../../testkit/fakes/in-memory-file-repo";
 import { InMemoryDocumentLinkRepo } from "../../../testkit/fakes/in-memory-document-link-repo";
 import { FakeObjectStoragePort } from "../../../testkit/fakes/fake-object-storage";
 import { FakeOutboxPort } from "../../../testkit/fakes/fake-outbox";
-import { FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
+import { FixedClock, NoopLogger, unwrap } from "@corely/kernel";
 
 class TestIdGenerator {
   private counter = 0;

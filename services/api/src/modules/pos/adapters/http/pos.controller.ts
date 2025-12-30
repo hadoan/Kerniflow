@@ -15,7 +15,7 @@ import type {
   SyncPosSaleOutput,
   GetCatalogSnapshotInput,
   GetCatalogSnapshotOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { AuthGuard } from "../../../identity";
 import { CreateRegisterUseCase } from "../../application/use-cases/create-register.usecase";
 import { ListRegistersUseCase } from "../../application/use-cases/list-registers.usecase";

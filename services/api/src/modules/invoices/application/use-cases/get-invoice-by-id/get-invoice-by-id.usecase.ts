@@ -8,7 +8,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { type InvoiceRepoPort } from "../../ports/invoice-repository.port";
 import { type GetInvoiceByIdCommand, type GetInvoiceByIdResult } from "./types";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";

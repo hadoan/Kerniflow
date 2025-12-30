@@ -7,7 +7,7 @@ describe("normalizeError", () => {
   describe("ProblemDetails responses", () => {
     it("should convert ProblemDetails HttpError to ApiError", () => {
       const httpError = new HttpError("Bad Request", 400, {
-        type: "https://errors.kerniflow.com/Invoices:Locked",
+        type: "https://errors.corely.com/Invoices:Locked",
         title: "Conflict",
         status: 409,
         detail: "This invoice has already been finalized",
@@ -30,7 +30,7 @@ describe("normalizeError", () => {
 
     it("should handle validation errors with validationErrors array", () => {
       const httpError = new HttpError("Validation Failed", 400, {
-        type: "https://errors.kerniflow.com/Common:ValidationFailed",
+        type: "https://errors.corely.com/Common:ValidationFailed",
         title: "Bad Request",
         status: 400,
         detail: "Validation failed",

@@ -1,5 +1,5 @@
 {
-  "extends": "@kerniflow/tsconfig/lib.json",
+  "extends": "@corely/tsconfig/lib.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023"],

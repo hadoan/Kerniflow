@@ -2,7 +2,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCartStore } from "@/stores/cartStore";
-import { SaleBuilder } from "@kerniflow/pos-core";
+import { SaleBuilder } from "@corely/pos-core";
 
 const saleBuilder = new SaleBuilder();
 

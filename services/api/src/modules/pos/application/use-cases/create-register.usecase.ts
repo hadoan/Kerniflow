@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { CreateRegisterInput, CreateRegisterOutput } from "@kerniflow/contracts";
+import type { CreateRegisterInput, CreateRegisterOutput } from "@corely/contracts";
 import {
   BaseUseCase,
   ConflictError,
@@ -10,7 +10,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { Register } from "../../domain/register.aggregate";
 import {
   REGISTER_REPOSITORY_PORT,

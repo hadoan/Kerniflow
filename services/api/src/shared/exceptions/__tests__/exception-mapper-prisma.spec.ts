@@ -22,7 +22,7 @@ describe("ExceptionToProblemDetailsMapper - Prisma Errors", () => {
       const result = mapper.map(prismaError);
 
       expect(result).toEqual({
-        type: "https://errors.kerniflow.com/Common:Conflict",
+        type: "https://errors.corely.com/Common:Conflict",
         title: "Conflict",
         status: HttpStatus.CONFLICT,
         detail: "A record with this value already exists",
@@ -61,7 +61,7 @@ describe("ExceptionToProblemDetailsMapper - Prisma Errors", () => {
       const result = mapper.map(prismaError);
 
       expect(result).toEqual({
-        type: "https://errors.kerniflow.com/Common:NotFound",
+        type: "https://errors.corely.com/Common:NotFound",
         title: "Not Found",
         status: HttpStatus.NOT_FOUND,
         detail: "Resource not found",
@@ -87,7 +87,7 @@ describe("ExceptionToProblemDetailsMapper - Prisma Errors", () => {
       const result = mapper.map(prismaError);
 
       expect(result).toEqual({
-        type: "https://errors.kerniflow.com/Common:Conflict",
+        type: "https://errors.corely.com/Common:Conflict",
         title: "Conflict",
         status: HttpStatus.CONFLICT,
         detail: "Referenced resource does not exist",
@@ -109,7 +109,7 @@ describe("ExceptionToProblemDetailsMapper - Prisma Errors", () => {
       const result = mapper.map(prismaError);
 
       expect(result).toEqual({
-        type: "https://errors.kerniflow.com/Common:DatabaseError",
+        type: "https://errors.corely.com/Common:DatabaseError",
         title: "Internal Server Error",
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         detail: "A database error occurred",

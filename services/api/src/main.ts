@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { loadEnv } from "@kerniflow/config";
+import { loadEnv } from "@corely/config";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";

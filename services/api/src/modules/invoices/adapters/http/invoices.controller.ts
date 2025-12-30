@@ -23,7 +23,7 @@ import {
   RecordPaymentInputSchema,
   SendInvoiceInputSchema,
   UpdateInvoiceInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { buildUseCaseContext, mapResultToHttp } from "./mappers";
 import { AuthGuard } from "../../../identity";
 import { ModuleRef } from "@nestjs/core";

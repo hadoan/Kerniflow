@@ -4,7 +4,7 @@ import type {
   BillPaymentDto,
   PurchasingSettingsDto,
   PurchasingAccountMappingDto,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { type PurchaseOrderAggregate } from "../../domain/purchase-order.aggregate";
 import { type VendorBillAggregate } from "../../domain/vendor-bill.aggregate";
 import type { BillPayment, PurchasingAccountMapping } from "../../domain/purchasing.types";

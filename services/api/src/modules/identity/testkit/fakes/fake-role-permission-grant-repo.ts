@@ -1,4 +1,4 @@
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import type { RolePermissionEffect } from "@corely/contracts";
 import type { RolePermissionGrantRepositoryPort } from "../../application/ports/role-permission-grant-repository.port";
 
 export class FakeRolePermissionGrantRepository implements RolePermissionGrantRepositoryPort {

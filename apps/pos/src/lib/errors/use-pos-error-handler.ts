@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { ApiError, normalizeError } from "@kerniflow/api-client";
+import { ApiError, normalizeError } from "@corely/api-client";
 import {
   determineErrorStrategy,
   getErrorDisplayMessage,

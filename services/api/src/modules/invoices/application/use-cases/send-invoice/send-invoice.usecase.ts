@@ -11,8 +11,8 @@ import {
   buildIdempotencyKey,
   err,
   ok,
-} from "@kerniflow/kernel";
-import { type SendInvoiceInput, type SendInvoiceOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import { type SendInvoiceInput, type SendInvoiceOutput } from "@corely/contracts";
 import { type InvoiceRepoPort } from "../../ports/invoice-repository.port";
 import { type InvoiceEmailDeliveryRepoPort } from "../../ports/invoice-email-delivery-repository.port";
 import { type OutboxPort } from "../../ports/outbox.port";

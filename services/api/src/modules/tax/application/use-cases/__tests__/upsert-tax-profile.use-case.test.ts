@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { UpsertTaxProfileUseCase } from "../upsert-tax-profile.use-case";
 import { GetTaxProfileUseCase } from "../get-tax-profile.use-case";
 import { InMemoryTaxProfileRepo } from "../../../testkit/fakes/in-memory-tax-profile-repo";
-import type { UpsertTaxProfileInput } from "@kerniflow/contracts";
+import type { UpsertTaxProfileInput } from "@corely/contracts";
 import type { UseCaseContext } from "../use-case-context";
 
 describe("UpsertTaxProfileUseCase", () => {

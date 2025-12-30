@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
-import { TenantTimeZonePort } from "@kerniflow/kernel";
+import { PrismaService } from "@corely/data";
+import { TenantTimeZonePort } from "@corely/kernel";
 
 @Injectable()
 export class PrismaTenantTimeZoneAdapter implements TenantTimeZonePort {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type {
   VendorBillRepositoryPort,
   ListVendorBillsResult,
@@ -7,7 +7,7 @@ import type {
 } from "../../application/ports/vendor-bill-repository.port";
 import { VendorBillAggregate } from "../../domain/vendor-bill.aggregate";
 import type { VendorBillLineItem, BillPayment } from "../../domain/purchasing.types";
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 const toPrismaDate = (localDate: LocalDate | null): Date | null =>
   localDate ? new Date(`${localDate}T00:00:00.000Z`) : null;

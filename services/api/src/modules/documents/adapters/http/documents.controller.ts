@@ -5,7 +5,7 @@ import {
   CreateUploadIntentInputSchema,
   GetDownloadUrlInputSchema,
   LinkDocumentInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { DocumentsApplication } from "../../application/documents.application";
 import { buildUseCaseContext, mapResultToHttp } from "./http-mappers";
 import { AuthGuard } from "../../../identity";

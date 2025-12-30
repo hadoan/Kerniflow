@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { SystemIdGenerator } from "../infrastructure/system-id-generator";
 import { SystemClock } from "../infrastructure/system-clock";
 import { PrismaIdempotencyStorageAdapter } from "../infrastructure/persistence/prisma-idempotency-storage.adapter";

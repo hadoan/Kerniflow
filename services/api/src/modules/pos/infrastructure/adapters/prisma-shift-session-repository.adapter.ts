@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import { ShiftSession } from "../../domain/shift-session.aggregate";
 import type { ShiftSessionRepositoryPort } from "../../application/ports/shift-session-repository.port";
 

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { CatalogProduct } from "@kerniflow/contracts";
+import type { CatalogProduct } from "@corely/contracts";
 import { useAuthStore } from "./authStore";
 import * as SecureStore from "expo-secure-store";
 

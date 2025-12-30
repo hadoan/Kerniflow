@@ -1,4 +1,4 @@
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 export type ProductType = "STOCKABLE" | "CONSUMABLE" | "SERVICE";
 export type LocationType = "INTERNAL" | "RECEIVING" | "SHIPPING" | "VIRTUAL";

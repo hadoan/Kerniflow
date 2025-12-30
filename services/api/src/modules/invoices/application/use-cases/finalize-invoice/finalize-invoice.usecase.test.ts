@@ -3,7 +3,7 @@ import { FinalizeInvoiceUseCase } from "./finalize-invoice.usecase";
 import { FakeInvoiceRepository } from "../../../testkit/fakes/fake-invoice-repo";
 import { FakeInvoiceNumbering } from "../../../testkit/fakes/fake-numbering";
 import { InvoiceAggregate } from "../../../domain/invoice.aggregate";
-import { FixedClock, NoopLogger, unwrap } from "@kerniflow/kernel";
+import { FixedClock, NoopLogger, unwrap } from "@corely/kernel";
 import { FakeCustomerQueryPort } from "../../../testkit/fakes/fake-customer-query";
 
 describe("FinalizeInvoiceUseCase", () => {

@@ -25,7 +25,7 @@ import {
   type AppRegistryPort,
 } from "../../application/ports/app-registry.port";
 import { Inject } from "@nestjs/common";
-import type { AppCatalogItem } from "@kerniflow/contracts";
+import type { AppCatalogItem } from "@corely/contracts";
 
 @Controller("platform/apps")
 @UseGuards(AuthGuard, RbacGuard)

@@ -12,7 +12,7 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateSalesInvoiceInput,
   CreateSalesInvoiceOutput,
@@ -28,7 +28,7 @@ import type {
   ListSalesInvoicesOutput,
   CreateJournalEntryInput,
   PostJournalEntryInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { SalesInvoiceAggregate } from "../../domain/invoice.aggregate";
 import type { InvoiceLineItem } from "../../domain/sales.types";
 import type { SalesInvoiceRepositoryPort } from "../ports/invoice-repository.port";

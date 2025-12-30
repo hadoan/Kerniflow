@@ -1,8 +1,8 @@
 /* eslint @typescript-eslint/no-explicit-any: "error" */
 import { Module } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { DataModule, PrismaOutboxAdapter } from "@kerniflow/data";
-import { OUTBOX_PORT } from "@kerniflow/kernel";
+import { DataModule, PrismaOutboxAdapter } from "@corely/data";
+import { OUTBOX_PORT } from "@corely/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 
 // Controllers

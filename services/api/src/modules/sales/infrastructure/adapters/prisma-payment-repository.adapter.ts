@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type { SalesPaymentRepositoryPort } from "../../application/ports/payment-repository.port";
 import type { SalesPayment } from "../../domain/sales.types";
 import { toPrismaDate, fromPrismaDate } from "./date-mappers";

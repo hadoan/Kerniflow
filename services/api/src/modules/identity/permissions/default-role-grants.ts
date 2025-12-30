@@ -1,4 +1,4 @@
-import type { PermissionGroup, RolePermissionEffect } from "@kerniflow/contracts";
+import type { PermissionGroup, RolePermissionEffect } from "@corely/contracts";
 
 export type DefaultRoleKey = "OWNER" | "ADMIN" | "ACCOUNTANT" | "STAFF" | "READ_ONLY";
 

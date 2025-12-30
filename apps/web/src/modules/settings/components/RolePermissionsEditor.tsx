@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import type { PermissionGroup } from "@kerniflow/contracts";
+import type { PermissionGroup } from "@corely/contracts";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Input } from "@/shared/ui/input";

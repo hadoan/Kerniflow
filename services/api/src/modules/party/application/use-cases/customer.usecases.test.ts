@@ -6,7 +6,7 @@ import {
   NoopLogger,
   unwrap,
   isErr,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { InMemoryPartyRepo } from "../../testkit/in-memory-party-repo";
 import { ArchiveCustomerUseCase } from "./archive-customer/archive-customer.usecase";
 import { CreateCustomerUseCase } from "./create-customer/create-customer.usecase";

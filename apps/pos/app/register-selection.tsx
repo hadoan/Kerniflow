@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useRegisterStore } from "@/stores/registerStore";
-import type { Register } from "@kerniflow/contracts";
+import type { Register } from "@corely/contracts";
 
 export default function RegisterSelectionScreen() {
   const { registers, selectedRegister, isLoading, loadRegisters, selectRegister } =

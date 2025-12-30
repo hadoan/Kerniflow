@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { nanoid } from "nanoid";
-import { createIdempotencyKey } from "@kerniflow/api-client";
+import { createIdempotencyKey } from "@corely/api-client";
 import { Button } from "@/shared/ui/button";
 
 type MessagePart =

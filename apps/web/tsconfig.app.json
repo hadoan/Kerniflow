@@ -1,5 +1,5 @@
 {
-  "extends": "@kerniflow/tsconfig/react.json",
+  "extends": "@corely/tsconfig/react.json",
   "compilerOptions": {
     "target": "ES2020",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -18,11 +18,11 @@
     "baseUrl": "..",
     "paths": {
       "@/*": ["web/src/*"],
-      "@kerniflow/api-client": ["packages/api-client/src/index.ts"],
-      "@kerniflow/contracts": ["packages/contracts/src/index.ts"],
-      "@kerniflow/domain": ["packages/domain/src/index.ts"],
-      "@kerniflow/offline-core": ["packages/offline-core/src/index.ts"],
-      "@kerniflow/offline-web": ["packages/offline-web/src/index.ts"]
+      "@corely/api-client": ["packages/api-client/src/index.ts"],
+      "@corely/contracts": ["packages/contracts/src/index.ts"],
+      "@corely/domain": ["packages/domain/src/index.ts"],
+      "@corely/offline-core": ["packages/offline-core/src/index.ts"],
+      "@corely/offline-web": ["packages/offline-web/src/index.ts"]
     }
   },
   "include": ["src"]

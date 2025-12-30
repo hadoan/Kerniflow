@@ -35,7 +35,7 @@ A complete template consists of two parts:
 Create a `*.definition.ts` file:
 
 ```typescript
-import type { TemplateDefinition } from "@kerniflow/contracts";
+import type { TemplateDefinition } from "@corely/contracts";
 import { z } from "zod";
 
 // 1. Define parameter schema with Zod
@@ -88,11 +88,11 @@ Create a `*.executor.ts` file:
 
 ```typescript
 import { Injectable, Inject } from "@nestjs/common";
-import type { TemplatePlan, TemplateResult, TemplatePlanAction } from "@kerniflow/contracts";
+import type { TemplatePlan, TemplateResult, TemplatePlanAction } from "@corely/contracts";
 import type { TemplateExecutorPort } from "../../platform/application/ports/template-executor.port";
 import type { SeededRecordMetaRepositoryPort } from "../../platform/application/ports/seeded-record-meta-repository.port";
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "../../platform/application/ports/seeded-record-meta-repository.port";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import {
   MyTemplateParamsSchema,
   type MyTemplateParams,

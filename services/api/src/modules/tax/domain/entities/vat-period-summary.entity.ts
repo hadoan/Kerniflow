@@ -1,4 +1,4 @@
-import type { VatPeriodStatus, TaxBreakdownDto } from "@kerniflow/contracts";
+import type { VatPeriodStatus, TaxBreakdownDto } from "@corely/contracts";
 
 export interface VatPeriodSummaryEntity {
   id: string;

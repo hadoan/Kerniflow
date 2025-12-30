@@ -18,9 +18,9 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "src"),
       "@shared": path.resolve(__dirname, "src/shared"),
-      "@kerniflow/kernel": path.resolve(__dirname, "../..", "packages/kernel/src"),
-      "@kerniflow/testkit": path.resolve(__dirname, "../..", "packages/testkit/src"),
-      "@kerniflow/data": path.resolve(__dirname, "../..", "packages/data/src"),
+      "@corely/kernel": path.resolve(__dirname, "../..", "packages/kernel/src"),
+      "@corely/testkit": path.resolve(__dirname, "../..", "packages/testkit/src"),
+      "@corely/data": path.resolve(__dirname, "../..", "packages/data/src"),
     },
   },
 });

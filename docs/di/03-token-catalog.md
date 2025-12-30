@@ -36,7 +36,7 @@ All feature modules now follow this consistent pattern:
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 
 @Module({
@@ -110,9 +110,9 @@ All other modules keep their tokens **private** (not exported):
 
 ### Canonical Import Sources
 
-**Kernel Tokens** - Import from `@kerniflow/kernel`:
+**Kernel Tokens** - Import from `@corely/kernel`:
 ```typescript
-import { AUDIT_PORT, OUTBOX_PORT, ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+import { AUDIT_PORT, OUTBOX_PORT, ID_GENERATOR_TOKEN } from "@corely/kernel";
 ```
 
 **Module-Local Tokens** - Import from local ports directory:
@@ -131,8 +131,8 @@ The `services/api/src/shared/ports/` directory provides convenience re-exports:
 
 ```typescript
 // shared/ports/id-generator.port.ts
-export type { IdGeneratorPort } from "@kerniflow/kernel";
-export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+export type { IdGeneratorPort } from "@corely/kernel";
+export { ID_GENERATOR_TOKEN } from "@corely/kernel";
 ```
 
 This allows local imports while preserving token identity.

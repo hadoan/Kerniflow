@@ -7,7 +7,7 @@ import {
 } from "../../../identity/adapters/http/current-user.decorator";
 import { PlanTemplateUseCase } from "../../application/use-cases/plan-template.usecase";
 import { ApplyTemplateUseCase } from "../../application/use-cases/apply-template.usecase";
-import type { TemplatePlan, TemplateResult, TemplateCatalogItem } from "@kerniflow/contracts";
+import type { TemplatePlan, TemplateResult, TemplateCatalogItem } from "@corely/contracts";
 import { TemplateRegistry } from "../../infrastructure/registries/template-registry";
 
 /**

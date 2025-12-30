@@ -10,7 +10,7 @@
 
 ### What Was Fixed
 
-✅ **Created `@kerniflow/auth-client` package** - Shared authentication and API client
+✅ **Created `@corely/auth-client` package** - Shared authentication and API client
 ✅ **Implemented storage abstraction** - Platform-agnostic token storage with adapters
 ✅ **Migrated web app** - Now uses shared package (removed ~200 duplicate lines)
 ✅ **Migrated POS app** - Now uses shared package (removed ~150 duplicate lines)
@@ -40,7 +40,7 @@
 
 ## ✅ What's Properly Shared
 
-### 1. Contracts & Types (`@kerniflow/contracts`)
+### 1. Contracts & Types (`@corely/contracts`)
 
 - **Status**: ✅ 100% SHARED
 - **Web**: Uses workspace package
@@ -49,10 +49,10 @@
 - **Example**:
   ```typescript
   // Both apps use the same types
-  import type { OpenShiftInput, OpenShiftOutput } from "@kerniflow/contracts";
+  import type { OpenShiftInput, OpenShiftOutput } from "@corely/contracts";
   ```
 
-### 2. POS Business Logic (`@kerniflow/pos-core`)
+### 2. POS Business Logic (`@corely/pos-core`)
 
 - **Status**: ✅ 100% SHARED
 - **Web**: Would use (not yet integrated)
@@ -61,19 +61,19 @@
 - **Example**:
   ```typescript
   // Both apps use the same sale calculations
-  import { SaleBuilder } from "@kerniflow/pos-core";
+  import { SaleBuilder } from "@corely/pos-core";
   const builder = new SaleBuilder();
   const total = builder.calculateLineTotal(qty, price, discount);
   ```
 
-### 3. Offline Sync Engine (`@kerniflow/offline-core`)
+### 3. Offline Sync Engine (`@corely/offline-core`)
 
 - **Status**: ✅ 100% SHARED
 - **Web**: Uses workspace package
-- **POS**: Uses workspace package with RN adapter (`@kerniflow/offline-rn`)
+- **POS**: Uses workspace package with RN adapter (`@corely/offline-rn`)
 - **Pattern**: Core logic shared, platform adapters separate
 
-### 4. Base HTTP Request (`@kerniflow/api-client`)
+### 4. Base HTTP Request (`@corely/api-client`)
 
 - **Status**: ⚠️ PARTIALLY SHARED (50%)
 - **Shared**: Base `request()` function with retry logic, idempotency
@@ -88,7 +88,7 @@
 **Web Implementation** ([apps/web/src/lib/api-client.ts](apps/web/src/lib/api-client.ts)):
 
 ```typescript
-// Web wraps @kerniflow/api-client with token refresh
+// Web wraps @corely/api-client with token refresh
 class ApiClient {
   private isRefreshing = false;
   private refreshPromise: Promise<void> | null = null;
@@ -172,7 +172,7 @@ export class PosApiClient {
 - ❌ Duplicated token refresh logic
 - ❌ Duplicated 401 handling
 - ❌ Duplicated retry coordination
-- ❌ Not using `@kerniflow/api-client` base request
+- ❌ Not using `@corely/api-client` base request
 - ❌ Missing idempotency key support
 - ❌ Missing correlation ID support
 - ❌ Missing automatic retry with exponential backoff
@@ -320,7 +320,7 @@ await SecureStore.setItemAsync("accessToken", token);
 
 ## ✅ Recommended Solution: Shared Auth & API Package
 
-### Create `@kerniflow/auth-client` Package
+### Create `@corely/auth-client` Package
 
 **Location**: `packages/auth-client/`
 
@@ -390,7 +390,7 @@ export class SecureStorageAdapter implements TokenStorage {
 
 ```typescript
 // packages/auth-client/src/auth-client.ts
-import { request } from "@kerniflow/api-client";
+import { request } from "@corely/api-client";
 import type { TokenStorage } from "./storage/storage.interface";
 
 export interface AuthClientConfig {
@@ -460,7 +460,7 @@ export class AuthClient {
 
 ```typescript
 // packages/auth-client/src/api-client.ts
-import { request, HttpError } from "@kerniflow/api-client";
+import { request, HttpError } from "@corely/api-client";
 import type { AuthClient } from "./auth-client";
 
 export interface ApiClientConfig {
@@ -564,7 +564,7 @@ export class ApiClient {
 
 ```typescript
 // apps/web/src/lib/api-client.ts - AFTER MIGRATION
-import { ApiClient, AuthClient, LocalStorageAdapter } from "@kerniflow/auth-client";
+import { ApiClient, AuthClient, LocalStorageAdapter } from "@corely/auth-client";
 
 const storage = new LocalStorageAdapter();
 const authClient = new AuthClient({
@@ -586,7 +586,7 @@ export const apiClient = new ApiClient({
 // apps/pos/src/services/apiClient.ts - DELETE THIS FILE
 
 // apps/pos/src/stores/authStore.ts - SIMPLIFIED
-import { AuthClient, SecureStorageAdapter } from "@kerniflow/auth-client";
+import { AuthClient, SecureStorageAdapter } from "@corely/auth-client";
 import { create } from "zustand";
 
 const storage = new SecureStorageAdapter();
@@ -667,7 +667,7 @@ export const useAuthStore = create((set) => ({
 - **API client wrapper is duplicated** - Create shared package
 - **Auth logic is duplicated** - Create shared package
 - **Token storage not abstracted** - Create adapter pattern
-- **POS app not using base `@kerniflow/api-client`** - Refactor to use it
+- **POS app not using base `@corely/api-client`** - Refactor to use it
 
 ---
 

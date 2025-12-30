@@ -4,7 +4,7 @@ This document explains how environment configuration works in Kerniflow and how 
 
 ## Overview
 
-Kerniflow uses a centralized configuration system powered by the `@kerniflow/config` package. This provides:
+Kerniflow uses a centralized configuration system powered by the `@corely/config` package. This provides:
 
 - **Type-safe access** to environment variables via `EnvService`
 - **Automatic validation** with clear error messages on startup
@@ -104,12 +104,12 @@ The services will automatically:
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: kerniflow-api
+  name: corely-api
 spec:
   template:
     spec:
       containers:
-        - image: gcr.io/project/kerniflow-api
+        - image: gcr.io/project/corely-api
           env:
             - name: NODE_ENV
               value: "production"
@@ -129,7 +129,7 @@ spec:
 
 ```typescript
 import { Injectable } from "@nestjs/common";
-import { EnvService } from "@kerniflow/config";
+import { EnvService } from "@corely/config";
 
 @Injectable()
 export class MyService {
@@ -227,7 +227,7 @@ Add the variable to:
 ### 5. Rebuild config package
 
 ```bash
-pnpm --filter @kerniflow/config build
+pnpm --filter @corely/config build
 ```
 
 ### 6. Use in your code
@@ -246,7 +246,7 @@ Override config in tests:
 
 ```typescript
 import { Test } from "@nestjs/testing";
-import { EnvModule } from "@kerniflow/config";
+import { EnvModule } from "@corely/config";
 
 const module = await Test.createTestingModule({
   imports: [
@@ -293,7 +293,7 @@ APP_ENV=e2e pnpm test:int
 ### View safe config summary
 
 ```typescript
-import { EnvService } from "@kerniflow/config";
+import { EnvService } from "@corely/config";
 
 @Injectable()
 export class DebugService {

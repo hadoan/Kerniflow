@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { EnvService } from "@kerniflow/config";
+import { EnvService } from "@corely/config";
 import { DocumentsController } from "./adapters/http/documents.controller";
 import { InvoicePdfController } from "./adapters/http/invoice-pdf.controller";
 import { DocumentsApplication } from "./application/documents.application";
@@ -12,8 +12,8 @@ import { PdfLibRendererAdapter } from "./infrastructure/pdf/pdf-lib/pdf-lib-rend
 import { NullInvoicePdfModelAdapter } from "./infrastructure/invoices/null-invoice-pdf-model.adapter";
 import { ID_GENERATOR_TOKEN, type IdGeneratorPort } from "../../shared/ports/id-generator.port";
 import { CLOCK_PORT_TOKEN, type ClockPort } from "../../shared/ports/clock.port";
-import { OUTBOX_PORT } from "@kerniflow/kernel";
-import type { OutboxPort } from "@kerniflow/kernel";
+import { OUTBOX_PORT } from "@corely/kernel";
+import type { OutboxPort } from "@corely/kernel";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { IdentityModule } from "../identity";
 import { KernelModule } from "../../shared/kernel/kernel.module";

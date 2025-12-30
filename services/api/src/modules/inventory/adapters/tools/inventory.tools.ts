@@ -12,7 +12,7 @@ import {
   InventoryAnomaliesCardSchema,
   PickListCardSchema,
   StockChangeExplanationCardSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 const validationError = (issues: unknown) => ({
   ok: false,

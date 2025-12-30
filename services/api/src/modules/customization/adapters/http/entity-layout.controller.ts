@@ -8,8 +8,8 @@ import {
   UseGuards,
   BadRequestException,
 } from "@nestjs/common";
-import type { CustomEntityType } from "@kerniflow/contracts";
-import { CustomEntityTypes, EntityLayoutSchema } from "@kerniflow/contracts";
+import type { CustomEntityType } from "@corely/contracts";
+import { CustomEntityTypes, EntityLayoutSchema } from "@corely/contracts";
 import { AuthGuard } from "../../../identity/adapters/http/auth.guard";
 import {
   CurrentTenantId,

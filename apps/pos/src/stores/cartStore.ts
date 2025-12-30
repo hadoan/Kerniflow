@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "@lukeed/uuid";
-import type { PosTicketLineItem } from "@kerniflow/contracts";
-import { SaleBuilder } from "@kerniflow/pos-core";
+import type { PosTicketLineItem } from "@corely/contracts";
+import { SaleBuilder } from "@corely/pos-core";
 
 const saleBuilder = new SaleBuilder();
 

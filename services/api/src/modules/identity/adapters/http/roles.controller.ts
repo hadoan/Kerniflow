@@ -16,7 +16,7 @@ import {
   CreateRoleInputSchema,
   UpdateRoleInputSchema,
   UpdateRolePermissionsRequestSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { AuthGuard } from "./auth.guard";
 import { RbacGuard, RequirePermission } from "./rbac.guard";
 import { CurrentTenantId, CurrentUserId } from "./current-user.decorator";

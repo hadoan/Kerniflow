@@ -21,13 +21,13 @@
 ## Environments
 
 - Integration/API/outbox suites use Postgres testcontainers. Requires Docker available to the runner.
-- `DATABASE_URL` is set automatically by `@kerniflow/testkit`; do not point at a shared DB.
+- `DATABASE_URL` is set automatically by `@corely/testkit`; do not point at a shared DB.
 - Optional provider live runs can be gated with `RUN_LIVE_PROVIDER_TESTS=1` (not enabled by default).
 - JWT secrets fall back to defaults for tests; override via `JWT_ACCESS_SECRET`/`JWT_REFRESH_SECRET` if needed.
 
-## Shared Testkit (`@kerniflow/testkit`)
+## Shared Testkit (`@corely/testkit`)
 
-- `createTestDb()` — starts Postgres container, runs Prisma migrations from `@kerniflow/data`, returns `PostgresTestDb` with `client`, `reset()`, `down()`.
+- `createTestDb()` — starts Postgres container, runs Prisma migrations from `@corely/data`, returns `PostgresTestDb` with `client`, `reset()`, `down()`.
 - Factories: `createTenant`, `createUser`, `createCustomerParty`, `createInvoice`, `createExpense`.
 - API helpers: `createApiTestApp(db)` bootstraps Nest `AppModule` against the test DB; `seedDefaultTenant(app)` uses the test harness seeder.
 - Remember to `await stopSharedContainer()` after suites to free Docker resources.

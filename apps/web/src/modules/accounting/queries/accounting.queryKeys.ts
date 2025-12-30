@@ -8,7 +8,7 @@ import type {
   GetGeneralLedgerInput,
   GetProfitLossInput,
   GetBalanceSheetInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export const accountingQueryKeys = {
   // Root key

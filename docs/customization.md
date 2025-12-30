@@ -45,9 +45,9 @@
 ## Migration & build
 
 - Prisma schema updated but migration not generated (local DB unavailable during setup). Run:
-  - `pnpm --filter @kerniflow/data exec prisma migrate dev --name customization`
+  - `pnpm --filter @corely/data exec prisma migrate dev --name customization`
 - Rebuild contracts/domain after schema changes:
-  - `pnpm --filter @kerniflow/contracts build && pnpm --filter @kerniflow/domain build`
+  - `pnpm --filter @corely/contracts build && pnpm --filter @corely/domain build`
 
 ## Remaining gaps / follow-ups
 

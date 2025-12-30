@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
-import { DataModule, PrismaAuditAdapter } from "@kerniflow/data";
+import { DataModule, PrismaAuditAdapter } from "@corely/data";
 import { PurchasingController } from "./adapters/http/purchasing.controller";
 import { PurchasingApplication } from "./application/purchasing.application";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
-import { AUDIT_PORT, AuditPort } from "@kerniflow/kernel";
+import { AUDIT_PORT, AuditPort } from "@corely/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import {
   IdempotencyStoragePort,

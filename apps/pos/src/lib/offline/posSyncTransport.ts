@@ -1,6 +1,6 @@
-import type { SyncTransport, CommandResult, OutboxCommand } from "@kerniflow/offline-core";
-import type { CreateCheckInEventInput, CreateLoyaltyEarnEntryInput } from "@kerniflow/contracts";
-import { HttpError } from "@kerniflow/api-client";
+import type { SyncTransport, CommandResult, OutboxCommand } from "@corely/offline-core";
+import type { CreateCheckInEventInput, CreateLoyaltyEarnEntryInput } from "@corely/contracts";
+import { HttpError } from "@corely/api-client";
 import { EngagementCommandTypes } from "@/offline/engagementOutbox";
 import type { PosApiClient } from "@/lib/pos-api-client";
 import type { EngagementService } from "@/services/engagementService";

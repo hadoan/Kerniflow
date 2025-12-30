@@ -1,4 +1,4 @@
 {
-  "extends": "@kerniflow/tsconfig/react.json",
+  "extends": "@corely/tsconfig/react.json",
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

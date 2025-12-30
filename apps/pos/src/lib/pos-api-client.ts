@@ -1,4 +1,4 @@
-import { ApiClient, type ApiClientConfig } from "@kerniflow/auth-client";
+import { ApiClient, type ApiClientConfig } from "@corely/auth-client";
 import type {
   CreateRegisterInput,
   CreateRegisterOutput,
@@ -32,7 +32,7 @@ import type {
   GetEngagementSettingsOutput,
   UpdateEngagementSettingsInput,
   UpdateEngagementSettingsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 /**
  * POS API Client

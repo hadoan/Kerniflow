@@ -1,4 +1,4 @@
-import type { PosSale, PaymentMethod } from "@kerniflow/contracts";
+import type { PosSale, PaymentMethod } from "@corely/contracts";
 import { format } from "date-fns";
 
 /**

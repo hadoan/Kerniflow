@@ -7,7 +7,7 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { Request, Response } from "express";
-import { AppError } from "@kerniflow/domain";
+import { AppError } from "@corely/domain";
 import { ExceptionToProblemDetailsMapper } from "./exception-to-problem-details.mapper.js";
 
 /**

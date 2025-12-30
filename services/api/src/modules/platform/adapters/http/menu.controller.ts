@@ -7,7 +7,7 @@ import {
 import { ComposeMenuUseCase } from "../../application/use-cases/compose-menu.usecase";
 import { UpdateMenuOverridesUseCase } from "../../application/use-cases/update-menu-overrides.usecase";
 import { ResetMenuOverridesUseCase } from "../../application/use-cases/reset-menu-overrides.usecase";
-import type { MenuOverrides } from "@kerniflow/contracts";
+import type { MenuOverrides } from "@corely/contracts";
 
 /**
  * Temporary interface for role permission grant repository

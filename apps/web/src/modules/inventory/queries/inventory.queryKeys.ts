@@ -6,7 +6,7 @@ import type {
   GetAvailableInput,
   ListReorderPoliciesInput,
   GetReorderSuggestionsInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export const inventoryQueryKeys = {
   all: ["inventory"] as const,

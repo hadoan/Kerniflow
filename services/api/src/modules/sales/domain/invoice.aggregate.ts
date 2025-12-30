@@ -1,4 +1,4 @@
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 import { calculateInvoiceTotals } from "./totals";
 import type {
   InvoiceLineItem,

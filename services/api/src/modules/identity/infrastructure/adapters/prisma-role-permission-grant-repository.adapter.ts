@@ -1,7 +1,7 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type { RolePermissionGrantRepositoryPort } from "../../application/ports/role-permission-grant-repository.port";
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import type { RolePermissionEffect } from "@corely/contracts";
 
 @Injectable()
 export class PrismaRolePermissionGrantRepository implements RolePermissionGrantRepositoryPort {

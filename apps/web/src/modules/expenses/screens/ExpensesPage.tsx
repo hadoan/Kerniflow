@@ -9,7 +9,7 @@ import { Badge } from "@/shared/ui/badge";
 import { formatMoney, formatDate } from "@/shared/lib/formatters";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { expensesApi } from "@/lib/expenses-api";
-import type { ExpenseDto } from "@kerniflow/contracts";
+import type { ExpenseDto } from "@corely/contracts";
 
 export default function ExpensesPage() {
   const { t, i18n } = useTranslation();

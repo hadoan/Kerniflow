@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
-import { AuthClient } from "@kerniflow/auth-client";
+import { AuthClient } from "@corely/auth-client";
 import { PosApiClient } from "@/lib/pos-api-client";
 import { NativeStorageAdapter } from "@/lib/storage-adapter";
 import { router } from "expo-router";

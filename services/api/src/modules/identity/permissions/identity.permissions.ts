@@ -1,4 +1,4 @@
-import type { PermissionGroup } from "@kerniflow/contracts";
+import type { PermissionGroup } from "@corely/contracts";
 
 export const identityPermissions: PermissionGroup[] = [
   {

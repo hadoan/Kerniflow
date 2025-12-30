@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Register } from "@kerniflow/contracts";
+import type { Register } from "@corely/contracts";
 import { useAuthStore } from "./authStore";
 import * as SecureStore from "expo-secure-store";
 

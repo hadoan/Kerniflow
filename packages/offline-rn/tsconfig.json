@@ -1,10 +1,10 @@
 {
-  "extends": "@kerniflow/tsconfig/lib.json",
+  "extends": "@corely/tsconfig/lib.json",
   "compilerOptions": {
     "lib": ["ES2022", "DOM"],
     "baseUrl": ".",
     "paths": {
-      "@kerniflow/offline-core": ["../offline-core/src"]
+      "@corely/offline-core": ["../offline-core/src"]
     }
   },
   "include": ["src", "../offline-core/src/**/*"]

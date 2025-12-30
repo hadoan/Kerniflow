@@ -5,7 +5,7 @@
       "label": "Build API",
       "type": "shell",
       "command": "pnpm",
-      "args": ["--filter", "@kerniflow/api", "build"],
+      "args": ["--filter", "@corely/api", "build"],
       "options": {
         "cwd": "${workspaceFolder}"
       },

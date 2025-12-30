@@ -1,4 +1,4 @@
-import type { PosSale, SyncPosSaleInput } from "@kerniflow/contracts";
+import type { PosSale, SyncPosSaleInput } from "@corely/contracts";
 
 /**
  * Sync Command Mapper - Maps POS sale to sync command payload

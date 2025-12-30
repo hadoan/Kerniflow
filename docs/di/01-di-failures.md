@@ -109,13 +109,13 @@ constructor(
 3. **PlatformModule** declares its OWN `ID_GENERATOR_TOKEN` provider
 4. **PlatformModule** declares its OWN `AUDIT_PORT` provider
 5. Token imports come from different paths:
-   - `AUDIT_PORT` from `@kerniflow/kernel` (line 2)
+   - `AUDIT_PORT` from `@corely/kernel` (line 2)
    - `ID_GENERATOR_TOKEN` from `../../../../shared/ports/id-generator.port` (line 10)
 
-6. Shared ports re-export from `@kerniflow/kernel`:
+6. Shared ports re-export from `@corely/kernel`:
    ```typescript
    // shared/ports/id-generator.port.ts
-   export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+   export { ID_GENERATOR_TOKEN } from "@corely/kernel";
    ```
 
 7. All tokens resolve to the same string values, but the **provider instances** are isolated to PlatformModule
@@ -139,7 +139,7 @@ EnableAppUseCase constructor
   ↓
 import from ../../../../shared/ports/id-generator.port
   ↓
-export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel"
+export { ID_GENERATOR_TOKEN } from "@corely/kernel"
   ↓
 packages/kernel/src/tokens.ts:
   export const ID_GENERATOR_TOKEN = "kernel/id-generator"
@@ -152,10 +152,10 @@ packages/kernel/src/tokens.ts:
 
 | Token | Canonical Source | Should Be Provided By | Actually Provided By |
 |-------|-----------------|----------------------|---------------------|
-| ID_GENERATOR_TOKEN | @kerniflow/kernel | KernelModule | KernelModule + 11 feature modules |
-| CLOCK_PORT_TOKEN | @kerniflow/kernel | KernelModule | KernelModule + 10 feature modules |
-| AUDIT_PORT | @kerniflow/kernel | DataModule | DataModule + 4 feature modules |
-| IDEMPOTENCY_STORAGE_PORT_TOKEN | @kerniflow/kernel | KernelModule | KernelModule + 3 feature modules |
+| ID_GENERATOR_TOKEN | @corely/kernel | KernelModule | KernelModule + 11 feature modules |
+| CLOCK_PORT_TOKEN | @corely/kernel | KernelModule | KernelModule + 10 feature modules |
+| AUDIT_PORT | @corely/kernel | DataModule | DataModule + 4 feature modules |
+| IDEMPOTENCY_STORAGE_PORT_TOKEN | @corely/kernel | KernelModule | KernelModule + 3 feature modules |
 
 ## Impact Assessment
 

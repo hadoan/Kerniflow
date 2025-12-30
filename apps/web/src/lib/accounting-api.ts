@@ -34,7 +34,7 @@ import type {
   JournalEntryDto,
   AccountingSettingsDto,
   AccountingPeriodDto,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export class AccountingApi {
   // ===== Setup =====

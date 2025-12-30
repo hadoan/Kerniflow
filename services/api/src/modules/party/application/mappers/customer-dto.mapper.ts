@@ -1,4 +1,4 @@
-import { type CustomerDto } from "@kerniflow/contracts";
+import { type CustomerDto } from "@corely/contracts";
 import { type PartyAggregate } from "../../domain/party.aggregate";
 
 export const toCustomerDto = (party: PartyAggregate): CustomerDto => ({

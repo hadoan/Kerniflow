@@ -1,5 +1,5 @@
 import tseslint from "typescript-eslint";
-import config from "@kerniflow/eslint-config";
+import config from "@corely/eslint-config";
 
 export default tseslint.config(
   {

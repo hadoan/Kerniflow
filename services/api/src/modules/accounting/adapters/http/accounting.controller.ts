@@ -30,8 +30,8 @@ import {
   ClosePeriodInputSchema,
   ReopenPeriodInputSchema,
   UpdateAccountingSettingsInputSchema,
-} from "@kerniflow/contracts";
-import { isOk } from "@kerniflow/kernel";
+} from "@corely/contracts";
+import { isOk } from "@corely/kernel";
 
 // Assuming auth guard from existing modules
 // @UseGuards(AuthGuard)

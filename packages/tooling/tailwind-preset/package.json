@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/tailwind-preset",
+  "name": "@corely/tailwind-preset",
   "private": true,
   "version": "0.0.0",
   "description": "Shared Tailwind CSS preset for Kerniflow monorepo",

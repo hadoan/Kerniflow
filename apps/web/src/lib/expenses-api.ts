@@ -3,7 +3,7 @@
  * Minimal wrapper around expenses endpoints
  */
 
-import type { ExpenseDto } from "@kerniflow/contracts";
+import type { ExpenseDto } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
 export type CreateExpenseRequest = {

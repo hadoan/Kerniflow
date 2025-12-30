@@ -7,7 +7,7 @@ This document describes the **repo hierarchy** for Kerniflow (pnpm monorepo) and
 ## Top-level layout
 
 ```text
-kerniflow/
+corely/
   apps/
     webs/                              # Frontend (Vite + React + TS)
 

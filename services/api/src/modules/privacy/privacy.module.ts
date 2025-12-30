@@ -6,7 +6,7 @@ import { RequestAccountErasureUseCase } from "./application/use-cases/request-ac
 import { GetPrivacyRequestStatusUseCase } from "./application/use-cases/get-privacy-request-status/get-privacy-request-status.usecase";
 import { ProcessPrivacyRequestHandler } from "./application/workers/process-privacy-request.handler";
 import { PrismaPrivacyRequestRepoAdapter } from "./infrastructure/prisma/prisma-privacy-request-repo.adapter";
-import { OUTBOX_PORT } from "@kerniflow/kernel";
+import { OUTBOX_PORT } from "@corely/kernel";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import type { DocumentsPort } from "./application/ports/documents.port";

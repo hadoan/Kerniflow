@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvoicesHttpController } from "./invoices.controller";
 import { InvoicesApplication } from "../../application/invoices.application";
 import { HttpException } from "@nestjs/common";
-import { NotFoundError, err, ok } from "@kerniflow/kernel";
+import { NotFoundError, err, ok } from "@corely/kernel";
 
 const invoice = {
   id: "inv-1",

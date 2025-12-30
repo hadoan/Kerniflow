@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type { BillPaymentRepositoryPort } from "../../application/ports/bill-payment-repository.port";
 import type { BillPayment } from "../../domain/purchasing.types";
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 const toPrismaDate = (localDate: LocalDate): Date => new Date(`${localDate}T00:00:00.000Z`);
 const fromPrismaDate = (value: Date): LocalDate => value.toISOString().slice(0, 10) as LocalDate;

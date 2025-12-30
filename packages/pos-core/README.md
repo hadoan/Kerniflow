@@ -1,4 +1,4 @@
-# @kerniflow/pos-core
+# @corely/pos-core
 
 Platform-agnostic POS business logic for Kerniflow.
 
@@ -15,7 +15,7 @@ This package contains shared POS domain logic that can be reused across web and 
 ## Usage
 
 ```typescript
-import { SaleBuilder, ReceiptFormatter } from "@kerniflow/pos-core";
+import { SaleBuilder, ReceiptFormatter } from "@corely/pos-core";
 
 // Calculate totals
 const builder = new SaleBuilder();
@@ -35,4 +35,4 @@ const receiptData = formatter.formatForDisplay(posSale, {
 - **No framework dependencies** - Pure TypeScript, works everywhere
 - **No platform-specific code** - No React, React Native, or DOM APIs
 - **Testable** - All logic is pure functions or simple classes
-- **Type-safe** - Uses `@kerniflow/contracts` for shared types
+- **Type-safe** - Uses `@corely/contracts` for shared types

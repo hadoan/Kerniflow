@@ -78,9 +78,9 @@ fi
 
 # Step 3: Run migrations
 echo -e "${YELLOW}[3/5] Running database migrations...${NC}"
-export DATABASE_URL="postgresql://kerniflow:kerniflow@localhost:5433/kerniflow?schema=public"
+export DATABASE_URL="postgresql://corely:corely@localhost:5433/corely?schema=public"
 
-if pnpm --filter @kerniflow/data exec prisma migrate deploy; then
+if pnpm --filter @corely/data exec prisma migrate deploy; then
   echo -e "${GREEN}      ✓ Migrations applied${NC}"
 else
   echo -e "${RED}      ✗ Migration failed${NC}"

@@ -10,7 +10,7 @@ import type {
   UpdateWorkspaceInput,
   UpdateWorkspaceOutput,
   WorkspaceOnboardingStatusResponse,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { apiClient } from "@/lib/api-client";
 
 class WorkspacesApi {

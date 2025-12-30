@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { IdempotencyPort, TransactionContext } from "@kerniflow/kernel";
+import { IdempotencyPort, TransactionContext } from "@corely/kernel";
 import { PrismaService } from "../prisma/prisma.service";
 import { getPrismaClient } from "../uow/prisma-unit-of-work.adapter";
 

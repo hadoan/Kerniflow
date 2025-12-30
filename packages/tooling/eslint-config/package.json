@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/eslint-config",
+  "name": "@corely/eslint-config",
   "private": true,
   "version": "0.0.0",
   "description": "Shared ESLint configuration for Kerniflow monorepo",

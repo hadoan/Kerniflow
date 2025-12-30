@@ -11,7 +11,7 @@ import type { MembershipRepositoryPort } from "../../application/ports/membershi
 import { MEMBERSHIP_REPOSITORY_TOKEN } from "../../application/ports/membership-repository.port";
 import type { RolePermissionGrantRepositoryPort } from "../../application/ports/role-permission-grant-repository.port";
 import { ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN } from "../../application/ports/role-permission-grant-repository.port";
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import type { RolePermissionEffect } from "@corely/contracts";
 
 export const REQUIRE_PERMISSION = "require_permission";
 

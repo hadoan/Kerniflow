@@ -29,7 +29,7 @@ import {
   ReversePaymentInputSchema,
   GetSalesSettingsInputSchema,
   UpdateSalesSettingsInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { SalesApplication } from "../../application/sales.application";
 import { buildUseCaseContext, mapResultToHttp } from "./mappers";
 import { AuthGuard } from "../../../identity";

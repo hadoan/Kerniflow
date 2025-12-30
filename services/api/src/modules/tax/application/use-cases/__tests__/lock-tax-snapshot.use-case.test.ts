@@ -6,7 +6,7 @@ import { InMemoryTaxSnapshotRepo } from "../../../testkit/fakes/in-memory-tax-sn
 import { InMemoryTaxProfileRepo } from "../../../testkit/fakes/in-memory-tax-profile-repo";
 import { InMemoryTaxCodeRepo } from "../../../testkit/fakes/in-memory-tax-code-repo";
 import { InMemoryTaxRateRepo } from "../../../testkit/fakes/in-memory-tax-rate-repo";
-import type { LockTaxSnapshotInput } from "@kerniflow/contracts";
+import type { LockTaxSnapshotInput } from "@corely/contracts";
 import type { UseCaseContext } from "../use-case-context";
 
 describe("LockTaxSnapshotUseCase", () => {

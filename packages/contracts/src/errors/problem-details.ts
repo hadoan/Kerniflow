@@ -22,7 +22,7 @@ export interface ValidationErrorItem {
  * Based on RFC 7807 with Kerniflow extensions for traceability and validation
  */
 export interface ProblemDetails {
-  /** Stable error type identifier (e.g., "https://errors.kerniflow.com/validation" or "Common:ValidationFailed") */
+  /** Stable error type identifier (e.g., "https://errors.corely.com/validation" or "Common:ValidationFailed") */
   type: string;
 
   /** Short, human-readable summary of the error type */

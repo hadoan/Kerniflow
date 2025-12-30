@@ -1,4 +1,4 @@
-import type { UpdateCustomerInput, UpdateCustomerOutput } from "@kerniflow/contracts";
+import type { UpdateCustomerInput, UpdateCustomerOutput } from "@corely/contracts";
 import type {
   ClockPort,
   IdGeneratorPort,
@@ -6,7 +6,7 @@ import type {
   Result,
   UseCaseContext,
   UseCaseError,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import {
   BaseUseCase,
   ConflictError,
@@ -14,7 +14,7 @@ import {
   ValidationError,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { toCustomerDto } from "../../mappers/customer-dto.mapper";
 import type { PartyRepoPort } from "../../ports/party-repository.port";
 type Deps = {

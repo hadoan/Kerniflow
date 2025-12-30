@@ -1,4 +1,4 @@
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 import { calculateQuoteTotals } from "./totals";
 import type { OrderLineItem, OrderProps, OrderStatus } from "./sales.types";
 

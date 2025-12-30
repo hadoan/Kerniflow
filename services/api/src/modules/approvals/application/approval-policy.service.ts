@@ -3,8 +3,8 @@ import {
   type ApprovalPolicyInput,
   ApprovalPolicyInputSchema,
   WorkflowDefinitionStatusSchema,
-} from "@kerniflow/contracts";
-import { WorkflowDefinitionRepository } from "@kerniflow/data";
+} from "@corely/contracts";
+import { WorkflowDefinitionRepository } from "@corely/data";
 import { buildApprovalWorkflowSpec } from "./approval-spec.builder";
 
 const APPROVAL_KEY_PREFIX = "approval.";

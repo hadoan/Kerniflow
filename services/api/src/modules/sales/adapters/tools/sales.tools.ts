@@ -6,7 +6,7 @@ import {
   SalesDraftFollowUpMessageInputSchema,
   SalesDetectStalledQuotesInputSchema,
   SalesExplainPostingInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type {
   QuoteDraftProposalCard,
   LineItemsProposalCard,
@@ -15,7 +15,7 @@ import type {
   MessageDraftCard,
   StalledQuotesCard,
   PostingExplanationCard,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import { type SalesApplication } from "../../application/sales.application";
 

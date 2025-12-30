@@ -13,7 +13,7 @@ export interface TestData {
   };
 }
 
-const TEST_EMAIL = "e2e-test@kerniflow.local";
+const TEST_EMAIL = "e2e-test@corely.local";
 const TEST_PASSWORD = "E2ETestPassword123!";
 
 /**

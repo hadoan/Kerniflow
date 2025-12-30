@@ -9,8 +9,8 @@ import { useEngagementService } from "@/hooks/useEngagementService";
 import { useSyncEngine } from "@/hooks/useSyncEngine";
 import { getOutboxStore } from "@/lib/offline/outboxStore";
 import { buildCreateCheckInCommand } from "@/offline/engagementOutbox";
-import type { CreateCheckInEventInput } from "@kerniflow/contracts";
-import { HttpError } from "@kerniflow/api-client";
+import type { CreateCheckInEventInput } from "@corely/contracts";
+import { HttpError } from "@corely/api-client";
 
 export default function KioskConfirmScreen() {
   const router = useRouter();

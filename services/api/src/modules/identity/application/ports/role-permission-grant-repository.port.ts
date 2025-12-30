@@ -1,4 +1,4 @@
-import type { RolePermissionEffect } from "@kerniflow/contracts";
+import type { RolePermissionEffect } from "@corely/contracts";
 
 export interface RolePermissionGrantRepositoryPort {
   listByRole(

@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/auth-client",
+  "name": "@corely/auth-client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -25,7 +25,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@kerniflow/api-client": "workspace:*"
+    "@corely/api-client": "workspace:*"
   },
   "peerDependencies": {
     "expo-secure-store": ">=14.0.0"

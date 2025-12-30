@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
-import type { GetWorkspaceOutput } from "@kerniflow/contracts";
+import type { GetWorkspaceOutput } from "@corely/contracts";
 import type { WorkspaceRepositoryPort } from "../ports/workspace-repository.port";
 import { WORKSPACE_REPOSITORY_PORT } from "../ports/workspace-repository.port";
 

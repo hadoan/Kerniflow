@@ -1,4 +1,4 @@
-import type { CustomEntityType } from "@kerniflow/contracts";
+import type { CustomEntityType } from "@corely/contracts";
 import type { CustomFieldDefinitionPort } from "../ports";
 import type { CustomFieldDefinition } from "../types";
 

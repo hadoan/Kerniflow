@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { accountingApi } from "@/lib/accounting-api";
 import { accountingQueryKeys } from "./accounting.queryKeys";
-import type { UpdateAccountingSettingsInput, SetupAccountingInput } from "@kerniflow/contracts";
+import type { UpdateAccountingSettingsInput, SetupAccountingInput } from "@corely/contracts";
 
 // Query: Get accounting settings
 export function useAccountingSettings() {

@@ -1,4 +1,4 @@
-import type { AppManifest } from "@kerniflow/contracts";
+import type { AppManifest } from "@corely/contracts";
 
 /**
  * Invoices App Manifest

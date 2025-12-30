@@ -28,7 +28,7 @@ fi
 echo "✅ Typecheck passed."
 
 echo "Running targeted build to ensure code compiles..."
-pnpm -r --filter @kerniflow/contracts --filter @kerniflow/domain --filter @kerniflow/data --filter @kerniflow/api --filter @kerniflow/worker build
+pnpm -r --filter @corely/contracts --filter @corely/domain --filter @corely/data --filter @corely/api --filter @corely/worker build
 
 if [ $? -ne 0 ]; then
   echo "❌ Build failed. Fix errors and try again."

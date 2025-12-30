@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { IdentityModule } from "../identity";
 import { ApprovalsPolicyController } from "./adapters/http/approvals-policy.controller";
 import { ApprovalsRequestsController } from "./adapters/http/approvals-requests.controller";

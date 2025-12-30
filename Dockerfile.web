@@ -27,12 +27,12 @@ COPY packages ./packages
 COPY apps/web ./apps/web
 
 # Build packages that web depends on
-# Note: @kerniflow/api-client is source-only (no build needed)
+# Note: @corely/api-client is source-only (no build needed)
 # Build vite-config directly with tsdown from root node_modules
 RUN cd packages/tooling/vite-config && /app/node_modules/.bin/tsdown \
- && cd /app && pnpm --filter @kerniflow/contracts build \
- && pnpm --filter @kerniflow/offline-core build \
- && pnpm --filter @kerniflow/offline-web build
+ && cd /app && pnpm --filter @corely/contracts build \
+ && pnpm --filter @corely/offline-core build \
+ && pnpm --filter @corely/offline-web build
 
 # Expose Vite dev server port
 EXPOSE 8080

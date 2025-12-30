@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { type ProblemDetails, type ValidationErrorItem } from "@kerniflow/contracts";
+import { type ProblemDetails, type ValidationErrorItem } from "@corely/contracts";
 import {
   AppError,
   UserFriendlyError,
@@ -9,7 +9,7 @@ import {
   UnauthorizedError,
   ForbiddenError,
   ExternalServiceError,
-} from "@kerniflow/domain";
+} from "@corely/domain";
 import {
   UseCaseError,
   ValidationError as KernelValidationError,
@@ -17,15 +17,15 @@ import {
   ConflictError as KernelConflictError,
   UnauthorizedError as KernelUnauthorizedError,
   ForbiddenError as KernelForbiddenError,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import { type Prisma } from "@prisma/client";
 
 /**
  * Maps any error to a ProblemDetails response
  *
  * Priority order:
- * 1. AppError (from @kerniflow/domain) - new error system
- * 2. UseCaseError (from @kerniflow/kernel) - legacy compatibility
+ * 1. AppError (from @corely/domain) - new error system
+ * 2. UseCaseError (from @corely/kernel) - legacy compatibility
  * 3. Prisma errors - mapped to appropriate business errors
  * 4. NestJS HttpException - converted with stable codes
  * 5. Unknown errors - sanitized 500 response
@@ -72,7 +72,7 @@ export class ExceptionToProblemDetailsMapper {
     const isPublic = error.isPublic();
 
     return {
-      type: `https://errors.kerniflow.com/${error.code}`,
+      type: `https://errors.corely.com/${error.code}`,
       title: this.getTitle(error.status),
       status: error.status,
       detail: isPublic ? error.publicMessage! : this.getSafeDetail(error.status),
@@ -114,7 +114,7 @@ export class ExceptionToProblemDetailsMapper {
     }
 
     return {
-      type: `https://errors.kerniflow.com/${error.code}`,
+      type: `https://errors.corely.com/${error.code}`,
       title: this.getTitle(status),
       status,
       detail: isPublic ? error.message : this.getSafeDetail(status),
@@ -133,7 +133,7 @@ export class ExceptionToProblemDetailsMapper {
     switch (error.code) {
       case "P2002": // Unique constraint violation
         return {
-          type: "https://errors.kerniflow.com/Common:Conflict",
+          type: "https://errors.corely.com/Common:Conflict",
           title: "Conflict",
           status: HttpStatus.CONFLICT,
           detail: "A record with this value already exists",
@@ -145,7 +145,7 @@ export class ExceptionToProblemDetailsMapper {
 
       case "P2025": // Record not found
         return {
-          type: "https://errors.kerniflow.com/Common:NotFound",
+          type: "https://errors.corely.com/Common:NotFound",
           title: "Not Found",
           status: HttpStatus.NOT_FOUND,
           detail: "Resource not found",
@@ -156,7 +156,7 @@ export class ExceptionToProblemDetailsMapper {
 
       case "P2003": // Foreign key constraint violation
         return {
-          type: "https://errors.kerniflow.com/Common:Conflict",
+          type: "https://errors.corely.com/Common:Conflict",
           title: "Conflict",
           status: HttpStatus.CONFLICT,
           detail: "Referenced resource does not exist",
@@ -168,7 +168,7 @@ export class ExceptionToProblemDetailsMapper {
       default:
         // Unknown Prisma error - treat as internal error
         return {
-          type: "https://errors.kerniflow.com/Common:DatabaseError",
+          type: "https://errors.corely.com/Common:DatabaseError",
           title: "Internal Server Error",
           status: HttpStatus.INTERNAL_SERVER_ERROR,
           detail: "A database error occurred",
@@ -204,7 +204,7 @@ export class ExceptionToProblemDetailsMapper {
     }
 
     return {
-      type: `https://errors.kerniflow.com/${code}`,
+      type: `https://errors.corely.com/${code}`,
       title: this.getTitle(status),
       status,
       detail,
@@ -225,7 +225,7 @@ export class ExceptionToProblemDetailsMapper {
         : "An unexpected error occurred";
 
     return {
-      type: "https://errors.kerniflow.com/Common:UnexpectedError",
+      type: "https://errors.corely.com/Common:UnexpectedError",
       title: "Internal Server Error",
       status: HttpStatus.INTERNAL_SERVER_ERROR,
       detail,

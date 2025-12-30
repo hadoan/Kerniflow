@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "@lukeed/uuid";
-import type { OutboxCommand } from "@kerniflow/offline-core";
-import type { CreateCheckInEventInput, CreateLoyaltyEarnEntryInput } from "@kerniflow/contracts";
+import type { OutboxCommand } from "@corely/offline-core";
+import type { CreateCheckInEventInput, CreateLoyaltyEarnEntryInput } from "@corely/contracts";
 
 export const EngagementCommandTypes = {
   CreateCheckIn: "engagement.checkin.create",

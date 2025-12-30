@@ -24,7 +24,7 @@ import type {
   LineDirection,
   PeriodStatus,
   SourceType,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 // Helper to format dates
 function toLocalDateString(date: Date): string {

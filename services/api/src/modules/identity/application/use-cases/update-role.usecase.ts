@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { RoleDto } from "@kerniflow/contracts";
+import type { RoleDto } from "@corely/contracts";
 import {
   ConflictError,
   NotFoundError,

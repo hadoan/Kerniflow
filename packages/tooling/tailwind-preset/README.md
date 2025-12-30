@@ -1,11 +1,11 @@
-# @kerniflow/tailwind-preset
+# @corely/tailwind-preset
 
 Shared Tailwind CSS preset for the Kerniflow design system.
 
 ## Installation
 
 ```bash
-pnpm add -D @kerniflow/tailwind-preset@workspace:* tailwindcss tailwindcss-animate
+pnpm add -D @corely/tailwind-preset@workspace:* tailwindcss tailwindcss-animate
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ pnpm add -D @kerniflow/tailwind-preset@workspace:* tailwindcss tailwindcss-anima
 ```typescript
 // tailwind.config.ts
 import type { Config } from "tailwindcss";
-import preset from "@kerniflow/tailwind-preset";
+import preset from "@corely/tailwind-preset";
 
 export default {
   presets: [preset],
@@ -33,7 +33,7 @@ export default {
 ```typescript
 // tailwind.config.ts
 import type { Config } from "tailwindcss";
-import preset from "@kerniflow/tailwind-preset";
+import preset from "@corely/tailwind-preset";
 
 export default {
   presets: [preset],

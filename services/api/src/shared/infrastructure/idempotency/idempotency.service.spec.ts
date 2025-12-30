@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from "vitest";
 
 type Key = { tenantId: string | null; actionKey: string; key: string };
 
-vi.mock("@kerniflow/data", () => {
+vi.mock("@corely/data", () => {
   const store = new Map<string, any>();
   const makeKey = (params: Key) =>
     `${params.tenantId ?? "public"}:${params.actionKey}:${params.key}`;
@@ -47,7 +47,7 @@ vi.mock("@kerniflow/data", () => {
 });
 
 // @ts-expect-error test-only mock export
-import { __resetIdempotencyMock, prisma } from "@kerniflow/data";
+import { __resetIdempotencyMock, prisma } from "@corely/data";
 import { IdempotencyService } from "./idempotency.service";
 
 describe("IdempotencyService", () => {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type {
   AccountingSettingsRepoPort,
   LedgerAccountRepoPort,
@@ -20,7 +20,7 @@ import {
   accountingPeriodFromPrisma,
   accountingPeriodToPrisma,
 } from "./mappers";
-import type { AccountType, EntryStatus } from "@kerniflow/contracts";
+import type { AccountType, EntryStatus } from "@corely/contracts";
 
 @Injectable()
 export class PrismaAccountingSettingsRepository implements AccountingSettingsRepoPort {

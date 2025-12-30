@@ -100,7 +100,7 @@ pnpm test di-smoke
 
 | Test                                | What It Verifies                                                                |
 | ----------------------------------- | ------------------------------------------------------------------------------- |
-| Token Identity (ID_GENERATOR_TOKEN) | Token imports from `@kerniflow/kernel` and `shared/ports` resolve to same value |
+| Token Identity (ID_GENERATOR_TOKEN) | Token imports from `@corely/kernel` and `shared/ports` resolve to same value |
 | Token Identity (AUDIT_PORT)         | Audit port token consistent across imports                                      |
 | KernelModule Instantiation          | KernelModule can be created and provides kernel services                        |
 

@@ -1,4 +1,4 @@
-import type { TokenStorage } from "@kerniflow/auth-client";
+import type { TokenStorage } from "@corely/auth-client";
 import * as SecureStore from "expo-secure-store";
 
 /**

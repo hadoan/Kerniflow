@@ -4,17 +4,17 @@ This document explains how the new offline foundation is structured and how to e
 
 ## Package map
 
-- `@kerniflow/offline-core` (pure TS, platform-agnostic)
+- `@corely/offline-core` (pure TS, platform-agnostic)
   - Ports: `OutboxStore`, `SyncTransport`, `SyncLock`, `NetworkMonitor`, `Clock`, `IdGenerator`, `Logger`
   - Command primitives: `OutboxCommand` model, serializer helpers, `CommandRegistry`
   - Sync engine: batching, exponential backoff with jitter, lock-guarded flush, conflict propagation, event subscription
   - Testing utilities: in-memory outbox store, fake lock/network/clock/id generator, vitest suite
-- `@kerniflow/offline-web` (browser adapters)
+- `@corely/offline-web` (browser adapters)
   - IndexedDB outbox store (`IndexedDbOutboxStore`) with workspace/status index
   - Cross-tab TTL lock (`LocalStorageSyncLock`)
   - Network monitor using `navigator.onLine` and online/offline events
   - TanStack Query persister for IndexedDB (`createIndexedDbPersister`)
-- `@kerniflow/offline-rn` (skeleton)
+- `@corely/offline-rn` (skeleton)
   - NetInfo-based `ReactNativeNetworkMonitor`
   - Placeholder `ReactNativeOutboxStore` to be replaced with SQLite-backed adapter
 
@@ -48,7 +48,7 @@ This document explains how the new offline foundation is structured and how to e
 
 ## Adding a new offline command
 
-1. Define payload schema in `@kerniflow/contracts` and register it in a `CommandRegistry` instance.
+1. Define payload schema in `@corely/contracts` and register it in a `CommandRegistry` instance.
 2. In the UI, create an `OutboxCommand` with client-generated `commandId` and `idempotencyKey`; enqueue via platform `OutboxStore` and apply optimistic cache updates.
 3. Implement transport mapping `type → API call`, ensuring idempotency and workspace headers.
 4. Handle conflicts in UI (e.g., show “conflict” status and CTA to retry/resolve).

@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { Queue, QueueScheduler } from "bullmq";
-import { EnvService } from "@kerniflow/config";
-import { WORKFLOW_ORCHESTRATOR_QUEUE, WORKFLOW_TASK_QUEUE } from "@kerniflow/contracts";
+import { EnvService } from "@corely/config";
+import { WORKFLOW_ORCHESTRATOR_QUEUE, WORKFLOW_TASK_QUEUE } from "@corely/contracts";
 
 function buildRedisConnection(redisUrl?: string) {
   if (!redisUrl) {

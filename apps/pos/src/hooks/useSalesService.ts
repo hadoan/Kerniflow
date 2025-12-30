@@ -18,7 +18,7 @@ export function useSalesService() {
     }
 
     try {
-      const db = await SQLite.openDatabaseAsync("kerniflow-pos.db");
+      const db = await SQLite.openDatabaseAsync("corely-pos.db");
       salesServiceInstance = new SalesService(db as any);
       await salesServiceInstance.initialize();
       setInitialized(true);

@@ -1,4 +1,4 @@
-import { ApiError, normalizeError } from "@kerniflow/api-client";
+import { ApiError, normalizeError } from "@corely/api-client";
 
 /**
  * POS-specific error handling with offline-aware behavior

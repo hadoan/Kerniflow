@@ -79,10 +79,10 @@ export interface UserRepositoryPort {
 
 ### Token Import Rules
 
-**Import kernel tokens from `@kerniflow/kernel`:**
+**Import kernel tokens from `@corely/kernel`:**
 
 ```typescript
-import { AUDIT_PORT, ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+import { AUDIT_PORT, ID_GENERATOR_TOKEN } from "@corely/kernel";
 ```
 
 **Import module tokens from local paths:**
@@ -101,7 +101,7 @@ import { MEMBERSHIP_REPOSITORY_TOKEN } from "../identity/application/ports/membe
 
 ```typescript
 // Both work - prefer direct import from kernel for clarity
-import { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+import { ID_GENERATOR_TOKEN } from "@corely/kernel";
 import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 ```
 
@@ -113,7 +113,7 @@ import { ID_GENERATOR_TOKEN } from "../../shared/ports/id-generator.port";
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 
 // Infrastructure adapters

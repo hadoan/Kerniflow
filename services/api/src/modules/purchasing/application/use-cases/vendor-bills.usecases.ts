@@ -12,7 +12,7 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateVendorBillInput,
   CreateVendorBillOutput,
@@ -30,7 +30,7 @@ import type {
   ListVendorBillsOutput,
   CreateJournalEntryInput,
   PostJournalEntryInput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { VendorBillAggregate } from "../../domain/vendor-bill.aggregate";
 import type { VendorBillLineItem } from "../../domain/purchasing.types";
 import type { VendorBillRepositoryPort } from "../ports/vendor-bill-repository.port";

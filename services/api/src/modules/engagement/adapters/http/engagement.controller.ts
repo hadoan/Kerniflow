@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import type { Request } from "express";
-import { isErr } from "@kerniflow/kernel";
+import { isErr } from "@corely/kernel";
 import {
   CancelCheckInEventInputSchema,
   CompleteCheckInEventInputSchema,
@@ -13,7 +13,7 @@ import {
   ListCheckInEventsInputSchema,
   ListLoyaltyLedgerInputSchema,
   UpdateEngagementSettingsInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { AuthGuard } from "../../../identity";
 import { EngagementApplication } from "../../application/engagement.application";
 import { toHttpException } from "../../../../shared/http/usecase-error.mapper";

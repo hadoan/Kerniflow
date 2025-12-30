@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { LockTaxSnapshotInput, TaxSnapshotDto } from "@kerniflow/contracts";
+import type { LockTaxSnapshotInput, TaxSnapshotDto } from "@corely/contracts";
 import { TaxEngineService } from "../services/tax-engine.service";
 import { TaxSnapshotRepoPort, TaxProfileRepoPort } from "../../domain/ports";
 import { TaxSnapshot } from "../../domain/entities";

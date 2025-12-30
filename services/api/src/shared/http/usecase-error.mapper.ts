@@ -6,7 +6,7 @@ import {
   UnauthorizedError,
   type UseCaseError,
   ValidationError,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 
 export const toHttpException = (error: UseCaseError): HttpException => {
   let status = HttpStatus.INTERNAL_SERVER_ERROR;

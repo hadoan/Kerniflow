@@ -2,7 +2,7 @@ import { Module, Global } from "@nestjs/common";
 import { TestHarnessController } from "./test-harness.controller";
 import { TestHarnessService } from "./test-harness.service";
 import { WorkspacesModule } from "../workspaces/workspaces.module";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 
 @Global()
 @Module({

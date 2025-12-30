@@ -29,7 +29,7 @@ describe("workspace-store", () => {
   });
 
   it("loads from localStorage when available", () => {
-    const storage: Record<string, string> = { "kerniflow-active-workspace": "stored-ws" };
+    const storage: Record<string, string> = { "corely-active-workspace": "stored-ws" };
     const storageApi: Pick<Storage, "getItem" | "setItem" | "removeItem"> = {
       getItem: (key: string) => storage[key] ?? null,
       setItem: (key: string, value: string) => {
@@ -44,7 +44,7 @@ describe("workspace-store", () => {
     (globalThis as any).localStorage = storageApi;
 
     setActiveWorkspaceId(null);
-    storage["kerniflow-active-workspace"] = "stored-ws";
+    storage["corely-active-workspace"] = "stored-ws";
     expect(loadActiveWorkspaceId()).toBe("stored-ws");
   });
 });

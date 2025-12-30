@@ -1,14 +1,14 @@
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PostgresTestDb } from "@kerniflow/testkit";
+import type { PostgresTestDb } from "@corely/testkit";
 import {
   createApiTestApp,
   createTestDb,
   seedDefaultTenant,
   stopSharedContainer,
-} from "@kerniflow/testkit";
-import { CreateExpenseOutputSchema } from "@kerniflow/contracts";
+} from "@corely/testkit";
+import { CreateExpenseOutputSchema } from "@corely/contracts";
 
 vi.setConfig({ hookTimeout: 120_000, testTimeout: 120_000 });
 

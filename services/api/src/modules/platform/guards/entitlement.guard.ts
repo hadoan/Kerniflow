@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, SetMetadata } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { ForbiddenError } from "@kerniflow/kernel";
+import { ForbiddenError } from "@corely/kernel";
 import { TenantEntitlementService } from "../application/services/tenant-entitlement.service";
 
 export const REQUIRE_APP = "require_app";

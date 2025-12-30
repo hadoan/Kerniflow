@@ -8,13 +8,13 @@ services:
     container_name: kerniflow_postgres_di_test
     restart: no
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-kerniflow}
-      POSTGRES_USER: ${POSTGRES_USER:-kerniflow}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kerniflow}
+      POSTGRES_DB: ${POSTGRES_DB:-corely}
+      POSTGRES_USER: ${POSTGRES_USER:-corely}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-corely}
     ports:
       - "5433:5432" # Different port to avoid conflict with local dev
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corely}"]
       interval: 5s
       timeout: 3s
       retries: 10

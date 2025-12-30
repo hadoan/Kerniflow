@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { MenuItem } from "@kerniflow/contracts";
+import type { MenuItem } from "@corely/contracts";
 import { MenuComposerService } from "../services/menu-composer.service";
 
 export interface ComposeMenuInput {

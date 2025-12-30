@@ -1,4 +1,4 @@
-import type { TaxRegime, VatFilingFrequency } from "@kerniflow/contracts";
+import type { TaxRegime, VatFilingFrequency } from "@corely/contracts";
 
 export interface TaxProfileEntity {
   id: string;

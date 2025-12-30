@@ -10,8 +10,8 @@ import {
   type UseCaseError,
   ValidationError,
   ok,
-} from "@kerniflow/kernel";
-import type { CancelInvoiceInput, CancelInvoiceOutput } from "@kerniflow/contracts";
+} from "@corely/kernel";
+import type { CancelInvoiceInput, CancelInvoiceOutput } from "@corely/contracts";
 import { toInvoiceDto } from "../shared/invoice-dto.mapper";
 import type { InvoiceRepoPort } from "../../ports/invoice-repository.port";
 

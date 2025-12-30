@@ -3,7 +3,7 @@ import type {
   WorkflowEventInput,
   WorkflowSpec,
   WorkflowTaskCreateSpec,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export type { WorkflowActionSpec, WorkflowEventInput, WorkflowSpec, WorkflowTaskCreateSpec };
 

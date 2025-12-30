@@ -1,9 +1,9 @@
 /**
  * API Client
- * Web platform wrapper around @kerniflow/auth-client ApiClient
+ * Web platform wrapper around @corely/auth-client ApiClient
  */
 
-import { ApiClient } from "@kerniflow/auth-client";
+import { ApiClient } from "@corely/auth-client";
 import { authClient } from "./auth-client";
 import { WebStorageAdapter } from "./storage-adapter";
 

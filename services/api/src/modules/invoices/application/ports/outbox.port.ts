@@ -1,2 +1,2 @@
-export type { OutboxPort } from "@kerniflow/kernel";
-export { OUTBOX_PORT } from "@kerniflow/kernel";
+export type { OutboxPort } from "@corely/kernel";
+export { OUTBOX_PORT } from "@corely/kernel";

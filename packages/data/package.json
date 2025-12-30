@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/data",
+  "name": "@corely/data",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -22,7 +22,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@kerniflow/domain": "workspace:*",
+    "@corely/domain": "workspace:*",
     "@prisma/adapter-pg": "catalog:",
     "@prisma/client": "catalog:",
     "pg": "catalog:"

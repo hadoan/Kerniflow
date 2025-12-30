@@ -12,7 +12,7 @@ import {
   err,
   ok,
   parseLocalDate,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   CreateInventoryDocumentInput,
   CreateInventoryDocumentOutput,
@@ -28,7 +28,7 @@ import type {
   GetInventoryDocumentOutput,
   ListInventoryDocumentsInput,
   ListInventoryDocumentsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { InventoryDocumentLine } from "../../domain/inventory.types";
 import { InventoryDocumentAggregate } from "../../domain/inventory-document.aggregate";
 import type { InventoryDocumentRepositoryPort } from "../ports/document-repository.port";

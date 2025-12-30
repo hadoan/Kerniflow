@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HttpError } from "@kerniflow/api-client";
+import { HttpError } from "@corely/api-client";
 import {
   mapValidationErrorsToForm,
   getValidationMessages,
@@ -9,7 +9,7 @@ import {
 describe("mapValidationErrorsToForm", () => {
   it("should map validation errors to field names", () => {
     const error = new HttpError("Validation Failed", 400, {
-      type: "https://errors.kerniflow.com/Common:ValidationFailed",
+      type: "https://errors.corely.com/Common:ValidationFailed",
       title: "Bad Request",
       status: 400,
       detail: "Validation failed",
@@ -32,7 +32,7 @@ describe("mapValidationErrorsToForm", () => {
 
   it("should handle nested field paths with dot notation", () => {
     const error = new HttpError("Validation Failed", 400, {
-      type: "https://errors.kerniflow.com/Common:ValidationFailed",
+      type: "https://errors.corely.com/Common:ValidationFailed",
       title: "Bad Request",
       status: 400,
       detail: "Validation failed",
@@ -55,7 +55,7 @@ describe("mapValidationErrorsToForm", () => {
 
   it("should return empty object for non-validation errors", () => {
     const error = new HttpError("Not Found", 404, {
-      type: "https://errors.kerniflow.com/Common:NotFound",
+      type: "https://errors.corely.com/Common:NotFound",
       title: "Not Found",
       status: 404,
       detail: "Resource not found",
@@ -71,7 +71,7 @@ describe("mapValidationErrorsToForm", () => {
 
   it("should return empty object for errors without validationErrors", () => {
     const error = new HttpError("Bad Request", 400, {
-      type: "https://errors.kerniflow.com/Common:BadRequest",
+      type: "https://errors.corely.com/Common:BadRequest",
       title: "Bad Request",
       status: 400,
       detail: "Invalid request",
@@ -97,7 +97,7 @@ describe("mapValidationErrorsToForm", () => {
 describe("getValidationMessages", () => {
   it("should return array of validation messages", () => {
     const error = new HttpError("Validation Failed", 400, {
-      type: "https://errors.kerniflow.com/Common:ValidationFailed",
+      type: "https://errors.corely.com/Common:ValidationFailed",
       title: "Bad Request",
       status: 400,
       detail: "Validation failed",
@@ -122,7 +122,7 @@ describe("getValidationMessages", () => {
 
   it("should return empty array for non-validation errors", () => {
     const error = new HttpError("Not Found", 404, {
-      type: "https://errors.kerniflow.com/Common:NotFound",
+      type: "https://errors.corely.com/Common:NotFound",
       title: "Not Found",
       status: 404,
       detail: "Resource not found",
@@ -139,7 +139,7 @@ describe("getValidationMessages", () => {
 
 describe("hasValidationErrorForField", () => {
   const validationError = new HttpError("Validation Failed", 400, {
-    type: "https://errors.kerniflow.com/Common:ValidationFailed",
+    type: "https://errors.corely.com/Common:ValidationFailed",
     title: "Bad Request",
     status: 400,
     detail: "Validation failed",

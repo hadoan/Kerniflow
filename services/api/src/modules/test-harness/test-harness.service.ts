@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import * as bcrypt from "bcrypt";
 import { CreateWorkspaceUseCase } from "../workspaces/application/use-cases/create-workspace.usecase";
 import type { WorkspaceRepositoryPort } from "../workspaces/application/ports/workspace-repository.port";

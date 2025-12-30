@@ -1,4 +1,4 @@
-import type { PartyDto } from "@kerniflow/contracts";
+import type { PartyDto } from "@corely/contracts";
 
 export type ListSuppliersResult = {
   suppliers: PartyDto[];

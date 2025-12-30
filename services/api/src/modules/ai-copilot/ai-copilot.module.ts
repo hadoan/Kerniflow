@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
-import { DataModule } from "@kerniflow/data";
+import { DataModule } from "@corely/data";
 import { CopilotController } from "./adapters/http/copilot.controller";
-import type { EnvService } from "@kerniflow/config";
+import type { EnvService } from "@corely/config";
 
 import { StreamCopilotChatUseCase } from "./application/use-cases/stream-copilot-chat.usecase";
 import { PrismaAgentRunRepository } from "./infrastructure/adapters/prisma-agent-run-repository.adapter";
@@ -16,7 +16,7 @@ import { COPILOT_TOOLS } from "./application/ports/tool-registry.port";
 import { AuditPort } from "./application/ports/audit.port";
 import { OUTBOX_PORT } from "./application/ports/outbox.port";
 import type { OutboxPort } from "./application/ports/outbox.port";
-import { ClockPort } from "@kerniflow/kernel/ports/clock.port";
+import { ClockPort } from "@corely/kernel/ports/clock.port";
 import { IdentityModule } from "../identity/identity.module";
 import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adapter";
 import { IdempotencyService } from "../../shared/infrastructure/idempotency/idempotency.service";

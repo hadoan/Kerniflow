@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shared/ui/card";
-import type { ActivityDto } from "@kerniflow/contracts";
+import type { ActivityDto } from "@corely/contracts";
 import { ActivityTypeIcon } from "./ActivityTypeIcon";
 import { Badge } from "@/shared/ui/badge";
 

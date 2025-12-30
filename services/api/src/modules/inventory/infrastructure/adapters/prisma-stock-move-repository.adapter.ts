@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type {
   StockMoveRepositoryPort,
   StockMoveFilters,
@@ -7,7 +7,7 @@ import type {
   StockMoveSum,
 } from "../../application/ports/stock-move-repository.port";
 import type { StockMove } from "../../domain/inventory.types";
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 const toPrismaDate = (localDate: LocalDate): Date => new Date(`${localDate}T00:00:00.000Z`);
 

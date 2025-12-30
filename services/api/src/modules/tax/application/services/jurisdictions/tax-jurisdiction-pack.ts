@@ -4,7 +4,7 @@ import type {
   CustomerTaxInfo,
   TaxBreakdownDto,
   TaxRegime,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 /**
  * Parameters for applying jurisdiction-specific tax rules

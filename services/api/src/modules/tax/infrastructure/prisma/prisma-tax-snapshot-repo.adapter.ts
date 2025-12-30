@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
-import type { TaxSourceType } from "@kerniflow/contracts";
+import { PrismaService } from "@corely/data";
+import type { TaxSourceType } from "@corely/contracts";
 import { TaxSnapshotRepoPort } from "../../domain/ports";
 import type { TaxSnapshotEntity } from "../../domain/entities";
 

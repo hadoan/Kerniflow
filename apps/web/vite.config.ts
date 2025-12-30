@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import { createBaseViteConfig } from "@kerniflow/vite-config";
+import { createBaseViteConfig } from "@corely/vite-config";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -14,15 +14,15 @@ export default defineConfig(({ mode }) => {
     ].filter(Boolean),
     aliases: {
       "@": path.resolve(__dirname, "./src"),
-      "@kerniflow/api-client": path.resolve(__dirname, "../../packages/api-client/src"),
-      "@kerniflow/auth-client": path.resolve(__dirname, "../../packages/auth-client/src"),
-      "@kerniflow/contracts": path.resolve(__dirname, "../../packages/contracts/src"),
-      "@kerniflow/domain": path.resolve(__dirname, "../../packages/domain/src"),
-      "@kerniflow/offline-core": path.resolve(__dirname, "../../packages/offline-core/src"),
-      "@kerniflow/offline-web": path.resolve(__dirname, "../../packages/offline-web/src"),
+      "@corely/api-client": path.resolve(__dirname, "../../packages/api-client/src"),
+      "@corely/auth-client": path.resolve(__dirname, "../../packages/auth-client/src"),
+      "@corely/contracts": path.resolve(__dirname, "../../packages/contracts/src"),
+      "@corely/domain": path.resolve(__dirname, "../../packages/domain/src"),
+      "@corely/offline-core": path.resolve(__dirname, "../../packages/offline-core/src"),
+      "@corely/offline-web": path.resolve(__dirname, "../../packages/offline-web/src"),
     },
-    excludeFromOptimizeDeps: ["@kerniflow/contracts", "@kerniflow/domain"],
-    watchWorkspacePackages: ["@kerniflow/*"],
+    excludeFromOptimizeDeps: ["@corely/contracts", "@corely/domain"],
+    watchWorkspacePackages: ["@corely/*"],
   });
 
   return {

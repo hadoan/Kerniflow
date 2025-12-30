@@ -6,7 +6,7 @@ import { Badge } from "@/shared/ui/badge";
 import { RolePermissionsEditor } from "../components/RolePermissionsEditor";
 import { useRolePermissions } from "../hooks/useRolePermissions";
 import { useUpdateRolePermissions } from "../hooks/useUpdateRolePermissions";
-import type { RolePermissionGrant } from "@kerniflow/contracts";
+import type { RolePermissionGrant } from "@corely/contracts";
 
 export default function RolePermissionsPage() {
   const { roleId } = useParams<{ roleId: string }>();

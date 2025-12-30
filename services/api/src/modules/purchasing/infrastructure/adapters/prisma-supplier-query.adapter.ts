@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type {
   SupplierQueryPort,
   ListSuppliersResult,
 } from "../../application/ports/supplier-query.port";
-import type { PartyDto, PartyRoleType } from "@kerniflow/contracts";
+import type { PartyDto, PartyRoleType } from "@corely/contracts";
 
 const toPartyDto = (row: any): PartyDto => {
   const primaryEmail = row.contactPoints?.find((cp: any) => cp.type === "EMAIL" && cp.isPrimary);

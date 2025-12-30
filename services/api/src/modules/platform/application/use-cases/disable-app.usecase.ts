@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ValidationError, NotFoundError, AUDIT_PORT } from "@kerniflow/kernel";
-import type { AuditPort } from "@kerniflow/kernel";
+import { ValidationError, NotFoundError, AUDIT_PORT } from "@corely/kernel";
+import type { AuditPort } from "@corely/kernel";
 import { APP_REGISTRY_TOKEN, type AppRegistryPort } from "../ports/app-registry.port";
 import {
   TENANT_APP_INSTALL_REPOSITORY_TOKEN,

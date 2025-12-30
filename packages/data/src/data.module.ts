@@ -1,5 +1,5 @@
 import { Global, Module } from "@nestjs/common";
-import { UNIT_OF_WORK, OUTBOX_PORT, AUDIT_PORT, IDEMPOTENCY_PORT } from "@kerniflow/kernel";
+import { UNIT_OF_WORK, OUTBOX_PORT, AUDIT_PORT, IDEMPOTENCY_PORT } from "@corely/kernel";
 import { PrismaService } from "./prisma/prisma.service";
 import { PrismaUnitOfWork } from "./uow/prisma-unit-of-work.adapter";
 import { PrismaOutboxAdapter } from "./adapters/prisma-outbox.adapter";

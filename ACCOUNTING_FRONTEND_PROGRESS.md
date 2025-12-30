@@ -21,7 +21,7 @@
   - Settings: `getSettings()`, `updateSettings()`, `listPeriods()`, `closePeriod()`, `reopenPeriod()`
   - Reports: `getTrialBalance()`, `getGeneralLedger()`, `getProfitLoss()`, `getBalanceSheet()`
 - ✅ Auto-generates idempotency keys and correlation IDs
-- ✅ Properly typed with `@kerniflow/contracts`
+- ✅ Properly typed with `@corely/contracts`
 
 ### 3. React Query Hooks (Data Layer)
 

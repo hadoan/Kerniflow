@@ -10,13 +10,13 @@ import {
   type AuditPort,
   err,
   ok,
-} from "@kerniflow/kernel";
+} from "@corely/kernel";
 import type {
   GetSalesSettingsInput,
   GetSalesSettingsOutput,
   UpdateSalesSettingsInput,
   UpdateSalesSettingsOutput,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import type { SalesSettingsRepositoryPort } from "../ports/settings-repository.port";
 import { SalesSettingsAggregate } from "../../domain/settings.aggregate";
 import { toSettingsDto } from "../mappers/sales-dto.mapper";

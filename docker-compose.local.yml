@@ -6,16 +6,16 @@ services:
     container_name: kerniflow_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-kerniflow}
-      POSTGRES_USER: ${POSTGRES_USER:-kerniflow}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kerniflow}
+      POSTGRES_DB: ${POSTGRES_DB:-corely}
+      POSTGRES_USER: ${POSTGRES_USER:-corely}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-corely}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corely}"]
       interval: 10s
       timeout: 5s
       retries: 5

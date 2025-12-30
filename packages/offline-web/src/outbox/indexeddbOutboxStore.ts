@@ -5,7 +5,7 @@ import {
   type OutboxError,
   serializeCommand,
   type SerializedCommand,
-} from "@kerniflow/offline-core";
+} from "@corely/offline-core";
 import { getDb, OUTBOX_STORE } from "../idb";
 
 export class IndexedDbOutboxStore implements OutboxStore {

@@ -1,2 +1,2 @@
-export type { IdGeneratorPort } from "@kerniflow/kernel";
-export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
+export type { IdGeneratorPort } from "@corely/kernel";
+export { ID_GENERATOR_TOKEN } from "@corely/kernel";

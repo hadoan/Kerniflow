@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
-import { createIdempotencyKey } from "@kerniflow/api-client";
+import { createIdempotencyKey } from "@corely/api-client";
 import {
   ProductProposalCardSchema,
   ReceiptDraftProposalCardSchema,
@@ -10,7 +10,7 @@ import {
   PickListCardSchema,
   StockChangeExplanationCardSchema,
   type Provenance,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { inventoryApi } from "@/lib/inventory-api";

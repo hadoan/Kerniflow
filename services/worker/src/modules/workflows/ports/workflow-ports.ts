@@ -1,5 +1,5 @@
-import type { ClockPort } from "@kerniflow/kernel";
-import type { EmailPort, HttpPort, LlmPort, ObjectStoragePort } from "@kerniflow/core";
+import type { ClockPort } from "@corely/kernel";
+import type { EmailPort, HttpPort, LlmPort, ObjectStoragePort } from "@corely/core";
 
 export interface WorkflowPorts {
   clock: ClockPort;

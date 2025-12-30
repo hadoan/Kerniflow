@@ -1,4 +1,4 @@
-import { type OutboxCommand, type OutboxError, type OutboxStore } from "@kerniflow/offline-core";
+import { type OutboxCommand, type OutboxError, type OutboxStore } from "@corely/offline-core";
 
 /**
  * Placeholder implementation meant to be replaced with a SQLite-backed store.

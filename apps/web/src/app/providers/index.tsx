@@ -3,7 +3,7 @@ import { Toaster } from "@/shared/ui/toaster";
 import { Toaster as Sonner } from "@/shared/ui/sonner";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { computeBackoffDelayMs, defaultRetryPolicy } from "@kerniflow/api-client";
+import { computeBackoffDelayMs, defaultRetryPolicy } from "@corely/api-client";
 import { AuthProvider } from "@/lib/auth-provider";
 import { WorkspaceProvider } from "@/shared/workspaces/workspace-provider";
 import { OfflineProvider } from "@/offline/offline-provider";

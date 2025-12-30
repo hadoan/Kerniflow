@@ -17,7 +17,7 @@ AI-Native, Offline-First Point of Sale application for Kerniflow.
 - **Expo Router**: File-based navigation
 - **SQLite**: Local database for offline storage
 - **Zustand**: State management
-- **Zod**: Schema validation (via @kerniflow/contracts)
+- **Zod**: Schema validation (via @corely/contracts)
 
 ## Project Structure
 
@@ -92,11 +92,11 @@ EXPO_PUBLIC_API_URL=http://localhost:3000/api
 
 This app uses shared packages from the monorepo:
 
-- `@kerniflow/contracts` - Type-safe API contracts and schemas
-- `@kerniflow/api-client` - API client with auth
-- `@kerniflow/offline-core` - Platform-agnostic sync engine
-- `@kerniflow/offline-rn` - React Native SQLite adapter
-- `@kerniflow/pos-core` - POS business logic (sale calculations, receipt formatting)
+- `@corely/contracts` - Type-safe API contracts and schemas
+- `@corely/api-client` - API client with auth
+- `@corely/offline-core` - Platform-agnostic sync engine
+- `@corely/offline-rn` - React Native SQLite adapter
+- `@corely/pos-core` - POS business logic (sale calculations, receipt formatting)
 
 ## Key Features
 
@@ -158,7 +158,7 @@ Uses Zustand for lightweight, scalable state management:
 
 ### Offline Sync
 
-Uses the `@kerniflow/offline-core` sync engine:
+Uses the `@corely/offline-core` sync engine:
 
 1. User actions create commands in local outbox
 2. Background sync processes pending commands

@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/pos",
+  "name": "@corely/pos",
   "version": "0.1.0",
   "private": true,
   "main": "expo-router/entry",
@@ -12,12 +12,12 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@kerniflow/contracts": "workspace:*",
-    "@kerniflow/api-client": "workspace:*",
-    "@kerniflow/auth-client": "workspace:*",
-    "@kerniflow/offline-core": "workspace:*",
-    "@kerniflow/offline-rn": "workspace:*",
-    "@kerniflow/pos-core": "workspace:*",
+    "@corely/contracts": "workspace:*",
+    "@corely/api-client": "workspace:*",
+    "@corely/auth-client": "workspace:*",
+    "@corely/offline-core": "workspace:*",
+    "@corely/offline-rn": "workspace:*",
+    "@corely/pos-core": "workspace:*",
     "expo": "^52.0.0",
     "expo-router": "^4.0.0",
     "expo-sqlite": "^15.0.0",

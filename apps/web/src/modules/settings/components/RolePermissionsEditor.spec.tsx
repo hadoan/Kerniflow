@@ -2,7 +2,7 @@
 import React, { useState, act } from "react";
 import { describe, it, expect } from "vitest";
 import { createRoot } from "react-dom/client";
-import type { PermissionGroup } from "@kerniflow/contracts";
+import type { PermissionGroup } from "@corely/contracts";
 import { RolePermissionsEditor } from "./RolePermissionsEditor";
 
 const catalog: PermissionGroup[] = [

@@ -4,8 +4,8 @@ import {
   ListCustomFieldDefinitions,
   UpdateCustomFieldDefinition,
   UpsertEntityLayout,
-} from "@kerniflow/domain";
-import type { CustomFieldDefinitionRepository, EntityLayoutRepository } from "@kerniflow/data";
+} from "@corely/domain";
+import type { CustomFieldDefinitionRepository, EntityLayoutRepository } from "@corely/data";
 import type { AuditPort } from "../../shared/ports/audit.port";
 import { AUDIT_PORT_TOKEN } from "../../shared/ports/audit.port";
 import type { IdempotencyStoragePort } from "../../shared/ports/idempotency-storage.port";
@@ -18,8 +18,8 @@ import type {
   CreateCustomFieldDefinition as CreateDefinitionContract,
   UpdateCustomFieldDefinition as UpdateDefinitionContract,
   CustomEntityType,
-} from "@kerniflow/contracts";
-import type { CustomFieldDefinition, EntityLayout } from "@kerniflow/domain";
+} from "@corely/contracts";
+import type { CustomFieldDefinition, EntityLayout } from "@corely/domain";
 
 @Injectable()
 export class CustomizationService {

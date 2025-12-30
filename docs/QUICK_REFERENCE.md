@@ -30,7 +30,7 @@ touch index.ts
 
 # Build
 cd ../../../
-pnpm --filter @kerniflow/contracts build
+pnpm --filter @corely/contracts build
 ```
 
 ### 2. Create Backend Module
@@ -94,7 +94,7 @@ export type Create{Module}Input = z.infer<typeof Create{Module}InputSchema>;
 
 ```typescript
 // apps/web/src/modules/{module}/schemas/{module}-form.schema.ts
-import { Create{Module}InputSchema } from "@kerniflow/contracts";
+import { Create{Module}InputSchema } from "@corely/contracts";
 
 export const {module}FormSchema = Create{Module}InputSchema.extend({
   // Dates as Date objects
@@ -125,13 +125,13 @@ export function toCreate{Module}Input(form: {Module}FormData): Create{Module}Inp
 
 ```bash
 # Build contracts package
-pnpm --filter @kerniflow/contracts build
+pnpm --filter @corely/contracts build
 
 # Type check frontend
-pnpm --filter @kerniflow/web typecheck
+pnpm --filter @corely/web typecheck
 
 # Type check backend
-pnpm --filter @kerniflow/api typecheck
+pnpm --filter @corely/api typecheck
 
 # Build all
 pnpm build
@@ -160,7 +160,7 @@ pnpm dev
 pnpm prisma:migrate --name add_{module}_table
 
 # Apply migrations
-pnpm --filter @kerniflow/data exec prisma migrate deploy
+pnpm --filter @corely/data exec prisma migrate deploy
 
 # Generate client
 pnpm prisma:generate
@@ -258,7 +258,7 @@ export interface {Module}RepoPort {
 ```typescript
 // create-{module}.use-case.ts
 import { Injectable } from "@nestjs/common";
-import type { Create{Module}Input } from "@kerniflow/contracts";
+import type { Create{Module}Input } from "@corely/contracts";
 
 export interface UseCaseContext {
   tenantId: string;
@@ -285,7 +285,7 @@ export class Create{Module}UseCase {
 ```typescript
 // {module}.controller.ts
 import { Controller, Post, Body, UseGuards, Req } from "@nestjs/common";
-import { Create{Module}InputSchema } from "@kerniflow/contracts";
+import { Create{Module}InputSchema } from "@corely/contracts";
 import { JwtAuthGuard } from "@/shared/guards/jwt-auth.guard";
 
 @Controller("{module}s")
@@ -321,7 +321,7 @@ export class {Module}Controller {
 
 ```typescript
 // {module}-api.ts
-import type { Create{Module}Input, {Module}Dto } from "@kerniflow/contracts";
+import type { Create{Module}Input, {Module}Dto } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
 export class {Module}Api {

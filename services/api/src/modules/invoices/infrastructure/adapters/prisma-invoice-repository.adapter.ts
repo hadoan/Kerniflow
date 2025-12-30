@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import {
   InvoiceRepoPort,
   ListInvoicesFilters,
@@ -7,7 +7,7 @@ import {
 } from "../../application/ports/invoice-repository.port";
 import { InvoiceAggregate } from "../../domain/invoice.aggregate";
 import { InvoiceLine, InvoicePayment, InvoiceStatus, PdfStatus } from "../../domain/invoice.types";
-import { LocalDate } from "@kerniflow/kernel";
+import { LocalDate } from "@corely/kernel";
 
 const toPrismaDate = (localDate: LocalDate | null): Date | null =>
   localDate ? new Date(`${localDate}T00:00:00.000Z`) : null;

@@ -7,7 +7,7 @@
  * Usage: pnpm catalog:sync
  */
 
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import { AppRegistry } from "../modules/platform/infrastructure/registries/app-registry";
 import { TemplateRegistry } from "../modules/platform/infrastructure/registries/template-registry";
 import { PackRegistry } from "../modules/platform/infrastructure/registries/pack-registry";

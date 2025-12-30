@@ -4,7 +4,7 @@ import { InMemoryDocumentRepo } from "../../../testkit/fakes/in-memory-document-
 import { InMemoryFileRepo } from "../../../testkit/fakes/in-memory-file-repo";
 import { FakeObjectStoragePort } from "../../../testkit/fakes/fake-object-storage";
 import { DocumentAggregate } from "../../../domain/document.aggregate";
-import { NoopLogger, unwrap } from "@kerniflow/kernel";
+import { NoopLogger, unwrap } from "@corely/kernel";
 
 describe("GetDownloadUrlUseCase", () => {
   let documentRepo: InMemoryDocumentRepo;

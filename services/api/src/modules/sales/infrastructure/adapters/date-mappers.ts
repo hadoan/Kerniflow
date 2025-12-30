@@ -1,4 +1,4 @@
-import type { LocalDate } from "@kerniflow/kernel";
+import type { LocalDate } from "@corely/kernel";
 
 export const toPrismaDate = (localDate: LocalDate | null): Date | null =>
   localDate ? new Date(`${localDate}T00:00:00.000Z`) : null;

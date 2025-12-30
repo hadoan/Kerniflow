@@ -4,16 +4,16 @@ import {
   WORKFLOW_ORCHESTRATOR_QUEUE,
   type WorkflowEventInput,
   type WorkflowTaskCreateSpec,
-} from "@kerniflow/contracts";
-import { applyWorkflowEvents, restoreSnapshot, serializeSnapshot } from "@kerniflow/core";
+} from "@corely/contracts";
+import { applyWorkflowEvents, restoreSnapshot, serializeSnapshot } from "@corely/core";
 import {
   PrismaService,
   WorkflowDefinitionRepository,
   WorkflowEventRepository,
   WorkflowInstanceRepository,
   WorkflowTaskRepository,
-} from "@kerniflow/data";
-import type { TransactionContext } from "@kerniflow/kernel";
+} from "@corely/data";
+import type { TransactionContext } from "@corely/kernel";
 import { WorkflowQueues } from "./workflow-queues";
 import { WorkflowMetricsService } from "./workflow-metrics.service";
 

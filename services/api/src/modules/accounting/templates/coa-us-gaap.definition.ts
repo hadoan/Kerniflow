@@ -1,4 +1,4 @@
-import type { TemplateDefinition } from "@kerniflow/contracts";
+import type { TemplateDefinition } from "@corely/contracts";
 import { z } from "zod";
 
 /**

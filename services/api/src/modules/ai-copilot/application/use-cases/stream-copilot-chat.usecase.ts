@@ -8,7 +8,7 @@ import { type LanguageModelPort } from "../ports/language-model.port";
 import { type AuditPort } from "../ports/audit.port";
 import { type OutboxPort } from "../ports/outbox.port";
 import { type CopilotIdempotencyPort } from "../ports/copilot-idempotency.port";
-import { type ClockPort } from "@kerniflow/kernel/ports/clock.port";
+import { type ClockPort } from "@corely/kernel/ports/clock.port";
 import { type Response } from "express";
 import { createHash } from "crypto";
 

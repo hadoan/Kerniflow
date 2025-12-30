@@ -4,7 +4,7 @@ import type {
   TaxCodeKind,
   TaxTotalsByKind,
   TaxLineResultDto,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { TaxJurisdictionPack, type ApplyRulesParams } from "./tax-jurisdiction-pack";
 import { TaxCodeRepoPort, TaxRateRepoPort } from "../../../domain/ports";
 import { TaxCode, TaxRate } from "../../../domain/entities";

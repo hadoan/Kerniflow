@@ -26,7 +26,7 @@ import type {
   GetTimelineOutput,
   ActivityDto,
   TimelineItem,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export const crmApi = {
   // ============================================================

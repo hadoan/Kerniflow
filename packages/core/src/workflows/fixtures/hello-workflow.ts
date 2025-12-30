@@ -1,4 +1,4 @@
-import type { WorkflowSpec } from "@kerniflow/contracts";
+import type { WorkflowSpec } from "@corely/contracts";
 
 export const helloWorkflowSpec: WorkflowSpec = {
   id: "hello-workflow",

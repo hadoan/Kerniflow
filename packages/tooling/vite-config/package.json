@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/vite-config",
+  "name": "@corely/vite-config",
   "private": true,
   "version": "0.0.0",
   "description": "Shared Vite and Vitest configurations for Kerniflow monorepo",

@@ -1,9 +1,9 @@
 import { Injectable, Inject } from "@nestjs/common";
-import type { TemplatePlan, TemplateResult, TemplatePlanAction } from "@kerniflow/contracts";
+import type { TemplatePlan, TemplateResult, TemplatePlanAction } from "@corely/contracts";
 import type { TemplateExecutorPort } from "../../platform/application/ports/template-executor.port";
 import type { SeededRecordMetaRepositoryPort } from "../../platform/application/ports/seeded-record-meta-repository.port";
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "../../platform/application/ports/seeded-record-meta-repository.port";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import {
   CoaUsGaapParamsSchema,
   type CoaUsGaapParams,

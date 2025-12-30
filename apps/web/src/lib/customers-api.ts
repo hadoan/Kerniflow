@@ -5,7 +5,7 @@ import type {
   UpdateCustomerInput,
   UpdateCustomerOutput,
   CustomerDto,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 
 export const customersApi = {
   async createCustomer(input: CreateCustomerInput): Promise<CustomerDto> {

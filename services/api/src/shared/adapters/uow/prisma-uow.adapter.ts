@@ -1,5 +1,5 @@
-// import { type PrismaService } from "@kerniflow/data";
-// import { type UnitOfWorkPort } from "@kerniflow/kernel";
+// import { type PrismaService } from "@corely/data";
+// import { type UnitOfWorkPort } from "@corely/kernel";
 
 // /**
 //  * Wraps a PrismaClient $transaction. Nested calls reuse the outer scope.

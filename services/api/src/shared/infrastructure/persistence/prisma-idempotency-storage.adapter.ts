@@ -1,5 +1,5 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { PrismaService } from "@kerniflow/data";
+import { PrismaService } from "@corely/data";
 import type { IdempotencyStoragePort, StoredResponse } from "../../ports/idempotency-storage.port";
 
 @Injectable()

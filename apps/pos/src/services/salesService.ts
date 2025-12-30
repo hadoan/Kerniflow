@@ -1,7 +1,7 @@
 import type * as SQLite from "expo-sqlite";
 import { v4 as uuidv4 } from "@lukeed/uuid";
-import type { PosSale, PosSaleLineItem, PosSalePayment } from "@kerniflow/contracts";
-import { SaleBuilder } from "@kerniflow/pos-core";
+import type { PosSale, PosSaleLineItem, PosSalePayment } from "@corely/contracts";
+import { SaleBuilder } from "@corely/pos-core";
 
 const saleBuilder = new SaleBuilder();
 

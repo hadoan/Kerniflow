@@ -3,7 +3,7 @@ import {
   ListWorkflowInstancesQuerySchema,
   SendWorkflowEventInputSchema,
   StartWorkflowInstanceInputSchema,
-} from "@kerniflow/contracts";
+} from "@corely/contracts";
 import { WorkflowService } from "../../application/workflow.service";
 import { CurrentTenantId } from "../../../identity/adapters/http/current-user.decorator";
 

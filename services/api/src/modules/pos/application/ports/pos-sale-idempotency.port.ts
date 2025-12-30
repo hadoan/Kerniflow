@@ -1,4 +1,4 @@
-import type { SyncPosSaleOutput } from "@kerniflow/contracts";
+import type { SyncPosSaleOutput } from "@corely/contracts";
 
 export const POS_SALE_IDEMPOTENCY_PORT = "pos/pos-sale-idempotency";
 

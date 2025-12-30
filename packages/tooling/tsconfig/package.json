@@ -1,5 +1,5 @@
 {
-  "name": "@kerniflow/tsconfig",
+  "name": "@corely/tsconfig",
   "private": true,
   "version": "0.0.0",
   "description": "Shared TypeScript configurations for Kerniflow monorepo",

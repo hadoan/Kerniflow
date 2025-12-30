@@ -9,7 +9,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@kerniflow/offline-core": path.resolve(__dirname, "../offline-core/src"),
+      "@corely/offline-core": path.resolve(__dirname, "../offline-core/src"),
     },
   },
 });

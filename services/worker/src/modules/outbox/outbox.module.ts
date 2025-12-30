@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { EnvService } from "@kerniflow/config";
-import { OutboxRepository } from "@kerniflow/data";
+import { EnvService } from "@corely/config";
+import { OutboxRepository } from "@corely/data";
 import { InvoiceEmailRequestedHandler } from "../invoices/invoice-email-requested.handler";
 import { PrismaInvoiceEmailRepository } from "../invoices/infrastructure/prisma-invoice-email-repository.adapter";
 import { EMAIL_SENDER_PORT, EmailSenderPort } from "../notifications/ports/email-sender.port";
