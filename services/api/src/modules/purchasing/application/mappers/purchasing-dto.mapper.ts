@@ -40,7 +40,6 @@ export const toPurchaseOrderDto = (order: PurchaseOrderAggregate): PurchaseOrder
   sentAt: toIso(order.sentAt) ?? undefined,
   receivedAt: toIso(order.receivedAt) ?? undefined,
   closedAt: toIso(order.closedAt) ?? undefined,
-  linkedBillIds: order.linkedBillIds,
 });
 
 export const toBillPaymentDto = (payment: BillPayment): BillPaymentDto => ({

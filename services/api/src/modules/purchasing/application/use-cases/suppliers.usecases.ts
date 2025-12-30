@@ -17,8 +17,8 @@ type SupplierDeps = {
 };
 
 export class ListSuppliersUseCase extends BaseUseCase<ListSuppliersInput, ListSuppliersOutput> {
-  constructor(private readonly deps: SupplierDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: SupplierDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -29,7 +29,7 @@ export class ListSuppliersUseCase extends BaseUseCase<ListSuppliersInput, ListSu
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.supplierQuery.listSuppliers(ctx.tenantId, {
+    const result = await this.services.supplierQuery.listSuppliers(ctx.tenantId, {
       search: input.search,
       cursor: input.cursor,
       pageSize: input.pageSize,

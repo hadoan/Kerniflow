@@ -38,7 +38,7 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       const { sourceText } = parsed.data;
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: anthropic("claude-3-5-sonnet-20241022") as any,
         schema: z.object({
           displayName: z.string(),
           email: z.string().email().optional(),
@@ -94,7 +94,7 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       const { sourceText, supplierPartyId } = parsed.data;
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: anthropic("claude-3-5-sonnet-20241022") as any,
         schema: z.object({
           supplierName: z.string().optional(),
           orderDate: z.string().optional(),
@@ -159,7 +159,7 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       const { sourceText } = parsed.data;
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: anthropic("claude-3-5-sonnet-20241022") as any,
         schema: z.object({
           supplierName: z.string().optional(),
           billNumber: z.string().optional(),
@@ -248,7 +248,7 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       }
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: anthropic("claude-3-5-sonnet-20241022") as any,
         schema: z.object({
           lines: z.array(
             z.object({
@@ -325,7 +325,7 @@ export const buildPurchasingTools = (_app: PurchasingApplication): DomainToolPor
       }
 
       const { object } = await generateObject({
-        model: anthropic("claude-3-5-sonnet-20241022"),
+        model: anthropic("claude-3-5-sonnet-20241022") as any,
         schema: z.object({
           subject: z.string(),
           body: z.string(),

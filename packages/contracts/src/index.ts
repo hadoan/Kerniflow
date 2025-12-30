@@ -10,6 +10,12 @@ export * from "./tax";
 export * from "./accounting";
 export * from "./crm";
 export * from "./sales";
+export {
+  RecordPaymentInputSchema as SalesRecordPaymentInputSchema,
+  RecordPaymentOutputSchema as SalesRecordPaymentOutputSchema,
+  type RecordPaymentInput as SalesRecordPaymentInput,
+  type RecordPaymentOutput as SalesRecordPaymentOutput,
+} from "./sales/record-payment.schema";
 export * from "./sales-ai";
 export * from "./purchasing";
 export * from "./purchasing-ai";

@@ -48,6 +48,9 @@ model Workspace {
   legalEntity LegalEntity           @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
   memberships WorkspaceMembership[]
   invites     WorkspaceInvite[]
+  registers   Register[]
+  shiftSessions ShiftSession[]
+  posSaleIdempotency PosSaleIdempotency[]
 
   @@unique([tenantId, name])
   @@index([tenantId])

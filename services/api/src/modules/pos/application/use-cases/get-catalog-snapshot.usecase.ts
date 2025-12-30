@@ -1,6 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import type { GetCatalogSnapshotInput, GetCatalogSnapshotOutput } from "@kerniflow/contracts";
-import { BaseUseCase, type Context, type Result, Ok } from "@kerniflow/kernel";
+import {
+  BaseUseCase,
+  NoopLogger,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  err,
+  ok,
+} from "@kerniflow/kernel";
 
 // Note: In production, inject InventoryApplication to fetch products
 // For now, this is a placeholder structure showing the integration pattern
@@ -11,17 +20,21 @@ export class GetCatalogSnapshotUseCase extends BaseUseCase<
   GetCatalogSnapshotOutput
 > {
   constructor() {
-    super();
+    super({ logger: new NoopLogger() });
     // TODO: Inject InventoryApplication or ProductRepository
   }
 
-  async executeImpl(
+  protected async handle(
     input: GetCatalogSnapshotInput,
-    ctx: Context
-  ): Promise<Result<GetCatalogSnapshotOutput>> {
+    ctx: UseCaseContext
+  ): Promise<Result<GetCatalogSnapshotOutput, UseCaseError>> {
+    if (!ctx.tenantId) {
+      return err(new ValidationError("tenantId missing from context"));
+    }
+
     // TODO: Fetch products from inventory
     // const productsResult = await this.inventoryApp.listProducts({
-    //   workspaceId: ctx.workspaceId,
+    //   workspaceId: ctx.tenantId,
     //   warehouseId: input.warehouseId,
     //   status: "ACTIVE",
     //   limit: input.limit,
@@ -30,7 +43,7 @@ export class GetCatalogSnapshotUseCase extends BaseUseCase<
     // }, ctx);
 
     // Mock response for now
-    return Ok({
+    return ok({
       products: [],
       hasMore: false,
       total: 0,

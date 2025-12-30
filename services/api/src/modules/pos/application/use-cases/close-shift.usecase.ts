@@ -2,12 +2,15 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { CloseShiftInput, CloseShiftOutput } from "@kerniflow/contracts";
 import {
   BaseUseCase,
-  type Context,
-  type Result,
-  Ok,
-  Err,
-  NotFoundError,
   ConflictError,
+  NoopLogger,
+  NotFoundError,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  err,
+  ok,
 } from "@kerniflow/kernel";
 import {
   SHIFT_SESSION_REPOSITORY_PORT,
@@ -19,18 +22,25 @@ export class CloseShiftUseCase extends BaseUseCase<CloseShiftInput, CloseShiftOu
   constructor(
     @Inject(SHIFT_SESSION_REPOSITORY_PORT) private shiftRepo: ShiftSessionRepositoryPort
   ) {
-    super();
+    super({ logger: new NoopLogger() });
   }
 
-  async executeImpl(input: CloseShiftInput, ctx: Context): Promise<Result<CloseShiftOutput>> {
+  protected async handle(
+    input: CloseShiftInput,
+    ctx: UseCaseContext
+  ): Promise<Result<CloseShiftOutput, UseCaseError>> {
+    if (!ctx.tenantId) {
+      return err(new ValidationError("tenantId missing from context"));
+    }
+
     // Find session
-    const session = await this.shiftRepo.findById(ctx.workspaceId, input.sessionId);
+    const session = await this.shiftRepo.findById(ctx.tenantId, input.sessionId);
     if (!session) {
-      return Err(new NotFoundError("SESSION_NOT_FOUND", "Shift session not found"));
+      return err(new NotFoundError("SESSION_NOT_FOUND", "Shift session not found"));
     }
 
     if (session.status === "CLOSED") {
-      return Err(new ConflictError("SESSION_ALREADY_CLOSED", "Shift session is already closed"));
+      return err(new ConflictError("SESSION_ALREADY_CLOSED", "Shift session is already closed"));
     }
 
     // TODO: Calculate totals from synced POS sales
@@ -50,7 +60,7 @@ export class CloseShiftUseCase extends BaseUseCase<CloseShiftInput, CloseShiftOu
     // Save updated session
     await this.shiftRepo.update(session);
 
-    return Ok({
+    return ok({
       sessionId: session.id,
       status: "CLOSED",
       closedAt: session.closedAt!,

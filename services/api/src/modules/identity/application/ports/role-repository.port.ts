@@ -17,7 +17,10 @@ export interface RoleRepositoryPort {
   /**
    * Find role by ID
    */
-  findById(tenantId: string, id: string): Promise<{
+  findById(
+    tenantId: string,
+    id: string
+  ): Promise<{
     id: string;
     tenantId: string;
     name: string;

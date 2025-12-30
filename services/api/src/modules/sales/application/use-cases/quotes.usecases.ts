@@ -42,7 +42,7 @@ import type { SalesSettingsRepositoryPort } from "../ports/settings-repository.p
 import { SalesSettingsAggregate } from "../../domain/settings.aggregate";
 import { toQuoteDto, toOrderDto, toInvoiceDto } from "../mappers/sales-dto.mapper";
 import { allocateUniqueNumber } from "./numbering";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import type { CustomerQueryPort } from "../../../party-crm/application/ports/customer-query.port";
 import type { SalesOrderRepositoryPort } from "../ports/order-repository.port";
@@ -86,8 +86,8 @@ type QuoteDeps = {
 };
 
 export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuoteOutput> {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected validate(input: CreateQuoteInput): CreateQuoteInput {
@@ -112,7 +112,7 @@ export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuot
     }
 
     const cached = await getIdempotentResult<CreateQuoteOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -121,7 +121,7 @@ export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuot
       return ok(cached);
     }
 
-    const customer = await this.deps.customerQuery.getCustomerBillingSnapshot(
+    const customer = await this.services.customerQuery.getCustomerBillingSnapshot(
       ctx.tenantId,
       input.customerPartyId
     );
@@ -129,16 +129,16 @@ export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuot
       return err(new NotFoundError("Customer not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const issueDate = input.issueDate ? parseLocalDate(input.issueDate) : null;
     const validUntilDate = input.validUntilDate ? parseLocalDate(input.validUntilDate) : null;
     const lineItems = buildLineItems({
-      idGenerator: this.deps.idGenerator,
+      idGenerator: this.services.idGenerator,
       lineItems: input.lineItems,
     });
 
     const quote = QuoteAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       customerPartyId: input.customerPartyId,
       customerContactPartyId: input.customerContactPartyId ?? null,
@@ -151,11 +151,11 @@ export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuot
       now,
     });
 
-    await this.deps.quoteRepo.create(ctx.tenantId, quote);
+    await this.services.quoteRepo.create(ctx.tenantId, quote);
 
     const result = { quote: toQuoteDto(quote) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -167,8 +167,8 @@ export class CreateQuoteUseCase extends BaseUseCase<CreateQuoteInput, CreateQuot
 }
 
 export class UpdateQuoteUseCase extends BaseUseCase<UpdateQuoteInput, UpdateQuoteOutput> {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -179,12 +179,12 @@ export class UpdateQuoteUseCase extends BaseUseCase<UpdateQuoteInput, UpdateQuot
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const quote = await this.deps.quoteRepo.findById(ctx.tenantId, input.quoteId);
+    const quote = await this.services.quoteRepo.findById(ctx.tenantId, input.quoteId);
     if (!quote) {
       return err(new NotFoundError("Quote not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     if (input.headerPatch) {
       quote.updateHeader(
         {
@@ -192,10 +192,10 @@ export class UpdateQuoteUseCase extends BaseUseCase<UpdateQuoteInput, UpdateQuot
           customerContactPartyId: input.headerPatch.customerContactPartyId,
           issueDate: input.headerPatch.issueDate
             ? parseLocalDate(input.headerPatch.issueDate)
-            : input.headerPatch.issueDate,
+            : undefined,
           validUntilDate: input.headerPatch.validUntilDate
             ? parseLocalDate(input.headerPatch.validUntilDate)
-            : input.headerPatch.validUntilDate,
+            : undefined,
           currency: input.headerPatch.currency,
           paymentTerms: input.headerPatch.paymentTerms,
           notes: input.headerPatch.notes,
@@ -206,20 +206,20 @@ export class UpdateQuoteUseCase extends BaseUseCase<UpdateQuoteInput, UpdateQuot
 
     if (input.lineItems) {
       const lineItems = buildLineItems({
-        idGenerator: this.deps.idGenerator,
+        idGenerator: this.services.idGenerator,
         lineItems: input.lineItems,
       });
       quote.replaceLineItems(lineItems, now);
     }
 
-    await this.deps.quoteRepo.save(ctx.tenantId, quote);
+    await this.services.quoteRepo.save(ctx.tenantId, quote);
     return ok({ quote: toQuoteDto(quote) });
   }
 }
 
 export class SendQuoteUseCase extends BaseUseCase<SendQuoteInput, SendQuoteOutput> {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -231,7 +231,7 @@ export class SendQuoteUseCase extends BaseUseCase<SendQuoteInput, SendQuoteOutpu
     }
 
     const cached = await getIdempotentResult<SendQuoteOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.send-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -240,16 +240,16 @@ export class SendQuoteUseCase extends BaseUseCase<SendQuoteInput, SendQuoteOutpu
       return ok(cached);
     }
 
-    const quote = await this.deps.quoteRepo.findById(ctx.tenantId, input.quoteId);
+    const quote = await this.services.quoteRepo.findById(ctx.tenantId, input.quoteId);
     if (!quote) {
       return err(new NotFoundError("Quote not found"));
     }
 
-    const now = this.deps.clock.now();
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    const now = this.services.clock.now();
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = SalesSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
         now,
       });
@@ -257,13 +257,13 @@ export class SendQuoteUseCase extends BaseUseCase<SendQuoteInput, SendQuoteOutpu
 
     const number = await allocateUniqueNumber({
       next: () => settings!.allocateQuoteNumber(),
-      isTaken: (candidate) => this.deps.quoteRepo.isQuoteNumberTaken(ctx.tenantId!, candidate),
+      isTaken: (candidate) => this.services.quoteRepo.isQuoteNumberTaken(ctx.tenantId!, candidate),
     });
     quote.send(number, now, now);
 
-    await this.deps.quoteRepo.save(ctx.tenantId, quote);
-    await this.deps.settingsRepo.save(settings);
-    await this.deps.audit.log({
+    await this.services.quoteRepo.save(ctx.tenantId, quote);
+    await this.services.settingsRepo.save(settings);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.quote.sent",
@@ -274,7 +274,7 @@ export class SendQuoteUseCase extends BaseUseCase<SendQuoteInput, SendQuoteOutpu
 
     const result = { quote: toQuoteDto(quote) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.send-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -286,8 +286,8 @@ export class SendQuoteUseCase extends BaseUseCase<SendQuoteInput, SendQuoteOutpu
 }
 
 export class AcceptQuoteUseCase extends BaseUseCase<AcceptQuoteInput, AcceptQuoteOutput> {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -299,7 +299,7 @@ export class AcceptQuoteUseCase extends BaseUseCase<AcceptQuoteInput, AcceptQuot
     }
 
     const cached = await getIdempotentResult<AcceptQuoteOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.accept-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -308,15 +308,15 @@ export class AcceptQuoteUseCase extends BaseUseCase<AcceptQuoteInput, AcceptQuot
       return ok(cached);
     }
 
-    const quote = await this.deps.quoteRepo.findById(ctx.tenantId, input.quoteId);
+    const quote = await this.services.quoteRepo.findById(ctx.tenantId, input.quoteId);
     if (!quote) {
       return err(new NotFoundError("Quote not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     quote.accept(now, now);
-    await this.deps.quoteRepo.save(ctx.tenantId, quote);
-    await this.deps.audit.log({
+    await this.services.quoteRepo.save(ctx.tenantId, quote);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.quote.accepted",
@@ -327,7 +327,7 @@ export class AcceptQuoteUseCase extends BaseUseCase<AcceptQuoteInput, AcceptQuot
 
     const result = { quote: toQuoteDto(quote) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.accept-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -339,8 +339,8 @@ export class AcceptQuoteUseCase extends BaseUseCase<AcceptQuoteInput, AcceptQuot
 }
 
 export class RejectQuoteUseCase extends BaseUseCase<RejectQuoteInput, RejectQuoteOutput> {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -352,7 +352,7 @@ export class RejectQuoteUseCase extends BaseUseCase<RejectQuoteInput, RejectQuot
     }
 
     const cached = await getIdempotentResult<RejectQuoteOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.reject-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -361,15 +361,15 @@ export class RejectQuoteUseCase extends BaseUseCase<RejectQuoteInput, RejectQuot
       return ok(cached);
     }
 
-    const quote = await this.deps.quoteRepo.findById(ctx.tenantId, input.quoteId);
+    const quote = await this.services.quoteRepo.findById(ctx.tenantId, input.quoteId);
     if (!quote) {
       return err(new NotFoundError("Quote not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     quote.reject(now, now);
-    await this.deps.quoteRepo.save(ctx.tenantId, quote);
-    await this.deps.audit.log({
+    await this.services.quoteRepo.save(ctx.tenantId, quote);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.quote.rejected",
@@ -380,7 +380,7 @@ export class RejectQuoteUseCase extends BaseUseCase<RejectQuoteInput, RejectQuot
 
     const result = { quote: toQuoteDto(quote) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.reject-quote",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -395,8 +395,8 @@ export class ConvertQuoteToOrderUseCase extends BaseUseCase<
   ConvertQuoteToOrderInput,
   ConvertQuoteToOrderOutput
 > {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -408,7 +408,7 @@ export class ConvertQuoteToOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<ConvertQuoteToOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.convert-quote-to-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -417,14 +417,14 @@ export class ConvertQuoteToOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const quote = await this.deps.quoteRepo.findById(ctx.tenantId, input.quoteId);
+    const quote = await this.services.quoteRepo.findById(ctx.tenantId, input.quoteId);
     if (!quote) {
       return err(new NotFoundError("Quote not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const order = SalesOrderAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       customerPartyId: quote.customerPartyId,
       customerContactPartyId: quote.customerContactPartyId,
@@ -437,10 +437,10 @@ export class ConvertQuoteToOrderUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.orderRepo.create(ctx.tenantId, order);
+    await this.services.orderRepo.create(ctx.tenantId, order);
     quote.markConverted({ orderId: order.id }, now);
-    await this.deps.quoteRepo.save(ctx.tenantId, quote);
-    await this.deps.audit.log({
+    await this.services.quoteRepo.save(ctx.tenantId, quote);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId ?? "system",
       action: "sales.quote.converted_to_order",
@@ -452,7 +452,7 @@ export class ConvertQuoteToOrderUseCase extends BaseUseCase<
     const payload = { order: toOrderDto(order) };
 
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.convert-quote-to-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -467,8 +467,8 @@ export class ConvertQuoteToInvoiceUseCase extends BaseUseCase<
   ConvertQuoteToInvoiceInput,
   ConvertQuoteToInvoiceOutput
 > {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -480,7 +480,7 @@ export class ConvertQuoteToInvoiceUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<ConvertQuoteToInvoiceOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.convert-quote-to-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -489,14 +489,14 @@ export class ConvertQuoteToInvoiceUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const quote = await this.deps.quoteRepo.findById(ctx.tenantId, input.quoteId);
+    const quote = await this.services.quoteRepo.findById(ctx.tenantId, input.quoteId);
     if (!quote) {
       return err(new NotFoundError("Quote not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const invoice = SalesInvoiceAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       customerPartyId: quote.customerPartyId,
       customerContactPartyId: quote.customerContactPartyId,
@@ -511,10 +511,10 @@ export class ConvertQuoteToInvoiceUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.invoiceRepo.create(ctx.tenantId, invoice);
+    await this.services.invoiceRepo.create(ctx.tenantId, invoice);
     quote.markConverted({ invoiceId: invoice.id }, now);
-    await this.deps.quoteRepo.save(ctx.tenantId, quote);
-    await this.deps.audit.log({
+    await this.services.quoteRepo.save(ctx.tenantId, quote);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId ?? "system",
       action: "sales.quote.converted_to_invoice",
@@ -526,7 +526,7 @@ export class ConvertQuoteToInvoiceUseCase extends BaseUseCase<
     const payload = { invoice: toInvoiceDto(invoice) };
 
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.convert-quote-to-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -538,8 +538,8 @@ export class ConvertQuoteToInvoiceUseCase extends BaseUseCase<
 }
 
 export class GetQuoteUseCase extends BaseUseCase<GetQuoteInput, GetQuoteOutput> {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -550,7 +550,7 @@ export class GetQuoteUseCase extends BaseUseCase<GetQuoteInput, GetQuoteOutput> 
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const quote = await this.deps.quoteRepo.findById(ctx.tenantId, input.quoteId);
+    const quote = await this.services.quoteRepo.findById(ctx.tenantId, input.quoteId);
     if (!quote) {
       return err(new NotFoundError("Quote not found"));
     }
@@ -559,8 +559,8 @@ export class GetQuoteUseCase extends BaseUseCase<GetQuoteInput, GetQuoteOutput> 
 }
 
 export class ListQuotesUseCase extends BaseUseCase<ListQuotesInput, ListQuotesOutput> {
-  constructor(private readonly deps: QuoteDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: QuoteDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -571,7 +571,7 @@ export class ListQuotesUseCase extends BaseUseCase<ListQuotesInput, ListQuotesOu
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.quoteRepo.list(
+    const result = await this.services.quoteRepo.list(
       ctx.tenantId,
       {
         status: input.status as any,

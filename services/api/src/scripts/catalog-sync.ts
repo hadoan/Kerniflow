@@ -7,11 +7,11 @@
  * Usage: pnpm catalog:sync
  */
 
-import { PrismaClient } from "@kerniflow/data";
+import { PrismaService } from "@kerniflow/data";
 import { AppRegistry } from "../modules/platform/infrastructure/registries/app-registry";
 
 async function syncCatalog() {
-  const prisma = new PrismaClient();
+  const prisma = new PrismaService();
   const appRegistry = new AppRegistry();
 
   try {

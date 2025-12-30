@@ -47,12 +47,12 @@ export class PosController {
     @Req() req: any
   ): Promise<CreateRegisterOutput> {
     const result = await this.createRegister.execute(input, {
-      workspaceId: req.user.workspaceId,
+      tenantId: req.user.workspaceId,
       userId: req.user.userId,
       requestId: req.id,
     });
 
-    if (!result.ok) {
+    if ("error" in result) {
       throw result.error;
     }
 
@@ -66,12 +66,12 @@ export class PosController {
     @Req() req: any
   ): Promise<ListRegistersOutput> {
     const result = await this.listRegisters.execute(input, {
-      workspaceId: req.user.workspaceId,
+      tenantId: req.user.workspaceId,
       userId: req.user.userId,
       requestId: req.id,
     });
 
-    if (!result.ok) {
+    if ("error" in result) {
       throw result.error;
     }
 
@@ -85,12 +85,12 @@ export class PosController {
     @Req() req: any
   ): Promise<OpenShiftOutput> {
     const result = await this.openShift.execute(input, {
-      workspaceId: req.user.workspaceId,
+      tenantId: req.user.workspaceId,
       userId: req.user.userId,
       requestId: req.id,
     });
 
-    if (!result.ok) {
+    if ("error" in result) {
       throw result.error;
     }
 
@@ -104,12 +104,12 @@ export class PosController {
     @Req() req: any
   ): Promise<CloseShiftOutput> {
     const result = await this.closeShift.execute(input, {
-      workspaceId: req.user.workspaceId,
+      tenantId: req.user.workspaceId,
       userId: req.user.userId,
       requestId: req.id,
     });
 
-    if (!result.ok) {
+    if ("error" in result) {
       throw result.error;
     }
 
@@ -123,12 +123,12 @@ export class PosController {
     @Req() req: any
   ): Promise<GetCurrentShiftOutput> {
     const result = await this.getCurrentShift.execute(input, {
-      workspaceId: req.user.workspaceId,
+      tenantId: req.user.workspaceId,
       userId: req.user.userId,
       requestId: req.id,
     });
 
-    if (!result.ok) {
+    if ("error" in result) {
       throw result.error;
     }
 
@@ -142,12 +142,12 @@ export class PosController {
     @Req() req: any
   ): Promise<SyncPosSaleOutput> {
     const result = await this.syncPosSale.execute(input, {
-      workspaceId: req.user.workspaceId,
+      tenantId: req.user.workspaceId,
       userId: req.user.userId,
       requestId: req.id,
     });
 
-    if (!result.ok) {
+    if ("error" in result) {
       throw result.error;
     }
 
@@ -161,12 +161,12 @@ export class PosController {
     @Req() req: any
   ): Promise<GetCatalogSnapshotOutput> {
     const result = await this.getCatalogSnapshot.execute(input, {
-      workspaceId: req.user.workspaceId,
+      tenantId: req.user.workspaceId,
       userId: req.user.userId,
       requestId: req.id,
     });
 
-    if (!result.ok) {
+    if ("error" in result) {
       throw result.error;
     }
 

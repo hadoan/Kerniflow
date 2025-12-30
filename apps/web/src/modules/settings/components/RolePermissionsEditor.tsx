@@ -101,9 +101,7 @@ export const RolePermissionsEditor: React.FC<RolePermissionsEditorProps> = ({
                   onClick={() => setActiveGroupId(group.id)}
                   className={cn(
                     "w-full flex items-center justify-between rounded-md px-3 py-2 text-sm transition",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-foreground/70 hover:bg-muted"
+                    isActive ? "bg-primary/10 text-primary" : "text-foreground/70 hover:bg-muted"
                   )}
                 >
                   <span className="truncate">{group.label}</span>
@@ -154,9 +152,7 @@ export const RolePermissionsEditor: React.FC<RolePermissionsEditorProps> = ({
               >
                 <Checkbox
                   checked={selectedKeys.has(permission.key)}
-                  onCheckedChange={(checked) =>
-                    togglePermission(permission.key, Boolean(checked))
-                  }
+                  onCheckedChange={(checked) => togglePermission(permission.key, Boolean(checked))}
                   disabled={readOnly}
                 />
                 <span className="space-y-1">

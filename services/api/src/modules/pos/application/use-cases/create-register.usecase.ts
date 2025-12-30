@@ -1,36 +1,45 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { CreateRegisterInput, CreateRegisterOutput } from "@kerniflow/contracts";
-import { BaseUseCase, type Context, type Result, Ok, Err, ConflictError } from "@kerniflow/kernel";
+import {
+  BaseUseCase,
+  ConflictError,
+  NoopLogger,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  err,
+  ok,
+} from "@kerniflow/kernel";
 import { Register } from "../../domain/register.aggregate";
 import {
   REGISTER_REPOSITORY_PORT,
   type RegisterRepositoryPort,
 } from "../ports/register-repository.port";
-import type { IdGenerator } from "../../../../shared/ports/id-generator.port";
+import type { IdGeneratorPort } from "../../../../shared/ports/id-generator.port";
 import { ID_GENERATOR_TOKEN } from "../../../../shared/ports/id-generator.port";
-
-interface CreateRegisterDeps {
-  registerRepo: RegisterRepositoryPort;
-  idGenerator: IdGenerator;
-}
 
 @Injectable()
 export class CreateRegisterUseCase extends BaseUseCase<CreateRegisterInput, CreateRegisterOutput> {
   constructor(
     @Inject(REGISTER_REPOSITORY_PORT) private registerRepo: RegisterRepositoryPort,
-    @Inject(ID_GENERATOR_TOKEN) private idGenerator: IdGenerator
+    @Inject(ID_GENERATOR_TOKEN) private idGenerator: IdGeneratorPort
   ) {
-    super();
+    super({ logger: new NoopLogger() });
   }
 
-  async executeImpl(
+  protected async handle(
     input: CreateRegisterInput,
-    ctx: Context
-  ): Promise<Result<CreateRegisterOutput>> {
+    ctx: UseCaseContext
+  ): Promise<Result<CreateRegisterOutput, UseCaseError>> {
+    if (!ctx.tenantId) {
+      return err(new ValidationError("tenantId missing from context"));
+    }
+
     // Check if name already exists
-    const exists = await this.registerRepo.existsByName(ctx.workspaceId, input.name);
+    const exists = await this.registerRepo.existsByName(ctx.tenantId, input.name);
     if (exists) {
-      return Err(
+      return err(
         new ConflictError(
           "REGISTER_NAME_EXISTS",
           `Register with name '${input.name}' already exists`
@@ -41,8 +50,8 @@ export class CreateRegisterUseCase extends BaseUseCase<CreateRegisterInput, Crea
     // Create register aggregate
     const now = new Date();
     const register = new Register(
-      this.idGenerator.generate(),
-      ctx.workspaceId,
+      this.idGenerator.newId(),
+      ctx.tenantId,
       input.name,
       input.defaultWarehouseId || null,
       input.defaultBankAccountId || null,
@@ -54,7 +63,7 @@ export class CreateRegisterUseCase extends BaseUseCase<CreateRegisterInput, Crea
     // Save to database
     await this.registerRepo.save(register);
 
-    return Ok({
+    return ok({
       registerId: register.id,
       workspaceId: register.workspaceId,
       name: register.name,

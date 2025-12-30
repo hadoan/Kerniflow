@@ -1,8 +1,8 @@
 import type { FC } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shared/ui/card";
 import type { ActivityDto } from "@kerniflow/contracts";
 import { ActivityTypeIcon } from "./ActivityTypeIcon";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/shared/ui/badge";
 
 interface ActivityCardProps {
   activity: ActivityDto;

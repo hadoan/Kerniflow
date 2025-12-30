@@ -1,6 +1,15 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { ListRegistersInput, ListRegistersOutput } from "@kerniflow/contracts";
-import { BaseUseCase, type Context, type Result, Ok } from "@kerniflow/kernel";
+import {
+  BaseUseCase,
+  NoopLogger,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  ok,
+  err,
+} from "@kerniflow/kernel";
 import {
   REGISTER_REPOSITORY_PORT,
   type RegisterRepositoryPort,
@@ -9,13 +18,20 @@ import {
 @Injectable()
 export class ListRegistersUseCase extends BaseUseCase<ListRegistersInput, ListRegistersOutput> {
   constructor(@Inject(REGISTER_REPOSITORY_PORT) private registerRepo: RegisterRepositoryPort) {
-    super();
+    super({ logger: new NoopLogger() });
   }
 
-  async executeImpl(input: ListRegistersInput, ctx: Context): Promise<Result<ListRegistersOutput>> {
-    const registers = await this.registerRepo.findByWorkspace(ctx.workspaceId, input.status);
+  protected async handle(
+    input: ListRegistersInput,
+    ctx: UseCaseContext
+  ): Promise<Result<ListRegistersOutput, UseCaseError>> {
+    if (!ctx.tenantId) {
+      return err(new ValidationError("tenantId missing from context"));
+    }
 
-    return Ok({
+    const registers = await this.registerRepo.findByWorkspace(ctx.tenantId, input.status);
+
+    return ok({
       registers: registers.map((r) => r.toDto()),
     });
   }

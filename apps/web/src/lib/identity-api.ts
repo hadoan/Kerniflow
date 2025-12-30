@@ -39,10 +39,7 @@ export const identityApi = {
     return apiClient.get<RolePermissionsResponse>(`/identity/roles/${roleId}/permissions`);
   },
 
-  async updateRolePermissions(
-    roleId: string,
-    input: UpdateRolePermissionsRequest
-  ): Promise<void> {
+  async updateRolePermissions(roleId: string, input: UpdateRolePermissionsRequest): Promise<void> {
     await apiClient.put(`/identity/roles/${roleId}/permissions`, input);
   },
 };

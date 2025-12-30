@@ -29,7 +29,10 @@ export class PrismaRoleRepository implements RoleRepositoryPort {
     });
   }
 
-  async findById(tenantId: string, id: string): Promise<{
+  async findById(
+    tenantId: string,
+    id: string
+  ): Promise<{
     id: string;
     tenantId: string;
     name: string;

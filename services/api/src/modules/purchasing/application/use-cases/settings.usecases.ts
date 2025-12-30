@@ -19,7 +19,7 @@ import type {
 import type { PurchasingSettingsRepositoryPort } from "../ports/settings-repository.port";
 import { PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
 import { toSettingsDto } from "../mappers/purchasing-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 
 type SettingsDeps = {
@@ -34,8 +34,8 @@ export class GetPurchasingSettingsUseCase extends BaseUseCase<
   GetPurchasingSettingsInput,
   GetPurchasingSettingsOutput
 > {
-  constructor(private readonly deps: SettingsDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: SettingsDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -46,14 +46,14 @@ export class GetPurchasingSettingsUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = PurchasingSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
-        now: this.deps.clock.now(),
+        now: this.services.clock.now(),
       });
-      await this.deps.settingsRepo.save(settings);
+      await this.services.settingsRepo.save(settings);
     }
 
     return ok({ settings: toSettingsDto(settings) });
@@ -64,8 +64,8 @@ export class UpdatePurchasingSettingsUseCase extends BaseUseCase<
   UpdatePurchasingSettingsInput,
   UpdatePurchasingSettingsOutput
 > {
-  constructor(private readonly deps: SettingsDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: SettingsDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -77,7 +77,7 @@ export class UpdatePurchasingSettingsUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<UpdatePurchasingSettingsOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.update-settings",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -86,12 +86,12 @@ export class UpdatePurchasingSettingsUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = PurchasingSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
-        now: this.deps.clock.now(),
+        now: this.services.clock.now(),
       });
     }
 
@@ -113,14 +113,14 @@ export class UpdatePurchasingSettingsUseCase extends BaseUseCase<
         approvalRequiredForBills:
           input.approvalRequiredForBills ?? settings.toProps().approvalRequiredForBills,
       },
-      this.deps.clock.now()
+      this.services.clock.now()
     );
 
-    await this.deps.settingsRepo.save(settings);
+    await this.services.settingsRepo.save(settings);
 
     const result = { settings: toSettingsDto(settings) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.update-settings",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,

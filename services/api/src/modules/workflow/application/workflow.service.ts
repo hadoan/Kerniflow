@@ -16,7 +16,6 @@ import {
   WorkflowInstanceRepository,
   WorkflowTaskRepository,
 } from "@kerniflow/data";
-import type { TransactionContext } from "@kerniflow/kernel";
 import { WorkflowQueueClient } from "../infrastructure/workflow-queue.client";
 
 @Injectable()
@@ -121,7 +120,7 @@ export class WorkflowService {
           context: serialized.context,
           startedAt: now,
         },
-        tx as TransactionContext
+        tx as any
       );
 
       await this.events.append(
@@ -134,7 +133,7 @@ export class WorkflowService {
             businessKey: input.businessKey ?? null,
           }),
         },
-        tx as TransactionContext
+        tx as any
       );
 
       return created;
@@ -168,12 +167,7 @@ export class WorkflowService {
 
   async cancelInstance(tenantId: string, id: string) {
     const result = await this.prisma.$transaction(async (tx) => {
-      const updated = await this.instances.updateStatus(
-        tenantId,
-        id,
-        "CANCELLED",
-        tx as TransactionContext
-      );
+      const updated = await this.instances.updateStatus(tenantId, id, "CANCELLED", tx as any);
 
       if (updated.count === 0) {
         throw new NotFoundException("Workflow instance not found");
@@ -186,7 +180,7 @@ export class WorkflowService {
           type: "INSTANCE_CANCELLED",
           payload: JSON.stringify({ reason: "manual" }),
         },
-        tx as TransactionContext
+        tx as any
       );
 
       return updated;
@@ -238,7 +232,7 @@ export class WorkflowService {
         tenantId,
         taskId,
         JSON.stringify(input.output ?? {}),
-        tx as TransactionContext
+        tx as any
       );
 
       await this.events.append(
@@ -248,7 +242,7 @@ export class WorkflowService {
           type: "TASK_COMPLETED",
           payload: JSON.stringify({ taskId, output: input.output ?? {} }),
         },
-        tx as TransactionContext
+        tx as any
       );
     });
 
@@ -268,13 +262,7 @@ export class WorkflowService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      await this.tasks.markFailed(
-        tenantId,
-        taskId,
-        JSON.stringify(error),
-        "FAILED",
-        tx as TransactionContext
-      );
+      await this.tasks.markFailed(tenantId, taskId, JSON.stringify(error), "FAILED", tx as any);
 
       await this.events.append(
         {
@@ -283,7 +271,7 @@ export class WorkflowService {
           type: "TASK_FAILED",
           payload: JSON.stringify({ taskId, error }),
         },
-        tx as TransactionContext
+        tx as any
       );
     });
 

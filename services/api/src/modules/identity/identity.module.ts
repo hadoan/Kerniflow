@@ -42,9 +42,7 @@ import { PrismaUserRepository } from "./infrastructure/adapters/prisma-user-repo
 import { MEMBERSHIP_REPOSITORY_TOKEN } from "./application/ports/membership-repository.port";
 import { REFRESH_TOKEN_REPOSITORY_TOKEN } from "./application/ports/refresh-token-repository.port";
 import { ROLE_REPOSITORY_TOKEN } from "./application/ports/role-repository.port";
-import {
-  ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN,
-} from "./application/ports/role-permission-grant-repository.port";
+import { ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN } from "./application/ports/role-permission-grant-repository.port";
 import { TENANT_REPOSITORY_TOKEN } from "./application/ports/tenant-repository.port";
 import { USER_REPOSITORY_TOKEN } from "./application/ports/user-repository.port";
 import { PERMISSION_CATALOG_PORT } from "./application/ports/permission-catalog.port";

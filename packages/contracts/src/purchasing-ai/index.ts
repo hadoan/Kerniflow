@@ -4,5 +4,4 @@ export * from "./vendor-bill-draft-card.schema";
 export * from "./line-categorization-card.schema";
 export * from "./duplicate-risk-card.schema";
 export * from "./expense-changes-narrative-card.schema";
-export * from "./posting-explanation-card.schema";
 export * from "../sales-ai/message-draft-card.schema";

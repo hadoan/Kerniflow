@@ -54,9 +54,7 @@ export class FakeRoleRepository implements RoleRepositoryPort {
     return this.roles.find((r) => r.tenantId === tenantId && r.systemKey === systemKey) ?? null;
   }
 
-  async listByTenant(
-    tenantId: string
-  ): Promise<
+  async listByTenant(tenantId: string): Promise<
     Array<{
       id: string;
       tenantId: string;

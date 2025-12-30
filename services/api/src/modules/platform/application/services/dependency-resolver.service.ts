@@ -82,7 +82,9 @@ export class DependencyResolverService {
     const dependents: string[] = [];
 
     for (const enabledAppId of enabledApps) {
-      if (enabledAppId === appId) {continue;}
+      if (enabledAppId === appId) {
+        continue;
+      }
 
       const manifest = registry.get(enabledAppId);
       if (manifest && manifest.dependencies.includes(appId)) {

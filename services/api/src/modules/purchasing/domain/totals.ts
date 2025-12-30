@@ -1,14 +1,16 @@
 import type {
-  PurchaseOrderLineItem,
   VendorBillLineItem,
   VendorBillTotals,
   PurchaseOrderTotals,
   BillPayment,
 } from "./purchasing.types";
 
-export const calculatePurchaseOrderTotals = (
-  lineItems: PurchaseOrderLineItem[] | VendorBillLineItem[]
-): PurchaseOrderTotals => {
+type LineItemAmount = {
+  quantity: number;
+  unitCostCents: number;
+};
+
+export const calculatePurchaseOrderTotals = (lineItems: LineItemAmount[]): PurchaseOrderTotals => {
   const subtotalCents = lineItems.reduce(
     (sum, item) => sum + item.quantity * item.unitCostCents,
     0

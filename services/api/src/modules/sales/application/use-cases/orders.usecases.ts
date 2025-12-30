@@ -40,7 +40,7 @@ import type { SalesSettingsRepositoryPort } from "../ports/settings-repository.p
 import { SalesSettingsAggregate } from "../../domain/settings.aggregate";
 import { toOrderDto, toInvoiceDto } from "../mappers/sales-dto.mapper";
 import { allocateUniqueNumber } from "./numbering";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import type { CustomerQueryPort } from "../../../party-crm/application/ports/customer-query.port";
 
@@ -84,8 +84,8 @@ export class CreateSalesOrderUseCase extends BaseUseCase<
   CreateSalesOrderInput,
   CreateSalesOrderOutput
 > {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected validate(input: CreateSalesOrderInput): CreateSalesOrderInput {
@@ -110,7 +110,7 @@ export class CreateSalesOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreateSalesOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -119,7 +119,7 @@ export class CreateSalesOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const customer = await this.deps.customerQuery.getCustomerBillingSnapshot(
+    const customer = await this.services.customerQuery.getCustomerBillingSnapshot(
       ctx.tenantId,
       input.customerPartyId
     );
@@ -127,16 +127,16 @@ export class CreateSalesOrderUseCase extends BaseUseCase<
       return err(new NotFoundError("Customer not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const orderDate = input.orderDate ? parseLocalDate(input.orderDate) : null;
     const deliveryDate = input.deliveryDate ? parseLocalDate(input.deliveryDate) : null;
     const lineItems = buildLineItems({
-      idGenerator: this.deps.idGenerator,
+      idGenerator: this.services.idGenerator,
       lineItems: input.lineItems,
     });
 
     const order = SalesOrderAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       customerPartyId: input.customerPartyId,
       customerContactPartyId: input.customerContactPartyId ?? null,
@@ -149,11 +149,11 @@ export class CreateSalesOrderUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.orderRepo.create(ctx.tenantId, order);
+    await this.services.orderRepo.create(ctx.tenantId, order);
 
     const result = { order: toOrderDto(order) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -168,8 +168,8 @@ export class UpdateSalesOrderUseCase extends BaseUseCase<
   UpdateSalesOrderInput,
   UpdateSalesOrderOutput
 > {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -180,12 +180,12 @@ export class UpdateSalesOrderUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const order = await this.deps.orderRepo.findById(ctx.tenantId, input.orderId);
+    const order = await this.services.orderRepo.findById(ctx.tenantId, input.orderId);
     if (!order) {
       return err(new NotFoundError("Sales order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     if (input.headerPatch) {
       order.updateHeader(
         {
@@ -193,10 +193,10 @@ export class UpdateSalesOrderUseCase extends BaseUseCase<
           customerContactPartyId: input.headerPatch.customerContactPartyId,
           orderDate: input.headerPatch.orderDate
             ? parseLocalDate(input.headerPatch.orderDate)
-            : input.headerPatch.orderDate,
+            : undefined,
           deliveryDate: input.headerPatch.deliveryDate
             ? parseLocalDate(input.headerPatch.deliveryDate)
-            : input.headerPatch.deliveryDate,
+            : undefined,
           currency: input.headerPatch.currency,
           notes: input.headerPatch.notes,
         },
@@ -206,13 +206,13 @@ export class UpdateSalesOrderUseCase extends BaseUseCase<
 
     if (input.lineItems) {
       const lineItems = buildLineItems({
-        idGenerator: this.deps.idGenerator,
+        idGenerator: this.services.idGenerator,
         lineItems: input.lineItems,
       });
       order.replaceLineItems(lineItems, now);
     }
 
-    await this.deps.orderRepo.save(ctx.tenantId, order);
+    await this.services.orderRepo.save(ctx.tenantId, order);
     return ok({ order: toOrderDto(order) });
   }
 }
@@ -221,8 +221,8 @@ export class ConfirmSalesOrderUseCase extends BaseUseCase<
   ConfirmSalesOrderInput,
   ConfirmSalesOrderOutput
 > {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -234,7 +234,7 @@ export class ConfirmSalesOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<ConfirmSalesOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.confirm-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -243,16 +243,16 @@ export class ConfirmSalesOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const order = await this.deps.orderRepo.findById(ctx.tenantId, input.orderId);
+    const order = await this.services.orderRepo.findById(ctx.tenantId, input.orderId);
     if (!order) {
       return err(new NotFoundError("Sales order not found"));
     }
 
-    const now = this.deps.clock.now();
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    const now = this.services.clock.now();
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = SalesSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
         now,
       });
@@ -260,13 +260,13 @@ export class ConfirmSalesOrderUseCase extends BaseUseCase<
 
     const number = await allocateUniqueNumber({
       next: () => settings!.allocateOrderNumber(),
-      isTaken: (candidate) => this.deps.orderRepo.isOrderNumberTaken(ctx.tenantId!, candidate),
+      isTaken: (candidate) => this.services.orderRepo.isOrderNumberTaken(ctx.tenantId!, candidate),
     });
 
     order.confirm(number, now, now);
-    await this.deps.orderRepo.save(ctx.tenantId, order);
-    await this.deps.settingsRepo.save(settings);
-    await this.deps.audit.log({
+    await this.services.orderRepo.save(ctx.tenantId, order);
+    await this.services.settingsRepo.save(settings);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.order.confirmed",
@@ -277,7 +277,7 @@ export class ConfirmSalesOrderUseCase extends BaseUseCase<
 
     const result = { order: toOrderDto(order) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.confirm-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -292,8 +292,8 @@ export class FulfillSalesOrderUseCase extends BaseUseCase<
   FulfillSalesOrderInput,
   FulfillSalesOrderOutput
 > {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -305,7 +305,7 @@ export class FulfillSalesOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<FulfillSalesOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.fulfill-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -314,15 +314,15 @@ export class FulfillSalesOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const order = await this.deps.orderRepo.findById(ctx.tenantId, input.orderId);
+    const order = await this.services.orderRepo.findById(ctx.tenantId, input.orderId);
     if (!order) {
       return err(new NotFoundError("Sales order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     order.fulfill(now, now);
-    await this.deps.orderRepo.save(ctx.tenantId, order);
-    await this.deps.audit.log({
+    await this.services.orderRepo.save(ctx.tenantId, order);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.order.fulfilled",
@@ -332,7 +332,7 @@ export class FulfillSalesOrderUseCase extends BaseUseCase<
 
     const result = { order: toOrderDto(order) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.fulfill-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -347,8 +347,8 @@ export class CancelSalesOrderUseCase extends BaseUseCase<
   CancelSalesOrderInput,
   CancelSalesOrderOutput
 > {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -360,7 +360,7 @@ export class CancelSalesOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CancelSalesOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.cancel-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -369,15 +369,15 @@ export class CancelSalesOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const order = await this.deps.orderRepo.findById(ctx.tenantId, input.orderId);
+    const order = await this.services.orderRepo.findById(ctx.tenantId, input.orderId);
     if (!order) {
       return err(new NotFoundError("Sales order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     order.cancel(now, now);
-    await this.deps.orderRepo.save(ctx.tenantId, order);
-    await this.deps.audit.log({
+    await this.services.orderRepo.save(ctx.tenantId, order);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.order.canceled",
@@ -387,7 +387,7 @@ export class CancelSalesOrderUseCase extends BaseUseCase<
 
     const result = { order: toOrderDto(order) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.cancel-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -402,8 +402,8 @@ export class CreateInvoiceFromOrderUseCase extends BaseUseCase<
   CreateInvoiceFromOrderInput,
   CreateInvoiceFromOrderOutput
 > {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -415,7 +415,7 @@ export class CreateInvoiceFromOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreateInvoiceFromOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-invoice-from-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -424,14 +424,14 @@ export class CreateInvoiceFromOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const order = await this.deps.orderRepo.findById(ctx.tenantId, input.orderId);
+    const order = await this.services.orderRepo.findById(ctx.tenantId, input.orderId);
     if (!order) {
       return err(new NotFoundError("Sales order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const invoice = SalesInvoiceAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       customerPartyId: order.customerPartyId,
       customerContactPartyId: order.customerContactPartyId,
@@ -446,10 +446,10 @@ export class CreateInvoiceFromOrderUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.invoiceRepo.create(ctx.tenantId, invoice);
+    await this.services.invoiceRepo.create(ctx.tenantId, invoice);
     order.markInvoiced(invoice.id, now);
-    await this.deps.orderRepo.save(ctx.tenantId, order);
-    await this.deps.audit.log({
+    await this.services.orderRepo.save(ctx.tenantId, order);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId ?? "system",
       action: "sales.order.invoiced",
@@ -460,7 +460,7 @@ export class CreateInvoiceFromOrderUseCase extends BaseUseCase<
 
     const payload = { invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-invoice-from-order",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -472,8 +472,8 @@ export class CreateInvoiceFromOrderUseCase extends BaseUseCase<
 }
 
 export class GetSalesOrderUseCase extends BaseUseCase<GetSalesOrderInput, GetSalesOrderOutput> {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -484,7 +484,7 @@ export class GetSalesOrderUseCase extends BaseUseCase<GetSalesOrderInput, GetSal
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const order = await this.deps.orderRepo.findById(ctx.tenantId, input.orderId);
+    const order = await this.services.orderRepo.findById(ctx.tenantId, input.orderId);
     if (!order) {
       return err(new NotFoundError("Sales order not found"));
     }
@@ -496,8 +496,8 @@ export class ListSalesOrdersUseCase extends BaseUseCase<
   ListSalesOrdersInput,
   ListSalesOrdersOutput
 > {
-  constructor(private readonly deps: OrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: OrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -508,7 +508,7 @@ export class ListSalesOrdersUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.orderRepo.list(
+    const result = await this.services.orderRepo.list(
       ctx.tenantId,
       {
         status: input.status as any,

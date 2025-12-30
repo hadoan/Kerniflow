@@ -3,7 +3,7 @@ import { type ApprovalPolicyInput, type ApprovalRules } from "@kerniflow/contrac
 import { AuditPort, OutboxPort, AUDIT_PORT, OUTBOX_PORT } from "@kerniflow/kernel";
 import { WorkflowService } from "../../workflow/application/workflow.service";
 import { DomainEventRepository } from "@kerniflow/data";
-import { IdempotencyService } from "../../shared/infrastructure/idempotency/idempotency.service";
+import { IdempotencyService } from "../../../shared/infrastructure/idempotency/idempotency.service";
 import { ApprovalPolicyService } from "./approval-policy.service";
 import { ApprovalWorkflowEvents } from "./approval-spec.builder";
 

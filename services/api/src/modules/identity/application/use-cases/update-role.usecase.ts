@@ -1,6 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { RoleDto } from "@kerniflow/contracts";
-import { ConflictError, NotFoundError, ValidationError } from "../../../../shared/errors/domain-errors";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "../../../../shared/errors/domain-errors";
 import type { RoleRepositoryPort } from "../ports/role-repository.port";
 import { ROLE_REPOSITORY_TOKEN } from "../ports/role-repository.port";
 
@@ -40,8 +44,7 @@ export class UpdateRoleUseCase {
 
     await this.roleRepo.update(command.tenantId, existing.id, {
       name: nextName ?? existing.name,
-      description:
-        command.description !== undefined ? command.description : existing.description,
+      description: command.description !== undefined ? command.description : existing.description,
     });
 
     return {

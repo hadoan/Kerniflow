@@ -150,7 +150,7 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
           { quoteId: parsed.data.quoteId },
           buildCtx(tenantId, userId, toolCallId, runId)
         );
-        if (!result.ok) {
+        if ("error" in result) {
           return {
             ok: false,
             code: result.error.code,
@@ -240,7 +240,7 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
         },
         buildCtx(tenantId, userId, toolCallId, runId)
       );
-      if (!list.ok) {
+      if ("error" in list) {
         return {
           ok: false,
           code: list.error.code,
@@ -300,7 +300,7 @@ export const buildSalesTools = (app: SalesApplication): DomainToolPort[] => [
           { invoiceId: parsed.data.invoiceId },
           buildCtx(tenantId, userId, toolCallId, runId)
         );
-        if (!result.ok) {
+        if ("error" in result) {
           return {
             ok: false,
             code: result.error.code,

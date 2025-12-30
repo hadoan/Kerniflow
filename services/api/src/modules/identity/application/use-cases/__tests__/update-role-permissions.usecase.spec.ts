@@ -41,12 +41,7 @@ beforeEach(async () => {
     isSystem: false,
   });
 
-  useCase = new UpdateRolePermissionsUseCase(
-    roleRepo,
-    catalogPort,
-    grantRepo,
-    new MockAudit()
-  );
+  useCase = new UpdateRolePermissionsUseCase(roleRepo, catalogPort, grantRepo, new MockAudit());
 });
 
 describe("UpdateRolePermissionsUseCase", () => {

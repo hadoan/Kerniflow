@@ -20,9 +20,7 @@ export const buildDefaultRoleGrants = (
   );
 
   const staffKeys = uniqueKeys.filter(
-    (key) =>
-      key.endsWith(".read") &&
-      !key.startsWith("settings.")
+    (key) => key.endsWith(".read") && !key.startsWith("settings.")
   );
 
   const readOnlyKeys = readKeys.filter((key) => !key.startsWith("settings."));

@@ -15,6 +15,7 @@
     "build:api": "pnpm build:packages && pnpm --filter @kerniflow/api build",
     "typecheck": "pnpm -r typecheck",
     "dev:web": "pnpm --filter @kerniflow/web dev",
+    "build:web": "pnpm build:packages && pnpm --filter @kerniflow/web build",
     "dev:api": "pnpm build:packages && pnpm --filter @kerniflow/api dev:esbuild",
     "dev:api:debug": "pnpm build:packages && pnpm --filter @kerniflow/api dev:debug",
     "dev:worker": "pnpm --filter @kerniflow/worker dev",

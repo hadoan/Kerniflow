@@ -15,7 +15,7 @@ import type {
   UpsertAccountMappingOutput,
 } from "@kerniflow/contracts";
 import type { PurchasingAccountMappingRepositoryPort } from "../ports/account-mapping-repository.port";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import { toAccountMappingDto } from "../mappers/purchasing-dto.mapper";
 import type { IdGeneratorPort, ClockPort } from "@kerniflow/kernel";
@@ -49,8 +49,8 @@ export class ListAccountMappingsUseCase extends BaseUseCase<
   ListAccountMappingsInput,
   ListAccountMappingsOutput
 > {
-  constructor(private readonly deps: MappingDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: MappingDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -61,7 +61,7 @@ export class ListAccountMappingsUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const mappings = await this.deps.mappingRepo.list(ctx.tenantId, input.supplierPartyId);
+    const mappings = await this.services.mappingRepo.list(ctx.tenantId, input.supplierPartyId);
     return ok({ mappings: mappings.map(toAccountMappingDto) });
   }
 }
@@ -70,8 +70,8 @@ export class UpsertAccountMappingUseCase extends BaseUseCase<
   UpsertAccountMappingInput,
   UpsertAccountMappingOutput
 > {
-  constructor(private readonly deps: MappingDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: MappingDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -83,7 +83,7 @@ export class UpsertAccountMappingUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<UpsertAccountMappingOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.upsert-mapping",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -93,19 +93,19 @@ export class UpsertAccountMappingUseCase extends BaseUseCase<
     }
 
     const mapping = buildMapping({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       supplierPartyId: input.supplierPartyId,
       categoryKey: input.categoryKey,
       glAccountId: input.glAccountId,
-      now: this.deps.clock.now(),
+      now: this.services.clock.now(),
     });
 
-    const saved = await this.deps.mappingRepo.upsert(mapping);
+    const saved = await this.services.mappingRepo.upsert(mapping);
 
     const result = { mapping: toAccountMappingDto(saved) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.upsert-mapping",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,

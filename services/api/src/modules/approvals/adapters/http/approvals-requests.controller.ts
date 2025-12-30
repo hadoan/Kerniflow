@@ -4,7 +4,7 @@ import {
   CurrentTenantId,
   CurrentUserId,
 } from "../../../identity/adapters/http/current-user.decorator";
-import { ApprovalRequestService } from "../application/approval-request.service";
+import { ApprovalRequestService } from "../../application/approval-request.service";
 
 @Controller("approvals")
 export class ApprovalsRequestsController {

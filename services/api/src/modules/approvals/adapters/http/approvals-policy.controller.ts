@@ -4,7 +4,7 @@ import {
   CurrentTenantId,
   CurrentUserId,
 } from "../../../identity/adapters/http/current-user.decorator";
-import { ApprovalPolicyService } from "../application/approval-policy.service";
+import { ApprovalPolicyService } from "../../application/approval-policy.service";
 
 @Controller("approvals/policies")
 export class ApprovalsPolicyController {

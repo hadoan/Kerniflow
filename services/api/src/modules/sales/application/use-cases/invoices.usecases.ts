@@ -36,10 +36,10 @@ import type { SalesSettingsRepositoryPort } from "../ports/settings-repository.p
 import { SalesSettingsAggregate } from "../../domain/settings.aggregate";
 import { toInvoiceDto } from "../mappers/sales-dto.mapper";
 import { allocateUniqueNumber } from "./numbering";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import type { CustomerQueryPort } from "../../../party-crm/application/ports/customer-query.port";
-import type { AccountingApplication } from "../../accounting/application/accounting.application";
+import type { AccountingApplication } from "../../../accounting/application/accounting.application";
 
 const buildLineItems = (params: {
   idGenerator: IdGeneratorPort;
@@ -81,8 +81,8 @@ export class CreateSalesInvoiceUseCase extends BaseUseCase<
   CreateSalesInvoiceInput,
   CreateSalesInvoiceOutput
 > {
-  constructor(private readonly deps: InvoiceDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: InvoiceDeps) {
+    super({ logger: services.logger });
   }
 
   protected validate(input: CreateSalesInvoiceInput): CreateSalesInvoiceInput {
@@ -107,7 +107,7 @@ export class CreateSalesInvoiceUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreateSalesInvoiceOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -116,7 +116,7 @@ export class CreateSalesInvoiceUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const customer = await this.deps.customerQuery.getCustomerBillingSnapshot(
+    const customer = await this.services.customerQuery.getCustomerBillingSnapshot(
       ctx.tenantId,
       input.customerPartyId
     );
@@ -124,16 +124,16 @@ export class CreateSalesInvoiceUseCase extends BaseUseCase<
       return err(new NotFoundError("Customer not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const issueDate = input.issueDate ? parseLocalDate(input.issueDate) : null;
     const dueDate = input.dueDate ? parseLocalDate(input.dueDate) : null;
     const lineItems = buildLineItems({
-      idGenerator: this.deps.idGenerator,
+      idGenerator: this.services.idGenerator,
       lineItems: input.lineItems,
     });
 
     const invoice = SalesInvoiceAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       customerPartyId: input.customerPartyId,
       customerContactPartyId: input.customerContactPartyId ?? null,
@@ -148,11 +148,11 @@ export class CreateSalesInvoiceUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.invoiceRepo.create(ctx.tenantId, invoice);
+    await this.services.invoiceRepo.create(ctx.tenantId, invoice);
 
     const result = { invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.create-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -167,8 +167,8 @@ export class UpdateSalesInvoiceUseCase extends BaseUseCase<
   UpdateSalesInvoiceInput,
   UpdateSalesInvoiceOutput
 > {
-  constructor(private readonly deps: InvoiceDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: InvoiceDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -179,12 +179,12 @@ export class UpdateSalesInvoiceUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.services.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Sales invoice not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     if (input.headerPatch) {
       invoice.updateHeader(
         {
@@ -192,10 +192,10 @@ export class UpdateSalesInvoiceUseCase extends BaseUseCase<
           customerContactPartyId: input.headerPatch.customerContactPartyId,
           issueDate: input.headerPatch.issueDate
             ? parseLocalDate(input.headerPatch.issueDate)
-            : input.headerPatch.issueDate,
+            : undefined,
           dueDate: input.headerPatch.dueDate
             ? parseLocalDate(input.headerPatch.dueDate)
-            : input.headerPatch.dueDate,
+            : undefined,
           currency: input.headerPatch.currency,
           paymentTerms: input.headerPatch.paymentTerms,
           notes: input.headerPatch.notes,
@@ -206,13 +206,13 @@ export class UpdateSalesInvoiceUseCase extends BaseUseCase<
 
     if (input.lineItems) {
       const lineItems = buildLineItems({
-        idGenerator: this.deps.idGenerator,
+        idGenerator: this.services.idGenerator,
         lineItems: input.lineItems,
       });
       invoice.replaceLineItems(lineItems, now);
     }
 
-    await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.services.invoiceRepo.save(ctx.tenantId, invoice);
     return ok({ invoice: toInvoiceDto(invoice) });
   }
 }
@@ -246,8 +246,8 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
   IssueSalesInvoiceInput,
   IssueSalesInvoiceOutput
 > {
-  constructor(private readonly deps: InvoiceDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: InvoiceDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -259,7 +259,7 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<IssueSalesInvoiceOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.issue-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -268,16 +268,16 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.services.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Sales invoice not found"));
     }
 
-    const now = this.deps.clock.now();
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    const now = this.services.clock.now();
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = SalesSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
         now,
       });
@@ -285,7 +285,8 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
 
     const number = await allocateUniqueNumber({
       next: () => settings!.allocateInvoiceNumber(),
-      isTaken: (candidate) => this.deps.invoiceRepo.isInvoiceNumberTaken(ctx.tenantId!, candidate),
+      isTaken: (candidate) =>
+        this.services.invoiceRepo.isInvoiceNumberTaken(ctx.tenantId!, candidate),
     });
 
     invoice.issue(number, now, now);
@@ -310,13 +311,13 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
         lines: [
           {
             ledgerAccountId: settings.defaultAccountsReceivableAccountId,
-            direction: "Debit",
+            direction: "Debit" as const,
             amountCents: invoice.totals.totalCents,
             currency: invoice.currency,
           },
           ...revenueLines.map((line) => ({
             ledgerAccountId: line.ledgerAccountId,
-            direction: "Credit",
+            direction: "Credit" as const,
             amountCents: line.amountCents,
             currency: line.currency,
             lineMemo: line.lineMemo,
@@ -327,25 +328,25 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
         sourceRef: invoice.number ?? undefined,
       };
 
-      const created = await this.deps.accounting.createJournalEntry.execute(createInput, ctx);
-      if (!created.ok) {
+      const created = await this.services.accounting.createJournalEntry.execute(createInput, ctx);
+      if ("error" in created) {
         return err(created.error);
       }
 
       const postInput: PostJournalEntryInput = {
         entryId: created.value.entry.id,
       };
-      const posted = await this.deps.accounting.postJournalEntry.execute(postInput, ctx);
-      if (!posted.ok) {
+      const posted = await this.services.accounting.postJournalEntry.execute(postInput, ctx);
+      if ("error" in posted) {
         return err(posted.error);
       }
 
       invoice.setIssuedJournalEntry(created.value.entry.id, now);
     }
 
-    await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
-    await this.deps.settingsRepo.save(settings);
-    await this.deps.audit.log({
+    await this.services.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.services.settingsRepo.save(settings);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.invoice.issued",
@@ -356,7 +357,7 @@ export class IssueSalesInvoiceUseCase extends BaseUseCase<
 
     const result = { invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.issue-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -371,8 +372,8 @@ export class VoidSalesInvoiceUseCase extends BaseUseCase<
   VoidSalesInvoiceInput,
   VoidSalesInvoiceOutput
 > {
-  constructor(private readonly deps: InvoiceDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: InvoiceDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -384,7 +385,7 @@ export class VoidSalesInvoiceUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<VoidSalesInvoiceOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.void-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -393,15 +394,15 @@ export class VoidSalesInvoiceUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.services.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Sales invoice not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     invoice.void(input.reason, now, now);
-    await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
-    await this.deps.audit.log({
+    await this.services.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.invoice.voided",
@@ -412,7 +413,7 @@ export class VoidSalesInvoiceUseCase extends BaseUseCase<
 
     const result = { invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.void-invoice",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -427,8 +428,8 @@ export class GetSalesInvoiceUseCase extends BaseUseCase<
   GetSalesInvoiceInput,
   GetSalesInvoiceOutput
 > {
-  constructor(private readonly deps: InvoiceDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: InvoiceDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -439,7 +440,7 @@ export class GetSalesInvoiceUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.services.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Sales invoice not found"));
     }
@@ -451,8 +452,8 @@ export class ListSalesInvoicesUseCase extends BaseUseCase<
   ListSalesInvoicesInput,
   ListSalesInvoicesOutput
 > {
-  constructor(private readonly deps: InvoiceDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: InvoiceDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -463,7 +464,7 @@ export class ListSalesInvoicesUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.invoiceRepo.list(
+    const result = await this.services.invoiceRepo.list(
       ctx.tenantId,
       {
         status: input.status as any,

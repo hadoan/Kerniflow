@@ -1,6 +1,15 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { GetCurrentShiftInput, GetCurrentShiftOutput } from "@kerniflow/contracts";
-import { BaseUseCase, type Context, type Result, Ok } from "@kerniflow/kernel";
+import {
+  BaseUseCase,
+  NoopLogger,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  err,
+  ok,
+} from "@kerniflow/kernel";
 import {
   SHIFT_SESSION_REPOSITORY_PORT,
   type ShiftSessionRepositoryPort,
@@ -14,16 +23,20 @@ export class GetCurrentShiftUseCase extends BaseUseCase<
   constructor(
     @Inject(SHIFT_SESSION_REPOSITORY_PORT) private shiftRepo: ShiftSessionRepositoryPort
   ) {
-    super();
+    super({ logger: new NoopLogger() });
   }
 
-  async executeImpl(
+  protected async handle(
     input: GetCurrentShiftInput,
-    ctx: Context
-  ): Promise<Result<GetCurrentShiftOutput>> {
-    const session = await this.shiftRepo.findOpenByRegister(ctx.workspaceId, input.registerId);
+    ctx: UseCaseContext
+  ): Promise<Result<GetCurrentShiftOutput, UseCaseError>> {
+    if (!ctx.tenantId) {
+      return err(new ValidationError("tenantId missing from context"));
+    }
 
-    return Ok({
+    const session = await this.shiftRepo.findOpenByRegister(ctx.tenantId, input.registerId);
+
+    return ok({
       session: session ? session.toDto() : null,
     });
   }

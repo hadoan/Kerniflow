@@ -1,7 +1,7 @@
 import React, { type FC, useMemo } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -9,8 +9,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+} from "@/shared/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import { useAccounts } from "../queries";
 import type { AccountType } from "@kerniflow/contracts";
 

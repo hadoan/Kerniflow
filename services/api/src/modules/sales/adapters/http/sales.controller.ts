@@ -24,7 +24,7 @@ import {
   VoidSalesInvoiceInputSchema,
   GetSalesInvoiceInputSchema,
   ListSalesInvoicesInputSchema,
-  RecordPaymentInputSchema,
+  SalesRecordPaymentInputSchema,
   ListPaymentsInputSchema,
   ReversePaymentInputSchema,
   GetSalesSettingsInputSchema,
@@ -311,7 +311,7 @@ export class SalesController {
     @Body() body: unknown,
     @Req() req: Request
   ) {
-    const input = RecordPaymentInputSchema.parse({ ...(body as object), invoiceId });
+    const input = SalesRecordPaymentInputSchema.parse({ ...(body as object), invoiceId });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.recordPayment.execute(input, ctx);
     return mapResultToHttp(result);

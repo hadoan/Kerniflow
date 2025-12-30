@@ -37,7 +37,10 @@ import { AuthGuard } from "./auth.guard";
 import { CurrentUserId, CurrentTenantId } from "./current-user.decorator";
 import { buildRequestContext } from "../../../../shared/context/request-context";
 import type { Request } from "express";
-import { USER_REPOSITORY_TOKEN, type UserRepositoryPort } from "../../application/ports/user-repository.port";
+import {
+  USER_REPOSITORY_TOKEN,
+  type UserRepositoryPort,
+} from "../../application/ports/user-repository.port";
 import {
   MEMBERSHIP_REPOSITORY_TOKEN,
   type MembershipRepositoryPort,

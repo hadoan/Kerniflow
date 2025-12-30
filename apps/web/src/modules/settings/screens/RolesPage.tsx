@@ -3,21 +3,8 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -105,11 +92,7 @@ export default function RolesPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditRole(role)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => setEditRole(role)}>
                         Edit
                       </Button>
                       <Button variant="ghost" size="sm" asChild>
@@ -137,9 +120,7 @@ export default function RolesPage() {
         title="Create role"
         submitLabel="Create"
         onClose={() => setCreateOpen(false)}
-        onSubmit={(values) =>
-          createRole.mutateAsync(values).then(() => setCreateOpen(false))
-        }
+        onSubmit={(values) => createRole.mutateAsync(values).then(() => setCreateOpen(false))}
       />
 
       <RoleDialog

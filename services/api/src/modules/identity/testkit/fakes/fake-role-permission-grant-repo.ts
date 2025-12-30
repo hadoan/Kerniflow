@@ -2,7 +2,8 @@ import type { RolePermissionEffect } from "@kerniflow/contracts";
 import type { RolePermissionGrantRepositoryPort } from "../../application/ports/role-permission-grant-repository.port";
 
 export class FakeRolePermissionGrantRepository implements RolePermissionGrantRepositoryPort {
-  grants: Array<{ tenantId: string; roleId: string; key: string; effect: RolePermissionEffect }> = [];
+  grants: Array<{ tenantId: string; roleId: string; key: string; effect: RolePermissionEffect }> =
+    [];
 
   async listByRole(
     tenantId: string,

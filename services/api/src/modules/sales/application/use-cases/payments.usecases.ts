@@ -14,8 +14,8 @@ import {
   parseLocalDate,
 } from "@kerniflow/kernel";
 import type {
-  RecordPaymentInput,
-  RecordPaymentOutput,
+  SalesRecordPaymentInput,
+  SalesRecordPaymentOutput,
   ListPaymentsInput,
   ListPaymentsOutput,
   ReversePaymentInput,
@@ -28,9 +28,9 @@ import type { SalesPaymentRepositoryPort } from "../ports/payment-repository.por
 import type { SalesInvoiceRepositoryPort } from "../ports/invoice-repository.port";
 import type { SalesSettingsRepositoryPort } from "../ports/settings-repository.port";
 import { toInvoiceDto, toPaymentDto } from "../mappers/sales-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
-import type { AccountingApplication } from "../../accounting/application/accounting.application";
+import type { AccountingApplication } from "../../../accounting/application/accounting.application";
 
 type PaymentDeps = {
   logger: LoggerPort;
@@ -44,12 +44,15 @@ type PaymentDeps = {
   audit: AuditPort;
 };
 
-export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, RecordPaymentOutput> {
-  constructor(private readonly deps: PaymentDeps) {
-    super({ logger: deps.logger });
+export class RecordPaymentUseCase extends BaseUseCase<
+  SalesRecordPaymentInput,
+  SalesRecordPaymentOutput
+> {
+  constructor(private readonly services: PaymentDeps) {
+    super({ logger: services.logger });
   }
 
-  protected validate(input: RecordPaymentInput): RecordPaymentInput {
+  protected validate(input: SalesRecordPaymentInput): SalesRecordPaymentInput {
     if (input.amountCents <= 0) {
       throw new ValidationError("Payment amount must be positive");
     }
@@ -57,15 +60,15 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
   }
 
   protected async handle(
-    input: RecordPaymentInput,
+    input: SalesRecordPaymentInput,
     ctx: UseCaseContext
-  ): Promise<Result<RecordPaymentOutput, UseCaseError>> {
+  ): Promise<Result<SalesRecordPaymentOutput, UseCaseError>> {
     if (!ctx.tenantId || !ctx.userId) {
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const cached = await getIdempotentResult<RecordPaymentOutput>({
-      idempotency: this.deps.idempotency,
+    const cached = await getIdempotentResult<SalesRecordPaymentOutput>({
+      idempotency: this.services.idempotency,
       actionKey: "sales.record-payment",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -74,7 +77,7 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
       return ok(cached);
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
+    const invoice = await this.services.invoiceRepo.findById(ctx.tenantId, input.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Sales invoice not found"));
     }
@@ -87,11 +90,11 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
       return err(new ValidationError("Payment amount exceeds remaining balance"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const paymentDate = parseLocalDate(input.paymentDate);
 
     const payment = {
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       invoiceId: invoice.id,
       amountCents: input.amountCents,
       currency: input.currency,
@@ -104,7 +107,7 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
       journalEntryId: null,
     };
 
-    const settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    const settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (settings?.autoPostOnPayment) {
       const bankAccountId = input.bankAccountId ?? settings.defaultBankAccountId;
       if (!bankAccountId) {
@@ -136,14 +139,14 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
         sourceRef: invoice.number ?? undefined,
       };
 
-      const created = await this.deps.accounting.createJournalEntry.execute(createInput, ctx);
-      if (!created.ok) {
+      const created = await this.services.accounting.createJournalEntry.execute(createInput, ctx);
+      if ("error" in created) {
         return err(created.error);
       }
 
       const postInput: PostJournalEntryInput = { entryId: created.value.entry.id };
-      const posted = await this.deps.accounting.postJournalEntry.execute(postInput, ctx);
-      if (!posted.ok) {
+      const posted = await this.services.accounting.postJournalEntry.execute(postInput, ctx);
+      if ("error" in posted) {
         return err(posted.error);
       }
 
@@ -152,9 +155,9 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
 
     invoice.addPayment(payment, now);
 
-    await this.deps.paymentRepo.create(ctx.tenantId, payment);
-    await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
-    await this.deps.audit.log({
+    await this.services.paymentRepo.create(ctx.tenantId, payment);
+    await this.services.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.payment.recorded",
@@ -165,7 +168,7 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
 
     const result = { payment: toPaymentDto(payment), invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.record-payment",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -177,8 +180,8 @@ export class RecordPaymentUseCase extends BaseUseCase<RecordPaymentInput, Record
 }
 
 export class ListPaymentsUseCase extends BaseUseCase<ListPaymentsInput, ListPaymentsOutput> {
-  constructor(private readonly deps: PaymentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PaymentDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -189,14 +192,14 @@ export class ListPaymentsUseCase extends BaseUseCase<ListPaymentsInput, ListPaym
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const payments = await this.deps.paymentRepo.listByInvoice(ctx.tenantId, input.invoiceId);
+    const payments = await this.services.paymentRepo.listByInvoice(ctx.tenantId, input.invoiceId);
     return ok({ items: payments.map(toPaymentDto) });
   }
 }
 
 export class ReversePaymentUseCase extends BaseUseCase<ReversePaymentInput, ReversePaymentOutput> {
-  constructor(private readonly deps: PaymentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PaymentDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -208,7 +211,7 @@ export class ReversePaymentUseCase extends BaseUseCase<ReversePaymentInput, Reve
     }
 
     const cached = await getIdempotentResult<ReversePaymentOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.reverse-payment",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -217,12 +220,12 @@ export class ReversePaymentUseCase extends BaseUseCase<ReversePaymentInput, Reve
       return ok(cached);
     }
 
-    const payment = await this.deps.paymentRepo.findById(ctx.tenantId, input.paymentId);
+    const payment = await this.services.paymentRepo.findById(ctx.tenantId, input.paymentId);
     if (!payment) {
       return err(new NotFoundError("Payment not found"));
     }
 
-    const invoice = await this.deps.invoiceRepo.findById(ctx.tenantId, payment.invoiceId);
+    const invoice = await this.services.invoiceRepo.findById(ctx.tenantId, payment.invoiceId);
     if (!invoice) {
       return err(new NotFoundError("Sales invoice not found"));
     }
@@ -233,18 +236,21 @@ export class ReversePaymentUseCase extends BaseUseCase<ReversePaymentInput, Reve
         reversalDate: payment.paymentDate,
         reversalMemo: input.reason,
       };
-      const reversed = await this.deps.accounting.reverseJournalEntry.execute(reversalInput, ctx);
-      if (!reversed.ok) {
+      const reversed = await this.services.accounting.reverseJournalEntry.execute(
+        reversalInput,
+        ctx
+      );
+      if ("error" in reversed) {
         return err(reversed.error);
       }
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     invoice.removePayment(payment.id, now);
 
-    await this.deps.paymentRepo.delete(ctx.tenantId, payment.id);
-    await this.deps.invoiceRepo.save(ctx.tenantId, invoice);
-    await this.deps.audit.log({
+    await this.services.paymentRepo.delete(ctx.tenantId, payment.id);
+    await this.services.invoiceRepo.save(ctx.tenantId, invoice);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "sales.payment.reversed",
@@ -255,7 +261,7 @@ export class ReversePaymentUseCase extends BaseUseCase<ReversePaymentInput, Reve
 
     const result = { payment: toPaymentDto(payment), invoice: toInvoiceDto(invoice) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "sales.reverse-payment",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,

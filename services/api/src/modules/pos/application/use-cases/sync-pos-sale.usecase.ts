@@ -1,6 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { SyncPosSaleInput, SyncPosSaleOutput } from "@kerniflow/contracts";
-import { BaseUseCase, type Context, type Result, Ok, Err, ConflictError } from "@kerniflow/kernel";
+import {
+  BaseUseCase,
+  ConflictError,
+  NoopLogger,
+  type Result,
+  type UseCaseContext,
+  type UseCaseError,
+  ValidationError,
+  err,
+  ok,
+} from "@kerniflow/kernel";
 import {
   POS_SALE_IDEMPOTENCY_PORT,
   type PosSaleIdempotencyPort,
@@ -16,15 +26,22 @@ export class SyncPosSaleUseCase extends BaseUseCase<SyncPosSaleInput, SyncPosSal
     // TODO: Inject SalesApplication, InventoryApplication (for product validation)
     // TODO: Inject PartyCrmApplication (for customer validation)
   ) {
-    super();
+    super({ logger: new NoopLogger() });
   }
 
-  async executeImpl(input: SyncPosSaleInput, ctx: Context): Promise<Result<SyncPosSaleOutput>> {
+  protected async handle(
+    input: SyncPosSaleInput,
+    ctx: UseCaseContext
+  ): Promise<Result<SyncPosSaleOutput, UseCaseError>> {
+    if (!ctx.tenantId) {
+      return err(new ValidationError("tenantId missing from context"));
+    }
+
     // 1. Check idempotency - return cached result if duplicate
-    const cached = await this.idempotencyStore.get(ctx.workspaceId, input.idempotencyKey);
+    const cached = await this.idempotencyStore.get(ctx.tenantId, input.idempotencyKey);
     if (cached) {
       // Duplicate request - return cached result
-      return Ok(cached);
+      return ok(cached);
     }
 
     // 2. Validate products exist and are active
@@ -91,12 +108,7 @@ export class SyncPosSaleUseCase extends BaseUseCase<SyncPosSaleInput, SyncPosSal
       receiptNumber,
     };
 
-    await this.idempotencyStore.store(
-      ctx.workspaceId,
-      input.idempotencyKey,
-      input.posSaleId,
-      result
-    );
+    await this.idempotencyStore.store(ctx.tenantId, input.idempotencyKey, input.posSaleId, result);
 
     // 9. TODO: Update shift session totals (if sessionId provided)
     // if (input.sessionId) {
@@ -113,7 +125,7 @@ export class SyncPosSaleUseCase extends BaseUseCase<SyncPosSaleInput, SyncPosSal
     //   }
     // }
 
-    return Ok(result);
+    return ok(result);
   }
 
   /**

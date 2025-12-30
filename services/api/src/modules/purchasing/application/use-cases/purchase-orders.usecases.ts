@@ -40,7 +40,7 @@ import type { PurchasingSettingsRepositoryPort } from "../ports/settings-reposit
 import { PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
 import { toPurchaseOrderDto } from "../mappers/purchasing-dto.mapper";
 import { allocateUniqueNumber } from "./numbering";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import type { SupplierQueryPort } from "../ports/supplier-query.port";
 
@@ -81,8 +81,8 @@ export class CreatePurchaseOrderUseCase extends BaseUseCase<
   CreatePurchaseOrderInput,
   CreatePurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected validate(input: CreatePurchaseOrderInput): CreatePurchaseOrderInput {
@@ -107,7 +107,7 @@ export class CreatePurchaseOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreatePurchaseOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.create-po",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -116,7 +116,7 @@ export class CreatePurchaseOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const supplier = await this.deps.supplierQuery.getSupplierById(
+    const supplier = await this.services.supplierQuery.getSupplierById(
       ctx.tenantId,
       input.supplierPartyId
     );
@@ -124,18 +124,18 @@ export class CreatePurchaseOrderUseCase extends BaseUseCase<
       return err(new NotFoundError("Supplier not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const orderDate = input.orderDate ? parseLocalDate(input.orderDate) : null;
     const expectedDeliveryDate = input.expectedDeliveryDate
       ? parseLocalDate(input.expectedDeliveryDate)
       : null;
     const lineItems = buildLineItems({
-      idGenerator: this.deps.idGenerator,
+      idGenerator: this.services.idGenerator,
       lineItems: input.lineItems,
     });
 
     const purchaseOrder = PurchaseOrderAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       supplierPartyId: input.supplierPartyId,
       supplierContactPartyId: input.supplierContactPartyId ?? null,
@@ -147,11 +147,11 @@ export class CreatePurchaseOrderUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.repo.create(ctx.tenantId, purchaseOrder);
+    await this.services.repo.create(ctx.tenantId, purchaseOrder);
 
     const result = { purchaseOrder: toPurchaseOrderDto(purchaseOrder) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.create-po",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -166,8 +166,8 @@ export class UpdatePurchaseOrderUseCase extends BaseUseCase<
   UpdatePurchaseOrderInput,
   UpdatePurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -178,12 +178,12 @@ export class UpdatePurchaseOrderUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const purchaseOrder = await this.deps.repo.findById(ctx.tenantId, input.purchaseOrderId);
+    const purchaseOrder = await this.services.repo.findById(ctx.tenantId, input.purchaseOrderId);
     if (!purchaseOrder) {
       return err(new NotFoundError("Purchase order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     if (input.headerPatch) {
       purchaseOrder.updateHeader(
         {
@@ -191,10 +191,10 @@ export class UpdatePurchaseOrderUseCase extends BaseUseCase<
           supplierContactPartyId: input.headerPatch.supplierContactPartyId,
           orderDate: input.headerPatch.orderDate
             ? parseLocalDate(input.headerPatch.orderDate)
-            : input.headerPatch.orderDate,
+            : undefined,
           expectedDeliveryDate: input.headerPatch.expectedDeliveryDate
             ? parseLocalDate(input.headerPatch.expectedDeliveryDate)
-            : input.headerPatch.expectedDeliveryDate,
+            : undefined,
           currency: input.headerPatch.currency,
           notes: input.headerPatch.notes,
         },
@@ -204,13 +204,13 @@ export class UpdatePurchaseOrderUseCase extends BaseUseCase<
 
     if (input.lineItems) {
       const lineItems = buildLineItems({
-        idGenerator: this.deps.idGenerator,
+        idGenerator: this.services.idGenerator,
         lineItems: input.lineItems,
       });
       purchaseOrder.replaceLineItems(lineItems, now);
     }
 
-    await this.deps.repo.save(ctx.tenantId, purchaseOrder);
+    await this.services.repo.save(ctx.tenantId, purchaseOrder);
     return ok({ purchaseOrder: toPurchaseOrderDto(purchaseOrder) });
   }
 }
@@ -219,8 +219,8 @@ export class ApprovePurchaseOrderUseCase extends BaseUseCase<
   ApprovePurchaseOrderInput,
   ApprovePurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -232,7 +232,7 @@ export class ApprovePurchaseOrderUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<ApprovePurchaseOrderOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.approve-po",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -241,35 +241,35 @@ export class ApprovePurchaseOrderUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const purchaseOrder = await this.deps.repo.findById(ctx.tenantId, input.purchaseOrderId);
+    const purchaseOrder = await this.services.repo.findById(ctx.tenantId, input.purchaseOrderId);
     if (!purchaseOrder) {
       return err(new NotFoundError("Purchase order not found"));
     }
 
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = PurchasingSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
-        now: this.deps.clock.now(),
+        now: this.services.clock.now(),
       });
     }
 
     const number = await allocateUniqueNumber({
       next: () => settings!.allocatePoNumber(),
-      isTaken: (candidate) => this.deps.repo.isPoNumberTaken(ctx.tenantId!, candidate),
+      isTaken: (candidate) => this.services.repo.isPoNumberTaken(ctx.tenantId!, candidate),
     });
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       purchaseOrder.approve(number, now, now);
     } catch (error) {
       return err(new ValidationError((error as Error).message));
     }
 
-    await this.deps.repo.save(ctx.tenantId, purchaseOrder);
-    await this.deps.settingsRepo.save(settings);
-    await this.deps.audit.log({
+    await this.services.repo.save(ctx.tenantId, purchaseOrder);
+    await this.services.settingsRepo.save(settings);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.po.approved",
@@ -280,7 +280,7 @@ export class ApprovePurchaseOrderUseCase extends BaseUseCase<
 
     const result = { purchaseOrder: toPurchaseOrderDto(purchaseOrder) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.approve-po",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -295,8 +295,8 @@ export class SendPurchaseOrderUseCase extends BaseUseCase<
   SendPurchaseOrderInput,
   SendPurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -307,20 +307,20 @@ export class SendPurchaseOrderUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const purchaseOrder = await this.deps.repo.findById(ctx.tenantId, input.purchaseOrderId);
+    const purchaseOrder = await this.services.repo.findById(ctx.tenantId, input.purchaseOrderId);
     if (!purchaseOrder) {
       return err(new NotFoundError("Purchase order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       purchaseOrder.markSent(now, now);
     } catch (error) {
       return err(new ValidationError((error as Error).message));
     }
-    await this.deps.repo.save(ctx.tenantId, purchaseOrder);
+    await this.services.repo.save(ctx.tenantId, purchaseOrder);
 
-    await this.deps.audit.log({
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.po.sent",
@@ -337,8 +337,8 @@ export class ReceivePurchaseOrderUseCase extends BaseUseCase<
   ReceivePurchaseOrderInput,
   ReceivePurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -349,20 +349,20 @@ export class ReceivePurchaseOrderUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const purchaseOrder = await this.deps.repo.findById(ctx.tenantId, input.purchaseOrderId);
+    const purchaseOrder = await this.services.repo.findById(ctx.tenantId, input.purchaseOrderId);
     if (!purchaseOrder) {
       return err(new NotFoundError("Purchase order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       purchaseOrder.markReceived(now, now);
     } catch (error) {
       return err(new ValidationError((error as Error).message));
     }
-    await this.deps.repo.save(ctx.tenantId, purchaseOrder);
+    await this.services.repo.save(ctx.tenantId, purchaseOrder);
 
-    await this.deps.audit.log({
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.po.received",
@@ -379,8 +379,8 @@ export class ClosePurchaseOrderUseCase extends BaseUseCase<
   ClosePurchaseOrderInput,
   ClosePurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -391,20 +391,20 @@ export class ClosePurchaseOrderUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const purchaseOrder = await this.deps.repo.findById(ctx.tenantId, input.purchaseOrderId);
+    const purchaseOrder = await this.services.repo.findById(ctx.tenantId, input.purchaseOrderId);
     if (!purchaseOrder) {
       return err(new NotFoundError("Purchase order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       purchaseOrder.close(now, now);
     } catch (error) {
       return err(new ValidationError((error as Error).message));
     }
-    await this.deps.repo.save(ctx.tenantId, purchaseOrder);
+    await this.services.repo.save(ctx.tenantId, purchaseOrder);
 
-    await this.deps.audit.log({
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.po.closed",
@@ -421,8 +421,8 @@ export class CancelPurchaseOrderUseCase extends BaseUseCase<
   CancelPurchaseOrderInput,
   CancelPurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -433,20 +433,20 @@ export class CancelPurchaseOrderUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const purchaseOrder = await this.deps.repo.findById(ctx.tenantId, input.purchaseOrderId);
+    const purchaseOrder = await this.services.repo.findById(ctx.tenantId, input.purchaseOrderId);
     if (!purchaseOrder) {
       return err(new NotFoundError("Purchase order not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       purchaseOrder.cancel(now, now);
     } catch (error) {
       return err(new ValidationError((error as Error).message));
     }
-    await this.deps.repo.save(ctx.tenantId, purchaseOrder);
+    await this.services.repo.save(ctx.tenantId, purchaseOrder);
 
-    await this.deps.audit.log({
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.po.canceled",
@@ -463,8 +463,8 @@ export class GetPurchaseOrderUseCase extends BaseUseCase<
   GetPurchaseOrderInput,
   GetPurchaseOrderOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -475,7 +475,7 @@ export class GetPurchaseOrderUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const purchaseOrder = await this.deps.repo.findById(ctx.tenantId, input.purchaseOrderId);
+    const purchaseOrder = await this.services.repo.findById(ctx.tenantId, input.purchaseOrderId);
     if (!purchaseOrder) {
       return err(new NotFoundError("Purchase order not found"));
     }
@@ -488,8 +488,8 @@ export class ListPurchaseOrdersUseCase extends BaseUseCase<
   ListPurchaseOrdersInput,
   ListPurchaseOrdersOutput
 > {
-  constructor(private readonly deps: PurchaseOrderDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PurchaseOrderDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -500,7 +500,7 @@ export class ListPurchaseOrdersUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.repo.list(ctx.tenantId, {
+    const result = await this.services.repo.list(ctx.tenantId, {
       status: input.status,
       supplierPartyId: input.supplierPartyId,
       fromDate: input.fromDate,

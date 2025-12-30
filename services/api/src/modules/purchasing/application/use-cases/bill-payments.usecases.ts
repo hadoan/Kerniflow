@@ -26,9 +26,9 @@ import type { BillPaymentRepositoryPort } from "../ports/bill-payment-repository
 import type { PurchasingSettingsRepositoryPort } from "../ports/settings-repository.port";
 import { PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
 import { toBillPaymentDto, toVendorBillDto } from "../mappers/purchasing-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
-import type { AccountingApplication } from "../../accounting/application/accounting.application";
+import type { AccountingApplication } from "../../../accounting/application/accounting.application";
 import type { BillPayment } from "../../domain/purchasing.types";
 
 type PaymentDeps = {
@@ -47,8 +47,8 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
   RecordBillPaymentInput,
   RecordBillPaymentOutput
 > {
-  constructor(private readonly deps: PaymentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PaymentDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -60,7 +60,7 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<RecordBillPaymentOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.record-payment",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -69,7 +69,7 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const vendorBill = await this.deps.billRepo.findById(ctx.tenantId, input.vendorBillId);
+    const vendorBill = await this.services.billRepo.findById(ctx.tenantId, input.vendorBillId);
     if (!vendorBill) {
       return err(new NotFoundError("Vendor bill not found"));
     }
@@ -78,12 +78,12 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
       return err(new ValidationError("Payment exceeds remaining balance"));
     }
 
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = PurchasingSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
-        now: this.deps.clock.now(),
+        now: this.services.clock.now(),
       });
     }
 
@@ -97,10 +97,10 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
     }
 
     const paymentDate = parseLocalDate(input.paymentDate);
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
 
     const payment: BillPayment = {
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       vendorBillId: vendorBill.id,
       amountCents: input.amountCents,
       currency: input.currency,
@@ -135,13 +135,13 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
       sourceRef: vendorBill.billNumber ?? undefined,
     };
 
-    const created = await this.deps.accounting.createJournalEntry.execute(createInput, ctx);
-    if (!created.ok) {
+    const created = await this.services.accounting.createJournalEntry.execute(createInput, ctx);
+    if ("error" in created) {
       return err(created.error);
     }
     const postInput: PostJournalEntryInput = { entryId: created.value.entry.id };
-    const posted = await this.deps.accounting.postJournalEntry.execute(postInput, ctx);
-    if (!posted.ok) {
+    const posted = await this.services.accounting.postJournalEntry.execute(postInput, ctx);
+    if ("error" in posted) {
       return err(posted.error);
     }
 
@@ -153,11 +153,11 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
       return err(new ValidationError((error as Error).message));
     }
 
-    await this.deps.paymentRepo.create(ctx.tenantId, payment);
-    await this.deps.billRepo.save(ctx.tenantId, vendorBill);
-    await this.deps.settingsRepo.save(settings);
+    await this.services.paymentRepo.create(ctx.tenantId, payment);
+    await this.services.billRepo.save(ctx.tenantId, vendorBill);
+    await this.services.settingsRepo.save(settings);
 
-    await this.deps.audit.log({
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.bill.payment.recorded",
@@ -168,7 +168,7 @@ export class RecordBillPaymentUseCase extends BaseUseCase<
 
     const result = { vendorBill: toVendorBillDto(vendorBill) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.record-payment",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -183,8 +183,8 @@ export class ListBillPaymentsUseCase extends BaseUseCase<
   ListBillPaymentsInput,
   ListBillPaymentsOutput
 > {
-  constructor(private readonly deps: PaymentDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: PaymentDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -195,7 +195,7 @@ export class ListBillPaymentsUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const payments = await this.deps.paymentRepo.listByBill(ctx.tenantId, input.vendorBillId);
+    const payments = await this.services.paymentRepo.listByBill(ctx.tenantId, input.vendorBillId);
 
     return ok({ payments: payments.map(toBillPaymentDto) });
   }

@@ -7,13 +7,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noEmit": false,
-    "module": "commonjs",
-    "moduleResolution": "node16",
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["src/shared/*"],
+      "@/*": ["src/*"]
     },
     "skipLibCheck": true,
     "esModuleInterop": true

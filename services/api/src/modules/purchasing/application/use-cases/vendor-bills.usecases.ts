@@ -38,10 +38,10 @@ import type { PurchasingSettingsRepositoryPort } from "../ports/settings-reposit
 import type { PurchasingAccountMappingRepositoryPort } from "../ports/account-mapping-repository.port";
 import { PurchasingSettingsAggregate } from "../../domain/settings.aggregate";
 import { toVendorBillDto } from "../mappers/purchasing-dto.mapper";
-import type { IdempotencyStoragePort } from "../../../shared/ports/idempotency-storage.port";
+import type { IdempotencyStoragePort } from "../../../../shared/ports/idempotency-storage.port";
 import { getIdempotentResult, storeIdempotentResult } from "./idempotency";
 import type { SupplierQueryPort } from "../ports/supplier-query.port";
-import type { AccountingApplication } from "../../accounting/application/accounting.application";
+import type { AccountingApplication } from "../../../accounting/application/accounting.application";
 
 const buildLineItems = (params: {
   idGenerator: IdGeneratorPort;
@@ -107,8 +107,8 @@ export class CreateVendorBillUseCase extends BaseUseCase<
   CreateVendorBillInput,
   CreateVendorBillOutput
 > {
-  constructor(private readonly deps: VendorBillDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: VendorBillDeps) {
+    super({ logger: services.logger });
   }
 
   protected validate(input: CreateVendorBillInput): CreateVendorBillInput {
@@ -133,7 +133,7 @@ export class CreateVendorBillUseCase extends BaseUseCase<
     }
 
     const cached = await getIdempotentResult<CreateVendorBillOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.create-bill",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -142,7 +142,7 @@ export class CreateVendorBillUseCase extends BaseUseCase<
       return ok(cached);
     }
 
-    const supplier = await this.deps.supplierQuery.getSupplierById(
+    const supplier = await this.services.supplierQuery.getSupplierById(
       ctx.tenantId,
       input.supplierPartyId
     );
@@ -151,7 +151,7 @@ export class CreateVendorBillUseCase extends BaseUseCase<
     }
 
     if (input.billNumber) {
-      const existing = await this.deps.repo.findBySupplierBillNumber(
+      const existing = await this.services.repo.findBySupplierBillNumber(
         ctx.tenantId,
         input.supplierPartyId,
         input.billNumber
@@ -170,14 +170,14 @@ export class CreateVendorBillUseCase extends BaseUseCase<
       }
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     const lineItems = buildLineItems({
-      idGenerator: this.deps.idGenerator,
+      idGenerator: this.services.idGenerator,
       lineItems: input.lineItems,
     });
 
     const vendorBill = VendorBillAggregate.createDraft({
-      id: this.deps.idGenerator.newId(),
+      id: this.services.idGenerator.newId(),
       tenantId: ctx.tenantId,
       supplierPartyId: input.supplierPartyId,
       supplierContactPartyId: input.supplierContactPartyId ?? null,
@@ -193,11 +193,11 @@ export class CreateVendorBillUseCase extends BaseUseCase<
       now,
     });
 
-    await this.deps.repo.create(ctx.tenantId, vendorBill);
+    await this.services.repo.create(ctx.tenantId, vendorBill);
 
     const result = { vendorBill: toVendorBillDto(vendorBill) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.create-bill",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -212,8 +212,8 @@ export class UpdateVendorBillUseCase extends BaseUseCase<
   UpdateVendorBillInput,
   UpdateVendorBillOutput
 > {
-  constructor(private readonly deps: VendorBillDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: VendorBillDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -224,12 +224,12 @@ export class UpdateVendorBillUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const vendorBill = await this.deps.repo.findById(ctx.tenantId, input.vendorBillId);
+    const vendorBill = await this.services.repo.findById(ctx.tenantId, input.vendorBillId);
     if (!vendorBill) {
       return err(new NotFoundError("Vendor bill not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     if (input.headerPatch) {
       vendorBill.updateHeader(
         {
@@ -239,10 +239,10 @@ export class UpdateVendorBillUseCase extends BaseUseCase<
           internalBillRef: input.headerPatch.internalBillRef,
           billDate: input.headerPatch.billDate
             ? parseLocalDate(input.headerPatch.billDate)
-            : input.headerPatch.billDate,
+            : undefined,
           dueDate: input.headerPatch.dueDate
             ? parseLocalDate(input.headerPatch.dueDate)
-            : input.headerPatch.dueDate,
+            : undefined,
           currency: input.headerPatch.currency,
           paymentTerms: input.headerPatch.paymentTerms,
           notes: input.headerPatch.notes,
@@ -254,13 +254,13 @@ export class UpdateVendorBillUseCase extends BaseUseCase<
 
     if (input.lineItems) {
       const lineItems = buildLineItems({
-        idGenerator: this.deps.idGenerator,
+        idGenerator: this.services.idGenerator,
         lineItems: input.lineItems,
       });
       vendorBill.replaceLineItems(lineItems, now);
     }
 
-    await this.deps.repo.save(ctx.tenantId, vendorBill);
+    await this.services.repo.save(ctx.tenantId, vendorBill);
     return ok({ vendorBill: toVendorBillDto(vendorBill) });
   }
 }
@@ -269,8 +269,8 @@ export class ApproveVendorBillUseCase extends BaseUseCase<
   ApproveVendorBillInput,
   ApproveVendorBillOutput
 > {
-  constructor(private readonly deps: VendorBillDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: VendorBillDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -281,20 +281,20 @@ export class ApproveVendorBillUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const vendorBill = await this.deps.repo.findById(ctx.tenantId, input.vendorBillId);
+    const vendorBill = await this.services.repo.findById(ctx.tenantId, input.vendorBillId);
     if (!vendorBill) {
       return err(new NotFoundError("Vendor bill not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       vendorBill.approve(now, now);
     } catch (error) {
       return err(new ValidationError((error as Error).message));
     }
-    await this.deps.repo.save(ctx.tenantId, vendorBill);
+    await this.services.repo.save(ctx.tenantId, vendorBill);
 
-    await this.deps.audit.log({
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.bill.approved",
@@ -307,8 +307,8 @@ export class ApproveVendorBillUseCase extends BaseUseCase<
 }
 
 export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, PostVendorBillOutput> {
-  constructor(private readonly deps: VendorBillDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: VendorBillDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -320,7 +320,7 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
     }
 
     const cached = await getIdempotentResult<PostVendorBillOutput>({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.post-bill",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -329,17 +329,17 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
       return ok(cached);
     }
 
-    const vendorBill = await this.deps.repo.findById(ctx.tenantId, input.vendorBillId);
+    const vendorBill = await this.services.repo.findById(ctx.tenantId, input.vendorBillId);
     if (!vendorBill) {
       return err(new NotFoundError("Vendor bill not found"));
     }
 
-    let settings = await this.deps.settingsRepo.findByTenant(ctx.tenantId);
+    let settings = await this.services.settingsRepo.findByTenant(ctx.tenantId);
     if (!settings) {
       settings = PurchasingSettingsAggregate.createDefault({
-        id: this.deps.idGenerator.newId(),
+        id: this.services.idGenerator.newId(),
         tenantId: ctx.tenantId,
-        now: this.deps.clock.now(),
+        now: this.services.clock.now(),
       });
     }
 
@@ -354,7 +354,7 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
         line,
         tenantId: ctx.tenantId,
         supplierPartyId: vendorBill.supplierPartyId,
-        mappingRepo: this.deps.mappingRepo,
+        mappingRepo: this.services.mappingRepo,
         defaultExpenseAccountId: settings.defaultExpenseAccountId,
       });
       if (!resolved) {
@@ -382,13 +382,13 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
       lines: [
         ...Array.from(debitBuckets.entries()).map(([ledgerAccountId, amountCents]) => ({
           ledgerAccountId,
-          direction: "Debit",
+          direction: "Debit" as const,
           amountCents,
           currency: vendorBill.currency,
         })),
         {
           ledgerAccountId: settings.defaultAccountsPayableAccountId,
-          direction: "Credit",
+          direction: "Credit" as const,
           amountCents: vendorBill.totals.totalCents,
           currency: vendorBill.currency,
         },
@@ -398,20 +398,20 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
       sourceRef: vendorBill.billNumber ?? undefined,
     };
 
-    const created = await this.deps.accounting.createJournalEntry.execute(createInput, ctx);
-    if (!created.ok) {
+    const created = await this.services.accounting.createJournalEntry.execute(createInput, ctx);
+    if ("error" in created) {
       return err(created.error);
     }
 
     const postInput: PostJournalEntryInput = {
       entryId: created.value.entry.id,
     };
-    const posted = await this.deps.accounting.postJournalEntry.execute(postInput, ctx);
-    if (!posted.ok) {
+    const posted = await this.services.accounting.postJournalEntry.execute(postInput, ctx);
+    if ("error" in posted) {
       return err(posted.error);
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       vendorBill.setPostedJournalEntry(created.value.entry.id, now);
       vendorBill.post(now, now);
@@ -419,9 +419,9 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
       return err(new ValidationError((error as Error).message));
     }
 
-    await this.deps.repo.save(ctx.tenantId, vendorBill);
-    await this.deps.settingsRepo.save(settings);
-    await this.deps.audit.log({
+    await this.services.repo.save(ctx.tenantId, vendorBill);
+    await this.services.settingsRepo.save(settings);
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.bill.posted",
@@ -432,7 +432,7 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
 
     const result = { vendorBill: toVendorBillDto(vendorBill) };
     await storeIdempotentResult({
-      idempotency: this.deps.idempotency,
+      idempotency: this.services.idempotency,
       actionKey: "purchasing.post-bill",
       tenantId: ctx.tenantId,
       idempotencyKey: input.idempotencyKey,
@@ -444,8 +444,8 @@ export class PostVendorBillUseCase extends BaseUseCase<PostVendorBillInput, Post
 }
 
 export class VoidVendorBillUseCase extends BaseUseCase<VoidVendorBillInput, VoidVendorBillOutput> {
-  constructor(private readonly deps: VendorBillDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: VendorBillDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -456,20 +456,20 @@ export class VoidVendorBillUseCase extends BaseUseCase<VoidVendorBillInput, Void
       return err(new ValidationError("tenantId and userId are required"));
     }
 
-    const vendorBill = await this.deps.repo.findById(ctx.tenantId, input.vendorBillId);
+    const vendorBill = await this.services.repo.findById(ctx.tenantId, input.vendorBillId);
     if (!vendorBill) {
       return err(new NotFoundError("Vendor bill not found"));
     }
 
-    const now = this.deps.clock.now();
+    const now = this.services.clock.now();
     try {
       vendorBill.void(now, now);
     } catch (error) {
       return err(new ValidationError((error as Error).message));
     }
-    await this.deps.repo.save(ctx.tenantId, vendorBill);
+    await this.services.repo.save(ctx.tenantId, vendorBill);
 
-    await this.deps.audit.log({
+    await this.services.audit.log({
       tenantId: ctx.tenantId,
       userId: ctx.userId,
       action: "purchasing.bill.voided",
@@ -482,8 +482,8 @@ export class VoidVendorBillUseCase extends BaseUseCase<VoidVendorBillInput, Void
 }
 
 export class GetVendorBillUseCase extends BaseUseCase<GetVendorBillInput, GetVendorBillOutput> {
-  constructor(private readonly deps: VendorBillDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: VendorBillDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -494,7 +494,7 @@ export class GetVendorBillUseCase extends BaseUseCase<GetVendorBillInput, GetVen
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const vendorBill = await this.deps.repo.findById(ctx.tenantId, input.vendorBillId);
+    const vendorBill = await this.services.repo.findById(ctx.tenantId, input.vendorBillId);
     if (!vendorBill) {
       return err(new NotFoundError("Vendor bill not found"));
     }
@@ -507,8 +507,8 @@ export class ListVendorBillsUseCase extends BaseUseCase<
   ListVendorBillsInput,
   ListVendorBillsOutput
 > {
-  constructor(private readonly deps: VendorBillDeps) {
-    super({ logger: deps.logger });
+  constructor(private readonly services: VendorBillDeps) {
+    super({ logger: services.logger });
   }
 
   protected async handle(
@@ -519,7 +519,7 @@ export class ListVendorBillsUseCase extends BaseUseCase<
       return err(new ValidationError("tenantId missing from context"));
     }
 
-    const result = await this.deps.repo.list(ctx.tenantId, {
+    const result = await this.services.repo.list(ctx.tenantId, {
       status: input.status,
       supplierPartyId: input.supplierPartyId,
       fromDate: input.fromDate,
