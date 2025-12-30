@@ -33,7 +33,7 @@ The Kerniflow backend suffered from **massive provider duplication**: 11 out of 
    - 68 DI tokens properly organized and documented
    - All tokens use string values (no Symbol-based tokens)
    - Consistent naming: `"<module>/<resource-type>"`
-   - Single source of truth in `packages/contracts/src/di/tokens.ts`
+   - Single source of truth in `packages/kernel/src/tokens.ts`
 
 4. **Created Guardrails** ✅
    - DI smoke tests to catch regressions early
@@ -139,7 +139,7 @@ These modules were already importing KernelModule correctly:
 ### Token Organization
 
 **Cross-Module Tokens** (7 tokens)
-- Defined in: `packages/contracts/src/di/tokens.ts`
+- Defined in: `packages/kernel/src/tokens.ts`
 - Provided by: KernelModule or DataModule
 - Usage: All feature modules
 

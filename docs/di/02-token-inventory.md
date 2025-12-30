@@ -11,18 +11,18 @@
 
 ### Cross-Module (Kernel-Level) Tokens
 
-These tokens are defined in `packages/contracts/src/di/tokens.ts` and used across multiple modules:
+These tokens are defined in `packages/kernel/src/tokens.ts` and used across multiple modules:
 
 | Token                          | Value                            | Canonical Source     | Should Be Provided By | Notes                                 |
 | ------------------------------ | -------------------------------- | -------------------- | --------------------- | ------------------------------------- |
-| AUDIT_PORT                     | `"kernel/audit-port"`            | @kerniflow/contracts | DataModule            | Exported from @kerniflow/kernel ports |
-| OUTBOX_PORT                    | `"kernel/outbox-port"`           | @kerniflow/contracts | DataModule            | Exported from @kerniflow/kernel ports |
-| IDEMPOTENCY_PORT               | `"kernel/idempotency-port"`      | @kerniflow/contracts | DataModule            | Exported from @kerniflow/kernel ports |
-| UNIT_OF_WORK                   | `"kernel/unit-of-work"`          | @kerniflow/contracts | DataModule            | Exported from @kerniflow/kernel ports |
-| CLOCK_PORT_TOKEN               | `"kernel/clock-port"`            | @kerniflow/contracts | **KernelModule**      | Re-exported by shared/ports           |
-| ID_GENERATOR_TOKEN             | `"kernel/id-generator"`          | @kerniflow/contracts | **KernelModule**      | Re-exported by shared/ports           |
-| IDEMPOTENCY_STORAGE_PORT_TOKEN | `"api/idempotency-storage-port"` | @kerniflow/contracts | **KernelModule**      | API-specific                          |
-| TENANT_TIMEZONE_PORT           | `"api/tenant-timezone-port"`     | @kerniflow/contracts | InvoicesModule        | Time service dependency               |
+| AUDIT_PORT                     | `"kernel/audit-port"`            | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
+| OUTBOX_PORT                    | `"kernel/outbox-port"`           | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
+| IDEMPOTENCY_PORT               | `"kernel/idempotency-port"`      | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
+| UNIT_OF_WORK                   | `"kernel/unit-of-work"`          | @kerniflow/kernel | DataModule            | Exported from @kerniflow/kernel ports |
+| CLOCK_PORT_TOKEN               | `"kernel/clock-port"`            | @kerniflow/kernel | **KernelModule**      | Re-exported by shared/ports           |
+| ID_GENERATOR_TOKEN             | `"kernel/id-generator"`          | @kerniflow/kernel | **KernelModule**      | Re-exported by shared/ports           |
+| IDEMPOTENCY_STORAGE_PORT_TOKEN | `"api/idempotency-storage-port"` | @kerniflow/kernel | **KernelModule**      | API-specific                          |
+| TENANT_TIMEZONE_PORT           | `"api/tenant-timezone-port"`     | @kerniflow/kernel | InvoicesModule        | Time service dependency               |
 
 **Status**: ✅ Token definitions are centralized
 **Issue**: ❌ 11 modules re-declare providers instead of importing
@@ -242,16 +242,16 @@ These files re-export kernel tokens for convenience:
 
 | File                        | Re-exports                     | Source               |
 | --------------------------- | ------------------------------ | -------------------- |
-| audit.port.ts               | AUDIT_PORT, AUDIT_PORT_TOKEN   | @kerniflow/contracts |
-| clock.port.ts               | CLOCK_PORT_TOKEN               | @kerniflow/contracts |
-| id-generator.port.ts        | ID_GENERATOR_TOKEN             | @kerniflow/contracts |
-| idempotency-storage.port.ts | IDEMPOTENCY_STORAGE_PORT_TOKEN | @kerniflow/contracts |
+| audit.port.ts               | AUDIT_PORT, AUDIT_PORT_TOKEN   | @kerniflow/kernel |
+| clock.port.ts               | CLOCK_PORT_TOKEN               | @kerniflow/kernel |
+| id-generator.port.ts        | ID_GENERATOR_TOKEN             | @kerniflow/kernel |
+| idempotency-storage.port.ts | IDEMPOTENCY_STORAGE_PORT_TOKEN | @kerniflow/kernel |
 
 **Pattern**:
 
 ```typescript
 export type { IdGeneratorPort } from "@kerniflow/kernel";
-export { ID_GENERATOR_TOKEN } from "@kerniflow/contracts";
+export { ID_GENERATOR_TOKEN } from "@kerniflow/kernel";
 ```
 
 **Purpose**: Allows API modules to import from local path while preserving token identity
@@ -264,7 +264,7 @@ export { ID_GENERATOR_TOKEN } from "@kerniflow/contracts";
 
 **ID_GENERATOR_TOKEN** can be imported from:
 
-1. `@kerniflow/contracts` (canonical)
+1. `@kerniflow/kernel` (canonical)
 2. `@kerniflow/kernel` (re-export)
 3. `../../shared/ports/id-generator.port` (re-export)
 
@@ -319,7 +319,7 @@ Examples:
 
 ✅ Each token has one canonical definition location
 ✅ Module-specific tokens are properly namespaced
-✅ Cross-module tokens are in `packages/contracts/src/di/tokens.ts`
+✅ Cross-module tokens are in `packages/kernel/src/tokens.ts`
 
 ### 3. Export Strategy is Inconsistent
 
@@ -333,7 +333,7 @@ Examples:
 
 ### 1. Keep Current Token Catalog
 
-**Do NOT create a new `packages/server-di`** - the existing setup in `packages/contracts/src/di/tokens.ts` is correct and working.
+**Do NOT create a new `packages/server-di`** - the existing setup in `packages/kernel/src/tokens.ts` is correct and working.
 
 ### 2. Fix Provider Registration (Phase 2)
 
@@ -345,7 +345,7 @@ Examples:
 
 Consider enforcing imports from canonical sources:
 
-- Kernel tokens: `@kerniflow/contracts`
+- Kernel tokens: `@kerniflow/kernel`
 - Module tokens: Local `./ports/*` paths
 
 ### 4. Document Export Rules

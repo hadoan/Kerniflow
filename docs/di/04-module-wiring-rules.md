@@ -40,10 +40,10 @@ This document defines the **standard patterns and rules** for NestJS dependency 
 
 #### Public Tokens (Cross-Module)
 
-**Kernel-level tokens** are defined in `packages/contracts/src/di/tokens.ts`:
+**Kernel-level tokens** are defined in `packages/kernel/src/tokens.ts`:
 
 ```typescript
-// packages/contracts/src/di/tokens.ts
+// packages/kernel/src/tokens.ts
 export const AUDIT_PORT = "kernel/audit-port";
 export const OUTBOX_PORT = "kernel/outbox-port";
 export const ID_GENERATOR_TOKEN = "kernel/id-generator";
@@ -52,7 +52,7 @@ export const CLOCK_PORT_TOKEN = "kernel/clock-port";
 ```
 
 **Rules**:
-- ✅ Define once in `packages/contracts/src/di/tokens.ts`
+- ✅ Define once in `packages/kernel/src/tokens.ts`
 - ✅ Use string values, never `Symbol()` (monorepo compatibility)
 - ✅ Follow naming pattern: `"<module>/<resource-type>"`
 - ❌ Never define kernel tokens in feature modules

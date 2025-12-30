@@ -12,7 +12,7 @@ After completing the DI refactoring, the Kerniflow backend now has a clean, cent
 
 ### Cross-Module Tokens (Kernel Level)
 
-These tokens are defined in `packages/contracts/src/di/tokens.ts` and provided by centralized modules:
+These tokens are defined in `packages/kernel/src/tokens.ts` and provided by centralized modules:
 
 | Token | Value | Provided By | Exported By | Used By |
 |-------|-------|-------------|-------------|---------|
