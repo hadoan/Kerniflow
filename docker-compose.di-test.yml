@@ -1,0 +1,45 @@
+version: "3.9"
+
+# Docker Compose for DI Integration Testing
+# Provides minimal infrastructure needed for full DI smoke tests
+# Usage: docker-compose -f docker-compose.di-test.yml up -d
+
+services:
+  postgres-test:
+    image: postgres:17-alpine
+    container_name: kerniflow_postgres_di_test
+    restart: no
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kerniflow_test}
+      POSTGRES_USER: ${POSTGRES_USER:-kerniflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kerniflow}
+    ports:
+      - "5433:5432" # Different port to avoid conflict with local dev
+    volumes:
+      - postgres_di_test:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kerniflow}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    tmpfs:
+      - /var/lib/postgresql/data # Use tmpfs for faster tests
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: kerniflow_redis_di_test
+    restart: no
+    ports:
+      - "6380:6379" # Different port to avoid conflict with local dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    tmpfs:
+      - /data # Use tmpfs for faster tests
+
+volumes:
+  postgres_di_test:
