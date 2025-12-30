@@ -1,8 +1,8 @@
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import type { PostgresTestDb } from "@kerniflow/testkit";
 import {
-  PostgresTestDb,
   createApiTestApp,
   createTestDb,
   seedDefaultTenant,
