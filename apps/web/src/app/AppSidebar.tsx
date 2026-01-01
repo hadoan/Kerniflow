@@ -85,7 +85,7 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
             onClick={onToggle}
             className="text-muted-foreground hover:text-foreground mx-auto"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
         ) : (
           <>
@@ -96,7 +96,7 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
               onClick={onToggle}
               className="text-muted-foreground hover:text-foreground"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
           </>
         )}
