@@ -42,3 +42,12 @@ export const CurrentRoleIds = createParamDecorator((data: unknown, ctx: Executio
   const request = ctx.switchToHttp().getRequest();
   return request.roleIds ?? [];
 });
+
+/**
+ * @CurrentWorkspaceId decorator
+ * Extracts current workspace ID from request context
+ */
+export const CurrentWorkspaceId = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest();
+  return request.workspaceId;
+});

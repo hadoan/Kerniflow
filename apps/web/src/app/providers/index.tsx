@@ -7,6 +7,7 @@ import { computeBackoffDelayMs, defaultRetryPolicy } from "@corely/api-client";
 import { AuthProvider } from "@/lib/auth-provider";
 import { WorkspaceProvider } from "@/shared/workspaces/workspace-provider";
 import { OfflineProvider } from "@/offline/offline-provider";
+import { ShellConfigProvider } from "./shell-config-provider";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useMemo(
@@ -26,13 +27,15 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WorkspaceProvider>
-          <OfflineProvider queryClient={queryClient}>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-              <Sonner />
-            </TooltipProvider>
-          </OfflineProvider>
+          <ShellConfigProvider>
+            <OfflineProvider queryClient={queryClient}>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </OfflineProvider>
+          </ShellConfigProvider>
         </WorkspaceProvider>
       </AuthProvider>
     </QueryClientProvider>

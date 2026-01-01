@@ -2,6 +2,7 @@ import { Module, OnModuleInit } from "@nestjs/common";
 import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
+import { WorkspacesModule } from "../workspaces/workspaces.module";
 
 // Infrastructure
 import { AppRegistry } from "./infrastructure/registries/app-registry";
@@ -17,6 +18,7 @@ import { PrismaSeededRecordMetaRepositoryAdapter } from "./infrastructure/adapte
 import { TenantEntitlementService } from "./application/services/tenant-entitlement.service";
 import { MenuComposerService } from "./application/services/menu-composer.service";
 import { DependencyResolverService } from "./application/services/dependency-resolver.service";
+import { WorkspaceTemplateService } from "./application/services/workspace-template.service";
 
 // Use Cases
 import { EnableAppUseCase } from "./application/use-cases/enable-app.usecase";
@@ -26,6 +28,7 @@ import { UpdateMenuOverridesUseCase } from "./application/use-cases/update-menu-
 import { ResetMenuOverridesUseCase } from "./application/use-cases/reset-menu-overrides.usecase";
 import { PlanTemplateUseCase } from "./application/use-cases/plan-template.usecase";
 import { ApplyTemplateUseCase } from "./application/use-cases/apply-template.usecase";
+import { GetShellConfigUseCase } from "./application/use-cases/get-shell-config.usecase";
 
 // Guards
 import { EntitlementGuard } from "./guards/entitlement.guard";
@@ -34,6 +37,7 @@ import { EntitlementGuard } from "./guards/entitlement.guard";
 import { PlatformController } from "./adapters/http/platform.controller";
 import { MenuController } from "./adapters/http/menu.controller";
 import { TemplateController } from "./adapters/http/template.controller";
+import { ShellConfigController } from "./adapters/http/shell-config.controller";
 
 // Ports
 import { APP_REGISTRY_TOKEN } from "./application/ports/app-registry.port";
@@ -45,8 +49,8 @@ import { TENANT_MENU_OVERRIDE_REPOSITORY_TOKEN } from "./application/ports/tenan
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-record-meta-repository.port";
 
 @Module({
-  imports: [DataModule, KernelModule, IdentityModule],
-  controllers: [PlatformController, MenuController, TemplateController],
+  imports: [DataModule, KernelModule, IdentityModule, WorkspacesModule],
+  controllers: [PlatformController, MenuController, TemplateController, ShellConfigController],
   providers: [
     // Infrastructure - Registries
     AppRegistry,
@@ -92,6 +96,7 @@ import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-
     TenantEntitlementService,
     MenuComposerService,
     DependencyResolverService,
+    WorkspaceTemplateService,
 
     // Use Cases
     EnableAppUseCase,
@@ -101,6 +106,7 @@ import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-
     ResetMenuOverridesUseCase,
     PlanTemplateUseCase,
     ApplyTemplateUseCase,
+    GetShellConfigUseCase,
 
     // Guards
     EntitlementGuard,
