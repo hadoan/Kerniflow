@@ -1,4 +1,4 @@
-import { request, createIdempotencyKey, HttpError } from "@corely/api-client";
+import { request, createIdempotencyKey, normalizeError } from "@corely/api-client";
 import type { TokenStorage } from "./storage/storage.interface";
 
 export interface SignUpData {
@@ -102,37 +102,47 @@ export class AuthClient {
    * Sign up
    */
   async signup(data: SignUpData): Promise<AuthResponse> {
-    const result = await request<AuthResponse>({
-      url: `${this.apiUrl}/auth/signup`,
-      method: "POST",
-      body: data,
-      idempotencyKey: createIdempotencyKey(),
-    });
-    await this.storeTokens(result.accessToken, result.refreshToken);
-    const workspaceId = result.workspaceId ?? result.tenantId;
-    if (workspaceId) {
-      await this.storage.setActiveWorkspaceId(workspaceId);
-    }
+    try {
+      const result = await request<AuthResponse>({
+        url: `${this.apiUrl}/auth/signup`,
+        method: "POST",
+        body: data,
+        idempotencyKey: createIdempotencyKey(),
+      });
+      await this.storeTokens(result.accessToken, result.refreshToken);
+      const workspaceId = result.workspaceId ?? result.tenantId;
+      if (workspaceId) {
+        await this.storage.setActiveWorkspaceId(workspaceId);
+      }
 
-    return result;
+      return result;
+    } catch (error) {
+      // Normalize error to extract proper message from ProblemDetails
+      throw normalizeError(error);
+    }
   }
 
   /**
    * Sign in
    */
   async signin(data: SignInData): Promise<AuthResponse> {
-    const result = await request<AuthResponse>({
-      url: `${this.apiUrl}/auth/login`,
-      method: "POST",
-      body: data,
-    });
-    await this.storeTokens(result.accessToken, result.refreshToken);
-    const workspaceId = result.workspaceId ?? result.tenantId ?? data.workspaceId ?? data.tenantId;
-    if (workspaceId) {
-      await this.storage.setActiveWorkspaceId(workspaceId);
-    }
+    try {
+      const result = await request<AuthResponse>({
+        url: `${this.apiUrl}/auth/login`,
+        method: "POST",
+        body: data,
+      });
+      await this.storeTokens(result.accessToken, result.refreshToken);
+      const workspaceId = result.workspaceId ?? result.tenantId ?? data.workspaceId ?? data.tenantId;
+      if (workspaceId) {
+        await this.storage.setActiveWorkspaceId(workspaceId);
+      }
 
-    return result;
+      return result;
+    } catch (error) {
+      // Normalize error to extract proper message from ProblemDetails
+      throw normalizeError(error);
+    }
   }
 
   /**
@@ -150,11 +160,12 @@ export class AuthClient {
         accessToken: this.accessToken,
       });
     } catch (error) {
-      if (error instanceof HttpError && error.status === 401) {
+      const normalized = normalizeError(error);
+      if (normalized.status === 401) {
         await this.refreshAccessToken();
         return this.getCurrentUser();
       }
-      throw error;
+      throw normalized;
     }
   }
 
@@ -166,13 +177,17 @@ export class AuthClient {
       throw new Error("No refresh token");
     }
 
-    const result = await request<{ accessToken: string; refreshToken: string }>({
-      url: `${this.apiUrl}/auth/refresh`,
-      method: "POST",
-      body: { refreshToken: this.refreshToken },
-    });
+    try {
+      const result = await request<{ accessToken: string; refreshToken: string }>({
+        url: `${this.apiUrl}/auth/refresh`,
+        method: "POST",
+        body: { refreshToken: this.refreshToken },
+      });
 
-    await this.storeTokens(result.accessToken, result.refreshToken);
+      await this.storeTokens(result.accessToken, result.refreshToken);
+    } catch (error) {
+      throw normalizeError(error);
+    }
   }
 
   /**
@@ -203,15 +218,19 @@ export class AuthClient {
       throw new Error("No access token");
     }
 
-    const result = await request<AuthResponse>({
-      url: `${this.apiUrl}/auth/switch-tenant`,
-      method: "POST",
-      accessToken: this.accessToken,
-      body: { tenantId },
-    });
-    await this.storeTokens(result.accessToken, result.refreshToken);
-    await this.storage.setActiveWorkspaceId(result.workspaceId ?? result.tenantId ?? tenantId);
+    try {
+      const result = await request<AuthResponse>({
+        url: `${this.apiUrl}/auth/switch-tenant`,
+        method: "POST",
+        accessToken: this.accessToken,
+        body: { tenantId },
+      });
+      await this.storeTokens(result.accessToken, result.refreshToken);
+      await this.storage.setActiveWorkspaceId(result.workspaceId ?? result.tenantId ?? tenantId);
 
-    return result;
+      return result;
+    } catch (error) {
+      throw normalizeError(error);
+    }
   }
 }
