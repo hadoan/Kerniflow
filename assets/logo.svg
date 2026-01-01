@@ -1,16 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="240" viewBox="0 0 960 240">
   <rect width="960" height="240" rx="40" fill="#0B0F14"/>
-  <g fill="none" stroke="#2EE6C5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M120 60v120"/>
-    <path d="M120 120l80-60"/>
-    <path d="M120 120l80 60"/>
-    <path d="M260 70h60c30 0 50 18 50 40s-20 40-50 40h-60v40"/>
+  <!-- Corely Icon -->
+  <g transform="translate(80, 60)">
+    <rect x="0" y="0" width="120" height="120" rx="30" fill="#2EE6C5" fill-opacity="0.15"/>
+    <rect x="0" y="0" width="120" height="120" rx="30" stroke="#2EE6C5" stroke-width="6"/>
+
+    <!-- Corely "C" lettermark -->
+    <path d="M 85 30 C 65 25 45 25 30 45 C 15 65 15 85 30 100 C 45 115 65 115 85 110"
+          stroke="#2EE6C5" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <circle cx="90" cy="30" r="6" fill="#2EE6C5"/>
+    <circle cx="90" cy="110" r="6" fill="#2EE6C5"/>
   </g>
-  <text x="420" y="145" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto"
+  <text x="250" y="145" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto"
         font-size="72" font-weight="700" fill="#EAF2FF" letter-spacing="1.5">
     Corely
   </text>
-  <text x="425" y="185" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto"
+  <text x="255" y="185" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto"
         font-size="22" fill="#8AA0B5">
     AI-native workflows → ERP kernel
   </text>

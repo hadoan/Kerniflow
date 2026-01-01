@@ -1,8 +1,8 @@
-# Bizflow Logo Guidelines
+# Corely Logo Guidelines
 
 ## Logo Concept
 
-The Bizflow logo represents "flow + connectivity" - a rounded square containing interconnected nodes that symbolize workflow processes and business operations.
+The Corely logo features a distinctive "C" lettermark within a rounded square container, representing the core ("core" + "ly") foundation of AI-native ERP workflows.
 
 ## Logo Files
 
@@ -37,5 +37,5 @@ import { Logo } from '@/shared/components/Logo';
 
 - Don't stretch or distort
 - Don't add effects or shadows
-- Don't change the node arrangement
+- Don't change the lettermark design
 - Don't use low contrast combinations

@@ -29,46 +29,21 @@ export function Logo({ size = "md", showText = true, className = "" }: LogoProps
         <rect x="2" y="2" width="36" height="36" rx="10" fill="currentColor" fillOpacity="0.15" />
         <rect x="2" y="2" width="36" height="36" rx="10" stroke="currentColor" strokeWidth="2" />
 
-        {/* Flow nodes */}
-        <circle cx="20" cy="10" r="3" fill="currentColor" />
-        <circle cx="10" cy="24" r="3" fill="currentColor" />
-        <circle cx="30" cy="24" r="3" fill="currentColor" />
-        <circle cx="20" cy="32" r="3" fill="currentColor" />
-
-        {/* Flowing connection paths */}
+        {/* Corely "C" lettermark */}
         <path
-          d="M20 13 L20 17 C20 20 15 22 10 21"
+          d="M 26 12 C 22 10 16 10 12 14 C 8 18 8 24 12 28 C 16 32 22 32 26 30"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="3"
           strokeLinecap="round"
           fill="none"
         />
-        <path
-          d="M20 13 L20 17 C20 20 25 22 30 21"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <path
-          d="M13 24 C16 26 17 29 20 29"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <path
-          d="M27 24 C24 26 23 29 20 29"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill="none"
-        />
+        <circle cx="28" cy="12" r="2" fill="currentColor" />
+        <circle cx="28" cy="30" r="2" fill="currentColor" />
       </svg>
 
       {showText && (
         <span className="font-bold text-foreground" style={{ fontSize: text }}>
-          Bizflow
+          Corely
         </span>
       )}
     </div>
