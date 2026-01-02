@@ -241,5 +241,8 @@
     "lastMonth": "Tháng trước",
     "thisYear": "Năm nay",
     "daysAgo": "{{count}} ngày trước"
+  },
+  "errors": {
+    "loadMenuFailed": "Không thể tải menu"
   }
 }

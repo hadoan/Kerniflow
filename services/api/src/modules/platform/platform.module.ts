@@ -2,6 +2,7 @@ import { Module, OnModuleInit } from "@nestjs/common";
 import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
+import { WorkspacesModule } from "../workspaces/workspaces.module";
 
 // Infrastructure
 import { AppRegistry } from "./infrastructure/registries/app-registry";
@@ -17,6 +18,7 @@ import { PrismaSeededRecordMetaRepositoryAdapter } from "./infrastructure/adapte
 import { TenantEntitlementService } from "./application/services/tenant-entitlement.service";
 import { MenuComposerService } from "./application/services/menu-composer.service";
 import { DependencyResolverService } from "./application/services/dependency-resolver.service";
+import { WorkspaceTemplateService } from "./application/services/workspace-template.service";
 
 // Use Cases
 import { EnableAppUseCase } from "./application/use-cases/enable-app.usecase";
@@ -45,7 +47,7 @@ import { TENANT_MENU_OVERRIDE_REPOSITORY_TOKEN } from "./application/ports/tenan
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-record-meta-repository.port";
 
 @Module({
-  imports: [DataModule, KernelModule, IdentityModule],
+  imports: [DataModule, KernelModule, IdentityModule, WorkspacesModule],
   controllers: [PlatformController, MenuController, TemplateController],
   providers: [
     // Infrastructure - Registries
@@ -92,6 +94,7 @@ import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-
     TenantEntitlementService,
     MenuComposerService,
     DependencyResolverService,
+    WorkspaceTemplateService,
 
     // Use Cases
     EnableAppUseCase,

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { useWorkspace } from "@/shared/workspaces/workspace-provider";
 
 export interface MenuItem {
   id: string;
@@ -13,10 +14,25 @@ export interface MenuItem {
   tags?: string[];
 }
 
+export interface WorkspaceMetadata {
+  kind: "PERSONAL" | "COMPANY";
+  capabilities: {
+    multiUser: boolean;
+    quotes: boolean;
+    aiCopilot: boolean;
+    rbac: boolean;
+  };
+  terminology: {
+    partyLabel: string;
+    partyLabelPlural: string;
+  };
+}
+
 export interface ComposedMenu {
   scope: string;
   items: MenuItem[];
   computedAt: string;
+  workspace?: WorkspaceMetadata; // Server-driven UI metadata
 }
 
 export interface MenuOverrides {
@@ -27,14 +43,42 @@ export interface MenuOverrides {
 }
 
 /**
- * Fetch composed menu for current user
+ * Fetch composed menu for current user with workspace metadata
  */
 export function useMenu(scope: "web" | "pos" = "web") {
+  const { activeWorkspace } = useWorkspace();
+  const enabled = !!activeWorkspace?.id;
+
+  console.debug("[useMenu] hook init", {
+    scope,
+    workspaceId: activeWorkspace?.id,
+    enabled,
+  });
+
   return useQuery({
-    queryKey: ["menu", scope],
+    queryKey: ["menu", scope, activeWorkspace?.id],
     queryFn: async () => {
-      const response = await apiClient.get<ComposedMenu>(`/menu?scope=${scope}`);
-      return response.data;
+      console.debug("[useMenu] fetching menu", {
+        scope,
+        workspaceId: activeWorkspace?.id,
+      });
+      const workspaceParam = activeWorkspace?.id ? `&workspaceId=${activeWorkspace.id}` : "";
+      const result = await apiClient.get<ComposedMenu>(`/menu?scope=${scope}${workspaceParam}`);
+      console.debug("[useMenu] menu response", {
+        scope,
+        workspaceId: activeWorkspace?.id,
+        items: result?.items?.length ?? 0,
+        computedAt: result?.computedAt,
+      });
+      return result;
+    },
+    enabled, // Only fetch when workspace is available
+    onError: (error) => {
+      console.error("[useMenu] menu fetch failed", {
+        scope,
+        workspaceId: activeWorkspace?.id,
+        error,
+      });
     },
   });
 }
@@ -53,8 +97,7 @@ export function useUpdateMenuOverrides() {
       scope: "web" | "pos";
       overrides: MenuOverrides;
     }) => {
-      const response = await apiClient.put(`/menu/overrides?scope=${scope}`, { overrides });
-      return response.data;
+      return apiClient.put(`/menu/overrides?scope=${scope}`, { overrides });
     },
     onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: ["menu", variables.scope] });
@@ -70,8 +113,7 @@ export function useResetMenuOverrides() {
 
   return useMutation({
     mutationFn: async (scope: "web" | "pos") => {
-      const response = await apiClient.delete(`/menu/overrides?scope=${scope}`);
-      return response.data;
+      return apiClient.delete(`/menu/overrides?scope=${scope}`);
     },
     onSuccess: (_data, scope) => {
       void queryClient.invalidateQueries({ queryKey: ["menu", scope] });

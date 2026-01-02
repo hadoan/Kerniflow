@@ -245,5 +245,8 @@
     "lastMonth": "Last month",
     "thisYear": "This year",
     "daysAgo": "{{count}} days ago"
+  },
+  "errors": {
+    "loadMenuFailed": "Failed to load menu"
   }
 }

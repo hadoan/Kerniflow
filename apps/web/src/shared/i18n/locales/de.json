@@ -241,5 +241,8 @@
     "lastMonth": "Letzter Monat",
     "thisYear": "Dieses Jahr",
     "daysAgo": "vor {{count}} Tagen"
+  },
+  "errors": {
+    "loadMenuFailed": "Menü konnte nicht geladen werden"
   }
 }

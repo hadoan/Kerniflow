@@ -7,3 +7,4 @@ export * from "./attach-receipt.schema";
 export * from "./submit-expense.schema";
 export * from "./list-expenses.schema";
 export * from "./get-expense.schema";
+export * from "./create-expense-web.schema";

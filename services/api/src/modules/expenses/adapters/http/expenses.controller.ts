@@ -1,12 +1,15 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UseInterceptors,
   Req,
   Param,
   Inject,
   Optional,
+  Query,
+  BadRequestException,
 } from "@nestjs/common";
 import {
   CreateExpenseUseCase,
@@ -18,16 +21,19 @@ import { IdempotencyInterceptor } from "../../../../shared/infrastructure/idempo
 import { buildRequestContext } from "../../../../shared/context/request-context";
 import type { Request } from "express";
 import { z } from "zod";
+import { CreateExpenseWebInputSchema } from "@corely/contracts";
+import {
+  EXPENSE_REPOSITORY,
+  type ExpenseRepositoryPort,
+} from "../../application/ports/expense-repository.port";
+import type { Expense } from "../../domain/expense.entity";
 
-const ExpenseHttpInputSchema = z.object({
-  tenantId: z.string(),
-  merchant: z.string(),
-  totalCents: z.number(),
-  currency: z.string(),
-  category: z.string().optional(),
-  issuedAt: z.string(),
-  createdByUserId: z.string(),
-  custom: z.record(z.any()).optional(),
+const ExpenseHttpInputSchema = CreateExpenseWebInputSchema.partial().extend({
+  tenantId: z.string().optional(),
+  merchant: z.string().optional(),
+  totalCents: z.number().optional(),
+  issuedAt: z.string().optional(),
+  createdByUserId: z.string().optional(),
 });
 
 @Controller("expenses")
@@ -37,26 +43,65 @@ export class ExpensesController {
     @Inject(CreateExpenseUseCase) private readonly createExpenseUseCase: CreateExpenseUseCase,
     @Inject(ArchiveExpenseUseCase) private readonly archiveExpenseUseCase: ArchiveExpenseUseCase,
     @Inject(UnarchiveExpenseUseCase)
-    private readonly unarchiveExpenseUseCase: UnarchiveExpenseUseCase
+    private readonly unarchiveExpenseUseCase: UnarchiveExpenseUseCase,
+    @Inject(EXPENSE_REPOSITORY) private readonly expenseRepo: ExpenseRepositoryPort
   ) {}
 
   @Post()
   async create(@Body() body: unknown, @Req() req: Request) {
     const input = ExpenseHttpInputSchema.parse(body);
+
+    const tenantId =
+      input.tenantId ??
+      (req.headers["x-tenant-id"] as string | undefined) ??
+      (req.headers["x-workspace-id"] as string | undefined) ??
+      (req as any).tenantId;
+    if (!tenantId) {
+      throw new BadRequestException("Missing tenant/workspace id");
+    }
+
+    const merchant = input.merchant ?? input.merchantName;
+    if (!merchant) {
+      throw new BadRequestException("Missing merchant");
+    }
+
+    const totalCents = input.totalCents ?? input.totalAmountCents;
+    if (typeof totalCents !== "number") {
+      throw new BadRequestException("Missing total amount");
+    }
+
+    const currency = input.currency;
+    if (!currency) {
+      throw new BadRequestException("Missing currency");
+    }
+
+    const issuedAtStr = input.issuedAt ?? input.expenseDate ?? new Date().toISOString();
+    const issuedAt = new Date(issuedAtStr);
+    if (Number.isNaN(issuedAt.getTime())) {
+      throw new BadRequestException("Invalid date");
+    }
+
+    const actorUserId =
+      input.createdByUserId ??
+      (req as any).user?.userId ??
+      (req as any).user?.id ??
+      (req.headers["x-user-id"] as string | undefined);
+    const createdByUserId = actorUserId ?? "system";
+
     const ctx = buildRequestContext({
       requestId: req.headers["x-request-id"] as string | undefined,
-      tenantId: input.tenantId,
-      actorUserId: input.createdByUserId,
+      tenantId,
+      actorUserId: createdByUserId,
     });
     const expenseInput: CreateExpenseInput = {
-      tenantId: input.tenantId,
-      merchant: input.merchant,
-      totalCents: input.totalCents,
-      currency: input.currency,
+      tenantId,
+      merchant,
+      totalCents,
+      currency,
       category: input.category,
-      createdByUserId: input.createdByUserId,
+      createdByUserId,
       custom: input.custom,
-      issuedAt: new Date(input.issuedAt),
+      issuedAt,
       idempotencyKey: (req.headers["x-idempotency-key"] as string) ?? "default",
       context: ctx,
     };
@@ -105,5 +150,43 @@ export class ExpensesController {
       expenseId,
     });
     return { archived: false };
+  }
+
+  @Get()
+  async list(@Query() query: any, @Req() req: Request) {
+    const tenantId =
+      (req.headers["x-tenant-id"] as string | undefined) ??
+      (req.headers["x-workspace-id"] as string | undefined) ??
+      (req as any).tenantId;
+
+    if (!tenantId) {
+      return { items: [] };
+    }
+
+    const includeArchived = query?.includeArchived === "true" || query?.includeArchived === true;
+    const expenses = await this.expenseRepo.list(tenantId, { includeArchived });
+    return { items: expenses.map((expense) => this.mapExpenseDto(expense)) };
+  }
+
+  private mapExpenseDto(expense: Expense) {
+    return {
+      id: expense.id,
+      tenantId: expense.tenantId,
+      status: "SUBMITTED",
+      expenseDate: expense.issuedAt.toISOString().slice(0, 10),
+      merchantName: expense.merchant,
+      supplierPartyId: null,
+      currency: expense.currency,
+      notes: null,
+      category: expense.category,
+      totalAmountCents: expense.totalCents,
+      taxAmountCents: null,
+      archivedAt: expense.archivedAt?.toISOString() ?? null,
+      createdAt: expense.createdAt.toISOString(),
+      updatedAt: expense.createdAt.toISOString(),
+      lines: [],
+      receipts: [],
+      custom: expense.custom,
+    };
   }
 }

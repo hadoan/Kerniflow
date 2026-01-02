@@ -3,19 +3,8 @@
  * Minimal wrapper around expenses endpoints
  */
 
-import type { ExpenseDto } from "@corely/contracts";
+import type { ExpenseDto, CreateExpenseWebInput } from "@corely/contracts";
 import { apiClient } from "./api-client";
-
-export type CreateExpenseRequest = {
-  expenseDate: string; // YYYY-MM-DD
-  merchantName: string;
-  totalAmountCents: number;
-  totalCents?: number;
-  currency: string;
-  category?: string;
-  notes?: string;
-  vatRate?: number;
-};
 
 export class ExpensesApi {
   async listExpenses(): Promise<ExpenseDto[]> {
@@ -28,7 +17,7 @@ export class ExpensesApi {
     return result.items ?? result.expenses ?? [];
   }
 
-  async createExpense(input: CreateExpenseRequest): Promise<ExpenseDto> {
+  async createExpense(input: CreateExpenseWebInput): Promise<ExpenseDto> {
     const result = await apiClient.post<{ expense: ExpenseDto }>("/expenses", input, {
       idempotencyKey: apiClient.generateIdempotencyKey(),
       correlationId: apiClient.generateCorrelationId(),

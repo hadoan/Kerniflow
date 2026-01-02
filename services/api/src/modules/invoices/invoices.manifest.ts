@@ -10,7 +10,7 @@ export const invoicesAppManifest: AppManifest = {
   tier: 1,
   version: "1.0.0",
   description: "Create, manage, and send invoices to customers",
-  dependencies: ["customers"], // Invoices depend on the customers module
+  dependencies: ["parties"], // Invoices depend on the parties module
   capabilities: ["invoices.create", "invoices.send", "invoices.pdf", "invoices.recurring"],
   permissions: [
     "invoices.read",
@@ -21,28 +21,15 @@ export const invoicesAppManifest: AppManifest = {
   ],
   menu: [
     {
-      id: "invoices-list",
+      id: "invoices",
       scope: "web",
-      section: "finance",
+      section: "invoices",
       labelKey: "nav.invoices",
       defaultLabel: "Invoices",
       route: "/invoices",
       icon: "FileText",
       order: 10,
       requiresPermissions: ["invoices.read"],
-      tags: ["sales", "billing", "finance"],
-    },
-    {
-      id: "invoices-create",
-      scope: "web",
-      section: "finance",
-      labelKey: "nav.invoices.create",
-      defaultLabel: "Create Invoice",
-      route: "/invoices/new",
-      icon: "FilePlus",
-      order: 11,
-      requiresPermissions: ["invoices.write"],
-      tags: ["sales", "billing"],
     },
   ],
 };

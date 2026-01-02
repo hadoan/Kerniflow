@@ -10,6 +10,8 @@ import {
   MessageSquare,
   FileText,
   Sparkles,
+  Users,
+  ShoppingCart,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -19,10 +21,24 @@ import { CardSkeleton } from "@/shared/components/Skeleton";
 import { invoicesApi } from "@/lib/invoices-api";
 import { customersApi } from "@/lib/customers-api";
 import { expensesApi } from "@/lib/expenses-api";
+import { useMenu } from "@/modules/platform/hooks/useMenu";
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "de" ? "de-DE" : "en-DE";
+
+  // Server-driven UI configuration from menu API
+  const { data: menu } = useMenu("web");
+  const capabilities = menu?.workspace?.capabilities ?? {
+    multiUser: false,
+    quotes: false,
+    aiCopilot: false,
+    rbac: false,
+  };
+  const terminology = menu?.workspace?.terminology ?? {
+    partyLabel: "Client",
+    partyLabelPlural: "Clients",
+  };
 
   // Fetch invoices
   const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
@@ -192,25 +208,29 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Capability-driven UI */}
       <div>
         <h2 className="text-h3 text-foreground mb-4">{t("dashboard.quickActions")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link to="/assistant">
-            <Card variant="interactive" className="group">
-              <CardContent className="p-6 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                  <Receipt className="h-6 w-6 text-accent" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground">{t("dashboard.addExpense")}</div>
-                  <div className="text-sm text-muted-foreground">Upload receipt with AI</div>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
-              </CardContent>
-            </Card>
-          </Link>
+          {/* Always show: Add expense with AI */}
+          {capabilities.aiCopilot && (
+            <Link to="/assistant">
+              <Card variant="interactive" className="group">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                    <Receipt className="h-6 w-6 text-accent" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-foreground">{t("dashboard.addExpense")}</div>
+                    <div className="text-sm text-muted-foreground">Upload receipt with AI</div>
+                  </div>
+                  <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                </CardContent>
+              </Card>
+            </Link>
+          )}
 
+          {/* Always show: Create invoice */}
           <Link to="/invoices">
             <Card variant="interactive" className="group">
               <CardContent className="p-6 flex items-center gap-4">
@@ -219,27 +239,71 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-foreground">{t("dashboard.createInvoice")}</div>
-                  <div className="text-sm text-muted-foreground">Generate with AI</div>
+                  <div className="text-sm text-muted-foreground">
+                    {capabilities.aiCopilot ? "Generate with AI" : "Create new"}
+                  </div>
                 </div>
                 <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-success transition-colors" />
               </CardContent>
             </Card>
           </Link>
 
-          <Link to="/assistant">
-            <Card variant="interactive" className="group">
-              <CardContent className="p-6 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <MessageSquare className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-medium text-foreground">{t("dashboard.openAssistant")}</div>
-                  <div className="text-sm text-muted-foreground">Ask anything</div>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </CardContent>
-            </Card>
-          </Link>
+          {/* Conditional: Show quotes for company mode, assistant for freelancer */}
+          {capabilities.quotes ? (
+            <Link to="/quotes">
+              <Card variant="interactive" className="group">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center group-hover:bg-warning/20 transition-colors">
+                    <ShoppingCart className="h-6 w-6 text-warning" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-foreground">Create Quote</div>
+                    <div className="text-sm text-muted-foreground">
+                      For {terminology.partyLabel.toLowerCase()}
+                    </div>
+                  </div>
+                  <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-warning transition-colors" />
+                </CardContent>
+              </Card>
+            </Link>
+          ) : (
+            capabilities.aiCopilot && (
+              <Link to="/assistant">
+                <Card variant="interactive" className="group">
+                  <CardContent className="p-6 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <MessageSquare className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium text-foreground">
+                        {t("dashboard.openAssistant")}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Ask anything</div>
+                    </div>
+                    <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </CardContent>
+                </Card>
+              </Link>
+            )
+          )}
+
+          {/* Conditional: Team management for multi-user companies */}
+          {capabilities.multiUser && (
+            <Link to="/settings/team">
+              <Card variant="interactive" className="group">
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-info/10 flex items-center justify-center group-hover:bg-info/20 transition-colors">
+                    <Users className="h-6 w-6 text-info" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-foreground">Manage Team</div>
+                    <div className="text-sm text-muted-foreground">Invite members</div>
+                  </div>
+                  <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-info transition-colors" />
+                </CardContent>
+              </Card>
+            </Link>
+          )}
         </div>
       </div>
 

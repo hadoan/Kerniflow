@@ -37,6 +37,29 @@ describe("POST /expenses (API)", () => {
     await stopSharedContainer();
   });
 
+  it("accepts web payload shape (merchantName/expenseDate/totalAmountCents)", async () => {
+    const payload = {
+      merchantName: "Web Vendor",
+      expenseDate: "2024-07-01",
+      totalAmountCents: 1234,
+      currency: "EUR",
+      category: "office_supplies",
+      notes: "From web form",
+    };
+
+    const res = await request(server)
+      .post("/expenses")
+      .set("x-idempotency-key", "web-payload-1")
+      .set("x-tenant-id", tenantId)
+      .set("x-user-id", userId)
+      .send(payload);
+
+    expect([200, 201]).toContain(res.status);
+    expect(res.body.merchant ?? res.body.merchantName).toBe(payload.merchantName);
+    expect(res.body.totalCents ?? res.body.totalAmountCents).toBe(payload.totalAmountCents);
+    expect(res.body.currency).toBe(payload.currency);
+  });
+
   it("creates an expense and returns dto", async () => {
     const res = await request(server)
       .post("/expenses")

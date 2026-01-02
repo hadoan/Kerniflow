@@ -43,6 +43,7 @@ export class MenuController {
   @Get()
   async getMenu(
     @Query("scope") scope: string | undefined,
+    @Query("workspaceId") workspaceId: string | undefined,
     @CurrentTenantId() tenantId: string,
     @CurrentUserId() userId: string,
     @CurrentRoleIds() roleIds: string[]
@@ -64,6 +65,7 @@ export class MenuController {
       userId,
       permissions,
       scope: validatedScope,
+      workspaceId, // Include workspace ID for metadata
     });
   }
 
