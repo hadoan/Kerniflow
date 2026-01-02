@@ -32,6 +32,7 @@ export class StreamCopilotChatUseCase {
     tenantId: string;
     userId: string;
     idempotencyKey: string;
+    runId?: string;
     response: Response;
   }): Promise<void> {
     const { tenantId, userId, idempotencyKey } = params;
@@ -76,14 +77,31 @@ export class StreamCopilotChatUseCase {
       return;
     }
 
-    const runId = params.messages.find((m) => m.id)?.id || nanoid();
+    const runId = params.runId || nanoid();
 
-    await this.agentRuns.create({
-      id: runId,
-      tenantId,
-      createdByUserId: userId,
-      status: "running",
-    });
+    const existingRun = await this.agentRuns.findById({ tenantId, runId });
+    if (!existingRun) {
+      await this.agentRuns.create({
+        id: runId,
+        tenantId,
+        createdByUserId: userId,
+        status: "running",
+      });
+    }
+
+    await this.messages.createMany(
+      (params.messages || []).map((msg) => ({
+        id: msg.id || nanoid(),
+        tenantId,
+        runId,
+        role: msg.role,
+        partsJson: JSON.stringify(
+          msg.parts && Array.isArray(msg.parts)
+            ? msg.parts
+            : [{ type: "text", text: (msg as any).content || "" }]
+        ),
+      }))
+    );
 
     const tools = this.toolRegistry.listForTenant(tenantId);
 

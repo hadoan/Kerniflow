@@ -10,4 +10,6 @@ export interface AgentRunRepositoryPort {
   }): Promise<AgentRun>;
 
   updateStatus(runId: string, status: string, finishedAt?: Date): Promise<void>;
+
+  findById(params: { tenantId: string; runId: string }): Promise<AgentRun | null>;
 }

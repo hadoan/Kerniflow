@@ -39,6 +39,9 @@ import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
 import { EngagementModule } from "../engagement/engagement.module";
 import { EngagementApplication } from "../engagement/application/engagement.application";
 import { buildEngagementTools } from "../engagement/adapters/tools/engagement.tools";
+import { CreateRunUseCase } from "./application/use-cases/create-run.usecase";
+import { GetRunUseCase } from "./application/use-cases/get-run.usecase";
+import { ListMessagesUseCase } from "./application/use-cases/list-messages.usecase";
 
 @Module({
   imports: [
@@ -85,6 +88,21 @@ import { buildEngagementTools } from "../engagement/adapters/tools/engagement.to
     {
       provide: "COPILOT_CLOCK",
       useValue: { now: () => new Date() },
+    },
+    {
+      provide: CreateRunUseCase,
+      useFactory: (runs: PrismaAgentRunRepository) => new CreateRunUseCase(runs),
+      inject: [PrismaAgentRunRepository],
+    },
+    {
+      provide: GetRunUseCase,
+      useFactory: (runs: PrismaAgentRunRepository) => new GetRunUseCase(runs),
+      inject: [PrismaAgentRunRepository],
+    },
+    {
+      provide: ListMessagesUseCase,
+      useFactory: (messages: PrismaMessageRepository) => new ListMessagesUseCase(messages),
+      inject: [PrismaMessageRepository],
     },
     {
       provide: COPILOT_TOOLS,

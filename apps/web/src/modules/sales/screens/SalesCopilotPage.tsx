@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createIdempotencyKey } from "@corely/api-client";
 import {
   QuoteDraftProposalCardSchema,
   LineItemsProposalCardSchema,
@@ -23,8 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatMoney } from "@/shared/lib/formatters";
 import { salesApi } from "@/lib/sales-api";
 import { customersApi } from "@/lib/customers-api";
-import { authClient } from "@/lib/auth-client";
-import { getActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
+import { useCopilotChatOptions } from "@/lib/copilot-api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { salesQueryKeys } from "../queries/sales.queryKeys";
@@ -72,10 +70,10 @@ const MetaFooter: React.FC<{
 
 export default function SalesCopilotPage() {
   const navigate = useNavigate();
-  const apiBase =
-    import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:3000";
-  const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
-  const accessToken = authClient.getAccessToken() ?? "";
+  const chatOptions = useCopilotChatOptions({
+    activeModule: "sales",
+    locale: "en",
+  });
 
   const [dismissedToolCalls, setDismissedToolCalls] = useState<string[]>([]);
   const [customerOverrides, setCustomerOverrides] = useState<Record<string, string>>({});
@@ -121,26 +119,6 @@ export default function SalesCopilotPage() {
     },
     onError: () => toast.error("Failed to create quote draft"),
   });
-
-  const chatOptions = useMemo(
-    () =>
-      ({
-        api: `${apiBase}/copilot/chat`,
-        headers: {
-          Authorization: accessToken ? `Bearer ${accessToken}` : "",
-          "X-Tenant-Id": tenantId,
-          "X-Idempotency-Key": createIdempotencyKey(),
-        },
-        body: {
-          requestData: {
-            tenantId,
-            locale: "en",
-            activeModule: "sales",
-          },
-        },
-      }) as any,
-    [apiBase, tenantId, accessToken]
-  );
 
   const { messages, input, handleInputChange, handleSubmit } = useChat(chatOptions);
 

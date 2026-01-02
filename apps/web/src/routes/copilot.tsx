@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useChat } from "@ai-sdk/react";
 import { nanoid } from "nanoid";
-import { createIdempotencyKey } from "@corely/api-client";
 import { Button } from "@/shared/ui/button";
+import { useCopilotChatOptions } from "@/lib/copilot-api";
 
 type MessagePart =
   | { type: "text"; text: string }
@@ -47,29 +47,10 @@ const MessageBubble: React.FC<{
 );
 
 export const CopilotPage: React.FC = () => {
-  const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-  const tenantId = "demo-tenant"; // TODO: pull from auth/tenant context
-  const accessToken = ""; // TODO: pull from auth context
-
-  const chatOptions = useMemo(
-    () =>
-      ({
-        api: `${apiBase}/copilot/chat`,
-        headers: {
-          Authorization: accessToken ? `Bearer ${accessToken}` : "",
-          "X-Tenant-Id": tenantId,
-          "X-Idempotency-Key": createIdempotencyKey(),
-        },
-        body: {
-          requestData: {
-            tenantId,
-            locale: "en",
-            activeModule: "freelancer",
-          },
-        },
-      }) as any,
-    [apiBase, tenantId, accessToken]
-  );
+  const chatOptions = useCopilotChatOptions({
+    activeModule: "freelancer",
+    locale: "en",
+  });
 
   const { messages, input, handleInputChange, handleSubmit, addToolResult } = useChat(chatOptions);
 

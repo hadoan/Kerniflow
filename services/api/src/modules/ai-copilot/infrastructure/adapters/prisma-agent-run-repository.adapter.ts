@@ -40,4 +40,22 @@ export class PrismaAgentRunRepository implements AgentRunRepositoryPort {
       data: { status, finishedAt: finishedAt || null },
     });
   }
+
+  async findById(params: { tenantId: string; runId: string }): Promise<AgentRun | null> {
+    const found = await this.prisma.agentRun.findFirst({
+      where: { id: params.runId, tenantId: params.tenantId },
+    });
+    if (!found) {
+      return null;
+    }
+    return new AgentRun(
+      found.id,
+      found.tenantId,
+      found.createdByUserId || null,
+      found.status,
+      found.startedAt,
+      found.finishedAt || undefined,
+      found.metadataJson || undefined
+    );
+  }
 }
