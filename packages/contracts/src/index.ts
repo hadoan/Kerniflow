@@ -30,6 +30,7 @@ export * from "./approvals";
 export * from "./identity";
 export * from "./errors";
 export * from "./platform";
+export * from "./copilot/collect-inputs.schema";
 
 export const CONTRACTS_HELLO = "Corely contracts loaded ✅";
 

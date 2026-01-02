@@ -9,6 +9,9 @@ import { buildAiTools } from "../tools/tools.factory";
 import type { ToolExecutionRepositoryPort } from "../../application/ports/tool-execution-repository.port";
 import type { AuditPort } from "../../application/ports/audit.port";
 import type { OutboxPort } from "../../application/ports/outbox.port";
+import { collectInputsTool } from "../tools/interactive-tools";
+import { type CopilotUIMessage } from "../../domain/types/ui-message";
+import type { Response } from "express";
 
 @Injectable()
 export class AiSdkModelAdapter implements LanguageModelPort {
@@ -30,12 +33,12 @@ export class AiSdkModelAdapter implements LanguageModelPort {
   }
 
   async streamChat(params: {
-    messages: any[];
+    messages: CopilotUIMessage[];
     tools: DomainToolPort[];
     runId: string;
     tenantId: string;
     userId: string;
-    response: any;
+    response: Response;
   }): Promise<void> {
     const aiTools = buildAiTools(params.tools, {
       toolExecutions: this.toolExecutions,
@@ -45,6 +48,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       runId: params.runId,
       userId: params.userId,
     });
+    const interactiveTools = [collectInputsTool];
 
     const provider = this.env.AI_MODEL_PROVIDER;
     const modelId = this.env.AI_MODEL_ID;
@@ -54,7 +58,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     const result = streamText({
       model: model as any,
       messages: convertToCoreMessages(params.messages),
-      tools: aiTools as any,
+      tools: [...aiTools, ...interactiveTools] as any,
     });
 
     (pipeUIMessageStreamToResponse as any)(result, params.response);

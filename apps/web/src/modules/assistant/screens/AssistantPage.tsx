@@ -17,10 +17,18 @@ import { Card, CardContent } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { useCopilotChatOptions } from "@/lib/copilot-api";
 import { cn } from "@/shared/lib/utils";
+import { QuestionForm } from "@/shared/components/QuestionForm";
+import { type CollectInputsToolInput, type CollectInputsToolOutput } from "@corely/contracts";
 
 type MessagePart =
   | { type: "text"; text: string }
-  | { type: "tool-call"; toolName: string; toolCallId: string; input: unknown }
+  | {
+      type: "tool-call";
+      toolName: string;
+      toolCallId: string;
+      input: unknown;
+      state?: "partial" | "full";
+    }
   | { type: "tool-result"; toolName: string; toolCallId: string; result: unknown }
   | { type: "data"; data: any };
 
@@ -64,11 +72,52 @@ const MessageBubble: React.FC<{ role: string; children: React.ReactNode }> = ({
   </div>
 );
 
-const renderPart = (part: MessagePart) => {
+const renderPart = (
+  part: MessagePart,
+  helpers: {
+    addToolResult?: (params: { toolCallId: string; result: unknown; toolName?: string }) => unknown;
+    submittingToolIds: Set<string>;
+    markSubmitting: (id: string, value: boolean) => void;
+  }
+) => {
   if (part.type === "text") {
     return <p className="whitespace-pre-wrap">{part.text}</p>;
   }
   if (part.type === "tool-call") {
+    if (part.toolName === "collect_inputs" && part.input) {
+      const request = part.input as CollectInputsToolInput;
+      const isSubmitting = helpers.submittingToolIds.has(part.toolCallId);
+      return (
+        <QuestionForm
+          request={request}
+          disabled={isSubmitting}
+          onSubmit={async (output: CollectInputsToolOutput) => {
+            if (!helpers.addToolResult) {return;}
+            helpers.markSubmitting(part.toolCallId, true);
+            await Promise.resolve(
+              helpers.addToolResult({
+                toolCallId: part.toolCallId,
+                result: output,
+                toolName: "collect_inputs",
+              })
+            );
+            helpers.markSubmitting(part.toolCallId, false);
+          }}
+          onCancel={async () => {
+            if (!helpers.addToolResult) {return;}
+            helpers.markSubmitting(part.toolCallId, true);
+            await Promise.resolve(
+              helpers.addToolResult({
+                toolCallId: part.toolCallId,
+                result: { values: {}, meta: { cancelled: true } },
+                toolName: "collect_inputs",
+              })
+            );
+            helpers.markSubmitting(part.toolCallId, false);
+          }}
+        />
+      );
+    }
     return (
       <div className="text-xs text-muted-foreground">
         Tool call: {part.toolName} ({part.toolCallId})
@@ -98,12 +147,26 @@ const renderPart = (part: MessagePart) => {
 export default function AssistantPage() {
   const { t, i18n } = useTranslation();
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [submittingToolIds, setSubmittingToolIds] = useState<Set<string>>(new Set());
   const chatOptions = useCopilotChatOptions({
     activeModule: "assistant",
     locale: i18n.language.startsWith("de") ? "de" : "en",
   });
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat(chatOptions);
+  const { messages, input, handleInputChange, handleSubmit, isLoading, addToolResult } =
+    useChat(chatOptions);
+
+  const markSubmitting = (id: string, value: boolean) => {
+    setSubmittingToolIds((prev) => {
+      const next = new Set(prev);
+      if (value) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)] lg:h-screen" data-testid="assistant-chat">
@@ -168,7 +231,9 @@ export default function AssistantPage() {
                 <MessageBubble role={m.role}>
                   {(m.parts as MessagePart[] | undefined)?.length
                     ? (m.parts as MessagePart[]).map((p, idx) => (
-                        <div key={idx}>{renderPart(p)}</div>
+                        <div key={idx}>
+                          {renderPart(p, { addToolResult, submittingToolIds, markSubmitting })}
+                        </div>
                       ))
                     : m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
                 </MessageBubble>

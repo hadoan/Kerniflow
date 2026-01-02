@@ -22,6 +22,8 @@ import { CreateRunUseCase } from "../../application/use-cases/create-run.usecase
 import { GetRunUseCase } from "../../application/use-cases/get-run.usecase";
 import { ListMessagesUseCase } from "../../application/use-cases/list-messages.usecase";
 
+type AuthedRequest = Request & { tenantId?: string; user?: { userId?: string } };
+
 @Controller("copilot")
 export class CopilotController {
   private readonly logger = new Logger(CopilotController.name);
@@ -30,7 +32,7 @@ export class CopilotController {
     private readonly streamCopilotChat: StreamCopilotChatUseCase,
     private readonly createRun: CreateRunUseCase,
     private readonly getRun: GetRunUseCase,
-    private readonly listMessages: ListMessagesUseCase,
+    private readonly listMessagesUseCase: ListMessagesUseCase,
     @Inject("COPILOT_CLOCK") private readonly clock: ClockPort
   ) {
     this.logger.debug("CopilotController instantiated");
@@ -41,15 +43,15 @@ export class CopilotController {
   async chat(
     @Body() body: CopilotChatRequestDto,
     @Headers("x-idempotency-key") idempotencyKey: string,
-    @Req() req: Request,
+    @Req() req: AuthedRequest,
     @Res() res: Response
   ) {
     if (!idempotencyKey) {
       throw new BadRequestException("Missing X-Idempotency-Key");
     }
 
-    const tenantId = (req as any).tenantId as string;
-    const userId = (req as any).user?.userId || "unknown";
+    const tenantId = req.tenantId as string;
+    const userId = req.user?.userId || "unknown";
 
     await this.streamCopilotChat.execute({
       messages: (body as any).messages || [],
@@ -66,13 +68,13 @@ export class CopilotController {
   async create(
     @Body() body: CopilotChatRequestDto,
     @Headers("x-idempotency-key") idempotencyKey: string,
-    @Req() req: Request
+    @Req() req: AuthedRequest
   ) {
     if (!idempotencyKey) {
       throw new BadRequestException("Missing X-Idempotency-Key");
     }
-    const tenantId = (req as any).tenantId as string;
-    const userId = (req as any).user?.userId || "unknown";
+    const tenantId = req.tenantId as string;
+    const userId = req.user?.userId || "unknown";
 
     const { runId } = await this.createRun.execute({
       runId: body.id,
@@ -86,17 +88,17 @@ export class CopilotController {
 
   @Get("runs/:id")
   @UseGuards(IdentityAuthGuard, TenantGuard)
-  async get(@Param("id") id: string, @Req() req: Request) {
-    const tenantId = (req as any).tenantId as string;
+  async get(@Param("id") id: string, @Req() req: AuthedRequest) {
+    const tenantId = req.tenantId as string;
     const run = await this.getRun.execute({ tenantId, runId: id });
     return { run };
   }
 
   @Get("runs/:id/messages")
   @UseGuards(IdentityAuthGuard, TenantGuard)
-  async listMessages(@Param("id") id: string, @Req() req: Request) {
-    const tenantId = (req as any).tenantId as string;
-    const messages = await this.listMessages.execute({ tenantId, runId: id });
+  async listMessages(@Param("id") id: string, @Req() req: AuthedRequest) {
+    const tenantId = req.tenantId as string;
+    const messages = await this.listMessagesUseCase.execute({ tenantId, runId: id });
     return { items: messages };
   }
 
@@ -106,14 +108,14 @@ export class CopilotController {
     @Param("id") id: string,
     @Body() body: CopilotChatRequestDto,
     @Headers("x-idempotency-key") idempotencyKey: string,
-    @Req() req: Request,
+    @Req() req: AuthedRequest,
     @Res() res: Response
   ) {
     if (!idempotencyKey) {
       throw new BadRequestException("Missing X-Idempotency-Key");
     }
-    const tenantId = (req as any).tenantId as string;
-    const userId = (req as any).user?.userId || "unknown";
+    const tenantId = req.tenantId as string;
+    const userId = req.user?.userId || "unknown";
 
     await this.streamCopilotChat.execute({
       messages: (body as any).messages || [],
