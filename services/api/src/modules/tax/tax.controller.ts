@@ -9,6 +9,8 @@ import {
   Query,
   Req,
   UseInterceptors,
+  UseGuards,
+  BadRequestException,
 } from "@nestjs/common";
 import type { Request } from "express";
 import {
@@ -34,6 +36,7 @@ import {
   type TaxRateDto,
 } from "@corely/contracts";
 import { IdempotencyInterceptor } from "../../shared/infrastructure/idempotency/IdempotencyInterceptor";
+import { AuthGuard } from "../identity/adapters/http/auth.guard";
 import { GetTaxProfileUseCase } from "./application/use-cases/get-tax-profile.use-case";
 import { UpsertTaxProfileUseCase } from "./application/use-cases/upsert-tax-profile.use-case";
 import { ListTaxCodesUseCase } from "./application/use-cases/list-tax-codes.use-case";
@@ -43,6 +46,7 @@ import { LockTaxSnapshotUseCase } from "./application/use-cases/lock-tax-snapsho
 import type { UseCaseContext } from "./application/use-cases/use-case-context";
 
 @Controller("tax")
+@UseGuards(AuthGuard)
 @UseInterceptors(IdempotencyInterceptor)
 export class TaxController {
   constructor(
@@ -140,10 +144,28 @@ export class TaxController {
 
   private buildContext(req: Request): UseCaseContext {
     // Extract tenant/user from request (in real app, from JWT)
-    // For now, use headers or defaults
+    const tenantId =
+      (req as any).tenantId ||
+      (req.headers["x-tenant-id"] as string | undefined) ||
+      (req.headers["x-workspace-id"] as string | undefined);
+    const userId =
+      (req.headers["x-user-id"] as string | undefined) ??
+      (req as any).user?.userId ??
+      (req as any).user?.id;
+
+    if (!tenantId) {
+      throw new BadRequestException("Missing tenantId in request context");
+    }
+    if (!userId) {
+      throw new BadRequestException("Missing userId in request context");
+    }
+    if (tenantId === "default-tenant") {
+      throw new BadRequestException("Invalid tenantId in request context");
+    }
+
     return {
-      tenantId: (req.headers["x-tenant-id"] as string) || "default-tenant",
-      userId: (req.headers["x-user-id"] as string) || "default-user",
+      tenantId,
+      userId,
       correlationId: req.headers["x-correlation-id"] as string | undefined,
       idempotencyKey: req.headers["x-idempotency-key"] as string | undefined,
     };

@@ -9,6 +9,7 @@ import {
   Inject,
   UseInterceptors,
   UseGuards,
+  BadRequestException,
 } from "@nestjs/common";
 import type { Request } from "express";
 import { z } from "zod";
@@ -37,15 +38,16 @@ function extractAuthUser(req: Request, bodyData?: any): AuthUser {
   const requestTenantId = (req as any).tenantId;
   const headerTenantId = req.headers["x-tenant-id"] as string | undefined;
   const headerUserId = req.headers["x-user-id"] as string | undefined;
-  const tenantId =
-    requestTenantId || headerTenantId || bodyData?.tenantId || user?.tenantId || "default-tenant";
+  const tenantId = requestTenantId || headerTenantId || bodyData?.tenantId || user?.tenantId;
   const userId =
-    headerUserId ||
-    bodyData?.createdByUserId ||
-    bodyData?.userId ||
-    user?.userId ||
-    user?.id ||
-    "default-user";
+    headerUserId || bodyData?.createdByUserId || bodyData?.userId || user?.userId || user?.id;
+
+  if (!tenantId) {
+    throw new BadRequestException("Missing tenantId in request context");
+  }
+  if (!userId) {
+    throw new BadRequestException("Missing userId in request context");
+  }
 
   return { id: userId, tenantId };
 }

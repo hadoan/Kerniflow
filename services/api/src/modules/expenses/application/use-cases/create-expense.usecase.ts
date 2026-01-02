@@ -17,6 +17,7 @@ export interface CreateExpenseInput {
   tenantId: string;
   merchant: string;
   totalCents: number;
+  taxAmountCents?: number | null;
   currency: string;
   category?: string | null;
   issuedAt: Date;
@@ -71,6 +72,7 @@ export class CreateExpenseUseCase {
       input.tenantId,
       input.merchant,
       input.totalCents,
+      input.taxAmountCents ?? null,
       input.currency,
       input.category ?? null,
       input.issuedAt,
@@ -131,6 +133,7 @@ export class CreateExpenseUseCase {
       tenantId: expense.tenantId,
       merchant: expense.merchant,
       totalCents: expense.totalCents,
+      taxAmountCents: expense.taxAmountCents,
       currency: expense.currency,
       category: expense.category,
       issuedAt: expense.issuedAt.toISOString(),

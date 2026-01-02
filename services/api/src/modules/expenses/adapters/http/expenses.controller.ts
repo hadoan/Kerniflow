@@ -93,10 +93,13 @@ export class ExpensesController {
       tenantId,
       actorUserId: createdByUserId,
     });
+    const vatRate = typeof input.vatRate === "number" ? input.vatRate : undefined;
+    const taxAmountCents = vatRate != null ? Math.round((totalCents * vatRate) / 100) : null;
     const expenseInput: CreateExpenseInput = {
       tenantId,
       merchant,
       totalCents,
+      taxAmountCents,
       currency,
       category: input.category,
       createdByUserId,
@@ -169,6 +172,7 @@ export class ExpensesController {
   }
 
   private mapExpenseDto(expense: Expense) {
+    const taxAmountCents = expense.taxAmountCents ?? null;
     return {
       id: expense.id,
       tenantId: expense.tenantId,
@@ -180,7 +184,7 @@ export class ExpensesController {
       notes: null,
       category: expense.category,
       totalAmountCents: expense.totalCents,
-      taxAmountCents: null,
+      taxAmountCents,
       archivedAt: expense.archivedAt?.toISOString() ?? null,
       createdAt: expense.createdAt.toISOString(),
       updatedAt: expense.createdAt.toISOString(),

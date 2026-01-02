@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { IdentityModule } from "../identity";
 import { TaxController } from "./tax.controller";
 
 // Use cases
@@ -30,6 +31,7 @@ import { PrismaTaxSnapshotRepoAdapter } from "./infrastructure/prisma/prisma-tax
 import { PrismaVatReportRepoAdapter } from "./infrastructure/prisma/prisma-vat-report-repo.adapter";
 
 @Module({
+  imports: [IdentityModule],
   controllers: [TaxController],
   providers: [
     // Use cases

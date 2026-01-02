@@ -4,6 +4,7 @@ export class Expense {
     public readonly tenantId: string,
     public readonly merchant: string,
     public readonly totalCents: number,
+    public readonly taxAmountCents: number | null,
     public readonly currency: string,
     public readonly category: string | null,
     public readonly issuedAt: Date,
