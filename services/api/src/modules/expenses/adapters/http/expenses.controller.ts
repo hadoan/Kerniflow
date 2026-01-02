@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   UseInterceptors,
   Req,
   Param,
@@ -169,6 +170,63 @@ export class ExpensesController {
     const includeArchived = query?.includeArchived === "true" || query?.includeArchived === true;
     const expenses = await this.expenseRepo.list(tenantId, { includeArchived });
     return { items: expenses.map((expense) => this.mapExpenseDto(expense)) };
+  }
+
+  @Get(":expenseId")
+  async getOne(@Param("expenseId") expenseId: string, @Req() req: Request) {
+    const tenantId =
+      (req.headers["x-tenant-id"] as string | undefined) ??
+      (req.headers["x-workspace-id"] as string | undefined) ??
+      (req as any).tenantId;
+
+    if (!tenantId) {
+      throw new BadRequestException("Missing tenant/workspace id");
+    }
+
+    const expense = await this.expenseRepo.findByIdIncludingArchived(tenantId, expenseId);
+    if (!expense) {
+      throw new BadRequestException("Expense not found");
+    }
+    return { expense: this.mapExpenseDto(expense) };
+  }
+
+  @Patch(":expenseId")
+  async update(@Param("expenseId") expenseId: string, @Body() body: unknown, @Req() req: Request) {
+    const input = ExpenseHttpInputSchema.parse(body);
+    const tenantId =
+      input.tenantId ??
+      (req.headers["x-tenant-id"] as string | undefined) ??
+      (req.headers["x-workspace-id"] as string | undefined) ??
+      (req as any).tenantId;
+    if (!tenantId) {
+      throw new BadRequestException("Missing tenant/workspace id");
+    }
+
+    const existing = await this.expenseRepo.findByIdIncludingArchived(tenantId, expenseId);
+    if (!existing) {
+      throw new BadRequestException("Expense not found");
+    }
+
+    const merchant = input.merchant ?? input.merchantName ?? existing.merchant;
+    const totalCents = input.totalCents ?? input.totalAmountCents ?? existing.totalCents;
+    const currency = input.currency ?? existing.currency;
+    const issuedAtStr = input.issuedAt ?? input.expenseDate ?? existing.issuedAt.toISOString();
+    const issuedAt = new Date(issuedAtStr);
+    const taxAmountCents =
+      typeof input.vatRate === "number" ? Math.round((totalCents * input.vatRate) / 100) : null;
+
+    existing.update({
+      merchant,
+      totalCents,
+      taxAmountCents,
+      currency,
+      category: input.category ?? existing.category,
+      issuedAt,
+      custom: input.custom ?? existing.custom,
+    });
+
+    await this.expenseRepo.update(existing);
+    return { expense: this.mapExpenseDto(existing) };
   }
 
   private mapExpenseDto(expense: Expense) {

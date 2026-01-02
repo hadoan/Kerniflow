@@ -47,6 +47,7 @@ import {
   type InvoiceFormData,
   type InvoiceLineFormData,
 } from "../schemas/invoice-form.schema";
+import type { InvoiceStatus } from "@corely/contracts";
 
 const DEFAULT_VAT_RATE = 19;
 const AVAILABLE_VAT_RATES = [0, 7, 19];
@@ -104,6 +105,7 @@ export default function NewInvoicePage() {
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const [newCustomerDialogOpen, setNewCustomerDialogOpen] = useState(false);
   const [lineItems, setLineItems] = useState<InvoiceLineFormData[]>(defaultValues.lineItems || []);
+  const [targetStatus, setTargetStatus] = useState<InvoiceStatus>("DRAFT");
 
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
@@ -211,14 +213,8 @@ export default function NewInvoicePage() {
   // Submit mutation
   const createInvoiceMutation = useMutation({
     mutationFn: async (data: InvoiceFormData) => {
-      // Transform form data (Date -> ISO strings) to match API contract
       const input = toCreateInvoiceInput(data);
       return invoicesApi.createInvoice(input);
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      toast.success(t("common.success"));
-      navigate("/invoices");
     },
     onError: (error) => {
       console.error("Error creating invoice:", error);
@@ -226,9 +222,51 @@ export default function NewInvoicePage() {
     },
   });
 
+  const runStatusFlow = React.useCallback(
+    async (invoiceId: string, currentStatus: InvoiceStatus, desiredStatus: InvoiceStatus) => {
+      if (desiredStatus === currentStatus) {
+        return currentStatus;
+      }
+
+      try {
+        if (desiredStatus === "ISSUED") {
+          await invoicesApi.finalizeInvoice(invoiceId);
+          return "ISSUED";
+        }
+        if (desiredStatus === "SENT") {
+          if (currentStatus === "DRAFT") {
+            await invoicesApi.finalizeInvoice(invoiceId);
+          }
+          await invoicesApi.sendInvoice(invoiceId);
+          return "SENT";
+        }
+        if (desiredStatus === "CANCELED") {
+          await invoicesApi.cancelInvoice(invoiceId, "Canceled from form");
+          return "CANCELED";
+        }
+        return currentStatus;
+      } catch (err) {
+        console.error("Status change failed", err);
+        toast.error("Could not update invoice status");
+        return currentStatus;
+      }
+    },
+    []
+  );
+
   // Submit handler
   const onSubmit = async (data: InvoiceFormData) => {
-    createInvoiceMutation.mutate(data);
+    try {
+      const invoice = await createInvoiceMutation.mutateAsync(data);
+      const finalStatus = await runStatusFlow(invoice.id, invoice.status ?? "DRAFT", targetStatus);
+      void queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success(
+        finalStatus === targetStatus ? t("invoices.created") : "Invoice saved (status unchanged)"
+      );
+      navigate("/invoices");
+    } catch {
+      // handled in mutation callbacks
+    }
   };
 
   // Get selected customer
@@ -243,14 +281,31 @@ export default function NewInvoicePage() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/invoices")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-h1 text-foreground">{t("invoices.createNewInvoice")}</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
+          <div className="w-48">
+            <Label className="text-xs text-muted-foreground">Status</Label>
+            <Select
+              value={targetStatus}
+              onValueChange={(val: InvoiceStatus) => setTargetStatus(val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="ISSUED">Issued</SelectItem>
+                <SelectItem value="SENT">Sent</SelectItem>
+                <SelectItem value="CANCELED">Canceled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             variant="outline"
             onClick={() => navigate("/invoices")}

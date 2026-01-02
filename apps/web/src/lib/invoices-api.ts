@@ -3,7 +3,12 @@
  * Handles HTTP calls to invoice endpoints
  */
 
-import type { CreateInvoiceInput, CreateInvoiceOutput, InvoiceDto } from "@corely/contracts";
+import type {
+  CreateInvoiceInput,
+  CreateInvoiceOutput,
+  InvoiceDto,
+  RecordPaymentInput,
+} from "@corely/contracts";
 import { apiClient } from "./api-client";
 
 export class InvoicesApi {
@@ -131,6 +136,21 @@ export class InvoicesApi {
       }
     );
     return result;
+  }
+
+  /**
+   * Record a payment for an invoice
+   */
+  async recordPayment(input: RecordPaymentInput): Promise<InvoiceDto> {
+    const result = await apiClient.post<{ invoice: InvoiceDto }>(
+      `/invoices/${input.invoiceId}/payments`,
+      { amountCents: input.amountCents, paidAt: input.paidAt, note: input.note },
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+    return result.invoice;
   }
 }
 

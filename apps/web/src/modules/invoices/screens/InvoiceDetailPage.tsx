@@ -13,9 +13,19 @@ import { Calendar } from "@/shared/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { cn } from "@/shared/lib/utils";
+import { formatMoney } from "@/shared/lib/formatters";
 import { invoicesApi } from "@/lib/invoices-api";
 import { customersApi } from "@/lib/customers-api";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/ui/dialog";
 import {
   invoiceFormSchema,
   toCreateInvoiceInput,
@@ -23,6 +33,7 @@ import {
   type InvoiceFormData,
   type InvoiceLineFormData,
 } from "../schemas/invoice-form.schema";
+import type { InvoiceStatus } from "@corely/contracts";
 
 const DEFAULT_VAT_RATE = 19;
 
@@ -50,6 +61,13 @@ export default function InvoiceDetailPage() {
   const [lineItems, setLineItems] = useState<InvoiceLineFormData[]>(
     getDefaultInvoiceFormValues().lineItems || []
   );
+  const [targetStatus, setTargetStatus] = useState<InvoiceStatus>("DRAFT");
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
+  const [paymentDate, setPaymentDate] = useState<string>(() =>
+    new Date().toISOString().slice(0, 10)
+  );
+  const [paymentNote, setPaymentNote] = useState<string>("");
 
   const form = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceFormSchema),
@@ -85,6 +103,9 @@ export default function InvoiceDetailPage() {
       vatRate: DEFAULT_VAT_RATE,
       lineItems: seededLines,
     });
+    setTargetStatus(invoice.status);
+    const due = invoice.totals?.dueCents ?? 0;
+    setPaymentAmount(due > 0 ? (due / 100).toFixed(2) : "");
   }, [invoice, form]);
 
   useEffect(() => {
@@ -110,17 +131,80 @@ export default function InvoiceDetailPage() {
       const input = toCreateInvoiceInput(data);
       return invoicesApi.updateInvoice(id, input);
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["invoice", id] });
-      void queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      toast.success("Invoice updated successfully");
-      navigate("/invoices");
-    },
     onError: (err) => {
       console.error("Update invoice failed", err);
       toast.error("Failed to update invoice");
     },
   });
+
+  const runStatusFlow = React.useCallback(
+    async (invoiceId: string, currentStatus: InvoiceStatus, desiredStatus: InvoiceStatus) => {
+      if (desiredStatus === currentStatus) {return currentStatus;}
+      try {
+        if (desiredStatus === "ISSUED") {
+          await invoicesApi.finalizeInvoice(invoiceId);
+          return "ISSUED";
+        }
+        if (desiredStatus === "SENT") {
+          if (currentStatus === "DRAFT") {
+            await invoicesApi.finalizeInvoice(invoiceId);
+          }
+          await invoicesApi.sendInvoice(invoiceId);
+          return "SENT";
+        }
+        if (desiredStatus === "CANCELED") {
+          await invoicesApi.cancelInvoice(invoiceId, "Canceled from edit form");
+          return "CANCELED";
+        }
+      } catch (err) {
+        console.error("Status change failed", err);
+        toast.error("Could not update invoice status");
+      }
+      return currentStatus;
+    },
+    []
+  );
+
+  const recordPayment = useMutation({
+    mutationFn: async () => {
+      if (!id) {throw new Error("Missing invoice id");}
+      const amountCents = Math.round(parseFloat(paymentAmount || "0") * 100);
+      if (!amountCents || Number.isNaN(amountCents)) {
+        throw new Error("Invalid amount");
+      }
+      return invoicesApi.recordPayment({
+        invoiceId: id,
+        amountCents,
+        paidAt: paymentDate ? new Date(paymentDate).toISOString() : undefined,
+        note: paymentNote || undefined,
+      });
+    },
+    onSuccess: async () => {
+      setPaymentDialogOpen(false);
+      setPaymentNote("");
+      void queryClient.invalidateQueries({ queryKey: ["invoice", id] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Payment recorded");
+    },
+    onError: (err) => {
+      console.error("Record payment failed", err);
+      toast.error("Failed to record payment");
+    },
+  });
+
+  const handleSubmit = async (data: InvoiceFormData) => {
+    if (!id || !invoice) {return;}
+    try {
+      await updateInvoice.mutateAsync(data);
+      await runStatusFlow(id, invoice.status, targetStatus);
+      void queryClient.invalidateQueries({ queryKey: ["invoice", id] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      toast.success("Invoice updated successfully");
+      navigate("/invoices");
+    } catch {
+      // errors handled by mutation/status flow
+    }
+  };
 
   const addLineItem = () => {
     setLineItems([
@@ -214,7 +298,24 @@ export default function InvoiceDetailPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          <div className="w-48">
+            <Label className="text-xs text-muted-foreground">Status</Label>
+            <Select
+              value={targetStatus}
+              onValueChange={(val: InvoiceStatus) => setTargetStatus(val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="ISSUED">Issued</SelectItem>
+                <SelectItem value="SENT">Sent</SelectItem>
+                <SelectItem value="CANCELED">Canceled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {invoice.status !== "DRAFT" && (
             <Button
               variant="outline"
@@ -225,11 +326,68 @@ export default function InvoiceDetailPage() {
               {downloadPdf.isPending ? "Downloading..." : "Download PDF"}
             </Button>
           )}
+          {invoice.status !== "PAID" && (
+            <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="accent">Record payment</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Record payment</DialogTitle>
+                  <DialogDescription>
+                    Log a payment to update the outstanding balance.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="payment-amount">Amount</Label>
+                    <Input
+                      id="payment-amount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Due: {formatMoney(invoice.totals?.dueCents ?? 0, "en-DE", invoice.currency)}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="payment-date">Date</Label>
+                    <Input
+                      id="payment-date"
+                      type="date"
+                      value={paymentDate}
+                      onChange={(e) => setPaymentDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="payment-note">Note (optional)</Label>
+                    <Input
+                      id="payment-note"
+                      value={paymentNote}
+                      onChange={(e) => setPaymentNote(e.target.value)}
+                      placeholder="e.g. Bank transfer"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={() => recordPayment.mutate()} disabled={recordPayment.isPending}>
+                    {recordPayment.isPending ? "Saving..." : "Save payment"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
           <Badge variant={invoice.status.toLowerCase() as any}>{invoice.status}</Badge>
         </div>
       </div>
 
-      <form onSubmit={form.handleSubmit((data) => updateInvoice.mutate(data))}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
         <Card>
           <CardContent className="p-8 space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

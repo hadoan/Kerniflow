@@ -24,6 +24,28 @@ export class ExpensesApi {
     });
     return result.expense;
   }
+
+  async getExpense(id: string): Promise<ExpenseDto> {
+    const result = await apiClient.get<{ expense: ExpenseDto }>(`/expenses/${id}`, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
+    return result.expense;
+  }
+
+  async updateExpense(id: string, input: CreateExpenseWebInput): Promise<ExpenseDto> {
+    const result = await apiClient.patch<{ expense: ExpenseDto }>(`/expenses/${id}`, input, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
+    return result.expense;
+  }
+
+  async archiveExpense(id: string): Promise<void> {
+    await apiClient.post(
+      `/expenses/${id}/archive`,
+      {},
+      { correlationId: apiClient.generateCorrelationId() }
+    );
+  }
 }
 
 export const expensesApi = new ExpensesApi();

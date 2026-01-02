@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Receipt, Plus } from "lucide-react";
+import { Receipt, Plus, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
@@ -10,15 +10,33 @@ import { formatMoney, formatDate } from "@/shared/lib/formatters";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { expensesApi } from "@/lib/expenses-api";
 import type { ExpenseDto } from "@corely/contracts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function ExpensesPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "de" ? "de-DE" : "en-DE";
   const navigate = useNavigate();
 
+  const queryClient = useQueryClient();
   const { data: expenses, isLoading } = useQuery<ExpenseDto[]>({
     queryKey: ["expenses"],
     queryFn: () => expensesApi.listExpenses(),
+  });
+
+  const archiveExpense = useMutation({
+    mutationFn: (id: string) => expensesApi.archiveExpense(id),
+    onSuccess: () => {
+      toast.success("Expense deleted");
+      void queryClient.invalidateQueries({ queryKey: ["expenses"] });
+    },
+    onError: () => toast.error("Failed to delete expense"),
   });
 
   return (
@@ -65,6 +83,7 @@ export default function ExpensesPage() {
                     <th className="text-right text-sm font-medium text-muted-foreground px-4 py-3">
                       {t("expenses.amount")}
                     </th>
+                    <th />
                   </tr>
                 </thead>
                 <tbody>
@@ -97,6 +116,30 @@ export default function ExpensesPage() {
                           expense.totalAmountCents ?? (expense as any).totalCents ?? 0,
                           locale
                         )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => navigate(`/expenses/${expense.id}/edit`)}
+                            >
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => archiveExpense.mutate(expense.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
                   ))}

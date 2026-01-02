@@ -27,4 +27,22 @@ export class Expense {
     this.archivedAt = null;
     this.archivedByUserId = null;
   }
+
+  update(data: {
+    merchant?: string;
+    totalCents?: number;
+    taxAmountCents?: number | null;
+    currency?: string;
+    category?: string | null;
+    issuedAt?: Date;
+    custom?: Record<string, unknown> | null;
+  }) {
+    if (data.merchant !== undefined) {this.merchant = data.merchant;}
+    if (data.totalCents !== undefined) {this.totalCents = data.totalCents;}
+    if (data.taxAmountCents !== undefined) {this.taxAmountCents = data.taxAmountCents;}
+    if (data.currency !== undefined) {this.currency = data.currency;}
+    if (data.category !== undefined) {this.category = data.category;}
+    if (data.issuedAt !== undefined) {this.issuedAt = data.issuedAt;}
+    if (data.custom !== undefined) {this.custom = data.custom;}
+  }
 }

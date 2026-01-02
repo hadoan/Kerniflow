@@ -16,6 +16,7 @@ export interface ExpenseRepositoryPort {
     },
     tx?: TransactionContext
   ): Promise<Expense[]>;
+  update(expense: Expense, tx?: TransactionContext): Promise<void>;
 }
 
 export const EXPENSE_REPOSITORY = "expenses/expense-repository";

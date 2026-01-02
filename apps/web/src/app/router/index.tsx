@@ -83,6 +83,7 @@ export const Router = () => (
           <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/expenses" element={<ExpensesPage />} />
           <Route path="/expenses/new" element={<NewExpensePage />} />
+          <Route path="/expenses/:id/edit" element={<NewExpensePage />} />
           <Route path="/invoices" element={<InvoicesPage />} />
           <Route path="/invoices/new" element={<NewInvoicePage />} />
           <Route path="/invoices/:id" element={<InvoiceDetailPage />} />
@@ -126,9 +127,12 @@ export const Router = () => (
           <Route path="/inventory/reorder" element={<ReorderDashboardPage />} />
           <Route path="/inventory/copilot" element={<InventoryCopilotPage />} />
           <Route path="/copilot" element={<CopilotPage />} />
-          <Route path="/tax" element={<TaxesOverviewPage />} />
+          <Route path="/taxes" element={<TaxesOverviewPage />} />
           <Route path="/tax/reports" element={<TaxReportsPage />} />
           <Route path="/tax/settings" element={<TaxSettingsPage />} />
+          {/* <Route path="/tax" element={<Navigate to="/taxes" replace />} /> */}
+          <Route path="/tax/reports" element={<Navigate to="/taxes/reports" replace />} />
+          <Route path="/tax/settings" element={<Navigate to="/taxes/settings" replace />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/settings/workspace" element={<WorkspaceSettingsPage />} />
           <Route path="/settings/members" element={<WorkspaceMembersPage />} />

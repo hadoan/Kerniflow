@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,9 +43,11 @@ const VAT_OPTIONS = ["0", "7", "19"];
 
 export default function NewExpensePage() {
   const { t } = useTranslation();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(expenseFormSchema),
@@ -60,10 +62,33 @@ export default function NewExpensePage() {
     },
   });
 
+  useEffect(() => {
+    if (!id) {return;}
+    setLoading(true);
+    expensesApi
+      .getExpense(id)
+      .then((expense) => {
+        form.reset({
+          merchantName: expense.merchantName ?? "",
+          expenseDate: expense.expenseDate ?? new Date().toISOString().slice(0, 10),
+          amount: ((expense.totalAmountCents ?? 0) / 100).toFixed(2),
+          currency: expense.currency,
+          category: expense.category ?? undefined,
+          vatRate:
+            expense.taxAmountCents && expense.totalAmountCents
+              ? String(Math.round((expense.taxAmountCents / expense.totalAmountCents) * 100))
+              : "0",
+          notes: expense.notes ?? "",
+        });
+      })
+      .catch(() => setSuccessMessage(t("common.error")))
+      .finally(() => setLoading(false));
+  }, [id, form, t]);
+
   const createExpenseMutation = useMutation({
     mutationFn: async (values: ExpenseFormValues) => {
       const totalAmountCents = Math.round(parseFloat(values.amount || "0") * 100);
-      return expensesApi.createExpense({
+      const payload = {
         merchantName: values.merchantName,
         expenseDate: values.expenseDate,
         totalAmountCents,
@@ -75,7 +100,8 @@ export default function NewExpensePage() {
         category: values.category,
         notes: values.notes,
         vatRate: values.vatRate ? Number(values.vatRate) : undefined,
-      });
+      };
+      return id ? expensesApi.updateExpense(id, payload) : expensesApi.createExpense(payload);
     },
     onSuccess: () => {
       setSuccessMessage(t("common.success"));
@@ -96,7 +122,9 @@ export default function NewExpensePage() {
           <Button variant="ghost" size="icon" onClick={() => navigate("/expenses")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-h1 text-foreground">{t("expenses.addExpense")}</h1>
+          <h1 className="text-h1 text-foreground">
+            {id ? t("expenses.editExpense") : t("expenses.addExpense")}
+          </h1>
         </div>
         <Button variant="outline" onClick={() => navigate("/expenses")}>
           {t("common.cancel")}

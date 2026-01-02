@@ -199,7 +199,7 @@ export class AppRegistry implements AppRegistryPort {
           section: "tax",
           labelKey: "nav.tax",
           defaultLabel: "Taxes",
-          route: "/tax",
+          route: "/taxes",
           icon: "Percent",
           order: 70,
         },
