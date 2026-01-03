@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import type { EnvService } from "@corely/config";
 import { streamText, convertToCoreMessages } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -13,16 +13,13 @@ import { collectInputsTool } from "../tools/interactive-tools";
 import { type CopilotUIMessage } from "../../domain/types/ui-message";
 import type { Response } from "express";
 import { type ObservabilityPort, type ObservabilitySpanRef } from "@corely/kernel";
-import {
-  type StreamTextOnFinishCallback,
-  type LanguageModelUsage,
-  type StreamTextOnErrorCallback,
-} from "ai";
+import { type LanguageModelUsage } from "ai";
 
 @Injectable()
 export class AiSdkModelAdapter implements LanguageModelPort {
   private readonly openai: ReturnType<typeof createOpenAI>;
   private readonly anthropic: ReturnType<typeof createAnthropic>;
+  private readonly logger = new Logger(AiSdkModelAdapter.name);
 
   constructor(
     private readonly toolExecutions: ToolExecutionRepositoryPort,
@@ -64,6 +61,13 @@ export class AiSdkModelAdapter implements LanguageModelPort {
 
     const model = provider === "anthropic" ? this.anthropic(modelId) : this.openai(modelId);
 
+    const toolset = {
+      ...aiTools,
+      collect_inputs: collectInputsTool,
+    };
+
+    this.logger.debug(`Starting streamText with ${Object.keys(toolset).length} tools`);
+
     let outputText = "";
     let usage: LanguageModelUsage | undefined;
     let finishResolve: (() => void) | undefined;
@@ -73,33 +77,19 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       finishResolve = resolve;
     });
 
-    const toolset = {
-      ...aiTools,
-      collect_inputs: collectInputsTool,
-    };
-
-    const onFinish: StreamTextOnFinishCallback<typeof toolset> = (event) => {
-      outputText = event.text;
-      usage = event.usage;
-      if (finishResolve) {
-        finishResolve();
-      }
-    };
-
-    const onError: StreamTextOnErrorCallback = (error) => {
-      streamError = error instanceof Error ? error : new Error(String(error));
-      if (finishResolve) {
-        finishResolve();
-      }
-    };
-
     const result = streamText({
       model,
       messages: convertToCoreMessages(params.messages),
       tools: toolset,
-      onFinish,
-      onError,
-      maxSteps: 5,
+      onFinish: (event) => {
+        outputText = event.text;
+        usage = event.usage;
+        finishResolve?.();
+      },
+      onError: (error) => {
+        streamError = error instanceof Error ? error : new Error(String(error));
+        finishResolve?.();
+      },
     });
 
     result.pipeUIMessageStreamToResponse(params.response, {

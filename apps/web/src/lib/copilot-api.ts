@@ -22,33 +22,34 @@ export interface CopilotOptionsInput {
 }
 
 export const useCopilotChatOptions = (input: CopilotOptionsInput): UseChatOptions => {
-  return useMemo(() => {
-    const apiBase = resolveCopilotBaseUrl();
-    const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
-    const accessToken = authClient.getAccessToken() ?? "";
+  const apiBase = resolveCopilotBaseUrl();
+  const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
+  const accessToken = authClient.getAccessToken() ?? "";
+  // Generate fresh idempotency key on each render to avoid reuse across requests
+  const idempotencyKey = createIdempotencyKey();
 
-    const options: UseChatOptions = {
-      api: input.runId
-        ? `${apiBase}/copilot/runs/${input.runId}/messages`
-        : `${apiBase}/copilot/chat`,
-      headers: {
-        Authorization: accessToken ? `Bearer ${accessToken}` : "",
-        "X-Tenant-Id": tenantId,
-        "X-Idempotency-Key": createIdempotencyKey(),
+  return {
+    api: input.runId
+      ? `${apiBase}/copilot/runs/${input.runId}/messages`
+      : `${apiBase}/copilot/chat`,
+    headers: {
+      Authorization: accessToken ? `Bearer ${accessToken}` : "",
+      "X-Tenant-Id": tenantId,
+      "X-Idempotency-Key": idempotencyKey,
+    },
+    body: {
+      id: input.runId,
+      requestData: {
+        tenantId,
+        locale: input.locale || "en",
+        activeModule: input.activeModule,
       },
-      body: {
-        id: input.runId,
-        requestData: {
-          tenantId,
-          locale: input.locale || "en",
-          activeModule: input.activeModule,
-        },
-      },
-      onError: (error: Error) => {
-        console.error("[Copilot] Stream error:", error);
-      },
-    };
-
-    return options;
-  }, [input.activeModule, input.locale, input.runId]);
+    },
+    // Use text protocol for compatibility with Express/NestJS backend
+    // Note: Tool calls execute server-side but don't render in real-time
+    streamProtocol: "text",
+    onError: (error: Error) => {
+      console.error("[Copilot] Stream error:", error);
+    },
+  };
 };
