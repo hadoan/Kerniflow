@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { PrismaService } from "@corely/data";
+import { PrismaService } from "@corely/data";
 import { AgentRunRepositoryPort } from "../../application/ports/agent-run-repository.port";
 import { AgentRun } from "../../domain/entities/agent-run.entity";
 

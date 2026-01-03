@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@corely/data";
 import { CopilotController } from "./adapters/http/copilot.controller";
-import type { EnvService } from "@corely/config";
+import { EnvService } from "@corely/config";
 
 import { StreamCopilotChatUseCase } from "./application/use-cases/stream-copilot-chat.usecase";
 import { PrismaAgentRunRepository } from "./infrastructure/adapters/prisma-agent-run-repository.adapter";
@@ -81,7 +81,7 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
         PrismaToolExecutionRepository,
         PrismaAuditAdapter,
         OUTBOX_PORT,
-        "ENV_SERVICE",
+        EnvService,
         "COPILOT_LOGGER",
       ],
     },

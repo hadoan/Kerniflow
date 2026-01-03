@@ -48,7 +48,6 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       runId: params.runId,
       userId: params.userId,
     });
-    const interactiveTools = [collectInputsTool];
 
     const provider = this.env.AI_MODEL_PROVIDER;
     const modelId = this.env.AI_MODEL_ID;
@@ -58,7 +57,10 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     const result = streamText({
       model: model as any,
       messages: convertToCoreMessages(params.messages),
-      tools: [...aiTools, ...interactiveTools] as any,
+      tools: {
+        ...aiTools,
+        collect_inputs: collectInputsTool,
+      } as any,
     });
 
     (pipeUIMessageStreamToResponse as any)(result, params.response);
