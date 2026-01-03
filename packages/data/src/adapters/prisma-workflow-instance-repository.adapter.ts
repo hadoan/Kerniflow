@@ -84,16 +84,27 @@ export class WorkflowInstanceRepository {
     tx?: TransactionContext
   ) {
     const client = getPrismaClient(this.prisma, tx);
+    const data: Record<string, unknown> = {
+      status: input.status,
+      currentState: input.currentState,
+      context: input.context,
+    };
+
+    if ("startedAt" in input) {
+      data.startedAt = input.startedAt ?? null;
+    }
+
+    if ("completedAt" in input) {
+      data.completedAt = input.completedAt ?? null;
+    }
+
+    if ("lastError" in input) {
+      data.lastError = input.lastError ?? null;
+    }
+
     return client.workflowInstance.updateMany({
       where: { tenantId, id, updatedAt },
-      data: {
-        status: input.status,
-        currentState: input.currentState,
-        context: input.context,
-        startedAt: input.startedAt ?? undefined,
-        completedAt: input.completedAt ?? undefined,
-        lastError: input.lastError ?? undefined,
-      },
+      data,
     });
   }
 

@@ -29,7 +29,7 @@ describe("customer tools", () => {
 
   it("executes get tool", async () => {
     const tools = buildCustomerTools(app);
-    const getTool = tools.find((t) => t.name === "customer.get")!;
+    const getTool = tools.find((t) => t.name === "customer_get")!;
 
     const result = await getTool.execute?.({
       tenantId: "tenant-1",
@@ -47,7 +47,7 @@ describe("customer tools", () => {
 
   it("returns structured error on use case failure", async () => {
     getExecute.mockResolvedValueOnce(err(new NotFoundError("missing")));
-    const getTool = buildCustomerTools(app).find((t) => t.name === "customer.get")!;
+    const getTool = buildCustomerTools(app).find((t) => t.name === "customer_get")!;
 
     const result = await getTool.execute?.({
       tenantId: "tenant-1",

@@ -113,9 +113,8 @@ export default function InvoiceDetailPage() {
       salesApi.recordPayment({
         invoiceId: invoiceId ?? "",
         amountCents: paymentAmount,
-        currency: invoice?.currency ?? "EUR",
-        paymentDate,
-        method: paymentMethod as any,
+        paidAt: paymentDate,
+        note: paymentMethod as any,
       }),
     onSuccess: () => {
       setPaymentDialogOpen(false);

@@ -1,5 +1,4 @@
 import { createMachine, initialTransition, transition as xstateTransition } from "xstate";
-import type { AnyEventObject, StateMachine } from "xstate";
 import type {
   WorkflowActionSpec,
   WorkflowEventInput,
@@ -38,7 +37,7 @@ function getContextPath(context: Record<string, unknown>, path: string): unknown
   }, context);
 }
 
-function buildGuard(guard: WorkflowSpec["guards"][string]) {
+function buildGuard(guard: any) {
   if (guard.type === "always") {
     return () => true;
   }
@@ -66,9 +65,9 @@ function buildGuards(guards: WorkflowSpec["guards"] | undefined) {
 }
 
 function normalizeSpec(spec: WorkflowSpec) {
-  const guards: NonNullable<WorkflowSpec["guards"]> = { ...(spec.guards ?? {}) };
+  const guards: Record<string, any> = { ...(spec.guards ?? {}) };
   let guardIndex = 0;
-  const states = structuredClone(spec.states);
+  const states = structuredClone(spec.states) as Record<string, WorkflowSpec["states"][string]>;
 
   for (const state of Object.values(states)) {
     if (!state.on) {
@@ -89,19 +88,19 @@ function normalizeSpec(spec: WorkflowSpec) {
   return { guards, states };
 }
 
-export function buildWorkflowMachine(spec: WorkflowSpec): StateMachine<any, AnyEventObject> {
+export function buildWorkflowMachine(spec: WorkflowSpec): any {
   const normalized = normalizeSpec(spec);
   return createMachine(
     {
       id: spec.id ?? "workflow",
       initial: spec.initial,
       context: spec.context ?? {},
-      states: normalized.states,
+      states: normalized.states as any,
     },
     {
       guards: buildGuards(normalized.guards),
     }
-  );
+  ) as any;
 }
 
 export function getInitialSnapshot(
@@ -159,7 +158,7 @@ function applyAssignActions(
   return next;
 }
 
-function normalizeSnapshot(machine: StateMachine<any, AnyEventObject>, snapshot: WorkflowSnapshot) {
+function normalizeSnapshot(machine: any, snapshot: WorkflowSnapshot) {
   const [base] = initialTransition(machine);
 
   return {
@@ -180,11 +179,15 @@ export function applyWorkflowEvents(
   const actions: WorkflowActionSpec[] = [];
 
   for (const event of events) {
-    const [next] = xstateTransition(machine, current, event);
-    const transitionData = machine.getTransitionData(current, event);
-    const eventActions = transitionData.flatMap((transition) => transition.actions ?? []);
+    const [next] = xstateTransition(machine, current, event) as any[];
+    const transitionData = machine.getTransitionData(current, event) as Array<{
+      actions?: any[];
+    }>;
+    const eventActions = transitionData.flatMap(
+      (transition) => transition.actions ?? []
+    ) as WorkflowActionSpec[];
 
-    if (next.changed) {
+    if ((next as any).changed) {
       transitions.push({
         event,
         from: current.value as WorkflowStateValue,
@@ -193,15 +196,12 @@ export function applyWorkflowEvents(
     }
 
     if (eventActions.length) {
-      actions.push(...(eventActions as WorkflowActionSpec[]));
+      actions.push(...eventActions);
     }
 
     current = {
       ...next,
-      context: applyAssignActions(
-        (next.context ?? {}) as Record<string, unknown>,
-        eventActions as WorkflowActionSpec[]
-      ),
+      context: applyAssignActions((next.context ?? {}) as Record<string, unknown>, eventActions),
     } as typeof next;
   }
 

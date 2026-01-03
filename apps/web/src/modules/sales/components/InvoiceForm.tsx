@@ -30,6 +30,14 @@ type InvoiceFormProps = {
   onSubmit: (values: InvoiceFormValues) => void;
 };
 
+type LineItem = {
+  id?: string;
+  description: string;
+  quantity: number;
+  unitPriceCents: number;
+  discountCents: number;
+};
+
 export const InvoiceForm: React.FC<InvoiceFormProps> = ({
   customers,
   initial,
@@ -42,7 +50,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? "");
   const [paymentTerms, setPaymentTerms] = useState(initial?.paymentTerms ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [lineItems, setLineItems] = useState(
+  const [lineItems, setLineItems] = useState<LineItem[]>(
     initial?.lineItems?.length
       ? initial.lineItems.map((item) => ({
           id: item.id,
@@ -103,7 +111,10 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
   };
 
   const addLineItem = () => {
-    setLineItems((prev) => [...prev, { description: "", quantity: 1, unitPriceCents: 0 }]);
+    setLineItems((prev) => [
+      ...prev,
+      { description: "", quantity: 1, unitPriceCents: 0, discountCents: 0 },
+    ]);
   };
 
   const removeLineItem = (index: number) => {

@@ -71,7 +71,7 @@ export class WorkflowTaskRunnerProcessor implements OnModuleInit, OnModuleDestro
       latencyMs: startedAt - job.timestamp,
     });
 
-    const { tenantId, taskId, instanceId } = job.data;
+    const { tenantId, taskId } = job.data;
     const now = new Date();
 
     const task = await this.tasks.claimTask(tenantId, taskId, this.workerId, now);

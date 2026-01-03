@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import React from "react";
+import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, ChevronLeft, Moon, Sun, Globe, LogOut, Building2, User } from "lucide-react";
 import { Logo } from "@/shared/components/Logo";

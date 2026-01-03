@@ -3,21 +3,27 @@ import { Test } from "@nestjs/testing";
 import { EnvModule } from "@corely/config";
 import { WorkflowQueueClient } from "../workflow-queue.client";
 
-// Mock bullmq so we don't open real connections
-class MockQueue {
-  static instances: Array<{ connection: any }> = [];
-  constructor(_name: string, options: { connection: unknown }) {
-    MockQueue.instances.push({ connection: options.connection });
+// Use hoisted mock to avoid temporal dead zone issues
+const { MockQueue, mockQueueInstances } = vi.hoisted(() => {
+  const instances: Array<{ connection: any }> = [];
+  class MockQueue {
+    static get instances() {
+      return instances;
+    }
+    constructor(_name: string, options: { connection: unknown }) {
+      instances.push({ connection: options.connection });
+    }
+    async add() {}
+    async close() {}
   }
-  async add() {}
-  async close() {}
-}
+  return { MockQueue, mockQueueInstances: instances };
+});
 
 vi.mock("bullmq", () => ({ Queue: MockQueue }));
 
 describe("WorkflowQueueClient (Env injection)", () => {
   beforeEach(() => {
-    MockQueue.instances = [];
+    mockQueueInstances.length = 0;
   });
 
   it("uses EnvService.REDIS_URL when constructing the queue connection", async () => {
@@ -33,7 +39,7 @@ describe("WorkflowQueueClient (Env injection)", () => {
     const client = moduleRef.get(WorkflowQueueClient);
     expect(client).toBeInstanceOf(WorkflowQueueClient);
 
-    const connection = MockQueue.instances[0]?.connection;
+    const connection = mockQueueInstances[0]?.connection;
     expect(connection).toEqual({
       host: "redis.example",
       port: 6380,

@@ -21,7 +21,34 @@ export * from "./purchasing";
 export * from "./purchasing-ai";
 export * from "./inventory";
 export * from "./inventory-ai";
-export * from "./pos";
+// POS exports (aliased to avoid clashing with Sales PaymentMethod)
+export {
+  PaymentMethod as PosPaymentMethod,
+  PaymentMethodSchema as PosPaymentMethodSchema,
+  PosSaleLineItemSchema,
+  type PosSaleLineItem,
+  PosSalePaymentSchema,
+  type PosSalePayment,
+  PosSaleStatus,
+  PosSaleStatusSchema,
+  PosSaleSchema,
+  type PosSale,
+  PosTicketLineItemSchema,
+  type PosTicketLineItem,
+  PosTicketStatus,
+  PosTicketStatusSchema,
+  PosTicketSchema,
+  type PosTicket,
+} from "./pos/pos-sale.types";
+export * from "./pos/register.types";
+export * from "./pos/shift-session.types";
+export * from "./pos/create-register.schema";
+export * from "./pos/list-registers.schema";
+export * from "./pos/open-shift.schema";
+export * from "./pos/close-shift.schema";
+export * from "./pos/get-current-shift.schema";
+export * from "./pos/sync-pos-sale.schema";
+export * from "./pos/get-catalog-snapshot.schema";
 export * from "./pos-ai";
 export * from "./engagement";
 export * from "./engagement-ai";
@@ -30,6 +57,7 @@ export * from "./approvals";
 export * from "./identity";
 export * from "./errors";
 export * from "./platform";
+export * from "./copilot/collect-inputs.schema";
 
 export const CONTRACTS_HELLO = "Corely contracts loaded ✅";
 

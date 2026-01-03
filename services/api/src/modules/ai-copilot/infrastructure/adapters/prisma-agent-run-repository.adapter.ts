@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { PrismaService } from "@corely/data";
+import { PrismaService } from "@corely/data";
 import { AgentRunRepositoryPort } from "../../application/ports/agent-run-repository.port";
 import { AgentRun } from "../../domain/entities/agent-run.entity";
 
@@ -39,5 +39,23 @@ export class PrismaAgentRunRepository implements AgentRunRepositoryPort {
       where: { id: runId },
       data: { status, finishedAt: finishedAt || null },
     });
+  }
+
+  async findById(params: { tenantId: string; runId: string }): Promise<AgentRun | null> {
+    const found = await this.prisma.agentRun.findFirst({
+      where: { id: params.runId, tenantId: params.tenantId },
+    });
+    if (!found) {
+      return null;
+    }
+    return new AgentRun(
+      found.id,
+      found.tenantId,
+      found.createdByUserId || null,
+      found.status,
+      found.startedAt,
+      found.finishedAt || undefined,
+      found.metadataJson || undefined
+    );
   }
 }

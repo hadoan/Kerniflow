@@ -21,6 +21,7 @@ import { InventoryModule } from "./modules/inventory";
 import { ApprovalsModule } from "./modules/approvals";
 import { EngagementModule } from "./modules/engagement/engagement.module";
 import { PlatformModule } from "./modules/platform";
+import { AiCopilotModule } from "./modules/ai-copilot/ai-copilot.module";
 import { TraceIdMiddleware } from "./shared/trace/trace-id.middleware.js";
 import { TraceIdService } from "./shared/trace/trace-id.service.js";
 
@@ -51,7 +52,7 @@ import { TraceIdService } from "./shared/trace/trace-id.service.js";
     AutomationModule,
     ReportingModule,
     // CustomizationModule,
-    // AiCopilotModule,
+    AiCopilotModule,
     // Conditional imports based on env
     ...(function () {
       // We need to access EnvService here, but it's not available yet

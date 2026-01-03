@@ -29,13 +29,21 @@ type OrderFormProps = {
   onSubmit: (values: OrderFormValues) => void;
 };
 
+type LineItem = {
+  id?: string;
+  description: string;
+  quantity: number;
+  unitPriceCents: number;
+  discountCents: number;
+};
+
 export const OrderForm: React.FC<OrderFormProps> = ({ customers, initial, disabled, onSubmit }) => {
   const [customerPartyId, setCustomerPartyId] = useState(initial?.customerPartyId ?? "");
   const [currency, setCurrency] = useState(initial?.currency ?? "EUR");
   const [orderDate, setOrderDate] = useState(initial?.orderDate ?? "");
   const [deliveryDate, setDeliveryDate] = useState(initial?.deliveryDate ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
-  const [lineItems, setLineItems] = useState(
+  const [lineItems, setLineItems] = useState<LineItem[]>(
     initial?.lineItems?.length
       ? initial.lineItems.map((item) => ({
           id: item.id,
@@ -95,7 +103,10 @@ export const OrderForm: React.FC<OrderFormProps> = ({ customers, initial, disabl
   };
 
   const addLineItem = () => {
-    setLineItems((prev) => [...prev, { description: "", quantity: 1, unitPriceCents: 0 }]);
+    setLineItems((prev) => [
+      ...prev,
+      { description: "", quantity: 1, unitPriceCents: 0, discountCents: 0 },
+    ]);
   };
 
   const removeLineItem = (index: number) => {

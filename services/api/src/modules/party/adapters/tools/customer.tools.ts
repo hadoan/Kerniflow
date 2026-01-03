@@ -25,7 +25,7 @@ const buildCtx = (tenantId: string, userId: string, toolCallId?: string, runId?:
 
 export const buildCustomerTools = (app: PartyApplication): DomainToolPort[] => [
   {
-    name: "customer.create",
+    name: "customer_create",
     description: "Create a customer with contact and billing details.",
     kind: "server",
     inputSchema: CreateCustomerInputSchema,
@@ -42,7 +42,7 @@ export const buildCustomerTools = (app: PartyApplication): DomainToolPort[] => [
     },
   },
   {
-    name: "customer.update",
+    name: "customer_update",
     description: "Update customer fields such as name, contacts, VAT, or billing address.",
     kind: "server",
     inputSchema: UpdateCustomerInputSchema,
@@ -59,7 +59,7 @@ export const buildCustomerTools = (app: PartyApplication): DomainToolPort[] => [
     },
   },
   {
-    name: "customer.get",
+    name: "customer_get",
     description: "Fetch a customer by id.",
     kind: "server",
     inputSchema: GetCustomerInputSchema,
@@ -76,7 +76,7 @@ export const buildCustomerTools = (app: PartyApplication): DomainToolPort[] => [
     },
   },
   {
-    name: "customer.search",
+    name: "customer_search",
     description: "Search customers by name, email, phone, or VAT.",
     kind: "server",
     inputSchema: SearchCustomersInputSchema,
@@ -93,7 +93,7 @@ export const buildCustomerTools = (app: PartyApplication): DomainToolPort[] => [
     },
   },
   {
-    name: "customer.archive",
+    name: "customer_archive",
     description: "Archive a customer to prevent updates.",
     kind: "server",
     inputSchema: ArchiveCustomerInputSchema,

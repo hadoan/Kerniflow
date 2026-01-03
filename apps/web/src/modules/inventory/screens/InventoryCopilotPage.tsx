@@ -1,6 +1,5 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useChat } from "@ai-sdk/react";
-import { createIdempotencyKey } from "@corely/api-client";
 import {
   ProductProposalCardSchema,
   ReceiptDraftProposalCardSchema,
@@ -14,8 +13,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { inventoryApi } from "@/lib/inventory-api";
-import { authClient } from "@/lib/auth-client";
-import { getActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
+import { useCopilotChatOptions } from "@/lib/copilot-api";
 
 type MessagePart =
   | { type: "text"; text: string }
@@ -68,30 +66,10 @@ const ProposalCard: React.FC<{
 );
 
 export default function InventoryCopilotPage() {
-  const apiBase =
-    import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:3000";
-  const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
-  const accessToken = authClient.getAccessToken() ?? "";
-
-  const chatOptions = useMemo(
-    () =>
-      ({
-        api: `${apiBase}/copilot/chat`,
-        headers: {
-          Authorization: accessToken ? `Bearer ${accessToken}` : "",
-          "X-Tenant-Id": tenantId,
-          "X-Idempotency-Key": createIdempotencyKey(),
-        },
-        body: {
-          requestData: {
-            tenantId,
-            locale: "en",
-            activeModule: "inventory",
-          },
-        },
-      }) as any,
-    [apiBase, tenantId, accessToken]
-  );
+  const chatOptions = useCopilotChatOptions({
+    activeModule: "inventory",
+    locale: "en",
+  });
 
   const { messages, input, handleInputChange, handleSubmit } = useChat(chatOptions);
   const setPrompt = (value: string) =>

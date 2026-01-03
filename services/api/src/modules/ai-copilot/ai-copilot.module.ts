@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { DataModule } from "@corely/data";
 import { CopilotController } from "./adapters/http/copilot.controller";
-import type { EnvService } from "@corely/config";
+import { EnvService } from "@corely/config";
 
 import { StreamCopilotChatUseCase } from "./application/use-cases/stream-copilot-chat.usecase";
 import { PrismaAgentRunRepository } from "./infrastructure/adapters/prisma-agent-run-repository.adapter";
@@ -39,6 +39,9 @@ import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
 import { EngagementModule } from "../engagement/engagement.module";
 import { EngagementApplication } from "../engagement/application/engagement.application";
 import { buildEngagementTools } from "../engagement/adapters/tools/engagement.tools";
+import { CreateRunUseCase } from "./application/use-cases/create-run.usecase";
+import { GetRunUseCase } from "./application/use-cases/get-run.usecase";
+import { ListMessagesUseCase } from "./application/use-cases/list-messages.usecase";
 
 @Module({
   imports: [
@@ -78,13 +81,28 @@ import { buildEngagementTools } from "../engagement/adapters/tools/engagement.to
         PrismaToolExecutionRepository,
         PrismaAuditAdapter,
         OUTBOX_PORT,
-        "ENV_SERVICE",
+        EnvService,
         "COPILOT_LOGGER",
       ],
     },
     {
       provide: "COPILOT_CLOCK",
       useValue: { now: () => new Date() },
+    },
+    {
+      provide: CreateRunUseCase,
+      useFactory: (runs: PrismaAgentRunRepository) => new CreateRunUseCase(runs),
+      inject: [PrismaAgentRunRepository],
+    },
+    {
+      provide: GetRunUseCase,
+      useFactory: (runs: PrismaAgentRunRepository) => new GetRunUseCase(runs),
+      inject: [PrismaAgentRunRepository],
+    },
+    {
+      provide: ListMessagesUseCase,
+      useFactory: (messages: PrismaMessageRepository) => new ListMessagesUseCase(messages),
+      inject: [PrismaMessageRepository],
     },
     {
       provide: COPILOT_TOOLS,
@@ -94,14 +112,15 @@ import { buildEngagementTools } from "../engagement/adapters/tools/engagement.to
         sales: SalesApplication,
         purchasing: PurchasingApplication,
         inventory: InventoryApplication,
-        engagement: EngagementApplication
+        engagement: EngagementApplication,
+        env: EnvService
       ) => [
         ...buildInvoiceTools(invoices),
         ...buildCustomerTools(partyCrm),
         ...buildSalesTools(sales),
-        ...buildPurchasingTools(purchasing),
-        ...buildInventoryTools(inventory),
-        ...buildApprovalTools(),
+        ...buildPurchasingTools(purchasing, env),
+        ...buildInventoryTools(inventory, env),
+        ...buildApprovalTools(env),
         ...buildEngagementTools(engagement, partyCrm),
       ],
       inject: [
@@ -111,6 +130,7 @@ import { buildEngagementTools } from "../engagement/adapters/tools/engagement.to
         PurchasingApplication,
         InventoryApplication,
         EngagementApplication,
+        EnvService,
       ],
     },
     {

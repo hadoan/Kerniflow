@@ -28,4 +28,8 @@ export class FakeExpenseRepository implements ExpenseRepositoryPort {
       (e) => e.tenantId === tenantId && (params?.includeArchived ? true : !e.archivedAt)
     );
   }
+
+  async update(expense: Expense): Promise<void> {
+    await this.save(expense);
+  }
 }

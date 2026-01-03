@@ -32,8 +32,16 @@ type QuoteFormProps = {
   onSubmit: (values: QuoteFormValues) => void;
 };
 
+type LineItem = {
+  id?: string;
+  description: string;
+  quantity: number;
+  unitPriceCents: number;
+  discountCents: number;
+};
+
 export const QuoteForm: React.FC<QuoteFormProps> = ({ customers, initial, disabled, onSubmit }) => {
-  const buildLineItems = (items?: QuoteFormValues["lineItems"]) =>
+  const buildLineItems = (items?: QuoteFormValues["lineItems"]): LineItem[] =>
     items?.length
       ? items.map((item) => ({
           id: item.id,
@@ -93,7 +101,10 @@ export const QuoteForm: React.FC<QuoteFormProps> = ({ customers, initial, disabl
   };
 
   const addLineItem = () => {
-    setLineItems((prev) => [...prev, { description: "", quantity: 1, unitPriceCents: 0 }]);
+    setLineItems((prev) => [
+      ...prev,
+      { description: "", quantity: 1, unitPriceCents: 0, discountCents: 0 },
+    ]);
   };
 
   const removeLineItem = (index: number) => {

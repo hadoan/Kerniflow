@@ -164,12 +164,12 @@ export class CustomizationService {
       id: nextId,
     });
 
-    await this.audit.write({
+    await this.audit.log({
       tenantId,
-      actorUserId,
+      userId: actorUserId ?? "",
       action: "custom_layout.upserted",
-      targetType: "EntityLayout",
-      targetId: saved.id,
+      entityType: "EntityLayout",
+      entityId: saved.id,
     });
 
     if (idempotencyKey) {

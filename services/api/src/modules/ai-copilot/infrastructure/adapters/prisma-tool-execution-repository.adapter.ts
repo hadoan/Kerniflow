@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { PrismaService } from "@corely/data";
+import { PrismaService } from "@corely/data";
 import { ToolExecutionRepositoryPort } from "../../application/ports/tool-execution-repository.port";
 import { ToolExecution } from "../../domain/entities/tool-execution.entity";
 

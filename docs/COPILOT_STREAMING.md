@@ -42,7 +42,7 @@ Defined in `packages/data/prisma/schema/80_ai.prisma`:
 
 - Env vars:
   - `AI_MODEL_PROVIDER` = `openai` | `anthropic` (default: openai)
-  - `AI_MODEL_ID` (default: gpt-4o-mini or claude-3-haiku-20240307)
+  - `AI_MODEL_ID` (default: gpt-4o-mini or claude-3-haiku-20240307; Anthropic Sonnet example: claude-3-5-sonnet-20240620)
   - `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`
 
 ## Tool System

@@ -29,6 +29,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "kill3000": "lsof -ti:3000 | xargs kill -9",
     "arch:check": "node scripts/architecture-check.mjs",
     "check": "pnpm lint && pnpm typecheck",
     "catalog:sync": "pnpm --filter @corely/api exec tsx src/scripts/catalog-sync.ts",

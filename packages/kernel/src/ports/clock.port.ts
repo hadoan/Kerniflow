@@ -2,4 +2,5 @@ export interface ClockPort {
   now(): Date;
 }
 
-// export const CLOCK_PORT_TOKEN = "kernel/clock-port";
+// Re-export canonical token to avoid identity mismatches
+export { CLOCK_PORT_TOKEN } from "../tokens";

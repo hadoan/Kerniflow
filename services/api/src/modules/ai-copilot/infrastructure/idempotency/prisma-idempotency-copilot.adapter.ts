@@ -3,7 +3,7 @@ import {
   IdempotencyDecision,
   CopilotIdempotencyPort,
 } from "../../application/ports/copilot-idempotency.port";
-import type { IdempotencyService } from "../../../../shared/infrastructure/idempotency/idempotency.service";
+import { IdempotencyService } from "../../../../shared/infrastructure/idempotency/idempotency.service";
 
 @Injectable()
 export class PrismaCopilotIdempotencyAdapter implements CopilotIdempotencyPort {

@@ -28,7 +28,7 @@ const buildCtx = (tenantId: string, userId: string, toolCallId?: string, runId?:
 
 export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] => [
   {
-    name: "invoice.get",
+    name: "invoice_get",
     description: "Fetch a single invoice by id for the current tenant.",
     kind: "server",
     inputSchema: GetInvoiceByIdInputSchema,
@@ -45,7 +45,7 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     },
   },
   {
-    name: "invoice.list",
+    name: "invoice_list",
     description: "List invoices with optional filters (status, customer, date range).",
     kind: "server",
     inputSchema: ListInvoicesInputSchema,
@@ -62,7 +62,7 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     },
   },
   {
-    name: "invoice.create",
+    name: "invoice_create",
     description: "Create a draft invoice with line items.",
     kind: "server",
     inputSchema: CreateInvoiceInputSchema,
@@ -79,7 +79,7 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     },
   },
   {
-    name: "invoice.update",
+    name: "invoice_update",
     description: "Update invoice header or line items (draft only for lines).",
     kind: "server",
     inputSchema: UpdateInvoiceInputSchema,
@@ -96,7 +96,7 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     },
   },
   {
-    name: "invoice.finalize",
+    name: "invoice_finalize",
     description: "Finalize a draft invoice (assigns number and marks issued).",
     kind: "server",
     inputSchema: FinalizeInvoiceInputSchema,
@@ -113,7 +113,7 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     },
   },
   {
-    name: "invoice.send",
+    name: "invoice_send",
     description: "Mark an invoice as sent (email/link).",
     kind: "server",
     inputSchema: SendInvoiceInputSchema,
@@ -130,7 +130,7 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     },
   },
   {
-    name: "invoice.record_payment",
+    name: "invoice_record_payment",
     description: "Record a payment for an invoice.",
     kind: "server",
     inputSchema: RecordPaymentInputSchema,
@@ -147,7 +147,7 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
     },
   },
   {
-    name: "invoice.cancel",
+    name: "invoice_cancel",
     description: "Cancel an invoice.",
     kind: "server",
     inputSchema: CancelInvoiceInputSchema,

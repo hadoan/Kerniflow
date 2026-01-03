@@ -50,6 +50,7 @@ export class CreateExpenseUseCase {
         body.tenantId,
         body.merchant,
         body.totalCents,
+        body.taxAmountCents ?? null,
         body.currency,
         body.category ?? null,
         new Date(body.issuedAt),

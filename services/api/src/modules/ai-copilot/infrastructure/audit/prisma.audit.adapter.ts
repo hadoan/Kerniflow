@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { PrismaService } from "@corely/data";
+import { PrismaService } from "@corely/data";
 import { AuditPort } from "../../application/ports/audit.port";
 
 @Injectable()

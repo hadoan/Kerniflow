@@ -8,4 +8,17 @@ export interface MessageRepositoryPort {
     role: string;
     partsJson: string;
   }): Promise<CopilotMessage>;
+
+  createMany(
+    messages: {
+      id: string;
+      tenantId: string;
+      runId: string;
+      role: string;
+      partsJson: string;
+      createdAt?: Date;
+    }[]
+  ): Promise<void>;
+
+  listByRun(params: { tenantId: string; runId: string }): Promise<CopilotMessage[]>;
 }

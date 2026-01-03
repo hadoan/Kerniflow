@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useChat } from "@ai-sdk/react";
-import { createIdempotencyKey } from "@corely/api-client";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { purchasingApi } from "@/lib/purchasing-api";
+import { useCopilotChatOptions } from "@/lib/copilot-api";
 
 type MessagePart =
   | { type: "text"; text: string }
@@ -36,29 +36,10 @@ const ProposalCard: React.FC<{
 );
 
 export default function PurchasingCopilotPage() {
-  const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-  const tenantId = "demo-tenant";
-  const accessToken = "";
-
-  const chatOptions = useMemo(
-    () =>
-      ({
-        api: `${apiBase}/copilot/chat`,
-        headers: {
-          Authorization: accessToken ? `Bearer ${accessToken}` : "",
-          "X-Tenant-Id": tenantId,
-          "X-Idempotency-Key": createIdempotencyKey(),
-        },
-        body: {
-          requestData: {
-            tenantId,
-            locale: "en",
-            activeModule: "purchasing",
-          },
-        },
-      }) as any,
-    [apiBase, tenantId, accessToken]
-  );
+  const chatOptions = useCopilotChatOptions({
+    activeModule: "purchasing",
+    locale: "en",
+  });
 
   const { messages, input, handleInputChange, handleSubmit } = useChat(chatOptions);
 

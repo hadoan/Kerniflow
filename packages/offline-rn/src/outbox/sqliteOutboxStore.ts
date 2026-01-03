@@ -274,6 +274,13 @@ export class SqliteOutboxStore implements OutboxStore {
   }
 
   /**
+   * Remove all commands for a workspace (used when clearing local data)
+   */
+  async clearWorkspace(workspaceId: string): Promise<void> {
+    await this.db.runAsync(`DELETE FROM outbox_commands WHERE workspaceId = ?`, [workspaceId]);
+  }
+
+  /**
    * Helper: Convert database row to OutboxCommand
    */
   private rowToCommand(row: any): OutboxCommand {
@@ -286,7 +293,7 @@ export class SqliteOutboxStore implements OutboxStore {
         }
       : undefined;
 
-    return {
+    const command: OutboxCommand = {
       commandId: row.commandId,
       workspaceId: row.workspaceId,
       type: row.type,
@@ -294,12 +301,26 @@ export class SqliteOutboxStore implements OutboxStore {
       createdAt: new Date(row.createdAt),
       status: row.status as OutboxCommandStatus,
       attempts: row.attempts,
-      nextAttemptAt: row.nextAttemptAt ? new Date(row.nextAttemptAt) : undefined,
+      nextAttemptAt: row.nextAttemptAt ? new Date(row.nextAttemptAt) : null,
       idempotencyKey: row.idempotencyKey,
-      clientTraceId: row.clientTraceId || undefined,
-      meta: row.meta ? JSON.parse(row.meta) : undefined,
-      error,
-      conflict: row.conflict ? JSON.parse(row.conflict) : undefined,
     };
+
+    if (row.clientTraceId) {
+      command.clientTraceId = row.clientTraceId;
+    }
+
+    if (row.meta) {
+      command.meta = JSON.parse(row.meta);
+    }
+
+    if (error) {
+      command.error = error;
+    }
+
+    if (row.conflict) {
+      command.conflict = JSON.parse(row.conflict);
+    }
+
+    return command;
   }
 }

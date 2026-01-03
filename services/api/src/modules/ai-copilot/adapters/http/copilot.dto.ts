@@ -5,8 +5,9 @@ export class CopilotChatRequestDto {
   @IsString()
   id?: string;
 
+  @IsOptional()
   @IsArray()
-  messages!: unknown[];
+  messages?: unknown[];
 
   requestData!: {
     tenantId: string;

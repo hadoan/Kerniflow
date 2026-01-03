@@ -17,7 +17,7 @@ export class SyncCommandMapper {
       saleDate: posSale.saleDate,
       cashierEmployeePartyId: posSale.cashierEmployeePartyId,
       customerPartyId: posSale.customerPartyId,
-      lineItems: posSale.lineItems.map((line) => ({
+      lineItems: posSale.lineItems.map((line: PosSale["lineItems"][number]) => ({
         lineItemId: line.lineItemId,
         productId: line.productId,
         productName: line.productName,
@@ -31,7 +31,7 @@ export class SyncCommandMapper {
       subtotalCents: posSale.subtotalCents,
       taxCents: posSale.taxCents,
       totalCents: posSale.totalCents,
-      payments: posSale.payments.map((payment) => ({
+      payments: posSale.payments.map((payment: PosSale["payments"][number]) => ({
         paymentId: payment.paymentId,
         method: payment.method,
         amountCents: payment.amountCents,

@@ -17,7 +17,6 @@ export class PrismaTenantTemplateInstallRepositoryAdapter implements TenantTempl
     tenantId: string,
     templateId: string
   ): Promise<TenantTemplateInstallEntity | null> {
-    // @ts-expect-error - tenantTemplateInstall table will exist after migration
     const record = await this.prisma.tenantTemplateInstall.findUnique({
       where: {
         tenantId_templateId: {
@@ -35,7 +34,6 @@ export class PrismaTenantTemplateInstallRepositoryAdapter implements TenantTempl
   }
 
   async listByTenant(tenantId: string): Promise<TenantTemplateInstallEntity[]> {
-    // @ts-expect-error - tenantTemplateInstall table will exist after migration
     const records = await this.prisma.tenantTemplateInstall.findMany({
       where: { tenantId },
       orderBy: { appliedAt: "desc" },
@@ -45,7 +43,6 @@ export class PrismaTenantTemplateInstallRepositoryAdapter implements TenantTempl
   }
 
   async upsert(entity: TenantTemplateInstallEntity): Promise<TenantTemplateInstallEntity> {
-    // @ts-expect-error - tenantTemplateInstall table will exist after migration
     const record = await this.prisma.tenantTemplateInstall.upsert({
       where: {
         tenantId_templateId: {
@@ -76,7 +73,6 @@ export class PrismaTenantTemplateInstallRepositoryAdapter implements TenantTempl
   }
 
   async delete(tenantId: string, templateId: string): Promise<void> {
-    // @ts-expect-error - tenantTemplateInstall table will exist after migration
     await this.prisma.tenantTemplateInstall.delete({
       where: {
         tenantId_templateId: {
