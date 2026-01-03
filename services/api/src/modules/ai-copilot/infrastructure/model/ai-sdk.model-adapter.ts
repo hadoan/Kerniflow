@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import type { EnvService } from "@corely/config";
-import { streamText, convertToCoreMessages } from "ai";
+import { streamText, convertToCoreMessages, stepCountIs } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { LanguageModelPort } from "../../application/ports/language-model.port";
@@ -68,46 +68,55 @@ export class AiSdkModelAdapter implements LanguageModelPort {
 
     this.logger.debug(`Starting streamText with ${Object.keys(toolset).length} tools`);
 
-    let outputText = "";
-    let usage: LanguageModelUsage | undefined;
-    let finishResolve: (() => void) | undefined;
-    let streamError: Error | undefined;
-
-    const finishPromise = new Promise<void>((resolve) => {
-      finishResolve = resolve;
-    });
-
     const result = streamText({
       model,
       messages: convertToCoreMessages(params.messages),
       tools: toolset,
-      onFinish: (event) => {
-        outputText = event.text;
-        usage = event.usage;
-        finishResolve?.();
-      },
-      onError: (error) => {
-        streamError = error instanceof Error ? error : new Error(String(error));
-        finishResolve?.();
-      },
+      stopWhen: stepCountIs(5),
     });
 
-    result.pipeUIMessageStreamToResponse(params.response, {
-      status: 200,
-      statusText: "OK",
-      headers: {
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "X-Content-Type-Options": "nosniff",
-      },
-    });
+    // Set response headers for text streaming
+    params.response.setHeader("Content-Type", "text/plain; charset=utf-8");
+    params.response.setHeader("Cache-Control", "no-cache, no-transform");
 
-    await finishPromise;
+    this.logger.debug("Starting to stream chunks from fullStream");
+    let chunkCount = 0;
+    let textDeltaCount = 0;
+    let toolCallCount = 0;
+    let toolResultCount = 0;
 
-    if (streamError) {
-      throw streamError;
+    // Stream all text from all steps (including after tool calls)
+    try {
+      for await (const chunk of result.fullStream) {
+        chunkCount++;
+
+        if (chunk.type === "text-delta") {
+          textDeltaCount++;
+          const preview = chunk.text.length > 50 ? chunk.text.substring(0, 50) + "..." : chunk.text;
+          this.logger.debug(`Text delta ${textDeltaCount}: "${preview}"`);
+          params.response.write(chunk.text);
+        } else if (chunk.type === "tool-call") {
+          toolCallCount++;
+          this.logger.log(`Tool call ${toolCallCount}: ${(chunk as any).toolName}`);
+        } else if (chunk.type === "tool-result") {
+          toolResultCount++;
+          this.logger.log(`Tool result ${toolResultCount} received`);
+        } else if (chunk.type === "finish") {
+          this.logger.log(`Stream finished: ${(chunk as any).finishReason}`);
+        } else {
+          this.logger.debug(`Chunk type: ${chunk.type}`);
+        }
+      }
+    } catch (error) {
+      this.logger.error("Stream error:", error);
+    } finally {
+      this.logger.log(
+        `Stream completed - Chunks: ${chunkCount}, Text: ${textDeltaCount}, Tools: ${toolCallCount}/${toolResultCount}`
+      );
+      params.response.end();
     }
 
-    return { outputText, usage };
+    // Return empty values - actual text/usage available via result promises if needed
+    return { outputText: "", usage: undefined };
   }
 }
