@@ -14,6 +14,7 @@ export * from "./ports/unit-of-work.port";
 export * from "./ports/idempotency.port";
 export * from "./ports/outbox.port";
 export * from "./ports/audit.port";
+export * from "./ports/observability.port";
 
 export * from "./testing/noop-logger";
 export * from "./testing/fixed-clock";

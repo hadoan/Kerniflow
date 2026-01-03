@@ -1,6 +1,8 @@
 import { type CopilotUIMessage } from "../../domain/types/ui-message";
 import { type DomainToolPort } from "./domain-tool.port";
 import { type Response } from "express";
+import { type ObservabilitySpanRef } from "@corely/kernel";
+import { type LanguageModelUsage } from "ai";
 
 export interface LanguageModelPort {
   streamChat(params: {
@@ -10,5 +12,6 @@ export interface LanguageModelPort {
     tenantId: string;
     userId: string;
     response: Response;
-  }): Promise<void>;
+    observability: ObservabilitySpanRef;
+  }): Promise<{ outputText: string; usage?: LanguageModelUsage }>;
 }

@@ -9,6 +9,7 @@ export class CreateRunUseCase {
     userId: string | null;
     metadataJson?: string;
     runId?: string;
+    traceId?: string;
   }): Promise<{ runId: string }> {
     const runId = params.runId || nanoid();
 
@@ -23,6 +24,7 @@ export class CreateRunUseCase {
       createdByUserId: params.userId,
       status: "running",
       metadataJson: params.metadataJson,
+      traceId: params.traceId,
     });
 
     return { runId };

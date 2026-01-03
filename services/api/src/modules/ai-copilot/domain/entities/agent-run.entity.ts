@@ -6,6 +6,7 @@ export class AgentRun {
     public status: string,
     public readonly startedAt: Date,
     public finishedAt?: Date,
-    public metadataJson?: string
+    public metadataJson?: string,
+    public readonly traceId?: string
   ) {}
 }

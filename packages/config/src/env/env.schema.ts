@@ -61,6 +61,18 @@ export const envSchema = z.object({
   GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
 
   // ============================================================================
+  // OBSERVABILITY
+  // ============================================================================
+  OBSERVABILITY_PROVIDER: z.enum(["none", "otel", "langfuse"]).default("none"),
+  OBSERVABILITY_SAMPLE_RATIO: z.coerce.number().min(0).max(1).default(1),
+  OBSERVABILITY_MASKING_MODE: z.enum(["off", "standard", "strict"]).default("standard"),
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
+  OTEL_EXPORTER_OTLP_HEADERS: z.string().optional(),
+  LANGFUSE_BASE_URL: z.string().url().optional(),
+  LANGFUSE_PUBLIC_KEY: z.string().optional(),
+  LANGFUSE_SECRET_KEY: z.string().optional(),
+
+  // ============================================================================
   // SECURITY & AUTH
   // ============================================================================
   JWT_SECRET: z.string().optional(),
@@ -91,6 +103,8 @@ export const SECRET_ENV_KEYS: ReadonlySet<keyof Env> = new Set([
   "RESEND_WEBHOOK_SECRET",
   "JWT_SECRET",
   "GOOGLE_APPLICATION_CREDENTIALS",
+  "LANGFUSE_SECRET_KEY",
+  "OTEL_EXPORTER_OTLP_HEADERS",
 ]);
 
 /**

@@ -134,6 +134,42 @@ export class EnvService {
   }
 
   // ============================================================================
+  // OBSERVABILITY
+  // ============================================================================
+
+  get OBSERVABILITY_PROVIDER(): "none" | "otel" | "langfuse" {
+    return this.config.OBSERVABILITY_PROVIDER;
+  }
+
+  get OBSERVABILITY_SAMPLE_RATIO(): number {
+    return this.config.OBSERVABILITY_SAMPLE_RATIO;
+  }
+
+  get OBSERVABILITY_MASKING_MODE(): "off" | "standard" | "strict" {
+    return this.config.OBSERVABILITY_MASKING_MODE;
+  }
+
+  get OTEL_EXPORTER_OTLP_ENDPOINT(): string | undefined {
+    return this.config.OTEL_EXPORTER_OTLP_ENDPOINT;
+  }
+
+  get OTEL_EXPORTER_OTLP_HEADERS(): string | undefined {
+    return this.config.OTEL_EXPORTER_OTLP_HEADERS;
+  }
+
+  get LANGFUSE_BASE_URL(): string | undefined {
+    return this.config.LANGFUSE_BASE_URL;
+  }
+
+  get LANGFUSE_PUBLIC_KEY(): string | undefined {
+    return this.config.LANGFUSE_PUBLIC_KEY;
+  }
+
+  get LANGFUSE_SECRET_KEY(): string | undefined {
+    return this.config.LANGFUSE_SECRET_KEY;
+  }
+
+  // ============================================================================
   // SECURITY & AUTH
   // ============================================================================
 

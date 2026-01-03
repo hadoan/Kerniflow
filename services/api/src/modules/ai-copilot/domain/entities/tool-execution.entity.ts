@@ -10,6 +10,7 @@ export class ToolExecution {
     public readonly startedAt: Date,
     public finishedAt?: Date,
     public outputJson?: string,
-    public errorJson?: string
+    public errorJson?: string,
+    public readonly traceId?: string
   ) {}
 }

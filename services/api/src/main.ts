@@ -5,6 +5,7 @@ import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { ProblemDetailsExceptionFilter } from "./shared/exceptions/problem-details.filter.js";
+import { setupTracing, shutdownTracing } from "./shared/observability/setup-tracing";
 
 // Load env files before anything else
 loadEnv();
@@ -12,6 +13,8 @@ loadEnv();
 async function bootstrap() {
   const logger = new Logger("Bootstrap");
   const startedAt = Date.now();
+
+  await setupTracing("corely-api");
 
   logger.log("Starting Nest factory");
   const app = await NestFactory.create(AppModule, {
@@ -54,5 +57,6 @@ async function bootstrap() {
 bootstrap().catch((err) => {
   const logger = new Logger("Bootstrap");
   logger.error("Bootstrap failed", err instanceof Error ? err.stack : `${err}`);
+  void shutdownTracing();
   throw err;
 });

@@ -1,4 +1,5 @@
 import { IsArray, IsOptional, IsString } from "class-validator";
+import { type CopilotUIMessage } from "../../domain/types/ui-message";
 
 export class CopilotChatRequestDto {
   @IsOptional()
@@ -7,7 +8,7 @@ export class CopilotChatRequestDto {
 
   @IsOptional()
   @IsArray()
-  messages?: unknown[];
+  messages?: CopilotUIMessage[];
 
   requestData!: {
     tenantId: string;

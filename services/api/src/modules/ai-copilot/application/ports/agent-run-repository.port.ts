@@ -6,6 +6,7 @@ export interface AgentRunRepositoryPort {
     tenantId: string;
     createdByUserId: string | null;
     status: string;
+    traceId?: string;
     metadataJson?: string;
   }): Promise<AgentRun>;
 

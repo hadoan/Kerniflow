@@ -13,6 +13,7 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
     runId: string;
     role: string;
     partsJson: string;
+    traceId?: string;
   }): Promise<CopilotMessage> {
     const created = await this.prisma.message.create({
       data: {
@@ -21,6 +22,7 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
         runId: message.runId,
         role: message.role,
         partsJson: message.partsJson,
+        traceId: message.traceId,
       },
     });
     return new CopilotMessage(
@@ -29,7 +31,8 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       created.runId,
       created.role,
       created.partsJson,
-      created.createdAt
+      created.createdAt,
+      created.traceId || undefined
     );
   }
 
@@ -41,6 +44,7 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
       role: string;
       partsJson: string;
       createdAt?: Date;
+      traceId?: string;
     }[]
   ): Promise<void> {
     if (!messages.length) {
@@ -54,6 +58,7 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
         role: m.role,
         partsJson: m.partsJson,
         createdAt: m.createdAt,
+        traceId: m.traceId,
       })),
       skipDuplicates: true,
     });
@@ -66,7 +71,15 @@ export class PrismaMessageRepository implements MessageRepositoryPort {
     });
     return rows.map(
       (row) =>
-        new CopilotMessage(row.id, row.tenantId, row.runId, row.role, row.partsJson, row.createdAt)
+        new CopilotMessage(
+          row.id,
+          row.tenantId,
+          row.runId,
+          row.role,
+          row.partsJson,
+          row.createdAt,
+          row.traceId || undefined
+        )
     );
   }
 }

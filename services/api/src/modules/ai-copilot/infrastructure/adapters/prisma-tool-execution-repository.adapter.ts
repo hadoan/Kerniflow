@@ -15,6 +15,7 @@ export class PrismaToolExecutionRepository implements ToolExecutionRepositoryPor
     toolName: string;
     inputJson: string;
     status: string;
+    traceId?: string;
   }): Promise<ToolExecution> {
     const created = await this.prisma.toolExecution.create({
       data: {
@@ -25,6 +26,7 @@ export class PrismaToolExecutionRepository implements ToolExecutionRepositoryPor
         toolName: execution.toolName,
         inputJson: execution.inputJson,
         status: execution.status,
+        traceId: execution.traceId,
       },
     });
 
@@ -39,7 +41,8 @@ export class PrismaToolExecutionRepository implements ToolExecutionRepositoryPor
       created.startedAt,
       created.finishedAt || undefined,
       created.outputJson || undefined,
-      created.errorJson || undefined
+      created.errorJson || undefined,
+      created.traceId || undefined
     );
   }
 

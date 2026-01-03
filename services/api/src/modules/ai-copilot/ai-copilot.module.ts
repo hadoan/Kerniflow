@@ -39,6 +39,8 @@ import { buildApprovalTools } from "../approvals/adapters/tools/approval.tools";
 import { EngagementModule } from "../engagement/engagement.module";
 import { EngagementApplication } from "../engagement/application/engagement.application";
 import { buildEngagementTools } from "../engagement/adapters/tools/engagement.tools";
+import { OtelObservabilityAdapter } from "../../shared/observability/otel-observability.adapter";
+import { type ObservabilityPort } from "@corely/kernel";
 import { CreateRunUseCase } from "./application/use-cases/create-run.usecase";
 import { GetRunUseCase } from "./application/use-cases/get-run.usecase";
 import { ListMessagesUseCase } from "./application/use-cases/list-messages.usecase";
@@ -72,10 +74,11 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
         audit: PrismaAuditAdapter,
         outbox: OutboxPort,
         env: EnvService,
-        logger: NestLoggerAdapter
+        logger: NestLoggerAdapter,
+        observability: ObservabilityPort
       ) => {
         logger.debug("Creating AiSdkModelAdapter");
-        return new AiSdkModelAdapter(toolExec, audit, outbox, env);
+        return new AiSdkModelAdapter(toolExec, audit, outbox, env, observability);
       },
       inject: [
         PrismaToolExecutionRepository,
@@ -83,6 +86,7 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
         OUTBOX_PORT,
         EnvService,
         "COPILOT_LOGGER",
+        "OBSERVABILITY_PORT",
       ],
     },
     {
@@ -103,6 +107,12 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
       provide: ListMessagesUseCase,
       useFactory: (messages: PrismaMessageRepository) => new ListMessagesUseCase(messages),
       inject: [PrismaMessageRepository],
+    },
+    {
+      provide: "OBSERVABILITY_PORT",
+      useFactory: (env: EnvService) =>
+        new OtelObservabilityAdapter({ maskingMode: env.OBSERVABILITY_MASKING_MODE }),
+      inject: [EnvService],
     },
     {
       provide: COPILOT_TOOLS,
@@ -145,7 +155,8 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
         outbox: OutboxPort,
         idem: PrismaCopilotIdempotencyAdapter,
         clock: ClockPort,
-        logger: NestLoggerAdapter
+        logger: NestLoggerAdapter,
+        observability: ObservabilityPort
       ) => {
         logger.debug("Creating StreamCopilotChatUseCase");
         return new StreamCopilotChatUseCase(
@@ -157,7 +168,8 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
           audit as AuditPort,
           outbox as OutboxPort,
           idem,
-          clock
+          clock,
+          observability
         );
       },
       inject: [
@@ -171,6 +183,7 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
         PrismaCopilotIdempotencyAdapter,
         "COPILOT_CLOCK",
         "COPILOT_LOGGER",
+        "OBSERVABILITY_PORT",
       ],
     },
   ],

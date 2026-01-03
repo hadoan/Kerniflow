@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { EnvService } from "@corely/config";
-import { streamText, convertToCoreMessages, pipeUIMessageStreamToResponse } from "ai";
+import { streamText, convertToCoreMessages } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { LanguageModelPort } from "../../application/ports/language-model.port";
@@ -12,6 +12,12 @@ import type { OutboxPort } from "../../application/ports/outbox.port";
 import { collectInputsTool } from "../tools/interactive-tools";
 import { type CopilotUIMessage } from "../../domain/types/ui-message";
 import type { Response } from "express";
+import { type ObservabilityPort, type ObservabilitySpanRef } from "@corely/kernel";
+import {
+  type StreamTextOnFinishCallback,
+  type LanguageModelUsage,
+  type StreamTextOnErrorCallback,
+} from "ai";
 
 @Injectable()
 export class AiSdkModelAdapter implements LanguageModelPort {
@@ -22,7 +28,8 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     private readonly toolExecutions: ToolExecutionRepositoryPort,
     private readonly audit: AuditPort,
     private readonly outbox: OutboxPort,
-    private readonly env: EnvService
+    private readonly env: EnvService,
+    private readonly observability: ObservabilityPort
   ) {
     this.openai = createOpenAI({
       apiKey: this.env.OPENAI_API_KEY || "",
@@ -39,7 +46,8 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     tenantId: string;
     userId: string;
     response: Response;
-  }): Promise<void> {
+    observability: ObservabilitySpanRef;
+  }): Promise<{ outputText: string; usage?: LanguageModelUsage }> {
     const aiTools = buildAiTools(params.tools, {
       toolExecutions: this.toolExecutions,
       audit: this.audit,
@@ -47,6 +55,8 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       tenantId: params.tenantId,
       runId: params.runId,
       userId: params.userId,
+      observability: this.observability,
+      parentSpan: params.observability,
     });
 
     const provider = this.env.AI_MODEL_PROVIDER;
@@ -54,18 +64,60 @@ export class AiSdkModelAdapter implements LanguageModelPort {
 
     const model = provider === "anthropic" ? this.anthropic(modelId) : this.openai(modelId);
 
-    const result = streamText({
-      model: model as any,
-      messages: convertToCoreMessages(params.messages),
-      tools: {
-        ...aiTools,
-        collect_inputs: collectInputsTool,
-      } as any,
+    let outputText = "";
+    let usage: LanguageModelUsage | undefined;
+    let finishResolve: (() => void) | undefined;
+    let streamError: Error | undefined;
+
+    const finishPromise = new Promise<void>((resolve) => {
+      finishResolve = resolve;
     });
 
-    pipeUIMessageStreamToResponse({
-      response: params.response as any,
-      stream: result.toUIMessageStream(),
+    const toolset = {
+      ...aiTools,
+      collect_inputs: collectInputsTool,
+    };
+
+    const onFinish: StreamTextOnFinishCallback<typeof toolset> = (event) => {
+      outputText = event.text;
+      usage = event.usage;
+      if (finishResolve) {
+        finishResolve();
+      }
+    };
+
+    const onError: StreamTextOnErrorCallback = (error) => {
+      streamError = error instanceof Error ? error : new Error(String(error));
+      if (finishResolve) {
+        finishResolve();
+      }
+    };
+
+    const result = streamText({
+      model,
+      messages: convertToCoreMessages(params.messages),
+      tools: toolset,
+      onFinish,
+      onError,
+      maxSteps: 5,
     });
+
+    result.pipeUIMessageStreamToResponse(params.response, {
+      status: 200,
+      statusText: "OK",
+      headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+
+    await finishPromise;
+
+    if (streamError) {
+      throw streamError;
+    }
+
+    return { outputText, usage };
   }
 }

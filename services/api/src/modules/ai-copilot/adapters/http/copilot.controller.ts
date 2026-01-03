@@ -21,8 +21,9 @@ import type { ClockPort } from "@corely/kernel";
 import { CreateRunUseCase } from "../../application/use-cases/create-run.usecase";
 import { GetRunUseCase } from "../../application/use-cases/get-run.usecase";
 import { ListMessagesUseCase } from "../../application/use-cases/list-messages.usecase";
+import { EnvService } from "@corely/config";
 
-type AuthedRequest = Request & { tenantId?: string; user?: { userId?: string } };
+type AuthedRequest = Request & { tenantId?: string; user?: { userId?: string }; traceId?: string };
 
 @Controller("copilot")
 export class CopilotController {
@@ -33,7 +34,8 @@ export class CopilotController {
     private readonly createRun: CreateRunUseCase,
     private readonly getRun: GetRunUseCase,
     private readonly listMessagesUseCase: ListMessagesUseCase,
-    @Inject("COPILOT_CLOCK") private readonly clock: ClockPort
+    @Inject("COPILOT_CLOCK") private readonly clock: ClockPort,
+    private readonly env: EnvService
   ) {
     this.logger.debug("CopilotController instantiated");
   }
@@ -44,7 +46,7 @@ export class CopilotController {
     @Body() body: CopilotChatRequestDto,
     @Headers("x-idempotency-key") idempotencyKey: string,
     @Req() req: AuthedRequest,
-    @Res() res: Response
+    @Res({ passthrough: false }) res: Response
   ) {
     if (!idempotencyKey) {
       throw new BadRequestException("Missing X-Idempotency-Key");
@@ -52,14 +54,22 @@ export class CopilotController {
 
     const tenantId = req.tenantId as string;
     const userId = req.user?.userId || "unknown";
+    const requestId = req.traceId || "unknown";
 
-    await this.streamCopilotChat.execute({
-      messages: (body as any).messages || [],
+    return this.streamCopilotChat.execute({
+      messages: body.messages || [],
       tenantId,
       userId,
       idempotencyKey,
       runId: body.id,
       response: res,
+      intent: body.requestData?.activeModule,
+      requestId,
+      workspaceId: tenantId,
+      workspaceKind: "COMPANY",
+      environment: this.env.APP_ENV,
+      modelId: this.env.AI_MODEL_ID,
+      modelProvider: this.env.AI_MODEL_PROVIDER,
     });
   }
 
@@ -75,11 +85,13 @@ export class CopilotController {
     }
     const tenantId = req.tenantId as string;
     const userId = req.user?.userId || "unknown";
+    const requestId = req.traceId || "unknown";
 
     const { runId } = await this.createRun.execute({
       runId: body.id,
       tenantId,
       userId,
+      traceId: requestId,
       metadataJson: body.requestData ? JSON.stringify(body.requestData) : undefined,
     });
 
@@ -116,14 +128,22 @@ export class CopilotController {
     }
     const tenantId = req.tenantId as string;
     const userId = req.user?.userId || "unknown";
+    const requestId = req.traceId || "unknown";
 
     await this.streamCopilotChat.execute({
-      messages: (body as any).messages || [],
+      messages: body.messages || [],
       tenantId,
       userId,
       idempotencyKey,
       runId: id,
       response: res,
+      intent: body.requestData?.activeModule,
+      requestId,
+      workspaceId: tenantId,
+      workspaceKind: "COMPANY",
+      environment: this.env.APP_ENV,
+      modelId: this.env.AI_MODEL_ID,
+      modelProvider: this.env.AI_MODEL_PROVIDER,
     });
   }
 }

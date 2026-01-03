@@ -7,6 +7,7 @@ export interface MessageRepositoryPort {
     runId: string;
     role: string;
     partsJson: string;
+    traceId?: string;
   }): Promise<CopilotMessage>;
 
   createMany(
@@ -17,6 +18,7 @@ export interface MessageRepositoryPort {
       role: string;
       partsJson: string;
       createdAt?: Date;
+      traceId?: string;
     }[]
   ): Promise<void>;
 

@@ -9,6 +9,7 @@ export interface ToolExecutionRepositoryPort {
     toolName: string;
     inputJson: string;
     status: string;
+    traceId?: string;
   }): Promise<ToolExecution>;
 
   complete(

@@ -5,6 +5,7 @@ export class CopilotMessage {
     public readonly runId: string,
     public readonly role: string,
     public readonly partsJson: string,
-    public readonly createdAt: Date
+    public readonly createdAt: Date,
+    public readonly traceId?: string
   ) {}
 }

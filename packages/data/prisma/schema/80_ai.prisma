@@ -7,6 +7,7 @@ model AgentRun {
   finishedAt     DateTime?
   metadataJson   String?
   createdAt      DateTime @default(now())
+  traceId        String?
 
   messages       Message[]
   toolExecutions ToolExecution[]
@@ -21,6 +22,7 @@ model Message {
   role      String
   partsJson String
   createdAt DateTime @default(now())
+  traceId   String?
 
   run AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
 
@@ -39,6 +41,7 @@ model ToolExecution {
   startedAt     DateTime @default(now())
   finishedAt    DateTime?
   errorJson     String?
+  traceId       String?
 
   run AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
 

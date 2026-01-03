@@ -1,8 +1,10 @@
 import { tool, type Tool, type ToolCallOptions } from "ai";
+import { SpanStatusCode } from "@opentelemetry/api";
 import type { DomainToolPort } from "../../application/ports/domain-tool.port";
 import type { ToolExecutionRepositoryPort } from "../../application/ports/tool-execution-repository.port";
 import type { AuditPort } from "../../application/ports/audit.port";
 import type { OutboxPort } from "../../application/ports/outbox.port";
+import { type ObservabilityPort, type ObservabilitySpanRef, type JsonValue } from "@corely/kernel";
 
 export function buildAiTools(
   tools: DomainToolPort[],
@@ -13,6 +15,8 @@ export function buildAiTools(
     tenantId: string;
     runId: string;
     userId: string;
+    observability: ObservabilityPort;
+    parentSpan: ObservabilitySpanRef;
   }
 ): Record<string, Tool<unknown, unknown>> {
   const serverTools = tools.filter(
@@ -38,7 +42,18 @@ export function buildAiTools(
           toolName: t.name,
           inputJson: JSON.stringify(input),
           status: "pending",
+          traceId: deps.parentSpan.traceId,
         });
+        const span = deps.observability.startSpan(
+          `tool.${t.name}`,
+          {
+            "tool.name": t.name,
+            "tool.call_id": toolCallId,
+            "copilot.run.id": deps.runId,
+          },
+          deps.parentSpan
+        );
+        const startedAt = Date.now();
         try {
           const result = await t.execute({
             tenantId: deps.tenantId,
@@ -64,12 +79,33 @@ export function buildAiTools(
             eventType: "copilot.tool.completed",
             payload: { runId: deps.runId, tool: t.name },
           });
+          const durationMs = Date.now() - startedAt;
+          deps.observability.recordToolObservation(span, {
+            toolName: t.name,
+            toolCallId,
+            input: input as JsonValue,
+            output: result as JsonValue,
+            status: "ok",
+            durationMs,
+          });
+          deps.observability.endSpan(span);
           return result;
         } catch (error) {
           await deps.toolExecutions.complete(deps.tenantId, deps.runId, toolCallId, {
             status: "failed",
             errorJson: error instanceof Error ? error.message : String(error),
           });
+          const durationMs = Date.now() - startedAt;
+          deps.observability.recordToolObservation(span, {
+            toolName: t.name,
+            toolCallId,
+            input: input as JsonValue,
+            status: "error",
+            durationMs,
+            errorType: "tool",
+            errorMessage: error instanceof Error ? error.message : String(error),
+          });
+          deps.observability.endSpan(span, { code: SpanStatusCode.ERROR, message: "tool_failed" });
           throw error;
         }
       },

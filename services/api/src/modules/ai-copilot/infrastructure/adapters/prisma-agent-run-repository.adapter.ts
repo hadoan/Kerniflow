@@ -12,6 +12,7 @@ export class PrismaAgentRunRepository implements AgentRunRepositoryPort {
     tenantId: string;
     createdByUserId: string | null;
     status: string;
+    traceId?: string | undefined;
     metadataJson?: string | undefined;
   }): Promise<AgentRun> {
     const created = await this.prisma.agentRun.create({
@@ -21,6 +22,7 @@ export class PrismaAgentRunRepository implements AgentRunRepositoryPort {
         createdByUserId: run.createdByUserId || undefined,
         status: run.status,
         metadataJson: run.metadataJson,
+        traceId: run.traceId,
       },
     });
     return new AgentRun(
@@ -30,7 +32,8 @@ export class PrismaAgentRunRepository implements AgentRunRepositoryPort {
       created.status,
       created.startedAt,
       created.finishedAt || undefined,
-      created.metadataJson || undefined
+      created.metadataJson || undefined,
+      created.traceId || undefined
     );
   }
 
@@ -55,7 +58,8 @@ export class PrismaAgentRunRepository implements AgentRunRepositoryPort {
       found.status,
       found.startedAt,
       found.finishedAt || undefined,
-      found.metadataJson || undefined
+      found.metadataJson || undefined,
+      found.traceId || undefined
     );
   }
 }

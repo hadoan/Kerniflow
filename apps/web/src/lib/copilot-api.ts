@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { UseChatOptions } from "@ai-sdk/react";
 import { createIdempotencyKey } from "@corely/api-client";
 import { authClient } from "./auth-client";
 import { getActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
@@ -20,13 +21,13 @@ export interface CopilotOptionsInput {
   runId?: string;
 }
 
-export const useCopilotChatOptions = (input: CopilotOptionsInput) => {
+export const useCopilotChatOptions = (input: CopilotOptionsInput): UseChatOptions => {
   return useMemo(() => {
     const apiBase = resolveCopilotBaseUrl();
     const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
     const accessToken = authClient.getAccessToken() ?? "";
 
-    return {
+    const options: UseChatOptions = {
       api: input.runId
         ? `${apiBase}/copilot/runs/${input.runId}/messages`
         : `${apiBase}/copilot/chat`,
@@ -43,6 +44,11 @@ export const useCopilotChatOptions = (input: CopilotOptionsInput) => {
           activeModule: input.activeModule,
         },
       },
-    } as any;
+      onError: (error: Error) => {
+        console.error("[Copilot] Stream error:", error);
+      },
+    };
+
+    return options;
   }, [input.activeModule, input.locale, input.runId]);
 };
