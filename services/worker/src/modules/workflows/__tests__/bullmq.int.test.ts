@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Queue, QueueEvents, Worker } from "bullmq";
 import { RedisTestServer } from "@corely/testkit";

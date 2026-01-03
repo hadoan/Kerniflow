@@ -38,9 +38,7 @@ export class ApplyTemplateUseCase {
     // 1. Get template definition
     const template = this.templateRegistry.get(templateId);
     if (!template) {
-      throw new NotFoundException(`Template "${templateId}" not found`, {
-        code: "Platform:TemplateNotFound",
-      });
+      throw new NotFoundException(`Template "${templateId}" not found`);
     }
 
     // 2. Check that tenant has required apps enabled
@@ -51,12 +49,9 @@ export class ApplyTemplateUseCase {
         throw new ForbiddenError(
           `Template "${templateId}" requires app "${requiredApp}" to be enabled`,
           {
-            code: "Platform:AppNotEnabled",
-            context: {
-              templateId,
-              requiredApp,
-              enabledApps: entitlement.getEnabledApps(),
-            },
+            templateId,
+            requiredApp,
+            enabledApps: entitlement.getEnabledApps(),
           }
         );
       }

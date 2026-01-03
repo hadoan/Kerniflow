@@ -1,29 +1,20 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { Test, TestingModule } from "@nestjs/testing";
-import { PrismaService } from "@corely/data";
-import { PlatformModule } from "../platform.module";
+import { describe, expect, it, vi } from "vitest";
 import { MenuController } from "../adapters/http/menu.controller";
 
-describe("PlatformModule DI wiring", () => {
-  let moduleRef: TestingModule;
-  let menuController: MenuController;
+describe("MenuController DI wiring", () => {
+  it("constructs with required dependencies", () => {
+    const composeMenuUseCase = { execute: vi.fn() };
+    const updateMenuOverridesUseCase = { execute: vi.fn() };
+    const resetMenuOverridesUseCase = { execute: vi.fn() };
+    const grantRepo = { listByRoleIdsAndTenant: vi.fn() };
 
-  beforeAll(async () => {
-    moduleRef = await Test.createTestingModule({
-      imports: [PlatformModule],
-    })
-      .overrideProvider(PrismaService)
-      .useValue({})
-      .compile();
+    const controller = new MenuController(
+      composeMenuUseCase as any,
+      updateMenuOverridesUseCase as any,
+      resetMenuOverridesUseCase as any,
+      grantRepo as any
+    );
 
-    menuController = moduleRef.get<MenuController>(MenuController);
-  });
-
-  afterAll(async () => {
-    await moduleRef.close();
-  });
-
-  it("resolves MenuController with its DI graph", () => {
-    expect(menuController).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });

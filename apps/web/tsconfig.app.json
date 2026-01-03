@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "types": ["./src/types/custom-modules"],
+    "types": ["./src/types/custom-modules", "./src/types/react-query"],
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
 

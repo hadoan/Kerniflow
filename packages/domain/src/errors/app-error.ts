@@ -17,36 +17,36 @@ export abstract class AppError extends Error {
   readonly code: string;
 
   /** Public message safe to show to end users (only set for user-friendly errors) */
-  readonly publicMessage?: string;
+  readonly publicMessage?: string | undefined;
 
   /** HTTP status code */
   readonly status: number;
 
   /** Internal details (for logging/debugging, not exposed to clients in production) */
-  readonly internalDetails?: string;
+  readonly internalDetails?: string | undefined;
 
   /** Safe metadata that can be included in error responses (never include secrets) */
-  readonly data?: Record<string, unknown>;
+  readonly data?: Record<string, unknown> | undefined;
 
   /** Validation errors for field-level failures */
-  readonly validationErrors?: ValidationErrorItem[];
+  readonly validationErrors?: ValidationErrorItem[] | undefined;
 
   /** Log level hint for error handlers */
   readonly logLevel: ErrorLogLevel;
 
   /** Original cause of this error */
-  readonly cause?: Error;
+  readonly cause?: Error | undefined;
 
   constructor(options: {
     code: string;
     message: string;
-    publicMessage?: string;
+    publicMessage?: string | undefined;
     status: number;
-    internalDetails?: string;
-    data?: Record<string, unknown>;
-    validationErrors?: ValidationErrorItem[];
+    internalDetails?: string | undefined;
+    data?: Record<string, unknown> | undefined;
+    validationErrors?: ValidationErrorItem[] | undefined;
     logLevel?: ErrorLogLevel;
-    cause?: Error;
+    cause?: Error | undefined;
   }) {
     super(options.message);
     this.name = this.constructor.name;

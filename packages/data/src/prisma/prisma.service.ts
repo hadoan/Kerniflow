@@ -9,9 +9,18 @@ import { Pool } from "pg";
  */
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  private pool: Pool;
+  private pool: Pool | null;
+  private readonly skipConnect: boolean;
 
   constructor() {
+    const skipConnect = process.env.SKIP_PRISMA_CONNECT === "true";
+    if (skipConnect) {
+      super();
+      this.skipConnect = true;
+      this.pool = null;
+      return;
+    }
+
     const url = process.env.DATABASE_URL;
     if (!url) {
       throw new Error("DATABASE_URL must be set before accessing Prisma client");
@@ -22,14 +31,21 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     super({ adapter });
     this.pool = pool;
+    this.skipConnect = false;
   }
 
   async onModuleInit() {
+    if (this.skipConnect) {
+      return;
+    }
     await this.$connect();
   }
 
   async onModuleDestroy() {
+    if (this.skipConnect) {
+      return;
+    }
     await this.$disconnect();
-    await this.pool.end();
+    await this.pool?.end();
   }
 }

@@ -2,4 +2,5 @@ export interface IdGeneratorPort {
   newId(): string;
 }
 
-// export const ID_GENERATOR_TOKEN = "kernel/id-generator";
+// Re-export canonical token to avoid identity mismatches
+export { ID_GENERATOR_TOKEN } from "../tokens";

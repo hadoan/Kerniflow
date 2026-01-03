@@ -88,12 +88,10 @@ async function syncCatalog() {
     let templatesUpdated = 0;
 
     for (const template of templates) {
-      // @ts-expect-error - templateCatalog table will exist after migration is run
       const existing = await prisma.templateCatalog.findUnique({
         where: { templateId: template.templateId },
       });
 
-      // @ts-expect-error - templateCatalog table will exist after migration is run
       await prisma.templateCatalog.upsert({
         where: { templateId: template.templateId },
         create: {
@@ -137,12 +135,10 @@ async function syncCatalog() {
     let packsUpdated = 0;
 
     for (const pack of packs) {
-      // @ts-expect-error - packCatalog table will exist after migration is run
       const existing = await prisma.packCatalog.findUnique({
         where: { packId: pack.packId },
       });
 
-      // @ts-expect-error - packCatalog table will exist after migration is run
       await prisma.packCatalog.upsert({
         where: { packId: pack.packId },
         create: {
@@ -150,25 +146,13 @@ async function syncCatalog() {
           name: pack.name,
           version: pack.version,
           description: pack.description ?? null,
-          appsToEnableJson: JSON.stringify(pack.appsToEnable),
-          templatesToApplyJson: JSON.stringify(pack.templatesToApply),
-          featureFlagsJson: pack.featureFlags ? JSON.stringify(pack.featureFlags) : null,
-          menuPresetTemplateId: pack.menuPresetTemplateId ?? null,
-          postInstallChecksJson: pack.postInstallChecks
-            ? JSON.stringify(pack.postInstallChecks)
-            : null,
+          definitionJson: JSON.stringify(pack),
         },
         update: {
           name: pack.name,
           version: pack.version,
           description: pack.description ?? null,
-          appsToEnableJson: JSON.stringify(pack.appsToEnable),
-          templatesToApplyJson: JSON.stringify(pack.templatesToApply),
-          featureFlagsJson: pack.featureFlags ? JSON.stringify(pack.featureFlags) : null,
-          menuPresetTemplateId: pack.menuPresetTemplateId ?? null,
-          postInstallChecksJson: pack.postInstallChecks
-            ? JSON.stringify(pack.postInstallChecks)
-            : null,
+          definitionJson: JSON.stringify(pack),
         },
       });
 

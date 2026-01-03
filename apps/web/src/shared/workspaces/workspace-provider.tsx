@@ -30,24 +30,28 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
     data: workspaces = [],
     isFetching,
     refetch,
-  } = useQuery({
+  } = useQuery<WorkspaceDto[]>({
     queryKey: ["workspaces"],
     queryFn: () => workspacesApi.listWorkspaces(),
     enabled: isAuthenticated,
     staleTime: 30_000,
-    onSuccess: (ws) => {
-      console.debug("[WorkspaceProvider] workspaces fetched", {
-        count: ws.length,
-        enabled: isAuthenticated,
-        activeId,
-      });
-    },
   });
 
   // keep local and persisted workspace id in sync
   useEffect(() => {
     return subscribeWorkspace((id) => setActiveId(id));
   }, []);
+
+  // Log when workspaces are fetched
+  useEffect(() => {
+    if (workspaces.length > 0) {
+      console.debug("[WorkspaceProvider] workspaces fetched", {
+        count: workspaces.length,
+        enabled: isAuthenticated,
+        activeId,
+      });
+    }
+  }, [workspaces, isAuthenticated, activeId]);
 
   // Set default workspace once we have list
   useEffect(() => {

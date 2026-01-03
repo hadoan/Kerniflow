@@ -20,22 +20,29 @@ type Props = {
 
 type FieldErrors = Record<string, string | undefined>;
 
-const buildSchema = (field: CollectInputField) => {
-  let schema: z.ZodTypeAny;
+const buildSchema = (field: CollectInputField): z.ZodTypeAny => {
   if (field.type === "number") {
-    schema = z.number();
-    if (field.min !== undefined) {schema = schema.min(field.min);}
-    if (field.max !== undefined) {schema = schema.max(field.max);}
+    let schema = z.number();
+    if (field.min !== undefined) {
+      schema = schema.min(field.min);
+    }
+    if (field.max !== undefined) {
+      schema = schema.max(field.max);
+    }
+    return field.required ? schema : schema.optional();
   } else {
-    schema = z.string();
-    if (field.minLength !== undefined) {schema = schema.min(field.minLength);}
-    if (field.maxLength !== undefined) {schema = schema.max(field.maxLength);}
-    if (field.pattern) {schema = schema.regex(new RegExp(field.pattern));}
+    let schema = z.string();
+    if (field.minLength !== undefined) {
+      schema = schema.min(field.minLength);
+    }
+    if (field.maxLength !== undefined) {
+      schema = schema.max(field.maxLength);
+    }
+    if (field.pattern) {
+      schema = schema.regex(new RegExp(field.pattern));
+    }
+    return field.required ? schema : schema.optional();
   }
-  if (!field.required) {
-    schema = schema.optional();
-  }
-  return schema;
 };
 
 export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, disabled }) => {
@@ -75,7 +82,9 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = validate();
-    if (!result.ok) {return;}
+    if (!result.ok) {
+      return;
+    }
     setIsSubmitting(true);
     await onSubmit({
       values,

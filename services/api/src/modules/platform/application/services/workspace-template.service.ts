@@ -1,11 +1,30 @@
 import { Injectable } from "@nestjs/common";
-import type {
-  Capabilities,
-  Terminology,
-  DashboardWidget,
-  NavigationGroup,
-} from "@corely/contracts";
 import type { WorkspaceKind } from "@corely/contracts";
+
+type Capabilities = Record<string, boolean>;
+
+interface Terminology {
+  partyLabel: string;
+  partyLabelPlural: string;
+  invoiceLabel: string;
+  invoiceLabelPlural: string;
+  quoteLabel: string;
+  quoteLabelPlural: string;
+  projectLabel: string;
+  projectLabelPlural: string;
+  expenseLabel: string;
+  expenseLabelPlural: string;
+}
+
+interface DashboardWidget {
+  id: string;
+  titleKey: string;
+  defaultTitle: string;
+  widgetType: string;
+  order: number;
+  size: string;
+  config?: Record<string, unknown>;
+}
 
 /**
  * Workspace Template Service

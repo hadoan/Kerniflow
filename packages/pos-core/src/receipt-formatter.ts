@@ -1,4 +1,4 @@
-import type { PosSale, PaymentMethod } from "@corely/contracts";
+import type { PosSale } from "@corely/contracts";
 import { format } from "date-fns";
 
 /**
@@ -46,9 +46,9 @@ export class ReceiptFormatter {
   /**
    * Format date with locale
    */
-  private formatDate(date: Date, locale: string): string {
+  private formatDate(date: Date, _locale: string): string {
     // Simple date format that works across locales
-    return format(date, "PPpp", { locale: undefined });
+    return format(date, "PPpp");
   }
 
   /**
@@ -81,7 +81,7 @@ export class ReceiptFormatter {
     const cashierName = options.cashierName || "Cashier";
 
     // Format line items
-    const lineItems = sale.lineItems.map((line) => ({
+    const lineItems = sale.lineItems.map((line: PosSale["lineItems"][number]) => ({
       description: line.productName,
       qty: line.quantity,
       unitPrice: this.formatMoney(line.unitPriceCents, locale, currency),
@@ -89,7 +89,7 @@ export class ReceiptFormatter {
     }));
 
     // Format payments
-    const payments = sale.payments.map((payment) => ({
+    const payments = sale.payments.map((payment: PosSale["payments"][number]) => ({
       method: this.formatPaymentMethod(payment.method),
       amount: this.formatMoney(payment.amountCents, locale, currency),
       reference: payment.reference,
@@ -97,13 +97,13 @@ export class ReceiptFormatter {
 
     // Calculate change if cash payment with overpayment
     let change: string | undefined;
-    const cashPayment = sale.payments.find((p) => p.method === "CASH");
+    const cashPayment = sale.payments.find((p: PosSale["payments"][number]) => p.method === "CASH");
     if (cashPayment && cashPayment.amountCents > sale.totalCents) {
       const changeCents = cashPayment.amountCents - sale.totalCents;
       change = this.formatMoney(changeCents, locale, currency);
     }
 
-    return {
+    const receipt: ReceiptData = {
       receiptNumber: sale.receiptNumber,
       saleDate: this.formatDate(sale.saleDate, locale),
       cashierName,
@@ -114,8 +114,13 @@ export class ReceiptFormatter {
       tax: this.formatMoney(sale.taxCents, locale, currency),
       total: this.formatMoney(sale.totalCents, locale, currency),
       payments,
-      change,
     };
+
+    if (change) {
+      receipt.change = change;
+    }
+
+    return receipt;
   }
 
   /**
