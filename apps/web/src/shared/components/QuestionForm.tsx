@@ -46,8 +46,10 @@ const buildSchema = (field: CollectInputField): z.ZodTypeAny => {
 };
 
 export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, disabled }) => {
+  const fields = Array.isArray(request.fields) ? request.fields : [];
+
   const [values, setValues] = useState<Record<string, unknown>>(
-    Object.fromEntries(request.fields.map((f) => [f.key, f.defaultValue ?? ""]))
+    Object.fromEntries(fields.map((f) => [f.key, f.defaultValue ?? ""]))
   );
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,9 +57,9 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
   const validators = useMemo(
     () =>
       z.object(
-        Object.fromEntries(request.fields.map((field) => [field.key, buildSchema(field)]))
+        Object.fromEntries(fields.map((field) => [field.key, buildSchema(field)]))
       ) as z.ZodSchema<Record<string, unknown>>,
-    [request.fields]
+    [fields]
   );
 
   const handleChange = (key: string, value: unknown) => {
@@ -167,8 +169,11 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {request.fields.map((field) => (
-            <div key={field.key} className="space-y-2">
+          {fields.map((field) => (
+            <div
+              key={field.key ?? field.label ?? field.placeholder ?? Math.random()}
+              className="space-y-2"
+            >
               <div className="flex items-start justify-between gap-2">
                 <label htmlFor={field.key} className="text-sm font-medium text-foreground">
                   {field.label}
