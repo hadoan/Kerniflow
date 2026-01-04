@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { UseChatOptions } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { createIdempotencyKey } from "@corely/api-client";
@@ -65,7 +65,6 @@ export const useCopilotChatOptions = (
 } => {
   const apiBase = resolveCopilotBaseUrl();
   const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
-  const accessToken = authClient.getAccessToken() ?? "";
 
   const [runId, setRunId] = useState<string>(
     input.runId ||
@@ -79,20 +78,21 @@ export const useCopilotChatOptions = (
     persistRunId(input.activeModule, tenantId, runId);
   }, [runId, input.activeModule, tenantId]);
 
-  const baseHeaders = useMemo(
-    () => ({
+  // Get auth headers dynamically on each request to ensure fresh token
+  const getAuthHeaders = useCallback(() => {
+    const accessToken = authClient.getAccessToken() ?? "";
+    return {
       Authorization: accessToken ? `Bearer ${accessToken}` : "",
       "X-Tenant-Id": tenantId,
-    }),
-    [accessToken, tenantId]
-  );
+    };
+  }, [tenantId]);
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport<CopilotUIMessage>({
         api: `${apiBase}/copilot/chat`,
         headers: async () => ({
-          ...baseHeaders,
+          ...getAuthHeaders(),
           "X-Idempotency-Key": createIdempotencyKey(),
         }),
         body: {
@@ -113,7 +113,7 @@ export const useCopilotChatOptions = (
           return {
             api: `${apiBase}/copilot/chat`,
             headers: {
-              ...baseHeaders,
+              ...getAuthHeaders(),
               "X-Idempotency-Key": idempotencyKey,
             },
             body: {
@@ -130,7 +130,7 @@ export const useCopilotChatOptions = (
           };
         },
       }),
-    [apiBase, baseHeaders, input.activeModule, input.locale, runId, tenantId]
+    [apiBase, getAuthHeaders, input.activeModule, input.locale, runId, tenantId]
   );
 
   const options: UseChatOptions = useMemo(
@@ -152,7 +152,7 @@ export const useCopilotChatOptions = (
     [input, runId, transport]
   );
 
-  return { options, runId, apiBase, tenantId, accessToken };
+  return { options, runId, apiBase, tenantId, accessToken: authClient.getAccessToken() ?? "" };
 };
 
 export const fetchCopilotHistory = async (params: {
