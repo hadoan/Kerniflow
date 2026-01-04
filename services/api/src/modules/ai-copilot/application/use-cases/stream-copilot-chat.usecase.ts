@@ -173,7 +173,10 @@ export class StreamCopilotChatUseCase {
       );
     }
 
-    const conversation = this.mergeMessages(historyMessages, incomingMessages);
+    const conversation = this.mergeMessages(historyMessages, incomingMessages).map((msg) => ({
+      ...msg,
+      parts: Array.isArray(msg.parts) ? msg.parts : [],
+    }));
     const assistantMessageId = nanoid();
 
     try {
@@ -335,17 +338,15 @@ export class StreamCopilotChatUseCase {
   private mapEntityToUIMessage(entity: CopilotMessage): CopilotUIMessage {
     try {
       const parsed = JSON.parse(entity.partsJson);
-      if (Array.isArray(parsed)) {
-        return {
-          id: entity.id,
-          role: entity.role as CopilotUIMessage["role"],
-          parts: parsed,
-        };
-      }
+      const parsedParts = Array.isArray(parsed?.parts)
+        ? parsed.parts
+        : Array.isArray(parsed)
+          ? parsed
+          : [];
       return {
         id: entity.id,
         role: entity.role as CopilotUIMessage["role"],
-        parts: parsed?.parts,
+        parts: parsedParts,
         metadata: parsed?.metadata,
       };
     } catch {

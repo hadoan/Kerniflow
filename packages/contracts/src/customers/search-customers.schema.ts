@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CustomerDtoSchema } from "./customer.types";
 
 export const SearchCustomersInputSchema = z.object({
-  q: z.string().min(1),
+  q: z.string().optional(),
   cursor: z.string().optional(),
   pageSize: z.number().int().positive().max(200).optional(),
 });

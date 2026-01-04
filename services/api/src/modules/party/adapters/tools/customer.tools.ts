@@ -77,16 +77,28 @@ export const buildCustomerTools = (app: PartyApplication): DomainToolPort[] => [
   },
   {
     name: "customer_search",
-    description: "Search customers by name, email, phone, or VAT.",
+    description:
+      "Search customers by name, email, phone, or VAT. If no search query is provided, returns all customers.",
     kind: "server",
     inputSchema: SearchCustomersInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
-      const parsed = SearchCustomersInputSchema.safeParse(input);
+      const sanitizedInput =
+        typeof (input as any)?.q === "string" && !(input as any).q.trim()
+          ? { ...(input as any), q: undefined }
+          : input;
+      const parsed = SearchCustomersInputSchema.safeParse(sanitizedInput);
       if (!parsed.success) {
         return validationError(parsed.error.flatten());
       }
+
+      const normalizedQ = parsed.data.q?.trim();
+      const shouldListAll =
+        normalizedQ === undefined ||
+        normalizedQ === "" ||
+        ["list customers", "list all customers"].includes(normalizedQ.toLowerCase());
+
       const result = await app.searchCustomers.execute(
-        parsed.data,
+        { ...parsed.data, q: shouldListAll ? undefined : normalizedQ },
         buildCtx(tenantId, userId, toolCallId, runId)
       );
       return mapToolResult(result);

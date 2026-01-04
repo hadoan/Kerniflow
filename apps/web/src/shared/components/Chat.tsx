@@ -247,6 +247,12 @@ export function Chat({
   };
 
   useEffect(() => {
+    // Reset messages immediately when runId changes
+    if (hydratedRunId && hydratedRunId !== runId) {
+      setMessages([]);
+      setHydratedRunId(null);
+    }
+
     let cancelled = false;
     void fetchCopilotHistory({ runId, apiBase, tenantId, accessToken })
       .then((history) => {

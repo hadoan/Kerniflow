@@ -44,19 +44,24 @@ export class InMemoryPartyRepo implements PartyRepoPort {
     return { items: slice, nextCursor };
   }
 
-  async searchCustomers(tenantId: string, q: string, pagination: Pagination) {
+  async searchCustomers(tenantId: string, q: string | undefined, pagination: Pagination) {
     const startIndex = pagination.cursor
       ? this.customers.findIndex((c) => c.id === pagination.cursor) + 1
       : 0;
-    const terms = q.toLowerCase();
     let items = this.customers.filter((c) => c.tenantId === tenantId && !c.archivedAt);
-    items = items.filter((c) => {
-      const matchesDisplay = c.displayName.toLowerCase().includes(terms);
-      const matchesEmail = (c.primaryEmail ?? "").toLowerCase().includes(terms);
-      const matchesPhone = (c.primaryPhone ?? "").toLowerCase().includes(terms);
-      const matchesVat = (c.vatId ?? "").toLowerCase().includes(terms);
-      return matchesDisplay || matchesEmail || matchesPhone || matchesVat;
-    });
+
+    // Only filter by search terms if q is provided
+    if (q && q.trim()) {
+      const terms = q.toLowerCase();
+      items = items.filter((c) => {
+        const matchesDisplay = c.displayName.toLowerCase().includes(terms);
+        const matchesEmail = (c.primaryEmail ?? "").toLowerCase().includes(terms);
+        const matchesPhone = (c.primaryPhone ?? "").toLowerCase().includes(terms);
+        const matchesVat = (c.vatId ?? "").toLowerCase().includes(terms);
+        return matchesDisplay || matchesEmail || matchesPhone || matchesVat;
+      });
+    }
+
     const slice = items.slice(startIndex, startIndex + (pagination.pageSize ?? 20));
     const nextCursor =
       slice.length === (pagination.pageSize ?? 20) ? (slice.at(-1)?.id ?? null) : null;

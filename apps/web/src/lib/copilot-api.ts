@@ -3,7 +3,7 @@ import type { UseChatOptions } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import { createIdempotencyKey } from "@corely/api-client";
 import { authClient } from "./auth-client";
-import { getActiveWorkspaceId } from "@/shared/workspaces/workspace-store";
+import { getActiveWorkspaceId, subscribeWorkspace } from "@/shared/workspaces/workspace-store";
 import { CopilotUIMessageSchema, type CopilotUIMessage } from "@corely/contracts";
 
 export const resolveCopilotBaseUrl = () => {
@@ -54,6 +54,12 @@ const persistRunId = (activeModule: string, tenantId: string, runId: string) => 
   }
 };
 
+const normalizeMessages = (messages: CopilotUIMessage[]) =>
+  messages.map((msg) => ({
+    ...msg,
+    parts: Array.isArray(msg.parts) ? msg.parts : [],
+  }));
+
 export const useCopilotChatOptions = (
   input: CopilotOptionsInput
 ): {
@@ -64,15 +70,35 @@ export const useCopilotChatOptions = (
   accessToken: string;
 } => {
   const apiBase = resolveCopilotBaseUrl();
-  const tenantId = getActiveWorkspaceId() ?? "demo-tenant";
+  const [tenantId, setTenantId] = useState<string>(getActiveWorkspaceId() ?? "demo-tenant");
 
-  const [runId, setRunId] = useState<string>(
-    input.runId ||
-      loadStoredRunId(input.activeModule, tenantId) ||
+  useEffect(() => {
+    const unsubscribe = subscribeWorkspace((workspaceId) => {
+      setTenantId(workspaceId ?? "demo-tenant");
+    });
+    return unsubscribe;
+  }, []);
+
+  const [runId, setRunId] = useState<string>(() => {
+    const initialTenant = getActiveWorkspaceId() ?? "demo-tenant";
+    return (
+      input.runId ||
+      loadStoredRunId(input.activeModule, initialTenant) ||
       (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
         : createIdempotencyKey())
-  );
+    );
+  });
+
+  useEffect(() => {
+    const nextRunId =
+      input.runId ||
+      loadStoredRunId(input.activeModule, tenantId) ||
+      (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : createIdempotencyKey());
+    setRunId(nextRunId);
+  }, [input.activeModule, input.runId, tenantId]);
 
   useEffect(() => {
     persistRunId(input.activeModule, tenantId, runId);
@@ -105,10 +131,11 @@ export const useCopilotChatOptions = (
         },
         prepareSendMessagesRequest: async ({ messages, trigger, messageId }) => {
           const idempotencyKey = createIdempotencyKey();
+          const safeMessages = normalizeMessages(messages);
           const shouldSendFullHistory = lastAssistantMessageIsCompleteWithApprovalResponses({
-            messages,
+            messages: safeMessages,
           });
-          const latestMessage = messages[messages.length - 1];
+          const latestMessage = safeMessages[safeMessages.length - 1];
 
           return {
             api: `${apiBase}/copilot/chat`,
@@ -125,7 +152,7 @@ export const useCopilotChatOptions = (
                 locale: input.locale || "en",
                 activeModule: input.activeModule,
               },
-              ...(shouldSendFullHistory ? { messages } : { message: latestMessage }),
+              ...(shouldSendFullHistory ? { messages: safeMessages } : { message: latestMessage }),
             },
           };
         },
@@ -147,7 +174,9 @@ export const useCopilotChatOptions = (
         console.error("[Copilot] Stream error:", error);
       },
       sendAutomaticallyWhen: ({ messages }) =>
-        lastAssistantMessageIsCompleteWithApprovalResponses({ messages }),
+        lastAssistantMessageIsCompleteWithApprovalResponses({
+          messages: normalizeMessages(messages),
+        }),
     }),
     [input, runId, transport]
   );
@@ -176,7 +205,10 @@ export const fetchCopilotHistory = async (params: {
   const json = await response.json();
   const parsed = CopilotUIMessageSchema.array().safeParse(json.items ?? []);
   if (parsed.success) {
-    return parsed.data;
+    return parsed.data.map((msg) => ({
+      ...msg,
+      parts: Array.isArray(msg.parts) ? msg.parts : [],
+    }));
   }
   return [];
 };

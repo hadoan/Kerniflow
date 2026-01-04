@@ -66,11 +66,49 @@ export class AiSdkModelAdapter implements LanguageModelPort {
 
     this.logger.debug(`Starting streamText with ${Object.keys(toolset).length} tools`);
 
+    const sanitizeParts = (parts: CopilotUIMessage["parts"]) => {
+      if (!Array.isArray(parts)) {
+        return undefined;
+      }
+      const filtered = parts
+        .map((part: any) => {
+          if (typeof part?.type !== "string") {
+            return null;
+          }
+          if (part.type === "text" && typeof part.text === "string") {
+            return { type: "text", text: part.text };
+          }
+          if (part.type === "reasoning" && typeof part.text === "string") {
+            return { type: "text", text: part.text };
+          }
+          // Drop tool/data/other parts to avoid malformed tool_use/tool_result sequences
+          return null;
+        })
+        .filter(Boolean);
+      return filtered.length ? filtered : undefined;
+    };
+
+    const systemMessage: CopilotUIMessage = {
+      role: "system",
+      parts: [
+        {
+          type: "text",
+          text:
+            "You are the Corely Copilot. Use the provided tools for all factual or data retrieval tasks. " +
+            "When asked to search, list, or look up customers, always call the customer_search tool even if the user provides no query; " +
+            "send an empty or undefined query to list all customers. Do not make up customer data.",
+        } as any,
+      ],
+    };
+
     const modelMessages = await convertToModelMessages(
-      params.messages.map((msg) => ({
-        role: msg.role,
-        parts: msg.parts,
-      }))
+      [systemMessage, ...params.messages].map((msg) => {
+        const parts = sanitizeParts(msg.parts) ?? [];
+        return {
+          role: msg.role,
+          parts,
+        };
+      })
     );
 
     const result = streamText({

@@ -287,21 +287,25 @@ export class PrismaPartyRepoAdapter implements PartyRepoPort {
     return { items, nextCursor };
   }
 
-  async searchCustomers(tenantId: string, q: string, pagination: Pagination) {
+  async searchCustomers(tenantId: string, q: string | undefined, pagination: Pagination) {
     const where = {
       tenantId,
       roles: { some: { role: "CUSTOMER" as const } },
       archivedAt: null,
-      OR: [
-        { displayName: { contains: q, mode: "insensitive" as const } },
-        {
-          contactPoints: {
-            some: { value: { contains: q, mode: "insensitive" as const } },
-          },
-        },
-        { vatId: { contains: q, mode: "insensitive" as const } },
-        { notes: { contains: q, mode: "insensitive" as const } },
-      ],
+      ...(q && q.trim()
+        ? {
+            OR: [
+              { displayName: { contains: q, mode: "insensitive" as const } },
+              {
+                contactPoints: {
+                  some: { value: { contains: q, mode: "insensitive" as const } },
+                },
+              },
+              { vatId: { contains: q, mode: "insensitive" as const } },
+              { notes: { contains: q, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
     };
 
     const results = await this.prisma.party.findMany({

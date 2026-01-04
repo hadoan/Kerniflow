@@ -25,7 +25,7 @@ export interface PartyRepoPort {
   ): Promise<ListCustomersResult>;
   searchCustomers(
     tenantId: string,
-    q: string,
+    q: string | undefined,
     pagination: Pagination
   ): Promise<ListCustomersResult>;
 }
