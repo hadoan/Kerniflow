@@ -18,16 +18,16 @@ export class ApiError extends Error {
   readonly detail: string;
 
   /** Validation errors (if this is a validation failure) */
-  readonly validationErrors?: ValidationErrorItem[];
+  readonly validationErrors: ValidationErrorItem[] | undefined;
 
   /** Trace/correlation ID for debugging */
-  readonly traceId?: string;
+  readonly traceId: string | undefined;
 
   /** Additional safe metadata */
-  readonly data?: Record<string, unknown>;
+  readonly data: Record<string, unknown> | undefined;
 
   /** Original HTTP error */
-  readonly originalError?: HttpError;
+  readonly originalError: HttpError | undefined;
 
   /** Whether this is a network/client error (vs server error) */
   readonly isNetworkError: boolean;

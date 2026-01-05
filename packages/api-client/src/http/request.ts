@@ -2,6 +2,7 @@ import {
   computeBackoffDelayMs,
   defaultRetryPolicy,
   getRetryAfterMs,
+  type RetryableResult,
   type RetryPolicyOptions,
   shouldRetry,
 } from "../retry/retryPolicy";
@@ -21,12 +22,12 @@ export class HttpError extends Error {
 export type RequestOptions = {
   url: string;
   method?: string;
-  headers?: HeadersInit;
+  headers?: HeadersInit | undefined;
   body?: unknown;
-  accessToken?: string | null;
-  workspaceId?: string | null;
-  idempotencyKey?: string;
-  correlationId?: string;
+  accessToken?: string | null | undefined;
+  workspaceId?: string | null | undefined;
+  idempotencyKey?: string | undefined;
+  correlationId?: string | undefined;
   retry?: Partial<RetryPolicyOptions>;
   parseJson?: boolean;
   streaming?: boolean;
@@ -70,8 +71,10 @@ export async function request<T = unknown>(opts: RequestOptions): Promise<T> {
     url: opts.url,
     method,
     headers,
-    body,
   };
+  if (body !== undefined) {
+    init.body = body;
+  }
 
   if (opts.streaming) {
     // For streaming, attempt only once to avoid mid-stream retries.
@@ -88,7 +91,11 @@ export async function request<T = unknown>(opts: RequestOptions): Promise<T> {
       }
 
       const retryAfter = getRetryAfterMs(response);
-      if (!shouldRetry(attempt, { response, method, idempotencyKey }, policy.maxAttempts)) {
+      const responseRetryContext: RetryableResult = { response, method };
+      if (idempotencyKey) {
+        responseRetryContext.idempotencyKey = idempotencyKey;
+      }
+      if (!shouldRetry(attempt, responseRetryContext, policy.maxAttempts)) {
         const errorBody = await safeParseBody(response);
         throw new HttpError(response.statusText, response.status, errorBody);
       }
@@ -100,7 +107,11 @@ export async function request<T = unknown>(opts: RequestOptions): Promise<T> {
       if (error instanceof HttpError) {
         throw error;
       }
-      if (!shouldRetry(attempt, { error, method, idempotencyKey }, policy.maxAttempts)) {
+      const errorRetryContext: RetryableResult = { error, method };
+      if (idempotencyKey) {
+        errorRetryContext.idempotencyKey = idempotencyKey;
+      }
+      if (!shouldRetry(attempt, errorRetryContext, policy.maxAttempts)) {
         throw new HttpError(error instanceof Error ? error.message : "Request failed", null, error);
       }
       await delayForRetry(attempt, policy);

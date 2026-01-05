@@ -13,7 +13,7 @@ export class ApiClient {
   private apiUrl: string;
   private authClient: AuthClient;
   private storage: TokenStorage;
-  private onAuthError?: () => void;
+  private onAuthError: (() => void) | undefined;
   private isRefreshing = false;
   private refreshPromise: Promise<void> | null = null;
 
@@ -107,14 +107,11 @@ export class ApiClient {
     body?: unknown,
     opts?: { idempotencyKey?: string; correlationId?: string }
   ): Promise<T> {
-    return this.request<T>(
-      endpoint,
-      {
-        method: "POST",
-        body: body as BodyInit | null | undefined,
-      },
-      opts
-    );
+    const requestInit: RequestInit = { method: "POST" };
+    if (body !== undefined) {
+      requestInit.body = body as BodyInit | null;
+    }
+    return this.request<T>(endpoint, requestInit, opts);
   }
 
   async put<T>(
@@ -122,14 +119,11 @@ export class ApiClient {
     body?: unknown,
     opts?: { idempotencyKey?: string; correlationId?: string }
   ): Promise<T> {
-    return this.request<T>(
-      endpoint,
-      {
-        method: "PUT",
-        body: body as BodyInit | null | undefined,
-      },
-      opts
-    );
+    const requestInit: RequestInit = { method: "PUT" };
+    if (body !== undefined) {
+      requestInit.body = body as BodyInit | null;
+    }
+    return this.request<T>(endpoint, requestInit, opts);
   }
 
   async patch<T>(
@@ -137,14 +131,11 @@ export class ApiClient {
     body?: unknown,
     opts?: { idempotencyKey?: string; correlationId?: string }
   ): Promise<T> {
-    return this.request<T>(
-      endpoint,
-      {
-        method: "PATCH",
-        body: body as BodyInit | null | undefined,
-      },
-      opts
-    );
+    const requestInit: RequestInit = { method: "PATCH" };
+    if (body !== undefined) {
+      requestInit.body = body as BodyInit | null;
+    }
+    return this.request<T>(endpoint, requestInit, opts);
   }
 
   async delete<T>(endpoint: string, opts?: { correlationId?: string }): Promise<T> {

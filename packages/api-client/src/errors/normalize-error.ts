@@ -3,6 +3,8 @@ import type { ProblemDetails } from "@corely/contracts";
 import { HttpError } from "../http/request";
 import { ApiError } from "./api-error";
 
+type ApiErrorOptions = ConstructorParameters<typeof ApiError>[0];
+
 /**
  * Normalize any error into a structured ApiError
  *
@@ -44,17 +46,26 @@ export function normalizeError(error: unknown): ApiError {
  * Convert ProblemDetails to ApiError
  */
 function problemDetailsToApiError(pd: ProblemDetails, originalError: HttpError): ApiError {
-  return new ApiError({
+  const options: ApiErrorOptions = {
     status: pd.status,
     code: pd.code,
     detail: pd.detail,
     message: pd.detail, // Use detail as the error message
-    validationErrors: pd.validationErrors,
-    traceId: pd.traceId,
-    data: pd.data,
     originalError,
     isNetworkError: false,
-  });
+  };
+
+  if (pd.validationErrors !== undefined) {
+    options.validationErrors = pd.validationErrors;
+  }
+  if (pd.traceId !== undefined) {
+    options.traceId = pd.traceId;
+  }
+  if (pd.data !== undefined) {
+    options.data = pd.data;
+  }
+
+  return new ApiError(options);
 }
 
 /**
