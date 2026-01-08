@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import type { AppManifest } from "@corely/contracts";
 import type { AppRegistryPort } from "../../application/ports/app-registry.port";
 import { invoicesAppManifest } from "../../../invoices/invoices.manifest";
+import { crmAppManifest } from "../../../crm/crm.manifest";
 
 /**
  * App Registry
@@ -109,6 +110,9 @@ export class AppRegistry implements AppRegistryPort {
 
     // Invoices App - imported from module manifest
     this.register(invoicesAppManifest);
+
+    // CRM App
+    this.register(crmAppManifest);
 
     // Expenses App
     this.register({

@@ -30,6 +30,7 @@ CROSS JOIN (
     ('invoices'),
     ('expenses'),
     ('parties'),
+    ('crm'),
     ('ai-copilot'),
     ('workspaces'),
     ('platform')

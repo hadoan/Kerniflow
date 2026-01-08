@@ -114,6 +114,7 @@ export class WorkspaceTemplateService {
         "invoices",
         "expenses",
         "parties", // clients
+        "crm",
         "tax",
         "ai-copilot",
       ];
@@ -251,7 +252,7 @@ export class WorkspaceTemplateService {
         labelKey: "nav.groups.core",
         defaultLabel: "Core",
         order: 1,
-        sectionOrder: ["dashboard", "invoices", "expenses", "clients", "assistant"],
+        sectionOrder: ["dashboard", "invoices", "expenses", "clients", "crm", "assistant"],
       },
       {
         id: "settings",
@@ -377,7 +378,7 @@ export class WorkspaceTemplateService {
         labelKey: "nav.groups.sales",
         defaultLabel: "Sales",
         order: 2,
-        sectionOrder: ["invoices", "quotes", "projects", "customers"],
+        sectionOrder: ["invoices", "quotes", "projects", "crm", "customers"],
       },
       {
         id: "purchasing",
