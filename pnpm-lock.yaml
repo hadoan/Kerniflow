@@ -294,6 +294,9 @@ importers:
         specifier: ^2.6.0
         version: 2.6.0
     devDependencies:
+      '@corely/vite-config':
+        specifier: workspace:*
+        version: link:../../packages/tooling/vite-config
       '@eslint/js':
         specifier: 'catalog:'
         version: 9.39.2
