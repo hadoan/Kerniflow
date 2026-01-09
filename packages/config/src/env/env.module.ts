@@ -97,6 +97,7 @@ export class EnvModule {
         NODE_ENV: "test",
         DATABASE_URL: "postgresql://test:test@localhost:5432/test",
         REDIS_URL: "redis://localhost:6379",
+        WORKFLOW_QUEUE_DRIVER: "memory",
         ...overrides,
       },
     });

@@ -1,49 +1,25 @@
-import { Injectable, Logger, OnModuleDestroy, Inject } from "@nestjs/common";
-import { Queue } from "bullmq";
-import { EnvService } from "@corely/config";
-import { WORKFLOW_ORCHESTRATOR_QUEUE } from "@corely/contracts";
-
-function buildRedisConnection(redisUrl?: string) {
-  if (!redisUrl) {
-    return { host: "127.0.0.1", port: 6379 };
-  }
-
-  const url = new URL(redisUrl);
-  const db = url.pathname ? Number(url.pathname.replace("/", "")) : undefined;
-
-  return {
-    host: url.hostname,
-    port: url.port ? Number(url.port) : 6379,
-    username: url.username || undefined,
-    password: url.password || undefined,
-    db: Number.isNaN(db) ? undefined : db,
-  };
-}
+import { Inject, Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
+import type { QueuePort } from "@corely/kernel";
+import {
+  WORKFLOW_ORCHESTRATOR_QUEUE_PORT,
+  type WorkflowOrchestratorQueuePayload,
+} from "@corely/contracts";
 
 @Injectable()
 export class WorkflowQueueClient implements OnModuleDestroy {
-  private readonly queue: Queue;
   private readonly logger = new Logger(WorkflowQueueClient.name);
 
-  constructor(@Inject(EnvService) private readonly env: EnvService) {
-    this.queue = new Queue(WORKFLOW_ORCHESTRATOR_QUEUE, {
-      connection: buildRedisConnection(this.env.REDIS_URL),
-      defaultJobOptions: {
-        removeOnComplete: true,
-        removeOnFail: 1000,
-      },
-    });
-  }
+  constructor(
+    @Inject(WORKFLOW_ORCHESTRATOR_QUEUE_PORT)
+    private readonly queue: QueuePort<WorkflowOrchestratorQueuePayload>
+  ) {}
 
-  async enqueueOrchestrator(payload: {
-    tenantId: string;
-    instanceId: string;
-    events: Array<{ type: string; payload?: unknown }>;
-  }) {
-    await this.queue.add(`orchestrate:${payload.instanceId}`, payload, {
+  async enqueueOrchestrator(payload: WorkflowOrchestratorQueuePayload) {
+    await this.queue.enqueue(payload, {
+      jobName: `orchestrate:${payload.instanceId}`,
       jobId: `${payload.instanceId}:${Date.now()}`,
       attempts: 5,
-      backoff: { type: "exponential", delay: 2000 },
+      backoff: { type: "exponential", delayMs: 2000 },
     });
 
     this.logger.debug(

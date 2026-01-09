@@ -2,19 +2,26 @@ import { describe, expect, it } from "vitest";
 import { WorkflowOrchestratorProcessor } from "../orchestrator.processor";
 
 function createProcessor() {
+  const env = { WORKFLOW_QUEUE_DRIVER: "memory" };
   const prisma = { $transaction: async (fn: any) => fn({}) };
   const noopRepo = {};
-  const queues = { connection: {} };
   const metrics = { recordQueueLatency: () => undefined };
+  const queue = {
+    subscribe: async () => ({ close: async () => undefined }),
+    enqueue: async () => undefined,
+    close: async () => undefined,
+  };
 
   return new WorkflowOrchestratorProcessor(
+    env as any,
     prisma as any,
     noopRepo as any,
     noopRepo as any,
     noopRepo as any,
     noopRepo as any,
-    queues as any,
-    metrics as any
+    metrics as any,
+    queue as any,
+    queue as any
   );
 }
 

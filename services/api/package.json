@@ -15,6 +15,7 @@
     "@corely/domain": "workspace:*",
     "@corely/kernel": "workspace:*",
     "@google-cloud/storage": "^7.14.0",
+    "@google-cloud/tasks": "^4.1.0",
     "@langfuse/otel": "^4.5.1",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
