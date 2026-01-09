@@ -15,11 +15,13 @@ export * from "./ports/idempotency.port";
 export * from "./ports/outbox.port";
 export * from "./ports/audit.port";
 export * from "./ports/observability.port";
+export * from "./ports/queue.port";
 
 export * from "./testing/noop-logger";
 export * from "./testing/fixed-clock";
 export * from "./testing/fake-id-generator";
 export * from "./testing/in-memory-idempotency";
+export * from "./testing/in-memory-queue";
 
 export * from "./time/local-date";
 export * from "./time/time-zone";

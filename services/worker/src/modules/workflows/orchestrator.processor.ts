@@ -1,9 +1,13 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { Worker, type Job } from "bullmq";
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { EnvService } from "@corely/config";
 import {
   WORKFLOW_ORCHESTRATOR_QUEUE,
+  WORKFLOW_ORCHESTRATOR_QUEUE_PORT,
+  WORKFLOW_TASK_QUEUE_PORT,
   type WorkflowEventInput,
+  type WorkflowOrchestratorQueuePayload,
   type WorkflowTaskCreateSpec,
+  type WorkflowTaskQueuePayload,
 } from "@corely/contracts";
 import { applyWorkflowEvents, restoreSnapshot, serializeSnapshot } from "@corely/core";
 import {
@@ -13,49 +17,42 @@ import {
   WorkflowInstanceRepository,
   WorkflowTaskRepository,
 } from "@corely/data";
-import type { TransactionContext } from "@corely/kernel";
-import { WorkflowQueues } from "./workflow-queues";
+import type { QueueJob, QueuePort, QueueSubscription, TransactionContext } from "@corely/kernel";
 import { WorkflowMetricsService } from "./workflow-metrics.service";
-
-interface OrchestratorJobPayload {
-  tenantId: string;
-  instanceId: string;
-  events: WorkflowEventInput[];
-}
 
 @Injectable()
 export class WorkflowOrchestratorProcessor implements OnModuleInit, OnModuleDestroy {
-  private worker: Worker | undefined;
+  private subscription: QueueSubscription | undefined;
   private readonly logger = new Logger(WorkflowOrchestratorProcessor.name);
 
   constructor(
+    private readonly env: EnvService,
     private readonly prisma: PrismaService,
     private readonly definitions: WorkflowDefinitionRepository,
     private readonly instances: WorkflowInstanceRepository,
     private readonly tasks: WorkflowTaskRepository,
     private readonly events: WorkflowEventRepository,
-    private readonly queues: WorkflowQueues,
-    private readonly metrics: WorkflowMetricsService
+    private readonly metrics: WorkflowMetricsService,
+    @Inject(WORKFLOW_ORCHESTRATOR_QUEUE_PORT)
+    private readonly orchestratorQueue: QueuePort<WorkflowOrchestratorQueuePayload>,
+    @Inject(WORKFLOW_TASK_QUEUE_PORT)
+    private readonly taskQueue: QueuePort<WorkflowTaskQueuePayload>
   ) {}
 
-  onModuleInit() {
-    this.worker = new Worker(
-      WORKFLOW_ORCHESTRATOR_QUEUE,
-      async (job) => this.process(job as Job<OrchestratorJobPayload>),
-      {
-        connection: this.queues.connection,
-        concurrency: 10,
-      }
-    );
+  async onModuleInit() {
+    if (this.env.WORKFLOW_QUEUE_DRIVER === "cloudtasks") {
+      return;
+    }
+    this.subscription = await this.orchestratorQueue.subscribe(async (job) => this.handleJob(job), {
+      concurrency: 10,
+    });
   }
 
   async onModuleDestroy() {
-    if (this.worker) {
-      await this.worker.close();
-    }
+    await this.subscription?.close();
   }
 
-  private async process(job: Job<OrchestratorJobPayload>) {
+  async handleJob(job: QueueJob<WorkflowOrchestratorQueuePayload>) {
     const startedAt = Date.now();
     this.metrics.recordQueueLatency({
       queue: WORKFLOW_ORCHESTRATOR_QUEUE,
@@ -272,22 +269,20 @@ export class WorkflowOrchestratorProcessor implements OnModuleInit, OnModuleDest
       return;
     }
 
-    const queue = this.queues.taskQueue;
-
     for (const task of createdTasks) {
       if (task.type === "HUMAN") {
         continue;
       }
 
       const delayMs = task.runAt ? Math.max(task.runAt.getTime() - Date.now(), 0) : 0;
-      await queue.add(
-        `task:${task.id}`,
+      await this.taskQueue.enqueue(
         { tenantId, taskId: task.id, instanceId },
         {
+          jobName: `task:${task.id}`,
           jobId: task.id,
-          delay: delayMs,
+          delayMs,
           attempts: task.maxAttempts ?? 3,
-          backoff: { type: "exponential", delay: 5000 },
+          backoff: { type: "exponential", delayMs: 5000 },
         }
       );
     }

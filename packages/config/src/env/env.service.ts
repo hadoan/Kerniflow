@@ -37,6 +37,30 @@ export class EnvService {
     return this.config.REDIS_URL;
   }
 
+  get WORKFLOW_QUEUE_DRIVER(): "bullmq" | "memory" | "cloudtasks" | undefined {
+    return this.config.WORKFLOW_QUEUE_DRIVER;
+  }
+
+  get WORKFLOW_CLOUDTASKS_LOCATION(): string | undefined {
+    return this.config.WORKFLOW_CLOUDTASKS_LOCATION;
+  }
+
+  get WORKFLOW_CLOUDTASKS_QUEUE_PREFIX(): string | undefined {
+    return this.config.WORKFLOW_CLOUDTASKS_QUEUE_PREFIX;
+  }
+
+  get WORKFLOW_CLOUDTASKS_TARGET_BASE_URL(): string | undefined {
+    return this.config.WORKFLOW_CLOUDTASKS_TARGET_BASE_URL;
+  }
+
+  get WORKFLOW_CLOUDTASKS_SERVICE_ACCOUNT(): string | undefined {
+    return this.config.WORKFLOW_CLOUDTASKS_SERVICE_ACCOUNT;
+  }
+
+  get WORKFLOW_QUEUE_SECRET(): string | undefined {
+    return this.config.WORKFLOW_QUEUE_SECRET;
+  }
+
   // ============================================================================
   // PORTS
   // ============================================================================
@@ -51,6 +75,10 @@ export class EnvService {
 
   get MOCK_PORT(): number {
     return this.config.MOCK_PORT;
+  }
+
+  get WORKER_PORT(): number {
+    return this.config.WORKER_PORT;
   }
 
   // ============================================================================

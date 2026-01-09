@@ -74,6 +74,16 @@ Guards can be defined in the spec under `guards` and referenced by name.
 3. Task runner claims runnable tasks, executes handlers, and enqueues follow-up events.
 4. Each transition writes history events and updates instance snapshots transactionally.
 
+## Queue Delivery Paths
+
+Workflow execution logic is shared across queue drivers; only the delivery
+mechanism changes.
+
+- BullMQ: workers subscribe to Redis queues in `onModuleInit()` and BullMQ
+  invokes `handleJob` for each job.
+- Cloud Tasks: Cloud Tasks pushes HTTP requests to the worker, the controller
+  builds a `QueueJob`, and calls `handleJob` directly.
+
 ## AI Tasks
 
 AI task handler enforces policy guardrails:
@@ -82,9 +92,47 @@ AI task handler enforces policy guardrails:
 - `policy.allowDirectEmit` must be true for the worker to emit those events
 - decisions are always stored in task output for auditability
 
-## Redis Configuration
+## Queue Drivers
 
-Queues use `REDIS_URL` if provided; otherwise they default to `redis://127.0.0.1:6379`.
+Workflows use a queue port that supports multiple drivers. Pick one based on your environment.
+
+### BullMQ (Redis)
+
+BullMQ requires Redis. Set:
+
+- `WORKFLOW_QUEUE_DRIVER=bullmq`
+- `REDIS_URL=redis://<host>:<port>/<db>`
+
+If `WORKFLOW_QUEUE_DRIVER` is not set, BullMQ is selected by default when
+`REDIS_URL` is set or when running in production.
+
+### In-memory (dev/tests)
+
+In-memory queues do not require Redis and are process-local. This is best for
+unit tests and single-process runs.
+
+- `WORKFLOW_QUEUE_DRIVER=memory`
+
+Do not use this when API and worker run in separate processes; they will not
+share queues.
+
+### GCP Cloud Tasks
+
+Cloud Tasks removes the Redis dependency and provides durable scheduling.
+It delivers jobs over HTTP to the worker service.
+
+Set:
+
+- `WORKFLOW_QUEUE_DRIVER=cloudtasks`
+- `GOOGLE_CLOUD_PROJECT=<project-id>`
+- `WORKFLOW_CLOUDTASKS_LOCATION=<region>` (e.g. `us-central1`)
+- `WORKFLOW_CLOUDTASKS_TARGET_BASE_URL=https://<worker-host>`
+- Optional: `WORKFLOW_CLOUDTASKS_QUEUE_PREFIX=<prefix>` (defaults to `${APP_ENV}-`)
+- Optional: `WORKFLOW_CLOUDTASKS_SERVICE_ACCOUNT=<service-account-email>` (for OIDC auth)
+- Optional: `WORKFLOW_QUEUE_SECRET=<shared-secret>` (sent as `X-Queue-Secret`)
+
+Note: Cloud Tasks requires the worker to run an HTTP server and expose the
+workflow queue routes under `internal/queues/*`.
 
 ## Fixtures
 

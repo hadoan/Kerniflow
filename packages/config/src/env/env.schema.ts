@@ -20,7 +20,13 @@ export const envSchema = z.object({
   // ============================================================================
   // REDIS CACHE & QUEUE
   // ============================================================================
-  REDIS_URL: z.string().url("REDIS_URL must be a valid Redis connection string"),
+  REDIS_URL: z.string().url("REDIS_URL must be a valid Redis connection string").optional(),
+  WORKFLOW_QUEUE_DRIVER: z.enum(["bullmq", "memory", "cloudtasks"]).optional(),
+  WORKFLOW_CLOUDTASKS_LOCATION: z.string().optional(),
+  WORKFLOW_CLOUDTASKS_QUEUE_PREFIX: z.string().optional(),
+  WORKFLOW_CLOUDTASKS_TARGET_BASE_URL: z.string().url().optional(),
+  WORKFLOW_CLOUDTASKS_SERVICE_ACCOUNT: z.string().optional(),
+  WORKFLOW_QUEUE_SECRET: z.string().optional(),
 
   // ============================================================================
   // PORTS
@@ -28,6 +34,7 @@ export const envSchema = z.object({
   API_PORT: z.coerce.number().int().positive().default(3000),
   WEB_PORT: z.coerce.number().int().positive().default(5173),
   MOCK_PORT: z.coerce.number().int().positive().default(4000),
+  WORKER_PORT: z.coerce.number().int().positive().default(3001),
 
   // ============================================================================
   // AI PROVIDERS
@@ -105,6 +112,7 @@ export const SECRET_ENV_KEYS: ReadonlySet<keyof Env> = new Set([
   "GOOGLE_APPLICATION_CREDENTIALS",
   "LANGFUSE_SECRET_KEY",
   "OTEL_EXPORTER_OTLP_HEADERS",
+  "WORKFLOW_QUEUE_SECRET",
 ]);
 
 /**
