@@ -174,9 +174,6 @@ export const useCopilotChatOptions = (
         prepareSendMessagesRequest: async ({ messages, trigger, messageId }) => {
           const idempotencyKey = createIdempotencyKey();
           const safeMessages = normalizeMessages(messages);
-          const shouldSendFullHistory = lastAssistantMessageIsCompleteWithApprovalResponses({
-            messages: safeMessages,
-          });
           const latestMessage = safeMessages[safeMessages.length - 1];
 
           return {
@@ -194,7 +191,7 @@ export const useCopilotChatOptions = (
                 locale: input.locale || "en",
                 activeModule: input.activeModule,
               },
-              ...(shouldSendFullHistory ? { messages: safeMessages } : { message: latestMessage }),
+              message: latestMessage,
             },
           };
         },

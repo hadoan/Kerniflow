@@ -5,9 +5,8 @@ import { createUIMessageStream, pipeUIMessageStreamToResponse } from "ai";
 import { type Response } from "express";
 
 import { type CopilotUIMessage } from "../../domain/types/ui-message";
-import { type CopilotMessage } from "../../domain/entities/message.entity";
 import { type AgentRunRepositoryPort } from "../ports/agent-run-repository.port";
-import { type MessageRepositoryPort } from "../ports/message-repository.port";
+import { type ChatStorePort } from "../ports/chat-store.port";
 import { type ToolExecutionRepositoryPort } from "../ports/tool-execution-repository.port";
 import { type ToolRegistryPort } from "../ports/tool-registry.port";
 import { type LanguageModelPort } from "../ports/language-model.port";
@@ -20,6 +19,8 @@ import {
   type NormalizedMessageSnapshot,
   type ObservabilityPort,
 } from "@corely/kernel";
+import { type CopilotContextBuilder } from "../services/copilot-context.builder";
+import { type CopilotTaskStateTracker } from "../services/copilot-task-state.service";
 import { type WorkspaceKind } from "@corely/prompts";
 
 const ACTION_KEY = "copilot.chat";
@@ -27,7 +28,7 @@ const ACTION_KEY = "copilot.chat";
 export class StreamCopilotChatUseCase {
   constructor(
     private readonly agentRuns: AgentRunRepositoryPort,
-    private readonly messages: MessageRepositoryPort,
+    private readonly chatStore: ChatStorePort,
     private readonly toolExecutions: ToolExecutionRepositoryPort,
     private readonly toolRegistry: ToolRegistryPort,
     private readonly languageModel: LanguageModelPort,
@@ -35,7 +36,9 @@ export class StreamCopilotChatUseCase {
     private readonly outbox: OutboxPort,
     private readonly idempotency: CopilotIdempotencyPort,
     private readonly clock: ClockPort,
-    private readonly observability: ObservabilityPort
+    private readonly observability: ObservabilityPort,
+    private readonly contextBuilder: CopilotContextBuilder,
+    private readonly taskTracker: CopilotTaskStateTracker
   ) {}
 
   async execute(params: {
@@ -153,31 +156,26 @@ export class StreamCopilotChatUseCase {
       });
     }
 
-    const historyEntities = await this.messages.listByRun({ tenantId, runId });
-    const historyMessages = historyEntities.map((entity) => this.mapEntityToUIMessage(entity));
-    const existingIds = new Set(historyMessages.map((msg) => msg.id).filter(Boolean) as string[]);
-
-    const newMessagesToPersist = incomingMessages
-      .map((msg) => ({ ...msg, id: msg.id || nanoid() }))
-      .filter((msg) => !existingIds.has(msg.id ?? ""));
-
-    if (newMessagesToPersist.length) {
-      await this.messages.createMany(
-        newMessagesToPersist.map((msg) => ({
-          id: msg.id as string,
-          tenantId,
-          runId,
-          role: msg.role,
-          partsJson: JSON.stringify(this.serializeMessage(msg)),
-          traceId: turnSpan.traceId,
-        }))
-      );
-    }
+    const stored = await this.chatStore.load({ chatId: runId, tenantId });
+    const historyMessages = stored.messages;
 
     const conversation = this.mergeMessages(historyMessages, incomingMessages).map((msg) => ({
       ...msg,
       parts: Array.isArray(msg.parts) ? msg.parts : [],
     }));
+    const taskState = this.taskTracker.derive(conversation, stored.metadata?.taskState);
+    await this.chatStore.save({
+      chatId: runId,
+      tenantId,
+      messages: incomingMessages,
+      metadata: {
+        workspaceId: params.workspaceId ?? stored.metadata?.workspaceId,
+        userId: params.userId ?? stored.metadata?.userId,
+        taskState,
+      },
+      traceId: turnSpan.traceId,
+    });
+    const modelContext = this.contextBuilder.build({ messages: conversation, taskState });
     const assistantMessageId = nanoid();
 
     try {
@@ -238,7 +236,7 @@ export class StreamCopilotChatUseCase {
           let modelSpanError: { code: SpanStatusCode; message: string } | undefined;
           try {
             const { result, usage } = await this.languageModel.streamChat({
-              messages: conversation,
+              messages: modelContext,
               tools,
               runId,
               tenantId,
@@ -338,36 +336,6 @@ export class StreamCopilotChatUseCase {
     return merged;
   }
 
-  private mapEntityToUIMessage(entity: CopilotMessage): CopilotUIMessage {
-    try {
-      const parsed = JSON.parse(entity.partsJson);
-      const parsedParts = Array.isArray(parsed?.parts)
-        ? parsed.parts
-        : Array.isArray(parsed)
-          ? parsed
-          : [];
-      return {
-        id: entity.id,
-        role: entity.role as CopilotUIMessage["role"],
-        parts: parsedParts,
-        metadata: parsed?.metadata,
-      };
-    } catch {
-      return {
-        id: entity.id,
-        role: entity.role as CopilotUIMessage["role"],
-        parts: [],
-      };
-    }
-  }
-
-  private serializeMessage(message: CopilotUIMessage) {
-    return {
-      parts: message.parts ?? [],
-      metadata: message.metadata,
-    };
-  }
-
   private async persistAssistantMessage(params: {
     message: CopilotUIMessage;
     tenantId: string;
@@ -375,18 +343,23 @@ export class StreamCopilotChatUseCase {
     traceId?: string;
     isContinuation: boolean;
   }) {
-    const payload = JSON.stringify(this.serializeMessage(params.message));
     const id = params.message.id || nanoid();
-    const record = {
-      id,
+    const stored = await this.chatStore.load({
+      chatId: params.runId,
       tenantId: params.tenantId,
-      runId: params.runId,
-      role: params.message.role ?? "assistant",
-      partsJson: payload,
+    });
+    const conversation = this.mergeMessages(stored.messages, [{ ...params.message, id }]);
+    const taskState = this.taskTracker.derive(conversation, stored.metadata?.taskState);
+    await this.chatStore.save({
+      chatId: params.runId,
+      tenantId: params.tenantId,
+      messages: [{ ...params.message, id }],
+      metadata: {
+        ...stored.metadata,
+        taskState,
+      },
       traceId: params.traceId,
-    };
-
-    await this.messages.upsert(record);
+    });
     await this.syncToolExecutionsFromMessage(params.message, params.tenantId, params.runId);
   }
 
