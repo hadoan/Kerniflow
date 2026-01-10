@@ -35,13 +35,17 @@ export class PrismaTaxReportRepoAdapter extends TaxReportRepoPort {
       throw new Error("Report not found for tenant");
     }
     const refreshed = await this.prisma.taxReport.findUnique({ where: { id } });
-    if (!refreshed) {throw new Error("Report not found after update");}
+    if (!refreshed) {
+      throw new Error("Report not found after update");
+    }
     return this.toDomain(refreshed);
   }
 
   async seedDefaultReports(tenantId: string): Promise<void> {
     const existing = await this.prisma.taxReport.count({ where: { tenantId } });
-    if (existing > 0) {return;}
+    if (existing > 0) {
+      return;
+    }
 
     const now = new Date();
     const year = now.getUTCFullYear();

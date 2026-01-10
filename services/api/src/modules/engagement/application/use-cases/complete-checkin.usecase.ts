@@ -9,10 +9,7 @@ import {
   ok,
   err,
 } from "@corely/kernel";
-import {
-  type CompleteCheckInEventInput,
-  type CompleteCheckInEventOutput,
-} from "@corely/contracts";
+import { type CompleteCheckInEventInput, type CompleteCheckInEventOutput } from "@corely/contracts";
 import { toCheckInEventDto } from "../mappers/engagement-dto.mappers";
 import type { CheckInRepositoryPort } from "../ports/checkin-repository.port";
 

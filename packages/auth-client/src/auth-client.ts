@@ -133,7 +133,8 @@ export class AuthClient {
         body: data,
       });
       await this.storeTokens(result.accessToken, result.refreshToken);
-      const workspaceId = result.workspaceId ?? result.tenantId ?? data.workspaceId ?? data.tenantId;
+      const workspaceId =
+        result.workspaceId ?? result.tenantId ?? data.workspaceId ?? data.tenantId;
       if (workspaceId) {
         await this.storage.setActiveWorkspaceId(workspaceId);
       }

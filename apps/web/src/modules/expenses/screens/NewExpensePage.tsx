@@ -63,7 +63,9 @@ export default function NewExpensePage() {
   });
 
   useEffect(() => {
-    if (!id) {return;}
+    if (!id) {
+      return;
+    }
     setLoading(true);
     expensesApi
       .getExpense(id)

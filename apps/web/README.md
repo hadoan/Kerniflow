@@ -49,6 +49,7 @@ The web application can be deployed to any static hosting service that supports 
 3. Configure your hosting to serve `index.html` for all routes (SPA routing)
 
 Recommended hosting providers:
+
 - Vercel
 - Netlify
 - Cloudflare Pages

@@ -44,7 +44,9 @@ export function TemplatesPage() {
   };
 
   const handleApplyTemplate = async () => {
-    if (!selectedTemplate) {return;}
+    if (!selectedTemplate) {
+      return;
+    }
 
     try {
       await applyTemplate.mutateAsync({

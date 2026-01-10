@@ -13,16 +13,16 @@
 
 These tokens are defined in `packages/kernel/src/tokens.ts` and used across multiple modules:
 
-| Token                          | Value                            | Canonical Source     | Should Be Provided By | Notes                                 |
-| ------------------------------ | -------------------------------- | -------------------- | --------------------- | ------------------------------------- |
-| AUDIT_PORT                     | `"kernel/audit-port"`            | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
-| OUTBOX_PORT                    | `"kernel/outbox-port"`           | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
-| IDEMPOTENCY_PORT               | `"kernel/idempotency-port"`      | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
-| UNIT_OF_WORK                   | `"kernel/unit-of-work"`          | @corely/kernel | DataModule            | Exported from @corely/kernel ports |
-| CLOCK_PORT_TOKEN               | `"kernel/clock-port"`            | @corely/kernel | **KernelModule**      | Re-exported by shared/ports           |
-| ID_GENERATOR_TOKEN             | `"kernel/id-generator"`          | @corely/kernel | **KernelModule**      | Re-exported by shared/ports           |
-| IDEMPOTENCY_STORAGE_PORT_TOKEN | `"api/idempotency-storage-port"` | @corely/kernel | **KernelModule**      | API-specific                          |
-| TENANT_TIMEZONE_PORT           | `"api/tenant-timezone-port"`     | @corely/kernel | InvoicesModule        | Time service dependency               |
+| Token                          | Value                            | Canonical Source | Should Be Provided By | Notes                              |
+| ------------------------------ | -------------------------------- | ---------------- | --------------------- | ---------------------------------- |
+| AUDIT_PORT                     | `"kernel/audit-port"`            | @corely/kernel   | DataModule            | Exported from @corely/kernel ports |
+| OUTBOX_PORT                    | `"kernel/outbox-port"`           | @corely/kernel   | DataModule            | Exported from @corely/kernel ports |
+| IDEMPOTENCY_PORT               | `"kernel/idempotency-port"`      | @corely/kernel   | DataModule            | Exported from @corely/kernel ports |
+| UNIT_OF_WORK                   | `"kernel/unit-of-work"`          | @corely/kernel   | DataModule            | Exported from @corely/kernel ports |
+| CLOCK_PORT_TOKEN               | `"kernel/clock-port"`            | @corely/kernel   | **KernelModule**      | Re-exported by shared/ports        |
+| ID_GENERATOR_TOKEN             | `"kernel/id-generator"`          | @corely/kernel   | **KernelModule**      | Re-exported by shared/ports        |
+| IDEMPOTENCY_STORAGE_PORT_TOKEN | `"api/idempotency-storage-port"` | @corely/kernel   | **KernelModule**      | API-specific                       |
+| TENANT_TIMEZONE_PORT           | `"api/tenant-timezone-port"`     | @corely/kernel   | InvoicesModule        | Time service dependency            |
 
 **Status**: ✅ Token definitions are centralized
 **Issue**: ❌ 11 modules re-declare providers instead of importing
@@ -240,8 +240,8 @@ These tokens are defined in `packages/kernel/src/tokens.ts` and used across mult
 
 These files re-export kernel tokens for convenience:
 
-| File                        | Re-exports                     | Source               |
-| --------------------------- | ------------------------------ | -------------------- |
+| File                        | Re-exports                     | Source         |
+| --------------------------- | ------------------------------ | -------------- |
 | audit.port.ts               | AUDIT_PORT, AUDIT_PORT_TOKEN   | @corely/kernel |
 | clock.port.ts               | CLOCK_PORT_TOKEN               | @corely/kernel |
 | id-generator.port.ts        | ID_GENERATOR_TOKEN             | @corely/kernel |

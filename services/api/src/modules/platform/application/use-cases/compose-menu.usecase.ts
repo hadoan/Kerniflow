@@ -115,9 +115,13 @@ export class ComposeMenuUseCase {
     const defaultApps = this.templateService.getDefaultEnabledApps(workspaceKind);
 
     for (const appId of defaultApps) {
-      if (installed.has(appId)) {continue;}
+      if (installed.has(appId)) {
+        continue;
+      }
       const manifest = this.appRegistry.get(appId);
-      if (!manifest) {continue;}
+      if (!manifest) {
+        continue;
+      }
       await this.appInstallRepo.upsert({
         id: randomUUID(),
         tenantId,

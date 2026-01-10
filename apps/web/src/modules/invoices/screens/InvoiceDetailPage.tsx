@@ -139,7 +139,9 @@ export default function InvoiceDetailPage() {
 
   const runStatusFlow = React.useCallback(
     async (invoiceId: string, currentStatus: InvoiceStatus, desiredStatus: InvoiceStatus) => {
-      if (desiredStatus === currentStatus) {return currentStatus;}
+      if (desiredStatus === currentStatus) {
+        return currentStatus;
+      }
       try {
         if (desiredStatus === "ISSUED") {
           await invoicesApi.finalizeInvoice(invoiceId);
@@ -167,7 +169,9 @@ export default function InvoiceDetailPage() {
 
   const recordPayment = useMutation({
     mutationFn: async () => {
-      if (!id) {throw new Error("Missing invoice id");}
+      if (!id) {
+        throw new Error("Missing invoice id");
+      }
       const amountCents = Math.round(parseFloat(paymentAmount || "0") * 100);
       if (!amountCents || Number.isNaN(amountCents)) {
         throw new Error("Invalid amount");
@@ -193,7 +197,9 @@ export default function InvoiceDetailPage() {
   });
 
   const handleSubmit = async (data: InvoiceFormData) => {
-    if (!id || !invoice) {return;}
+    if (!id || !invoice) {
+      return;
+    }
     try {
       await updateInvoice.mutateAsync(data);
       await runStatusFlow(id, invoice.status, targetStatus);

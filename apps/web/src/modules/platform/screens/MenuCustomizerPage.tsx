@@ -60,7 +60,9 @@ export function MenuCustomizerPage() {
   };
 
   const handleMoveUp = (index: number) => {
-    if (index === 0) {return;}
+    if (index === 0) {
+      return;
+    }
     const newItems = [...items];
     [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
     setItems(newItems);
@@ -74,7 +76,9 @@ export function MenuCustomizerPage() {
   };
 
   const handleMoveDown = (index: number) => {
-    if (index === items.length - 1) {return;}
+    if (index === items.length - 1) {
+      return;
+    }
     const newItems = [...items];
     [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
     setItems(newItems);
@@ -269,8 +273,12 @@ export function MenuCustomizerPage() {
                           value={editLabel}
                           onChange={(e) => setEditLabel(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter") {handleSaveEdit(item.id);}
-                            if (e.key === "Escape") {handleCancelEdit();}
+                            if (e.key === "Enter") {
+                              handleSaveEdit(item.id);
+                            }
+                            if (e.key === "Escape") {
+                              handleCancelEdit();
+                            }
                           }}
                           className="h-8 text-sm"
                           autoFocus
