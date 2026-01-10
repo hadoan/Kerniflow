@@ -1,5 +1,6 @@
 export * from "./invoice.types";
 export * from "./create-invoice.schema";
+export * from "./create-invoice-from-customer.schema";
 export * from "./update-invoice.schema";
 export * from "./finalize-invoice.schema";
 export * from "./send-invoice.schema";

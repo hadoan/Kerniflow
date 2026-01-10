@@ -23,6 +23,7 @@ import { IdempotencyService } from "../../shared/infrastructure/idempotency/idem
 import { InvoicesModule } from "../invoices/invoices.module";
 import { InvoicesApplication } from "../invoices/application/invoices.application";
 import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
+import { buildInvoiceWorkflowTools } from "./infrastructure/tools/invoice-workflow.tools";
 import { PartyModule } from "../party";
 import { PartyApplication } from "../party/application/party.application";
 import { buildCustomerTools } from "../party/adapters/tools/customer.tools";
@@ -125,6 +126,7 @@ import { ListMessagesUseCase } from "./application/use-cases/list-messages.useca
         engagement: EngagementApplication,
         env: EnvService
       ) => [
+        ...buildInvoiceWorkflowTools(invoices, partyCrm),
         ...buildInvoiceTools(invoices),
         ...buildCustomerTools(partyCrm),
         ...buildSalesTools(sales),

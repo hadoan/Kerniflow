@@ -6,6 +6,7 @@ import {
   type CollectInputsToolOutput,
 } from "@corely/contracts";
 import { Button } from "@/shared/ui/button";
+import { Checkbox } from "@/shared/ui/checkbox";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
@@ -22,7 +23,35 @@ type FieldErrors = Record<string, string | undefined>;
 
 const EMPTY_SELECT_VALUE = "__empty__";
 
+const toRegExp = (pattern: string) => {
+  const trimmed = pattern.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  if (trimmed.startsWith("/") && trimmed.lastIndexOf("/") > 0) {
+    const lastSlash = trimmed.lastIndexOf("/");
+    const body = trimmed.slice(1, lastSlash);
+    const flags = trimmed.slice(lastSlash + 1);
+    try {
+      return new RegExp(body, flags);
+    } catch {
+      return undefined;
+    }
+  }
+
+  try {
+    return new RegExp(trimmed);
+  } catch {
+    return undefined;
+  }
+};
+
 const buildSchema = (field: CollectInputField): z.ZodTypeAny => {
+  if (field.type === "boolean") {
+    const schema = z.boolean();
+    return field.required ? schema : schema.optional();
+  }
   if (field.type === "number") {
     let schema = z.number();
     if (field.min !== undefined) {
@@ -41,7 +70,10 @@ const buildSchema = (field: CollectInputField): z.ZodTypeAny => {
       schema = schema.max(field.maxLength);
     }
     if (field.pattern) {
-      schema = schema.regex(new RegExp(field.pattern));
+      const patternRegex = toRegExp(field.pattern);
+      if (patternRegex) {
+        schema = schema.regex(patternRegex);
+      }
     }
     return field.required ? schema : schema.optional();
   }
@@ -51,7 +83,12 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
   const fields = Array.isArray(request.fields) ? request.fields : [];
 
   const [values, setValues] = useState<Record<string, unknown>>(
-    Object.fromEntries(fields.map((f) => [f.key, f.defaultValue ?? ""]))
+    Object.fromEntries(
+      fields.map((field) => [
+        field.key,
+        field.defaultValue ?? (field.type === "boolean" ? false : ""),
+      ])
+    )
   );
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -102,13 +139,13 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
     const commonProps = {
       id: field.key,
       disabled: disabled || isSubmitting,
-      placeholder: field.placeholder,
       "aria-invalid": Boolean(error),
     };
     if (field.type === "textarea") {
       return (
         <Textarea
           {...commonProps}
+          placeholder={field.placeholder}
           value={(values[field.key] as string) ?? ""}
           onChange={(e) => handleChange(field.key, e.target.value)}
         />
@@ -119,6 +156,7 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
         <Input
           type="number"
           {...commonProps}
+          placeholder={field.placeholder}
           value={(values[field.key] as number | string | undefined) ?? ""}
           onChange={(e) =>
             handleChange(field.key, e.target.value === "" ? "" : Number(e.target.value))
@@ -126,6 +164,31 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
           min={field.min}
           max={field.max}
           step={field.step}
+        />
+      );
+    }
+    if (field.type === "boolean") {
+      return (
+        <div className="flex items-center gap-2">
+          <Checkbox
+            {...commonProps}
+            checked={Boolean(values[field.key])}
+            onCheckedChange={(checked) => handleChange(field.key, checked === true)}
+          />
+          {field.placeholder ? (
+            <span className="text-xs text-muted-foreground">{field.placeholder}</span>
+          ) : null}
+        </div>
+      );
+    }
+    if (field.type === "date" || field.type === "datetime") {
+      return (
+        <Input
+          type={field.type === "date" ? "date" : "datetime-local"}
+          {...commonProps}
+          placeholder={field.placeholder}
+          value={(values[field.key] as string) ?? ""}
+          onChange={(e) => handleChange(field.key, e.target.value)}
         />
       );
     }
@@ -178,6 +241,7 @@ export const QuestionForm: React.FC<Props> = ({ request, onSubmit, onCancel, dis
       <Input
         type="text"
         {...commonProps}
+        placeholder={field.placeholder}
         value={(values[field.key] as string) ?? ""}
         onChange={(e) => handleChange(field.key, e.target.value)}
       />

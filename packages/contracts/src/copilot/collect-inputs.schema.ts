@@ -3,9 +3,18 @@ import { z } from "zod";
 export const CollectInputFieldSchema = z.object({
   key: z.string(),
   label: z.string(),
-  type: z.enum(["text", "number", "select", "textarea"]),
+  type: z
+    .enum(["text", "number", "select", "textarea", "date", "datetime", "boolean"])
+    .describe(
+      "Field type. Use date for YYYY-MM-DD, datetime for date+time, boolean for yes/no, " +
+        "select for fixed choices, textarea for long text, number for numeric input, " +
+        "text for short freeform."
+    ),
   required: z.boolean().default(false),
-  placeholder: z.string().optional(),
+  placeholder: z
+    .string()
+    .optional()
+    .describe("Optional hint text. For dates use YYYY-MM-DD; for datetimes use YYYY-MM-DDTHH:mm."),
   helpText: z.string().optional(),
   patternLabel: z.string().optional(),
   defaultValue: z.any().optional(),
@@ -14,7 +23,10 @@ export const CollectInputFieldSchema = z.object({
   step: z.number().positive().optional(),
   minLength: z.number().int().optional(),
   maxLength: z.number().int().optional(),
-  pattern: z.string().optional(),
+  pattern: z
+    .string()
+    .optional()
+    .describe("Regex for text/textarea only. Do not use for date/datetime fields."),
   options: z
     .array(
       z.object({

@@ -63,7 +63,8 @@ export const buildInvoiceTools = (app: InvoicesApplication): DomainToolPort[] =>
   },
   {
     name: "invoice_create",
-    description: "Create a draft invoice with line items.",
+    description:
+      "Create a draft invoice with line items when customerPartyId is known (use invoice_create_from_customer for names).",
     kind: "server",
     inputSchema: CreateInvoiceInputSchema,
     execute: async ({ tenantId, userId, input, toolCallId, runId }) => {
