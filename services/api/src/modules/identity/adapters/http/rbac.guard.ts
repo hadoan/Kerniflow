@@ -52,7 +52,12 @@ export class RbacGuard implements CanActivate {
     const ctx = request.context;
     const userId = ctx?.userId ?? request.user?.userId;
     const tenantId = ctx?.tenantId ?? request.tenantId;
-    const workspaceId = (ctx?.workspaceId as string | null | undefined) ?? null;
+    const headerWorkspaceId = request.headers["x-workspace-id"] as string | undefined;
+    const workspaceId =
+      (ctx?.workspaceId as string | null | undefined) ??
+      (request.workspaceId as string | null | undefined) ??
+      headerWorkspaceId ??
+      null;
 
     if (!userId || !tenantId) {
       throw new ForbiddenException("User or tenant not found in context");
