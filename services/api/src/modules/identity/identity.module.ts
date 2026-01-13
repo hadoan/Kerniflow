@@ -1,9 +1,10 @@
 /* eslint @typescript-eslint/no-explicit-any: "error" */
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { DataModule, PrismaOutboxAdapter } from "@corely/data";
 import { OUTBOX_PORT } from "@corely/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
+import { PlatformModule } from "../platform";
 
 // Controllers
 import { AuthController } from "./adapters/http/auth.controller";
@@ -51,7 +52,7 @@ import { GetRolePermissionsUseCase } from "./application/use-cases/get-role-perm
 import { UpdateRolePermissionsUseCase } from "./application/use-cases/update-role-permissions.usecase";
 
 @Module({
-  imports: [DataModule, KernelModule],
+  imports: [DataModule, KernelModule, forwardRef(() => PlatformModule)],
   controllers: [AuthController, RolesController, PermissionsController],
   providers: [
     // Repositories - NestJS will auto-inject Prisma adapters based on @Injectable()

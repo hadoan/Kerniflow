@@ -29,6 +29,7 @@ export interface UpdateWorkspaceInput {
 }
 
 export interface UpdateLegalEntityInput {
+  kind?: string;
   legalName?: string;
   countryCode?: string;
   currency?: string;

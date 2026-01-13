@@ -12,6 +12,7 @@ export interface MenuItem {
   order: number;
   pinned?: boolean;
   tags?: string[];
+  requiredCapabilities?: string[];
 }
 
 export interface WorkspaceMetadata {

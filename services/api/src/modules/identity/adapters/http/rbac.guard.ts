@@ -15,6 +15,11 @@ import {
   computeEffectivePermissionSet,
   hasPermission,
 } from "../../../../shared/permissions/effective-permissions";
+import { WorkspaceTemplateService } from "../../platform";
+import {
+  WORKSPACE_REPOSITORY_PORT,
+  type WorkspaceRepositoryPort,
+} from "../../workspaces/application/ports/workspace-repository.port";
 
 export const REQUIRE_PERMISSION = "require_permission";
 
@@ -30,7 +35,10 @@ export class RbacGuard implements CanActivate {
     @Inject(MEMBERSHIP_REPOSITORY_TOKEN)
     private readonly membershipRepo: MembershipRepositoryPort,
     @Inject(ROLE_PERMISSION_GRANT_REPOSITORY_TOKEN)
-    private readonly grantRepo: RolePermissionGrantRepositoryPort
+    private readonly grantRepo: RolePermissionGrantRepositoryPort,
+    private readonly workspaceTemplateService: WorkspaceTemplateService,
+    @Inject(WORKSPACE_REPOSITORY_PORT)
+    private readonly workspaceRepo: WorkspaceRepositoryPort
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -43,9 +51,24 @@ export class RbacGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.userId;
     const tenantId = request.tenantId;
+    const headerWorkspaceId = request.headers["x-workspace-id"] as string | undefined;
+    const workspaceId = (request.workspaceId as string | null) ?? headerWorkspaceId ?? null;
 
     if (!userId || !tenantId) {
       throw new ForbiddenException("User or tenant not found in context");
+    }
+
+    // If workspace has RBAC disabled, allow access (capability gate handles visibility)
+    if (workspaceId) {
+      const workspace = await this.workspaceRepo.getWorkspaceByIdWithLegalEntity(
+        tenantId,
+        workspaceId
+      );
+      const workspaceKind = workspace?.legalEntity?.kind === "COMPANY" ? "COMPANY" : "PERSONAL";
+      const capabilities = this.workspaceTemplateService.getDefaultCapabilities(workspaceKind);
+      if (!capabilities["workspace.rbac"]) {
+        return true;
+      }
     }
 
     // Get user's membership and role

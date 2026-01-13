@@ -247,7 +247,7 @@ export class AppRegistry implements AppRegistryPort {
           section: "quotes",
           labelKey: "nav.quotes",
           defaultLabel: "Quotes",
-          route: "/quotes",
+          route: "/sales/quotes",
           icon: "FileCheck",
           order: 12,
           requiresCapabilities: ["sales.quotes"],

@@ -35,9 +35,11 @@ import { InventoryApplication } from "../../application/inventory.application";
 import { buildUseCaseContext, mapResultToHttp } from "./http-mappers";
 import { AuthGuard } from "../../../identity";
 import { RbacGuard, RequirePermission } from "../../../identity/adapters/http/rbac.guard";
+import { RequireWorkspaceCapability, WorkspaceCapabilityGuard } from "../../../platform";
 
 @Controller("inventory")
-@UseGuards(AuthGuard, RbacGuard)
+@UseGuards(AuthGuard, RbacGuard, WorkspaceCapabilityGuard)
+@RequireWorkspaceCapability("inventory.basic")
 export class InventoryController {
   constructor(private readonly app: InventoryApplication) {}
 

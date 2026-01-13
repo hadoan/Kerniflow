@@ -10,30 +10,30 @@ This implementation provides a **server-driven, template-based UI configuration 
 
 ## Architecture
 
-### Core Concept: ShellConfig
+### Core Concept: WorkspaceConfig
 
-The `ShellConfig` is a single server-computed response that contains everything the frontend needs to render the entire AppShell:
+The `WorkspaceConfig` is a single server-computed response that contains everything the frontend needs to render the entire AppShell:
 
 ```typescript
-interface ShellConfig {
-  tenant: {
-    workspaceId: string;
-    workspaceName: string;
-    businessMode: "PERSONAL" | "COMPANY";
-  };
+interface WorkspaceConfig {
+  workspaceId: string;
+  kind: "PERSONAL" | "COMPANY";
   navigation: NavigationConfig; // Grouped menu structure
   home: HomeConfig; // Dashboard widgets
-  capabilities: Capabilities; // Feature flags (multiUser, quotes, inventory, etc.)
+  capabilities: Capabilities; // Feature flags (workspace.multiUser, sales.quotes, etc.)
   terminology: Terminology; // UI labels (Client vs Customer, etc.)
-  enabledModules: string[]; // List of active apps/modules
+  currentUser: {
+    membershipRole: "OWNER" | "ADMIN" | "MEMBER" | "ACCOUNTANT" | "VIEWER";
+    isWorkspaceAdmin: boolean;
+  };
 }
 ```
 
 ### Server-Side Computation
 
-**Location:** [services/api/src/modules/platform/application/use-cases/get-shell-config.usecase.ts](./services/api/src/modules/platform/application/use-cases/get-shell-config.usecase.ts)
+**Location:** [services/api/src/modules/platform/application/use-cases/get-workspace-config.usecase.ts](./services/api/src/modules/platform/application/use-cases/get-workspace-config.usecase.ts)
 
-The `GetShellConfigUseCase` computes configuration from:
+The `GetWorkspaceConfigUseCase` computes configuration from:
 
 1. **Workspace.legalEntity.kind** → determines base template (PERSONAL/COMPANY)
 2. **TenantAppInstall** → which modules are enabled
@@ -46,22 +46,22 @@ The `GetShellConfigUseCase` computes configuration from:
 
 ### Backend
 
-| File                                                                                   | Purpose                                    |
-| -------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `packages/contracts/src/platform/shell-config.schema.ts`                               | **ShellConfig contract** (shared FE/BE)    |
-| `services/api/src/modules/platform/application/services/workspace-template.service.ts` | **Templates** for Freelancer/Company modes |
-| `services/api/src/modules/platform/application/use-cases/get-shell-config.usecase.ts`  | **Use case** to compute ShellConfig        |
-| `services/api/src/modules/platform/adapters/http/shell-config.controller.ts`           | **Endpoint:** `GET /shell-config`          |
-| `services/api/src/modules/platform/platform.module.ts`                                 | DI registration                            |
+| File                                                                                      | Purpose                                     |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `packages/contracts/src/workspaces/workspace-config.schema.ts`                            | **WorkspaceConfig contract** (shared FE/BE) |
+| `services/api/src/modules/platform/application/services/workspace-template.service.ts`    | **Templates** for Freelancer/Company modes  |
+| `services/api/src/modules/platform/application/use-cases/get-workspace-config.usecase.ts` | **Use case** to compute WorkspaceConfig     |
+| `services/api/src/modules/platform/adapters/http/workspace-config.controller.ts`          | **Endpoint:** `GET /workspaces/:id/config`  |
+| `services/api/src/modules/platform/platform.module.ts`                                    | DI registration                             |
 
 ### Frontend
 
-| File                                                   | Purpose                                                                                  |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| `apps/web/src/app/providers/shell-config-provider.tsx` | **ShellConfig provider** + hooks (`useShellConfig`, `useCapabilities`, `useTerminology`) |
-| `apps/web/src/shared/lib/shell-config.ts`              | **Re-exports** for modules to consume                                                    |
-| `apps/web/src/app/AppSidebar.tsx`                      | **Navigation rendering** from ShellConfig groups                                         |
-| `apps/web/src/modules/core/screens/DashboardPage.tsx`  | **Example:** Capability-driven quick actions                                             |
+| File                                                           | Purpose                                                     |
+| -------------------------------------------------------------- | ----------------------------------------------------------- |
+| `apps/web/src/shared/workspaces/workspace-config-provider.tsx` | **WorkspaceConfig provider** + hooks (`useWorkspaceConfig`) |
+| `apps/web/src/shared/workspaces/navigation.ts`                 | **Navigation filtering** for capability-gated groups        |
+| `apps/web/src/app/AppSidebar.tsx`                              | **Navigation rendering** from WorkspaceConfig groups        |
+| `apps/web/src/modules/core/screens/DashboardPage.tsx`          | **Example:** Capability-driven quick actions                |
 
 ---
 
@@ -78,23 +78,23 @@ The `GetShellConfigUseCase` computes configuration from:
 **Freelancer Template (`PERSONAL` kind):**
 
 - **Navigation:** Flat structure (Dashboard, Invoices, Expenses, Clients, Assistant, Settings)
-- **Capabilities:** `aiCopilot`, `timeTracking`, `projects`, `vatReporting` = true; rest = false
+- **Capabilities:** `ai.copilot`, `time.tracking`, `sales.projects`, `tax.vatReporting` = true; rest = false
 - **Terminology:** "Client" (not "Customer")
 - **Home Widgets:** Quick actions for invoices/expenses, AI assistant prominent
 
 **Company Template (`COMPANY` kind):**
 
 - **Navigation:** Grouped by domain (Core, Sales, Purchasing, Inventory, Finance, Admin)
-- **Capabilities:** `multiUser`, `rbac`, `approvals`, `quotes`, `inventory`, `costCenters` = true
+- **Capabilities:** `workspace.multiUser`, `workspace.rbac`, `approvals`, `sales.quotes`, `inventory.basic`, `finance.costCenters` = true
 - **Terminology:** "Customer" (not "Client")
 - **Home Widgets:** KPI overview, sales pipeline, approvals queue
 
 ### 3. Backend Flow
 
 ```
-GET /shell-config?scope=web&workspaceId=<id>
+GET /workspaces/<id>/config?scope=web
   ↓
-GetShellConfigUseCase
+GetWorkspaceConfigUseCase
   ↓
 1. Fetch Workspace + LegalEntity (determines kind)
   ↓
@@ -106,7 +106,7 @@ GetShellConfigUseCase
   ↓
 6. Organize menu items into navigation groups
   ↓
-7. Return ShellConfig
+7. Return WorkspaceConfig
 ```
 
 ### 4. Frontend Flow
@@ -114,13 +114,13 @@ GetShellConfigUseCase
 ```
 App Start
   ↓
-ShellConfigProvider fetches /shell-config
+WorkspaceConfigProvider fetches /workspaces/:id/config
   ↓
 AppSidebar reads navigation.groups → renders menu
   ↓
 Dashboard reads capabilities → shows/hides quick actions
   ↓
-Modules use useCapabilities() + useTerminology() → adapt UI
+Modules use useWorkspaceConfig() → adapt UI
 ```
 
 ---
@@ -131,18 +131,21 @@ Modules use useCapabilities() + useTerminology() → adapt UI
 
 ```typescript
 // apps/web/src/modules/invoices/screens/InvoiceForm.tsx
-import { useCapabilities, useTerminology } from "@/shared/lib/shell-config";
+import { useWorkspaceConfig } from "@/shared/workspaces/workspace-config-provider";
 
 function InvoiceForm() {
-  const capabilities = useCapabilities();
-  const terminology = useTerminology();
+  const { config, hasCapability } = useWorkspaceConfig();
+  const terminology = config?.terminology ?? {
+    partyLabel: "Client",
+    invoiceLabel: "Invoice",
+  };
 
   return (
     <form>
       <h2>Create {terminology.invoiceLabel}</h2>
 
       {/* Show advanced fields only for company mode */}
-      {capabilities.advancedInvoicing && (
+      {hasCapability("invoices.advanced") && (
         <div>
           <Input label="Payment Terms (Days)" />
           <Input label="VAT ID" />
@@ -160,9 +163,9 @@ function InvoiceForm() {
 
 ### Navigation: Server-Driven Groups
 
-The AppSidebar automatically renders navigation from ShellConfig:
+The AppSidebar automatically renders navigation from WorkspaceConfig:
 
-- **Freelancer:** Flat list, no group headers
+- **Freelancer:** Minimal groups (Core + Settings)
 - **Company:** Sections grouped (Sales, Purchasing, Finance, etc.)
 
 No hardcoded "if freelancer" checks in frontend!
@@ -176,24 +179,24 @@ No hardcoded "if freelancer" checks in frontend!
 **Backend:**
 
 ```typescript
-// packages/contracts/src/platform/shell-config.schema.ts
-export const CapabilitiesSchema = z.object({
+// packages/contracts/src/workspaces/workspace-config.schema.ts
+export const WorkspaceCapabilitiesSchema = z.object({
   // ... existing
-  myNewFeature: z.boolean().describe("My new feature"),
+  "my.feature": z.boolean().describe("My new feature"),
 });
 
 // services/api/src/modules/platform/application/services/workspace-template.service.ts
-private getFreelancerCapabilities(): Capabilities {
+private getFreelancerCapabilities(): WorkspaceCapabilities {
   return {
     // ... existing
-    myNewFeature: false, // disabled for freelancers
+    "my.feature": false, // disabled for freelancers
   };
 }
 
-private getCompanyCapabilities(): Capabilities {
+private getCompanyCapabilities(): WorkspaceCapabilities {
   return {
     // ... existing
-    myNewFeature: true, // enabled for companies
+    "my.feature": true, // enabled for companies
   };
 }
 ```
@@ -202,9 +205,9 @@ private getCompanyCapabilities(): Capabilities {
 
 ```typescript
 // apps/web/src/modules/my-module/MyComponent.tsx
-const capabilities = useCapabilities();
+const { hasCapability } = useWorkspaceConfig();
 
-{capabilities.myNewFeature && (
+{hasCapability("my.feature") && (
   <MyNewFeatureComponent />
 )}
 ```
@@ -214,27 +217,26 @@ const capabilities = useCapabilities();
 **Backend:**
 
 ```typescript
-// packages/contracts/src/platform/shell-config.schema.ts
-export const TerminologySchema = z.object({
+// packages/contracts/src/workspaces/workspace-config.schema.ts
+export const WorkspaceTerminologySchema = z.object({
   // ... existing
   myLabel: z.string().default("Default Label"),
 });
 
 // services/api/src/modules/platform/application/services/workspace-template.service.ts
-getDefaultTerminology(kind: WorkspaceKind): Terminology {
+getDefaultTerminology(kind: WorkspaceKind): WorkspaceTerminology {
   if (kind === "PERSONAL") {
     return { /* ... */, myLabel: "Freelancer Term" };
-  } else {
-    return { /* ... */, myLabel: "Company Term" };
   }
+  return { /* ... */, myLabel: "Company Term" };
 }
 ```
 
 **Frontend:**
 
 ```typescript
-const terminology = useTerminology();
-<h1>{terminology.myLabel}</h1>
+const terminology = config?.terminology;
+<h1>{terminology?.myLabel}</h1>
 ```
 
 ### 3. Customize Navigation Groups
@@ -265,46 +267,10 @@ Menu items with `section: "section-a"` will automatically appear in this group!
 
 ### Current Implementation
 
-- **Workspace.legalEntity.kind** can be updated via **`PATCH /workspaces/:id`**
-- ShellConfig recalculates on next fetch (cached for 5min)
+- **Upgrade endpoint:** `POST /workspaces/:id/upgrade` (admin-only)
+- **Workspace.legalEntity.kind** is updated to `COMPANY`
+- WorkspaceConfig recalculates on next fetch
 - Frontend automatically re-renders navigation/capabilities
-
-### Future: Upgrade Wizard (Optional)
-
-To implement a guided upgrade flow:
-
-1. **Backend endpoint:**
-
-   ```typescript
-   POST /workspaces/:id/upgrade-to-company
-
-   → Updates legalEntity.kind = "COMPANY"
-   → Optionally enables recommended apps
-   → Returns updated ShellConfig
-   ```
-
-2. **Frontend settings page:**
-
-   ```typescript
-   // apps/web/src/modules/settings/screens/WorkspaceModeSettings.tsx
-   function WorkspaceModeSettings() {
-     const { config, refetch } = useShellConfig();
-
-     const handleUpgrade = async () => {
-       await api.post(`/workspaces/${config.tenant.workspaceId}/upgrade-to-company`);
-       await refetch(); // Re-fetch ShellConfig
-     };
-
-     return (
-       <div>
-         <Badge>{config.tenant.businessMode === "PERSONAL" ? "Freelancer" : "Company"}</Badge>
-         {config.tenant.businessMode === "PERSONAL" && (
-           <Button onClick={handleUpgrade}>Upgrade to Company Mode</Button>
-         )}
-       </div>
-     );
-   }
-   ```
 
 ---
 
@@ -313,41 +279,14 @@ To implement a guided upgrade flow:
 ### Backend Tests
 
 ```typescript
-// services/api/src/modules/platform/__tests__/get-shell-config.usecase.spec.ts
-describe("GetShellConfigUseCase", () => {
-  it("returns freelancer template for PERSONAL workspace", async () => {
-    // Setup workspace with kind = PERSONAL
-    const result = await useCase.execute({...});
-    expect(result.capabilities.multiUser).toBe(false);
-    expect(result.terminology.partyLabel).toBe("Client");
-  });
-
-  it("returns company template for COMPANY workspace", async () => {
-    // Setup workspace with kind = COMPANY
-    const result = await useCase.execute({...});
-    expect(result.capabilities.multiUser).toBe(true);
-    expect(result.terminology.partyLabel).toBe("Customer");
-  });
-
-  it("filters navigation by RBAC permissions", async () => {
-    // Test that admin-only items are hidden for non-admin users
-  });
-});
+// services/api/src/modules/platform/__tests__/workspace-template.service.spec.ts
+// services/api/src/modules/workspaces/__tests__/workspaces-api.int.test.ts
 ```
 
 ### Frontend Tests
 
 ```typescript
-// apps/web/src/app/__tests__/AppSidebar.test.tsx
-it("renders freelancer navigation (flat list)", () => {
-  render(<AppSidebar />, { shellConfig: freelancerConfig });
-  expect(screen.queryByText("Sales")).not.toBeInTheDocument(); // No group headers
-});
-
-it("renders company navigation (grouped)", () => {
-  render(<AppSidebar />, { shellConfig: companyConfig });
-  expect(screen.getByText("Sales")).toBeInTheDocument(); // Group header visible
-});
+// apps/web/src/shared/workspaces/navigation.spec.ts
 ```
 
 ---
@@ -381,7 +320,7 @@ it("renders company navigation (grouped)", () => {
 ✅ **Event-Driven:** Can publish `WorkspaceUpgraded` event for automation
 ✅ **RBAC:** Navigation filtered by user permissions
 ✅ **Server-Driven UI:** Frontend is thin, config-driven
-✅ **No Module Boundaries Violated:** Modules import from `@/shared/lib/shell-config`, not from each other
+✅ **No Module Boundaries Violated:** Modules import from `@/shared/workspaces/workspace-config-provider`, not from each other
 
 ---
 
@@ -391,7 +330,7 @@ This implementation delivers **Freelancer vs Company UI mode** as a **fully serv
 
 - **Existing data** (Workspace.legalEntity.kind)
 - **Extensible templates** (WorkspaceTemplateService)
-- **Single source of truth** (ShellConfig)
+- **Single source of truth** (WorkspaceConfig)
 - **Capability-driven UI** (modules adapt via hooks, not mode checks)
 
 **No migrations. No duplicate apps. No hardcoded conditionals.**

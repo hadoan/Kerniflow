@@ -43,6 +43,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (authClient.getAccessToken()) {
           const currentUser = await authClient.getCurrentUser();
+          const workspaceId = currentUser.activeWorkspaceId ?? currentUser.activeTenantId;
+          if (workspaceId) {
+            setActiveWorkspaceId(workspaceId);
+          }
           setUser(currentUser);
         }
       } catch (err) {

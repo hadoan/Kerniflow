@@ -14,6 +14,7 @@ import { CLOCK_PORT_TOKEN } from "../../shared/ports/clock.port";
 import { AccountingModule } from "../accounting";
 import { AccountingApplication } from "../accounting/application/accounting.application";
 import { IdentityModule } from "../identity";
+import { PlatformModule } from "../platform";
 
 import { PrismaPurchaseOrderRepository } from "./infrastructure/adapters/prisma-purchase-order-repository.adapter";
 import { PrismaVendorBillRepository } from "./infrastructure/adapters/prisma-vendor-bill-repository.adapter";
@@ -64,7 +65,7 @@ import {
 import { ListSuppliersUseCase } from "./application/use-cases/suppliers.usecases";
 
 @Module({
-  imports: [DataModule, KernelModule, IdentityModule, AccountingModule],
+  imports: [DataModule, KernelModule, IdentityModule, PlatformModule, AccountingModule],
   controllers: [PurchasingController],
   providers: [
     PrismaPurchaseOrderRepository,

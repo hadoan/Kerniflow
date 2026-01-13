@@ -28,9 +28,11 @@ import {
 import { PurchasingApplication } from "../../application/purchasing.application";
 import { buildUseCaseContext, mapResultToHttp } from "./http-mappers";
 import { AuthGuard } from "../../../identity";
+import { RequireWorkspaceCapability, WorkspaceCapabilityGuard } from "../../../platform";
 
 @Controller("purchasing")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, WorkspaceCapabilityGuard)
+@RequireWorkspaceCapability("purchasing.purchaseOrders")
 export class PurchasingController {
   constructor(private readonly app: PurchasingApplication) {}
 

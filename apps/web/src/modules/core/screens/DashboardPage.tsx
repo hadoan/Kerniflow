@@ -21,23 +21,24 @@ import { CardSkeleton } from "@/shared/components/Skeleton";
 import { invoicesApi } from "@/lib/invoices-api";
 import { customersApi } from "@/lib/customers-api";
 import { expensesApi } from "@/lib/expenses-api";
-import { useMenu } from "@/modules/platform/hooks/useMenu";
+import { useWorkspaceConfig } from "@/shared/workspaces/workspace-config-provider";
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "de" ? "de-DE" : "en-DE";
 
-  // Server-driven UI configuration from menu API
-  const { data: menu } = useMenu("web");
-  const capabilities = menu?.workspace?.capabilities ?? {
-    multiUser: false,
-    quotes: false,
-    aiCopilot: false,
-    rbac: false,
-  };
-  const terminology = menu?.workspace?.terminology ?? {
+  const { config, hasCapability } = useWorkspaceConfig();
+  const terminology = config?.terminology ?? {
     partyLabel: "Client",
     partyLabelPlural: "Clients",
+    invoiceLabel: "Invoice",
+    invoiceLabelPlural: "Invoices",
+    quoteLabel: "Quote",
+    quoteLabelPlural: "Quotes",
+    projectLabel: "Project",
+    projectLabelPlural: "Projects",
+    expenseLabel: "Expense",
+    expenseLabelPlural: "Expenses",
   };
 
   // Fetch invoices
@@ -213,7 +214,7 @@ export default function DashboardPage() {
         <h2 className="text-h3 text-foreground mb-4">{t("dashboard.quickActions")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Always show: Add expense with AI */}
-          {capabilities.aiCopilot && (
+          {hasCapability("ai.copilot") && (
             <Link to="/assistant">
               <Card variant="interactive" className="group">
                 <CardContent className="p-6 flex items-center gap-4">
@@ -240,7 +241,7 @@ export default function DashboardPage() {
                 <div className="flex-1">
                   <div className="font-medium text-foreground">{t("dashboard.createInvoice")}</div>
                   <div className="text-sm text-muted-foreground">
-                    {capabilities.aiCopilot ? "Generate with AI" : "Create new"}
+                    {hasCapability("ai.copilot") ? "Generate with AI" : "Create new"}
                   </div>
                 </div>
                 <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-success transition-colors" />
@@ -249,8 +250,8 @@ export default function DashboardPage() {
           </Link>
 
           {/* Conditional: Show quotes for company mode, assistant for freelancer */}
-          {capabilities.quotes ? (
-            <Link to="/quotes">
+          {hasCapability("sales.quotes") ? (
+            <Link to="/sales/quotes">
               <Card variant="interactive" className="group">
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center group-hover:bg-warning/20 transition-colors">
@@ -267,7 +268,7 @@ export default function DashboardPage() {
               </Card>
             </Link>
           ) : (
-            capabilities.aiCopilot && (
+            hasCapability("ai.copilot") && (
               <Link to="/assistant">
                 <Card variant="interactive" className="group">
                   <CardContent className="p-6 flex items-center gap-4">
@@ -288,7 +289,7 @@ export default function DashboardPage() {
           )}
 
           {/* Conditional: Team management for multi-user companies */}
-          {capabilities.multiUser && (
+          {hasCapability("workspace.multiUser") && (
             <Link to="/settings/team">
               <Card variant="interactive" className="group">
                 <CardContent className="p-6 flex items-center gap-4">

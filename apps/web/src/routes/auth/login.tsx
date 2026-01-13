@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/lib/auth-provider";
 
@@ -14,6 +14,30 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [tenantId, setTenantId] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  // Load remembered credentials on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("corely-remember-login");
+      if (!raw) {
+        return;
+      }
+      const parsed = JSON.parse(raw) as { email?: string; password?: string; tenantId?: string };
+      if (parsed.email) {
+        setEmail(parsed.email);
+      }
+      if (parsed.password) {
+        setPassword(parsed.password);
+      }
+      if (parsed.tenantId) {
+        setTenantId(parsed.tenantId);
+      }
+      setRememberMe(true);
+    } catch {
+      // ignore corrupt storage
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +50,16 @@ export const LoginPage: React.FC = () => {
         password,
         tenantId: tenantId || undefined,
       });
+
+      // Persist credentials if requested
+      if (rememberMe) {
+        localStorage.setItem(
+          "corely-remember-login",
+          JSON.stringify({ email, password, tenantId: tenantId || undefined })
+        );
+      } else {
+        localStorage.removeItem("corely-remember-login");
+      }
 
       navigate("/");
     } catch (err) {
@@ -102,6 +136,18 @@ export const LoginPage: React.FC = () => {
                 onChange={(e) => setTenantId(e.target.value)}
               />
             </div>
+          </div>
+
+          <div>
+            <label className="inline-flex items-center space-x-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span>Remember me</span>
+            </label>
           </div>
 
           <div>

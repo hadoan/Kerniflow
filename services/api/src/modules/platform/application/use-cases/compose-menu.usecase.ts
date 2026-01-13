@@ -64,27 +64,36 @@ export class ComposeMenuUseCase {
 
     await this.ensureDefaultAppsInstalled(input.tenantId, input.userId, workspaceKind);
 
+    const defaultCapabilities = this.templateService.getDefaultCapabilities(workspaceKind);
+    const capabilityKeys = new Set(Object.keys(defaultCapabilities));
+    const capabilityFilter = new Set(
+      Object.entries(defaultCapabilities)
+        .filter(([, enabled]) => enabled)
+        .map(([key]) => key)
+    );
+
     const items = await this.menuComposer.composeMenu({
       tenantId: input.tenantId,
       userId: input.userId,
       permissions: new Set(input.permissions),
       scope: input.scope,
+      capabilityFilter,
+      capabilityKeys,
     });
 
     // Optionally include workspace metadata for server-driven UI
     let workspaceMetadata: ComposeMenuOutput["workspace"] | undefined;
 
     if (workspace && workspace.legalEntity) {
-      const defaultCapabilities = this.templateService.getDefaultCapabilities(workspaceKind);
       const defaultTerminology = this.templateService.getDefaultTerminology(workspaceKind);
 
       workspaceMetadata = {
         kind: workspaceKind,
         capabilities: {
-          multiUser: defaultCapabilities.multiUser,
-          quotes: defaultCapabilities.quotes,
-          aiCopilot: defaultCapabilities.aiCopilot,
-          rbac: defaultCapabilities.rbac,
+          multiUser: defaultCapabilities["workspace.multiUser"],
+          quotes: defaultCapabilities["sales.quotes"],
+          aiCopilot: defaultCapabilities["ai.copilot"],
+          rbac: defaultCapabilities["workspace.rbac"],
         },
         terminology: {
           partyLabel: defaultTerminology.partyLabel,

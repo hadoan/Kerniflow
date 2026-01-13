@@ -20,6 +20,7 @@ import {
 import { AuthGuard } from "./auth.guard";
 import { RbacGuard, RequirePermission } from "./rbac.guard";
 import { CurrentTenantId, CurrentUserId } from "./current-user.decorator";
+import { RequireWorkspaceCapability, WorkspaceCapabilityGuard } from "../../../platform";
 import { ListRolesUseCase } from "../../application/use-cases/list-roles.usecase";
 import { CreateRoleUseCase } from "../../application/use-cases/create-role.usecase";
 import { UpdateRoleUseCase } from "../../application/use-cases/update-role.usecase";
@@ -30,7 +31,8 @@ import { buildRequestContext } from "../../../../shared/context/request-context"
 import { mapErrorToHttp } from "../../../../shared/errors/domain-errors";
 
 @Controller("identity/roles")
-@UseGuards(AuthGuard, RbacGuard)
+@UseGuards(AuthGuard, RbacGuard, WorkspaceCapabilityGuard)
+@RequireWorkspaceCapability("workspace.rbac")
 export class RolesController {
   constructor(
     @Inject(ListRolesUseCase) private readonly listRolesUseCase: ListRolesUseCase,

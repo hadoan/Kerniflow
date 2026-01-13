@@ -6,6 +6,7 @@ import { NestLoggerAdapter } from "../../shared/adapters/logger/nest-logger.adap
 import { AUDIT_PORT, AuditPort } from "@corely/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
+import { PlatformModule } from "../platform";
 import {
   IdempotencyStoragePort,
   IDEMPOTENCY_STORAGE_PORT_TOKEN,
@@ -74,7 +75,7 @@ import {
 } from "./application/use-cases/reorder.usecases";
 
 @Module({
-  imports: [DataModule, KernelModule, IdentityModule],
+  imports: [DataModule, KernelModule, IdentityModule, PlatformModule],
   controllers: [InventoryController],
   providers: [
     PrismaProductRepository,

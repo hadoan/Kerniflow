@@ -8,9 +8,12 @@ import { Separator } from "@/shared/ui/separator";
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";
 import { workspacesApi } from "@/shared/workspaces/workspaces-api";
 import { useToast } from "@/shared/ui/use-toast";
+import { useWorkspaceConfig } from "@/shared/workspaces/workspace-config-provider";
+import { Badge } from "@/shared/ui/badge";
 
 export const WorkspaceSettingsPage: React.FC = () => {
   const { activeWorkspace, activeWorkspaceId, refresh } = useWorkspace();
+  const { config, refresh: refreshConfig } = useWorkspaceConfig();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [form, setForm] = useState({
@@ -24,6 +27,7 @@ export const WorkspaceSettingsPage: React.FC = () => {
     postalCode: "",
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   useEffect(() => {
     if (activeWorkspace) {
@@ -79,6 +83,33 @@ export const WorkspaceSettingsPage: React.FC = () => {
       setIsSaving(false);
     }
   };
+
+  const handleUpgrade = async () => {
+    if (!activeWorkspaceId) {
+      return;
+    }
+    setIsUpgrading(true);
+    try {
+      await workspacesApi.upgradeWorkspace(activeWorkspaceId);
+      await refresh();
+      await refreshConfig();
+      toast({
+        title: "Workspace upgraded",
+        description: "Your workspace now uses company defaults.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upgrade failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
+
+  const workspaceKind = config?.kind ?? activeWorkspace?.kind ?? "PERSONAL";
+  const canUpgrade = workspaceKind === "PERSONAL" && config?.currentUser.isWorkspaceAdmin;
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -166,6 +197,34 @@ export const WorkspaceSettingsPage: React.FC = () => {
               value={form.taxId}
               onChange={(e) => setForm((f) => ({ ...f, taxId: e.target.value }))}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Workspace type</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Current kind:</span>
+            <Badge variant="secondary">
+              {workspaceKind === "PERSONAL" ? "Freelancer" : "Company"}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Freelancer workspaces use minimal defaults. Upgrading keeps all data and unlocks company
+            capabilities.
+          </p>
+          <div>
+            <Button onClick={handleUpgrade} disabled={!canUpgrade || isUpgrading}>
+              {isUpgrading ? "Upgrading..." : "Upgrade to Company"}
+            </Button>
+            {!config?.currentUser.isWorkspaceAdmin && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Only workspace admins can upgrade.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

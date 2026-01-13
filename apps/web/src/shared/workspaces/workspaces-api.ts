@@ -9,6 +9,9 @@ import type {
   ListWorkspacesOutput,
   UpdateWorkspaceInput,
   UpdateWorkspaceOutput,
+  UpgradeWorkspaceInput,
+  UpgradeWorkspaceOutput,
+  WorkspaceConfig,
   WorkspaceOnboardingStatusResponse,
 } from "@corely/contracts";
 import { apiClient } from "@/lib/api-client";
@@ -40,6 +43,25 @@ class WorkspacesApi {
 
   async listMembers(workspaceId: string): Promise<ListWorkspaceMembersOutput> {
     return apiClient.get<ListWorkspaceMembersOutput>(`/workspaces/${workspaceId}/members`);
+  }
+
+  async getWorkspaceConfig(
+    workspaceId: string,
+    options?: { scope?: "web" | "pos" }
+  ): Promise<WorkspaceConfig> {
+    const scope = options?.scope ?? "web";
+    return apiClient.get<WorkspaceConfig>(`/workspaces/${workspaceId}/config?scope=${scope}`);
+  }
+
+  async upgradeWorkspace(
+    workspaceId: string,
+    input: UpgradeWorkspaceInput = {}
+  ): Promise<UpgradeWorkspaceOutput> {
+    return apiClient.post<UpgradeWorkspaceOutput>(
+      `/workspaces/${workspaceId}/upgrade`,
+      input,
+      this.withIdempotencyAndCorrelation()
+    );
   }
 
   async inviteMember(

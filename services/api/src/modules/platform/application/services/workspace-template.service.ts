@@ -1,29 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import type { WorkspaceKind } from "@corely/contracts";
+import type {
+  WorkspaceCapabilities,
+  WorkspaceDashboardWidget,
+  WorkspaceKind,
+  WorkspaceTerminology,
+} from "@corely/contracts";
 
-type Capabilities = Record<string, boolean>;
-
-interface Terminology {
-  partyLabel: string;
-  partyLabelPlural: string;
-  invoiceLabel: string;
-  invoiceLabelPlural: string;
-  quoteLabel: string;
-  quoteLabelPlural: string;
-  projectLabel: string;
-  projectLabelPlural: string;
-  expenseLabel: string;
-  expenseLabelPlural: string;
-}
-
-interface DashboardWidget {
-  id: string;
-  titleKey: string;
-  defaultTitle: string;
-  widgetType: string;
-  order: number;
-  size: string;
-  config?: Record<string, unknown>;
+export interface WorkspaceTemplate {
+  kind: WorkspaceKind;
+  capabilities: WorkspaceCapabilities;
+  terminology: WorkspaceTerminology;
+  homeWidgets: WorkspaceDashboardWidget[];
+  navigation: NavigationGroupStructure[];
+  enabledApps: string[];
 }
 
 /**
@@ -37,154 +26,142 @@ interface DashboardWidget {
 @Injectable()
 export class WorkspaceTemplateService {
   /**
+   * Get full workspace template for a kind
+   */
+  getTemplate(kind: WorkspaceKind): WorkspaceTemplate {
+    return kind === "PERSONAL" ? this.getPersonalTemplate() : this.getCompanyTemplate();
+  }
+
+  /**
+   * Template for freelancer/personal workspaces
+   */
+  getPersonalTemplate(): WorkspaceTemplate {
+    return {
+      kind: "PERSONAL",
+      capabilities: this.getFreelancerCapabilities(),
+      terminology: this.getFreelancerTerminology(),
+      homeWidgets: this.getFreelancerHomeWidgets(),
+      navigation: this.getFreelancerNavigationStructure(),
+      enabledApps: this.getFreelancerEnabledApps(),
+    };
+  }
+
+  /**
+   * Template for company workspaces
+   */
+  getCompanyTemplate(): WorkspaceTemplate {
+    return {
+      kind: "COMPANY",
+      capabilities: this.getCompanyCapabilities(),
+      terminology: this.getCompanyTerminology(),
+      homeWidgets: this.getCompanyHomeWidgets(),
+      navigation: this.getCompanyNavigationStructure(),
+      enabledApps: this.getCompanyEnabledApps(),
+    };
+  }
+
+  /**
    * Get default capabilities for a workspace kind
    */
-  getDefaultCapabilities(kind: WorkspaceKind): Capabilities {
-    if (kind === "PERSONAL") {
-      return this.getFreelancerCapabilities();
-    } else {
-      return this.getCompanyCapabilities();
-    }
+  getDefaultCapabilities(kind: WorkspaceKind): WorkspaceCapabilities {
+    return this.getTemplate(kind).capabilities;
   }
 
   /**
    * Get default terminology for a workspace kind
    */
-  getDefaultTerminology(kind: WorkspaceKind): Terminology {
-    if (kind === "PERSONAL") {
-      return {
-        partyLabel: "Client",
-        partyLabelPlural: "Clients",
-        invoiceLabel: "Invoice",
-        invoiceLabelPlural: "Invoices",
-        quoteLabel: "Quote",
-        quoteLabelPlural: "Quotes",
-        projectLabel: "Project",
-        projectLabelPlural: "Projects",
-        expenseLabel: "Expense",
-        expenseLabelPlural: "Expenses",
-      };
-    } else {
-      return {
-        partyLabel: "Customer",
-        partyLabelPlural: "Customers",
-        invoiceLabel: "Invoice",
-        invoiceLabelPlural: "Invoices",
-        quoteLabel: "Quote",
-        quoteLabelPlural: "Quotes",
-        projectLabel: "Project",
-        projectLabelPlural: "Projects",
-        expenseLabel: "Expense",
-        expenseLabelPlural: "Expenses",
-      };
-    }
+  getDefaultTerminology(kind: WorkspaceKind): WorkspaceTerminology {
+    return this.getTemplate(kind).terminology;
   }
 
   /**
    * Get default home widgets for a workspace kind
    */
-  getDefaultHomeWidgets(kind: WorkspaceKind): DashboardWidget[] {
-    if (kind === "PERSONAL") {
-      return this.getFreelancerHomeWidgets();
-    } else {
-      return this.getCompanyHomeWidgets();
-    }
+  getDefaultHomeWidgets(kind: WorkspaceKind): WorkspaceDashboardWidget[] {
+    return this.getTemplate(kind).homeWidgets;
   }
 
   /**
    * Get default navigation groups structure (logical grouping before menu composition)
    */
   getNavigationGroupsStructure(kind: WorkspaceKind): NavigationGroupStructure[] {
-    if (kind === "PERSONAL") {
-      return this.getFreelancerNavigationStructure();
-    } else {
-      return this.getCompanyNavigationStructure();
-    }
+    return this.getTemplate(kind).navigation;
   }
 
   /**
    * Get recommended default apps for a workspace kind
    */
   getDefaultEnabledApps(kind: WorkspaceKind): string[] {
-    if (kind === "PERSONAL") {
-      return [
-        "core",
-        "platform",
-        "workspaces",
-        "invoices",
-        "expenses",
-        "parties", // clients
-        "crm",
-        "tax",
-        "ai-copilot",
-      ];
-    } else {
-      return [
-        "core",
-        "platform",
-        "workspaces",
-        "invoices",
-        "expenses",
-        "parties", // customers
-        "sales", // quotes, projects
-        "tax",
-        "ai-copilot",
-      ];
-    }
+    return this.getTemplate(kind).enabledApps;
   }
 
   // ===========================
   // FREELANCER MODE (PERSONAL)
   // ===========================
 
-  private getFreelancerCapabilities(): Capabilities {
+  private getFreelancerCapabilities(): WorkspaceCapabilities {
     return {
       // Multi-user: Limited for freelancers
-      multiUser: false,
-      rbac: false,
+      "workspace.multiUser": false,
+      "workspace.rbac": false,
       approvals: false,
 
       // Sales: Simplified
-      advancedInvoicing: false,
-      quotes: false,
-      projects: true, // Freelancers often track projects
-      timeTracking: true,
+      "invoices.advanced": false,
+      "sales.quotes": false,
+      "sales.projects": true, // Freelancers often track projects
+      "time.tracking": true,
 
       // Purchasing: Not needed
-      purchaseOrders: false,
-      supplierPortal: false,
+      "purchasing.purchaseOrders": false,
+      "purchasing.supplierPortal": false,
 
       // Inventory: Basic tracking only
-      inventory: false,
-      warehouses: false,
-      serialTracking: false,
+      "inventory.basic": false,
+      "inventory.warehouses": false,
+      "inventory.serialTracking": false,
 
       // Finance: Simplified
-      costCenters: false,
-      budgeting: false,
-      multiCurrency: false,
+      "finance.costCenters": false,
+      "finance.budgeting": false,
+      "finance.multiCurrency": false,
 
       // Tax: Basic
-      vatReporting: true,
-      taxProfiles: false,
+      "tax.vatReporting": true,
+      "tax.profiles": false,
 
       // CRM: Basic
-      advancedCrm: false,
-      marketing: false,
+      "crm.advanced": false,
+      "marketing.basic": false,
 
       // POS: Optional
-      pos: false,
-      posMultiRegister: false,
+      "pos.basic": false,
+      "pos.multiRegister": false,
 
       // Platform: Enabled
-      aiCopilot: true,
-      apiAccess: false,
-      webhooks: false,
-      customFields: false,
+      "ai.copilot": true,
+      "platform.apiAccess": false,
+      "platform.webhooks": false,
+      "platform.customFields": false,
     };
   }
 
-  private getFreelancerHomeWidgets(): DashboardWidget[] {
+  private getFreelancerTerminology(): WorkspaceTerminology {
+    return {
+      partyLabel: "Client",
+      partyLabelPlural: "Clients",
+      invoiceLabel: "Invoice",
+      invoiceLabelPlural: "Invoices",
+      quoteLabel: "Quote",
+      quoteLabelPlural: "Quotes",
+      projectLabel: "Project",
+      projectLabelPlural: "Projects",
+      expenseLabel: "Expense",
+      expenseLabelPlural: "Expenses",
+    };
+  }
+
+  private getFreelancerHomeWidgets(): WorkspaceDashboardWidget[] {
     return [
       {
         id: "quick-actions",
@@ -268,54 +245,69 @@ export class WorkspaceTemplateService {
   // COMPANY MODE
   // ===========================
 
-  private getCompanyCapabilities(): Capabilities {
+  private getCompanyCapabilities(): WorkspaceCapabilities {
     return {
       // Multi-user: Full support
-      multiUser: true,
-      rbac: true,
+      "workspace.multiUser": true,
+      "workspace.rbac": true,
       approvals: true,
 
       // Sales: Advanced
-      advancedInvoicing: true,
-      quotes: true,
-      projects: true,
-      timeTracking: true,
+      "invoices.advanced": true,
+      "sales.quotes": true,
+      "sales.projects": true,
+      "time.tracking": true,
 
       // Purchasing: Full support
-      purchaseOrders: true,
-      supplierPortal: false, // Can be enabled separately
+      "purchasing.purchaseOrders": true,
+      "purchasing.supplierPortal": false, // Can be enabled separately
 
       // Inventory: Full support
-      inventory: true,
-      warehouses: false, // Can be enabled separately
-      serialTracking: false, // Can be enabled separately
+      "inventory.basic": true,
+      "inventory.warehouses": false, // Can be enabled separately
+      "inventory.serialTracking": false, // Can be enabled separately
 
       // Finance: Advanced
-      costCenters: true,
-      budgeting: true,
-      multiCurrency: false, // Can be enabled separately
+      "finance.costCenters": true,
+      "finance.budgeting": true,
+      "finance.multiCurrency": false, // Can be enabled separately
 
       // Tax: Advanced
-      vatReporting: true,
-      taxProfiles: true,
+      "tax.vatReporting": true,
+      "tax.profiles": true,
 
       // CRM: Advanced
-      advancedCrm: true,
-      marketing: false, // Can be enabled separately
+      "crm.advanced": true,
+      "marketing.basic": false, // Can be enabled separately
 
       // POS: Optional
-      pos: false,
-      posMultiRegister: false,
+      "pos.basic": false,
+      "pos.multiRegister": false,
 
       // Platform: Full
-      aiCopilot: true,
-      apiAccess: true,
-      webhooks: true,
-      customFields: true,
+      "ai.copilot": true,
+      "platform.apiAccess": true,
+      "platform.webhooks": true,
+      "platform.customFields": true,
     };
   }
 
-  private getCompanyHomeWidgets(): DashboardWidget[] {
+  private getCompanyTerminology(): WorkspaceTerminology {
+    return {
+      partyLabel: "Customer",
+      partyLabelPlural: "Customers",
+      invoiceLabel: "Invoice",
+      invoiceLabelPlural: "Invoices",
+      quoteLabel: "Quote",
+      quoteLabelPlural: "Quotes",
+      projectLabel: "Project",
+      projectLabelPlural: "Projects",
+      expenseLabel: "Expense",
+      expenseLabelPlural: "Expenses",
+    };
+  }
+
+  private getCompanyHomeWidgets(): WorkspaceDashboardWidget[] {
     return [
       {
         id: "kpi-overview",
@@ -408,6 +400,34 @@ export class WorkspaceTemplateService {
         order: 99,
         sectionOrder: ["workspace", "team", "roles", "platform"],
       },
+    ];
+  }
+
+  private getFreelancerEnabledApps(): string[] {
+    return [
+      "core",
+      "platform",
+      "workspaces",
+      "invoices",
+      "expenses",
+      "parties", // clients
+      "crm",
+      "tax",
+      "ai-copilot",
+    ];
+  }
+
+  private getCompanyEnabledApps(): string[] {
+    return [
+      "core",
+      "platform",
+      "workspaces",
+      "invoices",
+      "expenses",
+      "parties", // customers
+      "sales", // quotes, projects
+      "tax",
+      "ai-copilot",
     ];
   }
 }

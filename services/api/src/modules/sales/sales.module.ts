@@ -3,6 +3,7 @@ import { DataModule } from "@corely/data";
 import { AUDIT_PORT } from "@corely/kernel";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
+import { PlatformModule } from "../platform";
 import { SystemIdGenerator } from "../../shared/infrastructure/system-id-generator";
 import { SystemClock } from "../../shared/infrastructure/system-clock";
 import { SalesController } from "./adapters/http/sales.controller";
@@ -65,7 +66,14 @@ import {
 } from "./application/use-cases/settings.usecases";
 
 @Module({
-  imports: [DataModule, KernelModule, PartyModule, AccountingModule, IdentityModule],
+  imports: [
+    DataModule,
+    KernelModule,
+    PartyModule,
+    AccountingModule,
+    IdentityModule,
+    PlatformModule,
+  ],
   controllers: [SalesController],
   providers: [
     PrismaQuoteRepositoryAdapter,

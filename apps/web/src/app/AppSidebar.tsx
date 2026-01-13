@@ -17,9 +17,10 @@ import {
 } from "@/shared/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth-provider";
 import { useWorkspace } from "@/shared/workspaces/workspace-provider";
-import { useMenu } from "@/modules/platform/hooks/useMenu";
 import { getIconByName } from "@/shared/utils/iconMapping";
 import { Badge } from "@/shared/ui/badge";
+import { useWorkspaceConfig } from "@/shared/workspaces/workspace-config-provider";
+import { filterNavigationGroups } from "@/shared/workspaces/navigation";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -30,11 +31,14 @@ interface SidebarProps {
 export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }: SidebarProps) {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useThemeStore();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { activeWorkspace } = useWorkspace();
+  const { config, isLoading: isConfigLoading, error: configError } = useWorkspaceConfig();
 
-  // Use Menu API for server-driven UI
-  const { data: serverMenu, isLoading: isMenuLoading, error: menuError } = useMenu("web");
+  const navigationGroups = config?.navigation.groups ?? [];
+  const visibleGroups = config?.capabilities
+    ? filterNavigationGroups(navigationGroups, config.capabilities)
+    : navigationGroups;
 
   const changeLanguage = (lang: string) => {
     void i18n.changeLanguage(lang);
@@ -87,53 +91,62 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
         className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin"
         data-testid={`sidebar-nav${variant === "mobile" ? "-mobile" : ""}`}
       >
-        {isMenuLoading ? (
+        {isConfigLoading ? (
           /* Loading state */
           <div className="space-y-2 animate-pulse">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-10 bg-sidebar-accent/30 rounded-lg" />
             ))}
           </div>
-        ) : menuError ? (
+        ) : configError ? (
           /* Error state */
           <div className="px-3 py-4 text-sm text-muted-foreground">
             {t("errors.loadMenuFailed")}
           </div>
-        ) : serverMenu?.items ? (
-          /* Server menu items */
+        ) : visibleGroups.length > 0 ? (
+          /* Server-driven navigation */
           <>
-            <div className="space-y-1">
-              {serverMenu.items.map((item) => {
-                const Icon = getIconByName(item.icon);
-                return (
-                  <NavLink
-                    key={item.id}
-                    to={item.route || "#"}
-                    data-testid={`nav-${item.id}`}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                      )
-                    }
-                  >
-                    <Icon className="h-5 w-5 shrink-0" />
-                    {!collapsed && <span>{item.label}</span>}
-                    {!collapsed && item.pinned && (
-                      <span className="ml-auto text-xs text-muted-foreground">📌</span>
-                    )}
-                  </NavLink>
-                );
-              })}
-            </div>
+            {visibleGroups.map((group) => {
+              return (
+                <div key={group.id} className="space-y-1">
+                  {!collapsed && (
+                    <div className="px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {group.defaultLabel}
+                    </div>
+                  )}
+                  {group.items.map((item) => {
+                    const Icon = getIconByName(item.icon);
+                    return (
+                      <NavLink
+                        key={item.id}
+                        to={item.route || "#"}
+                        data-testid={`nav-${item.id}`}
+                        className={({ isActive }) =>
+                          cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                          )
+                        }
+                      >
+                        <Icon className="h-5 w-5 shrink-0" />
+                        {!collapsed && <span>{item.label}</span>}
+                        {!collapsed && item.pinned && (
+                          <span className="ml-auto text-xs text-muted-foreground">📌</span>
+                        )}
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              );
+            })}
 
             {/* Workspace mode indicator */}
-            {!collapsed && serverMenu.workspace && (
+            {!collapsed && config && (
               <div className="px-3 py-2 mt-4">
                 <Badge variant="outline" className="text-xs">
-                  {serverMenu.workspace.kind === "PERSONAL" ? (
+                  {config.kind === "PERSONAL" ? (
                     <>
                       <User className="h-3 w-3 mr-1" />
                       Freelancer
@@ -238,9 +251,16 @@ export function AppSidebar({ collapsed = false, onToggle, variant = "desktop" }:
                 <div className="text-xs text-muted-foreground">{user.email}</div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem data-testid="logout" className="text-danger">
+              <DropdownMenuItem
+                data-testid="logout"
+                className="text-danger"
+                onSelect={(event) => {
+                  event.preventDefault();
+                  void logout();
+                }}
+              >
                 <LogOut className="h-4 w-4 mr-2" />
-                {t("common.comingSoon")}
+                {t("common.logout", "Log out")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

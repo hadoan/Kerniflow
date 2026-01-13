@@ -53,6 +53,7 @@ export class PrismaWorkspaceRepository implements WorkspaceRepositoryPort {
     const entity = await this.prisma.legalEntity.update({
       where: { id },
       data: {
+        kind: input.kind,
         legalName: input.legalName,
         countryCode: input.countryCode,
         currency: input.currency,

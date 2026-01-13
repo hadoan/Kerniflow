@@ -13,6 +13,8 @@ interface ComposeMenuInput {
   userId: string;
   permissions: Set<string>;
   scope: "web" | "pos";
+  capabilityFilter?: Set<string>;
+  capabilityKeys?: Set<string>;
 }
 
 /**
@@ -42,7 +44,14 @@ export class MenuComposerService {
       const manifest = this.appRegistry.get(appId);
       if (manifest) {
         const filtered = manifest.menu.filter((item) =>
-          this.shouldIncludeMenuItem(item, input.scope, input.permissions, entitlement)
+          this.shouldIncludeMenuItem(
+            item,
+            input.scope,
+            input.permissions,
+            entitlement,
+            input.capabilityFilter,
+            input.capabilityKeys
+          )
         );
         contributions.push(...filtered);
       }
@@ -62,7 +71,9 @@ export class MenuComposerService {
     item: MenuContribution,
     scope: string,
     permissions: Set<string>,
-    entitlement: any
+    entitlement: any,
+    capabilityFilter?: Set<string>,
+    capabilityKeys?: Set<string>
   ): boolean {
     // Check scope
     if (!this.matchesScope(item, scope)) {
@@ -82,6 +93,14 @@ export class MenuComposerService {
     if (item.requiresCapabilities) {
       for (const requiredCapability of item.requiresCapabilities) {
         if (!entitlement.hasCapability(requiredCapability)) {
+          return false;
+        }
+        if (
+          capabilityKeys &&
+          capabilityKeys.has(requiredCapability) &&
+          capabilityFilter &&
+          !capabilityFilter.has(requiredCapability)
+        ) {
           return false;
         }
       }
@@ -140,6 +159,7 @@ export class MenuComposerService {
       order: overrides.order?.[item.id] ?? item.order,
       pinned: overrides.pins?.includes(item.id),
       tags: item.tags,
+      requiredCapabilities: item.requiresCapabilities,
     }));
   }
 
@@ -158,6 +178,7 @@ export class MenuComposerService {
         icon: item.icon,
         order: item.order,
         tags: item.tags,
+        requiredCapabilities: item.requiresCapabilities,
       }));
   }
 }

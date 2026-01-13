@@ -197,6 +197,25 @@ describe("Workspaces API (E2E)", () => {
     });
   });
 
+  describe("GET /workspaces/:id/config", () => {
+    it("returns workspace config based on kind", async () => {
+      const created = await authedPost("/workspaces").send({
+        name: "Config Workspace",
+        kind: "PERSONAL",
+      });
+
+      const workspaceId = created.body.workspace.id;
+      const res = await authedGet(`/workspaces/${workspaceId}/config`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.kind).toBe("PERSONAL");
+      expect(res.body.capabilities["workspace.multiUser"]).toBe(false);
+      expect(res.body.capabilities["sales.quotes"]).toBe(false);
+      expect(res.body.terminology.partyLabel).toBe("Client");
+      expect(Array.isArray(res.body.navigation.groups)).toBe(true);
+    });
+  });
+
   describe("PATCH /workspaces/:id", () => {
     it("updates workspace name", async () => {
       const created = await authedPost("/workspaces").send({

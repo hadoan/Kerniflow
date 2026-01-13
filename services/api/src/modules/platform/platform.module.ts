@@ -1,8 +1,9 @@
-import { Module, OnModuleInit } from "@nestjs/common";
+import { Module, OnModuleInit, forwardRef } from "@nestjs/common";
 import { DataModule } from "@corely/data";
 import { KernelModule } from "../../shared/kernel/kernel.module";
 import { IdentityModule } from "../identity";
 import { WorkspacesModule } from "../workspaces/workspaces.module";
+import { WORKSPACE_REPOSITORY_PORT } from "../workspaces/application/ports/workspace-repository.port";
 
 // Infrastructure
 import { AppRegistry } from "./infrastructure/registries/app-registry";
@@ -28,14 +29,17 @@ import { UpdateMenuOverridesUseCase } from "./application/use-cases/update-menu-
 import { ResetMenuOverridesUseCase } from "./application/use-cases/reset-menu-overrides.usecase";
 import { PlanTemplateUseCase } from "./application/use-cases/plan-template.usecase";
 import { ApplyTemplateUseCase } from "./application/use-cases/apply-template.usecase";
+import { GetWorkspaceConfigUseCase } from "./application/use-cases/get-workspace-config.usecase";
 
 // Guards
 import { EntitlementGuard } from "./guards/entitlement.guard";
+import { WorkspaceCapabilityGuard } from "./guards/workspace-capability.guard";
 
 // Controllers
 import { PlatformController } from "./adapters/http/platform.controller";
 import { MenuController } from "./adapters/http/menu.controller";
 import { TemplateController } from "./adapters/http/template.controller";
+import { WorkspaceConfigController } from "./adapters/http/workspace-config.controller";
 
 // Ports
 import { APP_REGISTRY_TOKEN } from "./application/ports/app-registry.port";
@@ -47,8 +51,8 @@ import { TENANT_MENU_OVERRIDE_REPOSITORY_TOKEN } from "./application/ports/tenan
 import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-record-meta-repository.port";
 
 @Module({
-  imports: [DataModule, KernelModule, IdentityModule, WorkspacesModule],
-  controllers: [PlatformController, MenuController, TemplateController],
+  imports: [DataModule, KernelModule, forwardRef(() => IdentityModule), WorkspacesModule],
+  controllers: [PlatformController, MenuController, TemplateController, WorkspaceConfigController],
   providers: [
     // Infrastructure - Registries
     AppRegistry,
@@ -104,14 +108,20 @@ import { SEEDED_RECORD_META_REPOSITORY_TOKEN } from "./application/ports/seeded-
     ResetMenuOverridesUseCase,
     PlanTemplateUseCase,
     ApplyTemplateUseCase,
+    GetWorkspaceConfigUseCase,
 
     // Guards
     EntitlementGuard,
+    WorkspaceCapabilityGuard,
   ],
   exports: [
     TenantEntitlementService,
     MenuComposerService,
     EntitlementGuard,
+    WorkspaceCapabilityGuard,
+    WorkspaceTemplateService,
+    WorkspacesModule,
+    WORKSPACE_REPOSITORY_PORT,
     APP_REGISTRY_TOKEN,
     TEMPLATE_REGISTRY_TOKEN,
     PACK_REGISTRY_TOKEN,

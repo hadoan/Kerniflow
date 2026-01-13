@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { computeBackoffDelayMs, defaultRetryPolicy } from "@corely/api-client";
 import { AuthProvider } from "@/lib/auth-provider";
 import { WorkspaceProvider } from "@/shared/workspaces/workspace-provider";
+import { WorkspaceConfigProvider } from "@/shared/workspaces/workspace-config-provider";
 import { OfflineProvider } from "@/offline/offline-provider";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
@@ -26,13 +27,15 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <WorkspaceProvider>
-          <OfflineProvider queryClient={queryClient}>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-              <Sonner />
-            </TooltipProvider>
-          </OfflineProvider>
+          <WorkspaceConfigProvider>
+            <OfflineProvider queryClient={queryClient}>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </OfflineProvider>
+          </WorkspaceConfigProvider>
         </WorkspaceProvider>
       </AuthProvider>
     </QueryClientProvider>

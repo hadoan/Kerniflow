@@ -21,6 +21,7 @@ export const MenuItemSchema = z.object({
   order: z.number(),
   pinned: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
+  requiredCapabilities: z.array(z.string()).optional(),
 });
 
 export type MenuItem = z.infer<typeof MenuItemSchema>;
