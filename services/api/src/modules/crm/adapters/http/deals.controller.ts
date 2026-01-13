@@ -8,6 +8,7 @@ import {
   MarkDealLostInputSchema,
   ListDealsInputSchema,
   GetDealInputSchema,
+  LogMessageInputSchema,
 } from "@corely/contracts";
 import { CrmApplication } from "../../application/crm.application";
 import { buildUseCaseContext, mapResultToHttp } from "../../../../shared/http/usecase-mappers";
@@ -98,6 +99,18 @@ export class DealsHttpController {
     });
     const ctx = buildUseCaseContext(req);
     const result = await this.app.listDeals.execute(input, ctx);
+    return mapResultToHttp(result);
+  }
+
+  @Post(":id/messages")
+  @RequirePermission("crm.deals.manage")
+  async logMessage(@Param("id") id: string, @Body() body: unknown, @Req() req: Request) {
+    const input = LogMessageInputSchema.parse({
+      dealId: id,
+      ...(body as Record<string, unknown>),
+    });
+    const ctx = buildUseCaseContext(req);
+    const result = await this.app.logMessage.execute(input, ctx);
     return mapResultToHttp(result);
   }
 }

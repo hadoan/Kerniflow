@@ -141,6 +141,10 @@ model Activity {
   type             ActivityType
   subject          String
   body             String?
+  channelKey       String?
+  messageDirection String?
+  messageTo        String?
+  openUrl          String?
   partyId          String?
   dealId           String?
   dueAt            DateTime?      @db.Timestamptz(6)

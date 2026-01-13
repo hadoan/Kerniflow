@@ -15,6 +15,10 @@ type ActivityRow = {
   type: "NOTE" | "TASK" | "CALL" | "MEETING" | "EMAIL_DRAFT";
   subject: string;
   body: string | null;
+  channelKey: string | null;
+  messageDirection: string | null;
+  messageTo: string | null;
+  openUrl: string | null;
   partyId: string | null;
   dealId: string | null;
   dueAt: Date | null;
@@ -33,6 +37,10 @@ const toEntity = (row: ActivityRow): ActivityEntity => {
     type: row.type,
     subject: row.subject,
     body: row.body,
+    channelKey: row.channelKey,
+    messageDirection: row.messageDirection,
+    messageTo: row.messageTo,
+    openUrl: row.openUrl,
     partyId: row.partyId,
     dealId: row.dealId,
     dueAt: row.dueAt,
@@ -102,6 +110,10 @@ export class PrismaActivityRepoAdapter implements ActivityRepoPort {
         type: activity.type,
         subject: activity.subject,
         body: activity.body,
+        channelKey: activity.channelKey,
+        messageDirection: activity.messageDirection,
+        messageTo: activity.messageTo,
+        openUrl: activity.openUrl,
         partyId: activity.partyId,
         dealId: activity.dealId,
         dueAt: activity.dueAt,
@@ -126,6 +138,10 @@ export class PrismaActivityRepoAdapter implements ActivityRepoPort {
         type: activity.type,
         subject: activity.subject,
         body: activity.body,
+        channelKey: activity.channelKey,
+        messageDirection: activity.messageDirection,
+        messageTo: activity.messageTo,
+        openUrl: activity.openUrl,
         partyId: activity.partyId,
         dealId: activity.dealId,
         dueAt: activity.dueAt,
@@ -154,21 +170,28 @@ export class PrismaActivityRepoAdapter implements ActivityRepoPort {
       take: pageSize,
     });
 
-    const activityItems: TimelineItem[] = activities.map((activity) => ({
-      id: activity.id,
-      type: "ACTIVITY" as const,
-      timestamp: activity.createdAt,
-      subject: activity.subject,
-      body: activity.body,
-      actorUserId: activity.createdByUserId,
-      metadata: {
-        activityType: activity.type,
-        activityStatus: activity.status,
-        assignedToUserId: activity.assignedToUserId,
-        dueAt: activity.dueAt?.toISOString() ?? null,
-        completedAt: activity.completedAt?.toISOString() ?? null,
-      },
-    }));
+    const activityItems: TimelineItem[] = activities.map((activity) => {
+      const isMessage = Boolean(activity.channelKey);
+      return {
+        id: activity.id,
+        type: isMessage ? ("MESSAGE" as const) : ("ACTIVITY" as const),
+        timestamp: activity.createdAt,
+        subject: activity.subject,
+        body: activity.body,
+        actorUserId: activity.createdByUserId,
+        channelKey: activity.channelKey ?? undefined,
+        direction: activity.messageDirection ?? undefined,
+        to: activity.messageTo ?? undefined,
+        openUrl: activity.openUrl ?? undefined,
+        metadata: {
+          activityType: activity.type,
+          activityStatus: activity.status,
+          assignedToUserId: activity.assignedToUserId,
+          dueAt: activity.dueAt?.toISOString() ?? null,
+          completedAt: activity.completedAt?.toISOString() ?? null,
+        },
+      };
+    });
 
     // If entity is a deal, also fetch stage transitions
     let stageTransitionItems: TimelineItem[] = [];

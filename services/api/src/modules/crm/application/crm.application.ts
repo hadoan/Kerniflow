@@ -10,6 +10,7 @@ import type { UpdateActivityUseCase } from "./use-cases/update-activity/update-a
 import type { CompleteActivityUseCase } from "./use-cases/complete-activity/complete-activity.usecase";
 import type { ListActivitiesUseCase } from "./use-cases/list-activities/list-activities.usecase";
 import type { GetTimelineUseCase } from "./use-cases/get-timeline/get-timeline.usecase";
+import type { LogMessageUseCase } from "./use-cases/log-message/log-message.usecase";
 
 export class CrmApplication {
   constructor(
@@ -24,6 +25,7 @@ export class CrmApplication {
     public readonly updateActivity: UpdateActivityUseCase,
     public readonly completeActivity: CompleteActivityUseCase,
     public readonly listActivities: ListActivitiesUseCase,
-    public readonly getTimeline: GetTimelineUseCase
+    public readonly getTimeline: GetTimelineUseCase,
+    public readonly logMessage: LogMessageUseCase
   ) {}
 }

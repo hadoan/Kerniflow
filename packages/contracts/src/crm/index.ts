@@ -3,6 +3,7 @@ export * from "./party.types";
 export * from "./deal.types";
 export * from "./activity.types";
 export * from "./pipeline.types";
+export * from "./channel.types";
 
 // Party operations
 // TODO: Add party operation schemas (create-party, update-party, list-parties, etc.)
@@ -22,6 +23,7 @@ export * from "./complete-activity.schema";
 export * from "./get-timeline.schema";
 export * from "./update-activity.schema";
 export * from "./list-activities.schema";
+export * from "./log-message.schema";
 
 // AI Proposals
 export * from "./ai-proposals/party-proposal.types";

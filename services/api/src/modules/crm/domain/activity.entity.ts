@@ -7,6 +7,10 @@ type ActivityProps = {
   type: ActivityType;
   subject: string;
   body: string | null;
+  channelKey: string | null;
+  messageDirection: string | null;
+  messageTo: string | null;
+  openUrl: string | null;
   partyId: string | null;
   dealId: string | null;
   dueAt: Date | null;
@@ -24,6 +28,10 @@ export class ActivityEntity {
   type: ActivityType;
   subject: string;
   body: string | null;
+  channelKey: string | null;
+  messageDirection: string | null;
+  messageTo: string | null;
+  openUrl: string | null;
   partyId: string | null;
   dealId: string | null;
   dueAt: Date | null;
@@ -50,6 +58,10 @@ export class ActivityEntity {
     this.type = props.type;
     this.subject = props.subject;
     this.body = props.body;
+    this.channelKey = props.channelKey;
+    this.messageDirection = props.messageDirection;
+    this.messageTo = props.messageTo;
+    this.openUrl = props.openUrl;
     this.partyId = props.partyId;
     this.dealId = props.dealId;
     this.dueAt = props.dueAt;
@@ -67,6 +79,10 @@ export class ActivityEntity {
     type: ActivityType;
     subject: string;
     body?: string | null;
+    channelKey?: string | null;
+    messageDirection?: string | null;
+    messageTo?: string | null;
+    openUrl?: string | null;
     partyId?: string | null;
     dealId?: string | null;
     dueAt?: Date | null;
@@ -77,6 +93,10 @@ export class ActivityEntity {
     return new ActivityEntity({
       ...params,
       body: params.body ?? null,
+      channelKey: params.channelKey ?? null,
+      messageDirection: params.messageDirection ?? null,
+      messageTo: params.messageTo ?? null,
+      openUrl: params.openUrl ?? null,
       partyId: params.partyId ?? null,
       dealId: params.dealId ?? null,
       dueAt: params.dueAt ?? null,

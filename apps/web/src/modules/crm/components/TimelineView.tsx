@@ -3,6 +3,7 @@ import type { ActivityType, TimelineItem } from "@corely/contracts";
 import { ActivityTypeIcon } from "./ActivityTypeIcon";
 import { ArrowRight } from "lucide-react";
 import { format } from "date-fns";
+import { MessageCircle } from "lucide-react";
 
 interface TimelineViewProps {
   items: TimelineItem[];
@@ -43,6 +44,8 @@ export const TimelineView: FC<TimelineViewProps> = ({ items }) => {
                       <ActivityTypeIcon type={activityType} className="w-4 h-4" />
                     ) : isStageChange ? (
                       <ArrowRight className="w-4 h-4" />
+                    ) : item.type === "MESSAGE" ? (
+                      <MessageCircle className="w-4 h-4" />
                     ) : (
                       <span className="text-xs">•</span>
                     )}
@@ -50,7 +53,11 @@ export const TimelineView: FC<TimelineViewProps> = ({ items }) => {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h4 className="font-medium text-sm">{item.subject}</h4>
+                        <h4 className="font-medium text-sm">
+                          {item.type === "MESSAGE" && item.channelKey
+                            ? `${item.channelKey} message`
+                            : item.subject}
+                        </h4>
                         {item.body && (
                           <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                             {item.body}

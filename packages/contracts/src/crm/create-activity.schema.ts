@@ -10,6 +10,10 @@ export const CreateActivityInputSchema = z.object({
   dealId: z.string().optional(),
   dueAt: utcInstantSchema.optional(),
   assignedToUserId: z.string().optional(),
+  channelKey: z.string().optional(),
+  messageDirection: z.string().optional(),
+  messageTo: z.string().optional(),
+  openUrl: z.string().optional(),
 });
 
 export const CreateActivityOutputSchema = z.object({

@@ -19,11 +19,15 @@ export type ListActivitiesResult = {
 
 export type TimelineItem = {
   id: string;
-  type: "ACTIVITY" | "STAGE_TRANSITION" | "NOTE";
+  type: "ACTIVITY" | "STAGE_TRANSITION" | "NOTE" | "MESSAGE";
   timestamp: Date;
   subject: string;
   body: string | null;
   actorUserId: string | null;
+  channelKey?: string;
+  direction?: string;
+  to?: string;
+  openUrl?: string;
   metadata?: Record<string, unknown>;
 };
 

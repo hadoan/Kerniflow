@@ -13,6 +13,10 @@ export const ActivityDtoSchema = z.object({
   type: ActivityTypeSchema,
   subject: z.string(),
   body: z.string().nullable(),
+  channelKey: z.string().nullable().optional(),
+  messageDirection: z.string().nullable().optional(),
+  messageTo: z.string().nullable().optional(),
+  openUrl: z.string().nullable().optional(),
   partyId: z.string().nullable(),
   dealId: z.string().nullable(),
   dueAt: utcInstantSchema.nullable(),
@@ -28,7 +32,7 @@ export type ActivityDto = z.infer<typeof ActivityDtoSchema>;
 export type ActivityDTO = ActivityDto;
 
 // Timeline item union type (can be Activity or other timeline events like stage transitions)
-export const TimelineItemTypeSchema = z.enum(["ACTIVITY", "STAGE_TRANSITION", "NOTE"]);
+export const TimelineItemTypeSchema = z.enum(["ACTIVITY", "STAGE_TRANSITION", "NOTE", "MESSAGE"]);
 export type TimelineItemType = z.infer<typeof TimelineItemTypeSchema>;
 
 export const TimelineItemSchema = z.object({
@@ -38,6 +42,11 @@ export const TimelineItemSchema = z.object({
   subject: z.string(),
   body: z.string().nullable(),
   actorUserId: z.string().nullable(),
+  actorDisplayName: z.string().nullable().optional(),
+  channelKey: z.string().nullable().optional(),
+  direction: z.string().nullable().optional(),
+  to: z.string().nullable().optional(),
+  openUrl: z.string().nullable().optional(),
   metadata: z.record(z.unknown()).optional(), // flexible for different timeline item types
 });
 

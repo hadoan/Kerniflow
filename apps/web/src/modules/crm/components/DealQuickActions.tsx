@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 import { DealStageSelect } from "./DealStageSelect";
-import type { DealDto } from "@corely/contracts";
-import { Mail, StickyNote, Trash2 } from "lucide-react";
+import type { ChannelDefinition, DealDto } from "@corely/contracts";
+import { Mail, MessageCircle, StickyNote, Trash2, Linkedin } from "lucide-react";
 
 interface DealQuickActionsProps {
   deal: DealDto;
@@ -16,6 +17,10 @@ interface DealQuickActionsProps {
   onQuickNote?: (subject: string, body?: string) => void;
   onDelete?: () => void;
   disabled?: boolean;
+  channels?: ChannelDefinition[];
+  onSelectChannel?: (channel: ChannelDefinition) => void;
+  contactContext?: Record<string, string | undefined>;
+  channelsLoading?: boolean;
 }
 
 export const DealQuickActions: React.FC<DealQuickActionsProps> = ({
@@ -27,9 +32,24 @@ export const DealQuickActions: React.FC<DealQuickActionsProps> = ({
   onQuickNote,
   onDelete,
   disabled,
+  channels = [],
+  onSelectChannel,
+  contactContext = {},
+  channelsLoading = false,
 }) => {
   const [noteSubject, setNoteSubject] = useState("");
   const [noteBody, setNoteBody] = useState("");
+  const channelIcons: Record<string, JSX.Element> = useMemo(
+    () => ({
+      whatsapp: <MessageCircle className="h-4 w-4" />,
+      linkedin: <Linkedin className="h-4 w-4" />,
+      email: <Mail className="h-4 w-4" />,
+    }),
+    []
+  );
+
+  const canUseChannel = (channel: ChannelDefinition) =>
+    channel.requiredContactFields.every((field) => contactContext[field]);
 
   return (
     <Card>
@@ -55,6 +75,45 @@ export const DealQuickActions: React.FC<DealQuickActionsProps> = ({
           >
             Mark lost
           </Button>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Message</p>
+          {channelsLoading ? (
+            <p className="text-sm text-muted-foreground">Loading channels...</p>
+          ) : channels.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No channels configured</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {channels
+                .filter((c) => c.enabled)
+                .sort((a, b) => a.order - b.order)
+                .map((channel) => {
+                  const enabled = canUseChannel(channel);
+                  const icon = channelIcons[channel.key] ?? <MessageCircle className="h-4 w-4" />;
+                  const button = (
+                    <Button
+                      key={channel.key}
+                      size="sm"
+                      variant="secondary"
+                      disabled={disabled || !enabled}
+                      onClick={() => onSelectChannel?.(channel)}
+                    >
+                      {icon}
+                      <span className="ml-2">{channel.label}</span>
+                    </Button>
+                  );
+                  if (enabled) {return button;}
+                  return (
+                    <Tooltip key={channel.key}>
+                      <TooltipTrigger asChild>{button}</TooltipTrigger>
+                      <TooltipContent>
+                        Missing: {channel.requiredContactFields.join(", ")}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+            </div>
+          )}
         </div>
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -84,15 +143,6 @@ export const DealQuickActions: React.FC<DealQuickActionsProps> = ({
             Add note
           </Button>
         </div>
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <a
-            href={`mailto:?subject=${encodeURIComponent(deal.title)}`}
-            className="flex items-center gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            Send email
-          </a>
-        </Button>
         <Button
           variant="ghost"
           className="w-full justify-start text-destructive"

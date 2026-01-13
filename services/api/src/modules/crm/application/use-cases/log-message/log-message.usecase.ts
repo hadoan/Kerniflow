@@ -11,13 +11,15 @@ import {
   ok,
   err,
 } from "@corely/kernel";
-import type { CreateActivityInput, CreateActivityOutput } from "@corely/contracts";
+import type { LogMessageInput, LogMessageOutput } from "@corely/contracts";
 import type { ActivityRepoPort } from "../../ports/activity-repository.port";
 import { ActivityEntity } from "../../../domain/activity.entity";
 import { toActivityDto } from "../../mappers/activity-dto.mapper";
 
+const SAFE_SCHEMES = ["https://", "mailto:"];
+
 @Injectable()
-export class CreateActivityUseCase extends BaseUseCase<CreateActivityInput, CreateActivityOutput> {
+export class LogMessageUseCase extends BaseUseCase<LogMessageInput, LogMessageOutput> {
   constructor(
     private readonly activityRepo: ActivityRepoPort,
     private readonly clock: ClockPort,
@@ -27,20 +29,26 @@ export class CreateActivityUseCase extends BaseUseCase<CreateActivityInput, Crea
     super({ logger });
   }
 
-  protected validate(input: CreateActivityInput): CreateActivityInput {
-    if (!input.subject.trim()) {
-      throw new ValidationError("Activity subject is required");
+  protected validate(input: LogMessageInput): LogMessageInput {
+    if (!input.dealId) {
+      throw new ValidationError("dealId is required");
     }
-    if (!input.partyId && !input.dealId) {
-      throw new ValidationError("Activity must be associated with either a party or a deal");
+    if (!input.channelKey) {
+      throw new ValidationError("channelKey is required");
+    }
+    if (input.openUrl) {
+      const lower = input.openUrl.toLowerCase();
+      if (!SAFE_SCHEMES.some((scheme) => lower.startsWith(scheme))) {
+        throw new ValidationError("Invalid URL scheme");
+      }
     }
     return input;
   }
 
   protected async handle(
-    input: CreateActivityInput,
+    input: LogMessageInput,
     ctx: UseCaseContext
-  ): Promise<Result<CreateActivityOutput, UseCaseError>> {
+  ): Promise<Result<LogMessageOutput, UseCaseError>> {
     if (!ctx.tenantId) {
       return err(new ValidationError("tenantId is required"));
     }
@@ -49,17 +57,17 @@ export class CreateActivityUseCase extends BaseUseCase<CreateActivityInput, Crea
     const activity = ActivityEntity.create({
       id: this.idGenerator.newId(),
       tenantId: ctx.tenantId,
-      type: input.type,
-      subject: input.subject,
-      body: input.body,
-      channelKey: input.channelKey ?? null,
-      messageDirection: input.messageDirection ?? null,
-      messageTo: input.messageTo ?? null,
+      type: "NOTE",
+      subject: input.subject || `${input.channelKey} message`,
+      body: input.body ?? null,
+      channelKey: input.channelKey,
+      messageDirection: input.direction ?? "outbound",
+      messageTo: input.to ?? null,
       openUrl: input.openUrl ?? null,
-      partyId: input.partyId,
+      partyId: null,
       dealId: input.dealId,
-      dueAt: input.dueAt ? new Date(input.dueAt) : null,
-      assignedToUserId: input.assignedToUserId ?? ctx.userId ?? null,
+      dueAt: null,
+      assignedToUserId: ctx.userId ?? null,
       createdByUserId: ctx.userId ?? null,
       createdAt: now,
     });

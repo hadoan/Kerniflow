@@ -173,7 +173,7 @@ export default function NewActivityPage() {
                 <FormField
                   control={form.control}
                   name="type"
-                  render={({ field: _field }) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Type</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>

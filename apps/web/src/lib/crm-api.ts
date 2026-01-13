@@ -9,7 +9,9 @@ import type {
   GetTimelineOutput,
   ActivityDto,
   TimelineItem,
+  ChannelDefinition,
 } from "@corely/contracts";
+import type { LogMessageInput, LogMessageOutput, ListChannelsOutput } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
 const unwrapDealResponse = (response: unknown): DealDto => {
@@ -218,5 +220,21 @@ export const crmApi = {
 
     const response = await apiClient.get<GetTimelineOutput>(endpoint);
     return { items: response.items, nextCursor: response.nextCursor };
+  },
+
+  // ============================================================
+  // Channel Operations
+  // ============================================================
+  async listChannels(): Promise<ChannelDefinition[]> {
+    const response = await apiClient.get<ListChannelsOutput>("/crm/channels");
+    return response.channels;
+  },
+
+  async logMessage(input: LogMessageInput): Promise<ActivityDto> {
+    const response = await apiClient.post<LogMessageOutput>(
+      `/crm/deals/${input.dealId}/messages`,
+      input
+    );
+    return response.activity;
   },
 };

@@ -28,11 +28,20 @@ import { UpdateActivityUseCase } from "./application/use-cases/update-activity/u
 import { CompleteActivityUseCase } from "./application/use-cases/complete-activity/complete-activity.usecase";
 import { ListActivitiesUseCase } from "./application/use-cases/list-activities/list-activities.usecase";
 import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-timeline.usecase";
+import { ChannelCatalogService } from "./application/channel-catalog.service";
+import { ChannelsHttpController } from "./adapters/http/channels.controller";
+import { LogMessageUseCase } from "./application/use-cases/log-message/log-message.usecase";
 
 @Module({
   imports: [DataModule, IdentityModule, KernelModule, PlatformModule],
-  controllers: [DealsHttpController, ActivitiesHttpController, TimelineHttpController],
+  controllers: [
+    DealsHttpController,
+    ActivitiesHttpController,
+    TimelineHttpController,
+    ChannelsHttpController,
+  ],
   providers: [
+    ChannelCatalogService,
     PrismaDealRepoAdapter,
     PrismaActivityRepoAdapter,
     { provide: DEAL_REPO_PORT, useExisting: PrismaDealRepoAdapter },
@@ -89,6 +98,15 @@ import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-tim
       inject: [ACTIVITY_REPO_PORT, CLOCK_PORT_TOKEN, ID_GENERATOR_TOKEN],
     },
     {
+      provide: LogMessageUseCase,
+      useFactory: (
+        activityRepo: PrismaActivityRepoAdapter,
+        clock: ClockPort,
+        idGen: IdGeneratorPort
+      ) => new LogMessageUseCase(activityRepo, clock, idGen, new NestLoggerAdapter()),
+      inject: [ACTIVITY_REPO_PORT, CLOCK_PORT_TOKEN, ID_GENERATOR_TOKEN],
+    },
+    {
       provide: UpdateActivityUseCase,
       useFactory: (activityRepo: PrismaActivityRepoAdapter, clock: ClockPort) =>
         new UpdateActivityUseCase(activityRepo, clock, new NestLoggerAdapter()),
@@ -126,7 +144,8 @@ import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-tim
         updateActivity: UpdateActivityUseCase,
         completeActivity: CompleteActivityUseCase,
         listActivities: ListActivitiesUseCase,
-        getTimeline: GetTimelineUseCase
+        getTimeline: GetTimelineUseCase,
+        logMessage: LogMessageUseCase
       ) =>
         new CrmApplication(
           createDeal,
@@ -140,7 +159,8 @@ import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-tim
           updateActivity,
           completeActivity,
           listActivities,
-          getTimeline
+          getTimeline,
+          logMessage
         ),
       inject: [
         CreateDealUseCase,
@@ -155,6 +175,7 @@ import { GetTimelineUseCase } from "./application/use-cases/get-timeline/get-tim
         CompleteActivityUseCase,
         ListActivitiesUseCase,
         GetTimelineUseCase,
+        LogMessageUseCase,
       ],
     },
   ],
