@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, BadRequestException } from "@nestjs/common";
-import { HEADER_TENANT_ID } from "@shared/request-context";
+import { HEADER_TENANT_ID } from "../../../../../shared/request-context/index.js";
 
 @Injectable()
 export class TenantGuard implements CanActivate {
