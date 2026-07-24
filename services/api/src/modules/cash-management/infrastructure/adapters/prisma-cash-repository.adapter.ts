@@ -7,6 +7,7 @@ import {
   type CashEntryAttachment,
   type CashExportArtifact,
   type CashRegister,
+  type CashDayConfirmation,
 } from "@prisma/client";
 import { PrismaService, getPrismaClient } from "@corely/data";
 import type { CashDayCloseStatus, CashEntryDirection, CashEntryType } from "@corely/contracts";
@@ -23,6 +24,8 @@ import type {
   EntryListFilters,
   UpdateRegisterRecord,
   UpsertDayCloseRecord,
+  CashConfirmationRepoPort,
+  CreateCashConfirmationRecord,
 } from "../../application/ports/cash-management.ports";
 import type {
   CashDayCloseEntity,
@@ -31,6 +34,7 @@ import type {
   CashEntryEntity,
   CashExportArtifactEntity,
   CashRegisterEntity,
+  CashDayConfirmationEntity,
 } from "../../domain/entities";
 
 const monthStart = (month: string): string => `${month}-01`;
@@ -47,7 +51,8 @@ export class PrismaCashRepository
     CashEntryRepoPort,
     CashDayCloseRepoPort,
     CashAttachmentRepoPort,
-    CashExportRepoPort
+    CashExportRepoPort,
+    CashConfirmationRepoPort
 {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -779,6 +784,90 @@ export class PrismaCashRepository
     });
 
     return rows;
+  }
+
+  async createConfirmation(
+    data: CreateCashConfirmationRecord,
+    tx?: TransactionContext
+  ): Promise<CashDayConfirmationEntity> {
+    const row = await this.client(tx).cashDayConfirmation.create({
+      data: {
+        tenantId: data.tenantId,
+        workspaceId: data.workspaceId,
+        registerId: data.registerId,
+        conversationId: data.conversationId,
+        preparedByUserId: data.preparedByUserId,
+        businessDate: data.businessDate,
+        candidatePayload: data.candidatePayload as Prisma.InputJsonValue,
+        candidateHash: data.candidateHash,
+        version: data.version,
+        status: data.status,
+        expiresAt: data.expiresAt,
+      },
+    });
+    return this.mapConfirmation(row);
+  }
+
+  async findConfirmationById(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<CashDayConfirmationEntity | null> {
+    const row = await this.client(tx).cashDayConfirmation.findFirst({
+      where: { id, tenantId, workspaceId },
+    });
+    return row ? this.mapConfirmation(row) : null;
+  }
+
+  async markConsumed(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void> {
+    await this.client(tx).cashDayConfirmation.updateMany({
+      where: { id, tenantId, workspaceId },
+      data: {
+        status: "CONSUMED",
+        consumedAt: new Date(),
+      },
+    });
+  }
+
+  async markExpired(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void> {
+    await this.client(tx).cashDayConfirmation.updateMany({
+      where: { id, tenantId, workspaceId },
+      data: {
+        status: "EXPIRED",
+      },
+    });
+  }
+
+  private mapConfirmation(row: CashDayConfirmation): CashDayConfirmationEntity {
+    return {
+      id: row.id,
+      tenantId: row.tenantId,
+      workspaceId: row.workspaceId,
+      registerId: row.registerId,
+      conversationId: row.conversationId,
+      preparedByUserId: row.preparedByUserId,
+      businessDate: row.businessDate,
+      candidatePayload: row.candidatePayload,
+      candidateHash: row.candidateHash,
+      version: row.version,
+      status: row.status as "PENDING" | "CONFIRMED" | "CONSUMED" | "EXPIRED",
+      expiresAt: row.expiresAt,
+      confirmedAt: row.confirmedAt,
+      consumedAt: row.consumedAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
   }
 
   private mapRegister(row: CashRegister): CashRegisterEntity {

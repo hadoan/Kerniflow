@@ -15,6 +15,7 @@ import {
   CASH_EXPORT_PORT,
   CASH_EXPORT_REPO,
   CASH_REGISTER_REPO,
+  CASH_CONFIRMATION_REPO,
 } from "./application/ports/cash-management.ports";
 import { PrismaCashRepository } from "./infrastructure/adapters/prisma-cash-repository.adapter";
 import { CashDocumentsPortAdapter } from "./infrastructure/documents/documents-port.adapter";
@@ -36,6 +37,9 @@ import { ListCashEntryAttachmentsQueryUseCase } from "./application/use-cases/li
 import { ExportCashBookUseCase } from "./application/use-cases/export-cash-book.usecase";
 import { GetCashExportArtifactQueryUseCase } from "./application/use-cases/get-cash-export-artifact.query";
 import { GetCashDashboardQueryUseCase } from "./application/use-cases/get-cash-dashboard.query";
+import { GetCashReportPreviewQueryUseCase } from "./application/use-cases/get-cash-report-preview.query";
+import { PrepareCashDayConfirmationUseCase } from "./application/use-cases/prepare-cash-day-confirmation.usecase";
+import { ConfirmCashDayDraftUseCase } from "./application/use-cases/confirm-cash-day-draft.usecase";
 
 @Module({
   imports: [DataModule, KernelModule, IdentityModule, DocumentsModule, BillingModule, TaxModule],
@@ -47,6 +51,7 @@ import { GetCashDashboardQueryUseCase } from "./application/use-cases/get-cash-d
     { provide: CASH_DAY_CLOSE_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_ATTACHMENT_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_EXPORT_REPO, useExisting: PrismaCashRepository },
+    { provide: CASH_CONFIRMATION_REPO, useExisting: PrismaCashRepository },
     {
       provide: CASH_DOCUMENTS_PORT,
       useFactory: (documentsApp: DocumentsApplication) =>
@@ -74,6 +79,9 @@ import { GetCashDashboardQueryUseCase } from "./application/use-cases/get-cash-d
     ExportCashBookUseCase,
     GetCashExportArtifactQueryUseCase,
     GetCashDashboardQueryUseCase,
+    GetCashReportPreviewQueryUseCase,
+    PrepareCashDayConfirmationUseCase,
+    ConfirmCashDayDraftUseCase,
   ],
   exports: [
     ListCashRegistersQueryUseCase,
@@ -91,6 +99,9 @@ import { GetCashDashboardQueryUseCase } from "./application/use-cases/get-cash-d
     ExportCashBookUseCase,
     CreateCashRegisterUseCase,
     GetCashDashboardQueryUseCase,
+    GetCashReportPreviewQueryUseCase,
+    PrepareCashDayConfirmationUseCase,
+    ConfirmCashDayDraftUseCase,
   ],
 })
 export class CashManagementModule {}

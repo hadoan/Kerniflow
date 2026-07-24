@@ -21,6 +21,7 @@ import {
   isSupportedAttachment,
   MAX_ATTACHMENT_SIZE_BYTES,
 } from "./chat/chat-utils";
+import type { ToolRenderer } from "./chat/ChatParts";
 
 export interface ChatProps {
   activeModule: string;
@@ -39,6 +40,7 @@ export interface ChatProps {
   onRunIdResolved?: (runId: string) => void;
   onConversationUpdated?: () => void;
   focusMessageId?: string | null;
+  toolRenderers?: Record<string, ToolRenderer>;
 }
 
 export type { CapabilityAction, CapabilityGroup, Suggestion };
@@ -60,6 +62,7 @@ export function Chat({
   onRunIdResolved,
   onConversationUpdated,
   focusMessageId,
+  toolRenderers,
 }: ChatProps) {
   const { t } = useTranslation();
   const [streamEventStarted, setStreamEventStarted] = useState(false);
@@ -415,6 +418,7 @@ export function Chat({
             }
             showWaitingStatus={showWaitingStatus}
             statusText={statusText}
+            toolRenderers={toolRenderers}
           />
         </div>
       </div>

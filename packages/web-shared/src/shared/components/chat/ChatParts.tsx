@@ -5,6 +5,22 @@ import i18n from "@corely/web-shared/shared/i18n";
 import { QuestionForm } from "@corely/web-shared/shared/components/QuestionForm";
 import { Markdown } from "@corely/web-shared/shared/components/Markdown";
 
+export type ToolRendererProps = {
+  toolName: string;
+  state:
+    | "input-streaming"
+    | "input-available"
+    | "output-available"
+    | "output-error"
+    | "approval-requested"
+    | "output-denied";
+  input?: unknown;
+  output?: unknown;
+  error?: unknown;
+};
+
+export type ToolRenderer = (props: ToolRendererProps) => React.ReactNode;
+
 export type ToolInvocationPart = {
   type: "dynamic-tool" | `tool-${string}` | "tool-call" | "tool-result";
   toolCallId?: string;
@@ -52,6 +68,7 @@ export const renderPart = (
     submittingToolIds: Set<string>;
     markSubmitting: (id: string, value: boolean) => void;
     sendPrompt?: (prompt: string) => void;
+    toolRenderers?: Record<string, ToolRenderer>;
   }
 ) => {
   if (part.type === "text") {
@@ -78,6 +95,33 @@ export const renderPart = (
   if (isToolPart(part)) {
     const toolName = part.toolName ?? part.type.replace("tool-", "");
     const toolCallId = part.toolCallId || toolName;
+
+    if (helpers.toolRenderers && helpers.toolRenderers[toolName]) {
+      const Renderer = helpers.toolRenderers[toolName];
+      const validStates = [
+        "input-streaming",
+        "input-available",
+        "output-available",
+        "output-error",
+        "approval-requested",
+        "output-denied",
+      ];
+      const state = (
+        validStates.includes(part.state ?? "") ? part.state : "output-available"
+      ) as ToolRendererProps["state"];
+      const rawOutput = part.output ?? part.result ?? part.input;
+
+      const rendered = Renderer({
+        toolName,
+        state,
+        input: part.input,
+        output: rawOutput,
+        error: part.errorText,
+      });
+      if (rendered) {
+        return rendered;
+      }
+    }
 
     if (toolName === "collect_inputs" && part.state !== "output-available") {
       const request = part.input as CollectInputsToolInput | undefined;

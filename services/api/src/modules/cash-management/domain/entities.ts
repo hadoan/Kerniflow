@@ -106,3 +106,22 @@ export type CashExportArtifactEntity = {
   createdAt: Date;
   expiresAt: Date | null;
 };
+
+export type CashDayConfirmationEntity = {
+  id: string;
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  conversationId: string;
+  preparedByUserId: string;
+  businessDate: string;
+  candidatePayload: any;
+  candidateHash: string;
+  version: number;
+  status: "PENDING" | "CONFIRMED" | "CONSUMED" | "EXPIRED";
+  expiresAt: Date;
+  confirmedAt: Date | null;
+  consumedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};

@@ -10,6 +10,7 @@ import type {
 import type { TransactionContext } from "@corely/kernel";
 import type {
   CashDayCloseEntity,
+  CashDayConfirmationEntity,
   CashDenominationCountEntity,
   CashEntryAttachmentEntity,
   CashEntryEntity,
@@ -22,6 +23,7 @@ export const CASH_ENTRY_REPO = Symbol("CASH_ENTRY_REPO");
 export const CASH_DAY_CLOSE_REPO = Symbol("CASH_DAY_CLOSE_REPO");
 export const CASH_ATTACHMENT_REPO = Symbol("CASH_ATTACHMENT_REPO");
 export const CASH_EXPORT_REPO = Symbol("CASH_EXPORT_REPO");
+export const CASH_CONFIRMATION_REPO = Symbol("CASH_CONFIRMATION_REPO");
 export const CASH_DOCUMENTS_PORT = Symbol("CASH_DOCUMENTS_PORT");
 export const CASH_EXPORT_PORT = Symbol("CASH_EXPORT_PORT");
 
@@ -307,6 +309,45 @@ export interface CashExportRepoPort {
 
 export interface DocumentsPort {
   assertDocumentAccessible(tenantId: string, documentId: string): Promise<void>;
+}
+
+export type CreateCashConfirmationRecord = {
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  conversationId: string;
+  preparedByUserId: string;
+  businessDate: string;
+  candidatePayload: any;
+  candidateHash: string;
+  version: number;
+  status: "PENDING" | "CONFIRMED" | "CONSUMED" | "EXPIRED";
+  expiresAt: Date;
+};
+
+export interface CashConfirmationRepoPort {
+  createConfirmation(
+    data: CreateCashConfirmationRecord,
+    tx?: TransactionContext
+  ): Promise<CashDayConfirmationEntity>;
+  findConfirmationById(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<CashDayConfirmationEntity | null>;
+  markConsumed(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
+  markExpired(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
 }
 
 export type CashExportPayload = {

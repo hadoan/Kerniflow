@@ -17,6 +17,7 @@ model CashRegister {
   dayCloses       CashDayClose[]
   entryCounter    CashEntryCounter?
   exportArtifacts CashExportArtifact[]
+  confirmations   CashDayConfirmation[]
 
   tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -194,5 +195,38 @@ model CashExportArtifact {
   @@index([tenantId, workspaceId, registerId, month, format])
   @@index([tenantId, workspaceId, createdAt])
   @@map("cash_export_artifacts")
+  @@schema("accounting")
+}
+
+model CashDayConfirmation {
+  id               String @id @default(cuid())
+  tenantId         String
+  workspaceId      String
+  registerId       String
+  conversationId   String
+  preparedByUserId String
+
+  businessDate     String
+  candidatePayload Json
+  candidateHash    String
+  version          Int    @default(1)
+
+  status    String   @default("PENDING") // PENDING, CONFIRMED, CONSUMED, EXPIRED
+  expiresAt DateTime @db.Timestamptz(6)
+
+  confirmedAt DateTime? @db.Timestamptz(6)
+  consumedAt  DateTime? @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  register  CashRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  tenant    Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, workspaceId, registerId])
+  @@index([tenantId, workspaceId, conversationId])
+  @@index([status, expiresAt])
+  @@map("cash_day_confirmations")
   @@schema("accounting")
 }

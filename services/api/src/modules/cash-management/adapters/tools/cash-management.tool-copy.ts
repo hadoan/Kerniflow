@@ -1,10 +1,10 @@
 import type { LocalizedToolText } from "../../../ai-copilot/application/ports/domain-tool.port";
 
 export const cashManagementToolDescriptions = {
-  create_cash_entry: {
-    en: "Create a cash entry for the current register and optionally attach uploaded receipts.",
-    de: "Erstellt einen Kassenbucheintrag fuer die aktuelle Kasse und haengt optional hochgeladene Belege an.",
-    vi: "Tạo một giao dịch sổ quỹ cho két sắt hiện tại và có thể đính kèm hóa đơn đã tải lên.",
+  prepare_cash_day_confirmation: {
+    en: "Prepare a draft for a new cash day confirmation with proposed cash entries and actual counted balance. MUST only be called to generate a preview for user confirmation.",
+    de: "Erstellt einen Entwurf für eine neue Kassenbestätigung mit vorgeschlagenen Kassenbucheinträgen und gezähltem Bestand. DARF NUR aufgerufen werden, um eine Vorschau zur Bestätigung durch den Benutzer zu generieren.",
+    vi: "Chuẩn bị bản nháp xác nhận ngày tiền mặt mới với các giao dịch được đề xuất và số dư đếm thực tế. CHỈ ĐƯỢC gọi để tạo bản xem trước cho người dùng xác nhận.",
   },
   update_cash_entry: {
     en: "Update an open cash entry by reversing the old entry and creating a corrected replacement entry.",
@@ -31,15 +31,15 @@ export const cashManagementToolDescriptions = {
     de: "Gibt den heutigen Kassenstatus, den erwarteten Bestand, fehlende Belege und die Abschlussbereitschaft zurueck.",
     vi: "Trả về trạng thái tiền mặt hôm nay, số dư dự kiến, các hóa đơn còn thiếu và mức độ sẵn sàng đóng ngày.",
   },
-  submit_counted_cash: {
-    en: "Save the counted cash for a day before final closing.",
-    de: "Speichert den gezaehlten Kassenbestand eines Tages vor dem endgueltigen Tagesabschluss.",
-    vi: "Lưu số tiền mặt đã kiểm đếm trong ngày trước khi đóng ngày chính thức.",
+  confirm_cash_day_draft: {
+    en: "Confirm a previously prepared cash day draft by atomically saving the proposed movements and submitting the counted cash.",
+    de: "Bestätigt einen zuvor vorbereiteten Entwurf, indem die vorgeschlagenen Einträge und das gezählte Bargeld atomar gespeichert werden.",
+    vi: "Xác nhận một bản nháp ngày tiền mặt đã chuẩn bị bằng cách lưu các giao dịch đề xuất và gửi số tiền đếm thực tế một cách đồng thời.",
   },
   close_cash_day: {
-    en: "Close a cash day after counted cash and required notes are provided.",
-    de: "Schliesst einen Kassentag, nachdem gezaehlter Bestand und erforderliche Hinweise vorliegen.",
-    vi: "Đóng ngày sổ quỹ sau khi đã cung cấp tiền mặt kiểm đếm và các ghi chú bắt buộc.",
+    en: "Close a cash day. MUST only be called AFTER user explicitly confirms the structured report preview.",
+    de: "Schließt einen Kassentag. DARF NUR nach ausdrücklicher Bestätigung der Vorschau durch den Benutzer aufgerufen werden.",
+    vi: "Đóng một ngày sổ quỹ. CHỈ ĐƯỢC gọi sau khi người dùng xác nhận rõ ràng bản xem trước báo cáo.",
   },
   list_unclosed_days: {
     en: "List days that are still open and block monthly export readiness.",
@@ -75,5 +75,10 @@ export const cashManagementToolDescriptions = {
     en: "Explain the next steps for closing the day, fixing receipts, or preparing monthly export.",
     de: "Erklaert die naechsten Schritte fuer Tagesabschluss, Belegkorrekturen oder die Vorbereitung des Monats-exports.",
     vi: "Giải thích các bước tiếp theo để đóng ngày, xử lý hóa đơn hoặc chuẩn bị xuất dữ liệu tháng.",
+  },
+  get_cash_report_preview: {
+    en: "Return a structured Kassenbericht preview. Use this to ask for user confirmation BEFORE closing or saving counts.",
+    de: "Gibt eine strukturierte Kassenbericht-Vorschau zurück. Nutzen, um VOR dem Speichern von Zählungen oder dem Tagesabschluss um Bestätigung zu bitten.",
+    vi: "Trả về bản xem trước Kassenbericht có cấu trúc. Sử dụng để yêu cầu xác nhận VÀO TRƯỚC KHI đóng hoặc lưu đếm tiền.",
   },
 } satisfies Record<string, LocalizedToolText>;

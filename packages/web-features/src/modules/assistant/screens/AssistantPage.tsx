@@ -28,6 +28,7 @@ import { useToast } from "@corely/ui";
 import { billingApi } from "@corely/web-shared/lib/billing-api";
 import { CashManagementBillingFeatureKeys, CashManagementProductKey } from "@corely/contracts";
 import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assistant-suggestions";
+import { CashReportPreview } from "../components/cash-report-preview";
 
 type ThreadGroupKey = "today" | "yesterday" | "week" | "older";
 
@@ -384,6 +385,20 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                   )}
                   emptyStateTitle={t("assistant.emptyStateTitle")}
                   emptyStateDescription={t("assistant.emptyStateDescription")}
+                  toolRenderers={{
+                    get_cash_report_preview: (props) => {
+                      if (
+                        !props.output ||
+                        typeof props.output !== "object" ||
+                        !("business" in props.output)
+                      ) {
+                        return (
+                          <div className="p-4 border rounded bg-muted/30">Loading preview...</div>
+                        );
+                      }
+                      return <CashReportPreview report={props.output as any} />;
+                    },
+                  }}
                 />
               </div>
             </main>

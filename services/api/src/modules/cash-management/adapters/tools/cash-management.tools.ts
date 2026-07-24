@@ -4,12 +4,13 @@ import {
   CashEntryDirection,
   CashEntrySource,
   CashEntryType,
-  CashPaymentMethod,
+  type CashPaymentMethod,
   ExportCashBookFormatSchema,
   type CashDayClose,
   type CashEntry,
-  type CashRegister,
   localDateSchema,
+  PrepareCashDayConfirmationInputSchema,
+  ConfirmCashDayDraftInputSchema,
 } from "@corely/contracts";
 import { isErr, type Result, type UseCaseError } from "@corely/kernel";
 import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
@@ -27,7 +28,9 @@ import { type SubmitCashDayCloseUseCase } from "../../application/use-cases/subm
 import { type ListCashDayClosesQueryUseCase } from "../../application/use-cases/list-cash-day-closes.query";
 import { type AttachBelegToCashEntryUseCase } from "../../application/use-cases/attach-beleg-to-cash-entry.usecase";
 import { type ListCashEntryAttachmentsQueryUseCase } from "../../application/use-cases/list-cash-entry-attachments.query";
-import { type ExportCashBookUseCase } from "../../application/use-cases/export-cash-book.usecase";
+import { type GetCashReportPreviewQueryUseCase } from "../../application/use-cases/get-cash-report-preview.query";
+import { type PrepareCashDayConfirmationUseCase } from "../../application/use-cases/prepare-cash-day-confirmation.usecase";
+import { type ConfirmCashDayDraftUseCase } from "../../application/use-cases/confirm-cash-day-draft.usecase";
 import {
   extractLatestUserAttachments,
   normalizeAttachment,
@@ -66,6 +69,9 @@ type CashToolDeps = {
   attachBeleg: AttachBelegToCashEntryUseCase;
   listAttachments: ListCashEntryAttachmentsQueryUseCase;
   exportCashBook: ExportCashBookUseCase;
+  getReportPreview: GetCashReportPreviewQueryUseCase;
+  prepareConfirmation: PrepareCashDayConfirmationUseCase;
+  confirmDraft: ConfirmCashDayDraftUseCase;
   documentsApp: DocumentsApplication;
 };
 
@@ -240,6 +246,10 @@ const WorkflowHelpToolInputSchema = RegisterScopedSchema.extend({
     .default("general"),
   dayKey: localDateSchema.optional(),
   locale: z.enum(["en", "de", "vi"]).optional().default("en"),
+});
+
+const GetCashReportPreviewToolInputSchema = RegisterScopedSchema.extend({
+  businessDate: localDateSchema.optional(),
 });
 
 const receiptRequiredTypes = new Set<string>([
@@ -753,82 +763,23 @@ const resolveGlossaryEntry = (term: string) => {
 
 export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] => [
   {
-    name: "create_cash_entry",
+    name: "prepare_cash_day_confirmation",
     description:
-      "Create a cash entry for the current register and optionally attach uploaded receipts.",
-    descriptions: cashManagementToolDescriptions.create_cash_entry,
+      "Generate a pending confirmation for closing the day with proposed cash entries and actual counted balance.",
+    descriptions: cashManagementToolDescriptions.prepare_cash_day_confirmation,
     kind: "server",
-    inputSchema: CreateCashEntryToolInputSchema,
+    inputSchema: PrepareCashDayConfirmationInputSchema,
     execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = CreateCashEntryToolInputSchema.safeParse(input);
+      const parsed = PrepareCashDayConfirmationInputSchema.safeParse(input);
       if (!parsed.success) {
         return validationError(parsed.error.flatten());
       }
-
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
-
-      const created = mapToolResult(
-        await deps.createEntry.execute(
-          {
-            registerId: register.id,
-            description: parsed.data.description,
-            amount: parsed.data.amountCents,
-            type: parsed.data.type,
-            direction: parsed.data.direction,
-            source:
-              (parsed.data.source as (typeof CashEntrySource)[keyof typeof CashEntrySource]) ??
-              CashEntrySource.MANUAL,
-            paymentMethod:
-              (parsed.data
-                .paymentMethod as (typeof CashPaymentMethod)[keyof typeof CashPaymentMethod]) ??
-              CashPaymentMethod.CASH,
-            occurredAt: parsed.data.occurredAt,
-            dayKey: parsed.data.dayKey,
-            referenceId: parsed.data.referenceId,
-            idempotencyKey: parsed.data.idempotencyKey,
-          },
+      return mapToolResult(
+        await deps.prepareConfirmation.execute(
+          parsed.data,
           getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
         )
       );
-      if (!created.ok) {
-        return created;
-      }
-
-      const documentIds = new Set<string>();
-      if (parsed.data.documentId) {
-        documentIds.add(parsed.data.documentId);
-      }
-      for (const documentId of parsed.data.documentIds ?? []) {
-        documentIds.add(documentId);
-      }
-
-      const attachments = [];
-      for (const documentId of documentIds) {
-        const attached = mapToolResult(
-          await deps.attachBeleg.execute(
-            { entryId: created.entry.id, documentId },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-          )
-        );
-        if (!attached.ok) {
-          return attached;
-        }
-        attachments.push(attached.attachment);
-      }
-
-      return {
-        ok: true,
-        register,
-        entry: created.entry,
-        attachments,
-      };
     },
   },
   {
@@ -1118,61 +1069,23 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     },
   },
   {
-    name: "submit_counted_cash",
+    name: "confirm_cash_day_draft",
     description:
-      "Save counted cash for today as a draft step before the final day close is submitted.",
-    descriptions: cashManagementToolDescriptions.submit_counted_cash,
+      "Confirm a previously prepared cash day draft by atomically saving the proposed movements and submitting the counted cash.",
+    descriptions: cashManagementToolDescriptions.confirm_cash_day_draft,
     kind: "server",
-    inputSchema: CountedCashToolInputSchema,
+    inputSchema: ConfirmCashDayDraftInputSchema,
     execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = CountedCashToolInputSchema.safeParse(input);
+      const parsed = ConfirmCashDayDraftInputSchema.safeParse(input);
       if (!parsed.success) {
         return validationError(parsed.error.flatten());
       }
-
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
-
-      const result = mapToolResult(
-        await deps.saveDayCount.execute(
-          {
-            registerId: register.id,
-            dayKey: toDayKey(parsed.data.dayKey),
-            countedBalanceCents: parsed.data.countedBalanceCents,
-            denominationCounts: parsed.data.denominationCounts,
-            note: parsed.data.note,
-            idempotencyKey: parsed.data.idempotencyKey,
-          },
+      return mapToolResult(
+        await deps.confirmDraft.execute(
+          parsed.data,
           getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
         )
       );
-      if (!result.ok) {
-        return result;
-      }
-
-      const readyStatus = await buildTodayStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register,
-        toDayKey(parsed.data.dayKey)
-      );
-      if (isToolFailure(readyStatus)) {
-        return readyStatus;
-      }
-
-      return {
-        ok: true,
-        register,
-        dayClose: result.dayClose,
-        readyToClose: readyStatus.readyToClose,
-        blockers: readyStatus.blockers,
-      };
     },
   },
   {
@@ -1777,6 +1690,36 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           { tool: "find_missing_receipts", why: "Fix the most common day-close blocker." },
         ],
       };
+    },
+  },
+  {
+    name: "get_cash_report_preview",
+    description: "Return a structured Kassenbericht preview.",
+    descriptions: cashManagementToolDescriptions.get_cash_report_preview,
+    kind: "server",
+    inputSchema: GetCashReportPreviewToolInputSchema,
+    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
+      const parsed = GetCashReportPreviewToolInputSchema.safeParse(input);
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
+      const register = await resolveRegister(
+        deps,
+        { tenantId, workspaceId, userId, toolCallId, runId },
+        parsed.data.registerId
+      );
+      if (isToolFailure(register)) {
+        return register;
+      }
+      return mapToolResult(
+        await deps.getReportPreview.execute(
+          {
+            registerId: register.id,
+            businessDate: toDayKey(parsed.data.businessDate),
+          },
+          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+        )
+      );
     },
   },
 ];

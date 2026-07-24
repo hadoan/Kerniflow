@@ -75,6 +75,7 @@ model Workspace {
   crmMailThreads         CrmMailThread[]
   crmMailMessages        CrmMailMessage[]
   channelTemplates       ChannelTemplate[]
+  cashDayConfirmations   CashDayConfirmation[]
 
   @@unique([tenantId, name])
   @@index([tenantId])
