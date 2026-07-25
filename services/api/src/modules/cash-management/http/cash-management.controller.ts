@@ -95,6 +95,7 @@ export class CashManagementController {
   async createCashRegister(@Req() req: ContextAwareRequest, @Body() body: unknown) {
     const ctx = buildUseCaseContext(req);
     const parsed = CreateCashRegisterSchema.parse(body);
+    console.log(`[API] createRegister called for tenant ${ctx.tenantId} with name ${parsed.name}`);
     const result = await this.createRegisterUseCase.execute(
       {
         ...parsed,

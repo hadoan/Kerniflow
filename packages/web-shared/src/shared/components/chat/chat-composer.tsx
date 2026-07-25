@@ -99,6 +99,7 @@ export function ChatComposer({
           placeholder={placeholder}
           className="h-12 flex-1 border-transparent bg-transparent text-base shadow-none focus:border-transparent focus:ring-0"
           disabled={isLoading}
+          data-testid="cash-assistant-message-input"
         />
         <Button
           type="submit"

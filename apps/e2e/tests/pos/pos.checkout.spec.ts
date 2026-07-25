@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { POS_AUTH_TOKENS, POS_IDS, autoAcceptNativeDialogs, installPosApiMock } from "./helpers";
+import { POS_AUTH_TOKENS, POS_IDS, autoAcceptNativeDialogs, installPosApiMock } from "./helpers.ts";
 
 function seedAuthenticatedStorage(page: Page): Promise<void> {
   return page.addInitScript(

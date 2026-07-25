@@ -1,8 +1,8 @@
 import type { APIRequestContext, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 import { GetOnboardingProgressOutputSchema, OnboardingProgressSchema } from "@corely/contracts";
-import type { AuthContext } from "./auth";
-import { HttpClient } from "./http-client";
+import type { AuthContext } from "./auth.ts";
+import { HttpClient } from "./http-client.ts";
 
 export const ONBOARDING_JOURNEY_KEY = "cash-management-v1";
 

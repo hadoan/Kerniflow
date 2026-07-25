@@ -1,5 +1,5 @@
-import { loadDirectoryE2eEnv } from "./env";
-import { API_BASE_URL } from "./http";
+import { loadDirectoryE2eEnv } from "./env.ts";
+import { API_BASE_URL } from "./http.ts";
 
 loadDirectoryE2eEnv();
 

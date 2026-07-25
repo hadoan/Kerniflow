@@ -1,18 +1,17 @@
 import { Controller, Post, Body, UseGuards, Get } from "@nestjs/common";
+import { AuthGuard } from "../../../../identity/adapters/http/auth.guard";
 import {
-  AuthGuard,
-  WorkspaceGuard,
-  CurrentTenant,
-  CurrentWorkspace,
-  Actor,
-  CurrentActor,
-} from "@corely/api-client";
+  CurrentTenantId,
+  CurrentWorkspaceId,
+  CurrentUserId,
+} from "../../../../identity/adapters/http/current-user.decorator";
 import { ResolveCashWorkspaceUseCase } from "../../../application/use-cases/copilot/resolve-cash-workspace.usecase";
 import {
   CASH_WORKSPACE_REPO,
   type CashWorkspaceRepoPort,
 } from "../../../application/ports/cash-management.ports";
 import { Inject } from "@nestjs/common";
+import { isErr } from "@corely/kernel";
 import { z } from "zod";
 
 const ResolveWorkspaceSchema = z.object({
@@ -26,7 +25,7 @@ const ResolveWorkspaceSchema = z.object({
 type ResolveWorkspaceDto = z.infer<typeof ResolveWorkspaceSchema>;
 
 @Controller("cash-management/workspaces")
-@UseGuards(AuthGuard, WorkspaceGuard)
+@UseGuards(AuthGuard)
 export class CashAssistantWorkspaceController {
   constructor(
     private readonly resolveWorkspaceUseCase: ResolveCashWorkspaceUseCase,
@@ -34,16 +33,16 @@ export class CashAssistantWorkspaceController {
   ) {}
 
   @Get()
-  async list(@CurrentTenant() tenantId: string, @CurrentWorkspace() workspaceId: string) {
+  async list(@CurrentTenantId() tenantId: string, @CurrentWorkspaceId() workspaceId: string) {
     const workspaces = await this.workspaceRepo.listWorkspaces(tenantId, workspaceId);
     return { items: workspaces };
   }
 
   @Post("resolve")
   async resolve(
-    @CurrentTenant() tenantId: string,
-    @CurrentWorkspace() workspaceId: string,
-    @CurrentActor() actor: Actor,
+    @CurrentTenantId() tenantId: string,
+    @CurrentWorkspaceId() workspaceId: string,
+    @CurrentUserId() userId: string,
     @Body() body: ResolveWorkspaceDto
   ) {
     const validated = ResolveWorkspaceSchema.parse(body);
@@ -59,11 +58,11 @@ export class CashAssistantWorkspaceController {
       {
         tenantId,
         workspaceId,
-        userId: actor.userId,
+        userId,
       }
     );
 
-    if (!result.isOk()) {
+    if (isErr(result)) {
       throw result.error;
     }
 

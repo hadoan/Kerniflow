@@ -1,4 +1,4 @@
-import { expect, test } from "../fixtures";
+import { expect, test } from "../fixtures.ts";
 import {
   createCohortFromProgramViaApi,
   createProgramViaApi,
@@ -6,7 +6,7 @@ import {
   loginAndGetAuthContext,
   requestAsAuth,
   requestAsAuthFailure,
-} from "../../helpers/classes/workflow";
+} from "../../helpers/classes/workflow.ts";
 
 test.describe("Classes Cohort Academy v1.1 - Resources", () => {
   test("scenario F + negative: resources CRUD/reorder/persistence and invalid LINK", async ({

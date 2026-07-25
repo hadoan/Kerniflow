@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { apiClient } from "../utils/api";
+import { apiClient } from "../utils/api.ts";
 
 const PORTAL_URL = process.env.PORTAL_URL || "http://localhost:8083";
 

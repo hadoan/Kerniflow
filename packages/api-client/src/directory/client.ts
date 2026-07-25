@@ -10,8 +10,8 @@ import {
   type DirectoryRestaurantListQuery,
   type DirectoryRestaurantListResponse,
 } from "@corely/contracts";
-import { normalizeError } from "../errors/normalize-error";
-import { request } from "../http/request";
+import { normalizeError } from "../errors/normalize-error.ts";
+import { request } from "../http/request.ts";
 
 const DEFAULT_BASE_URL = "http://localhost:3000";
 

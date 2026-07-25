@@ -1,5 +1,5 @@
 import { expect, type APIRequestContext } from "@playwright/test";
-import { API_BASE_URL } from "./http";
+import { API_BASE_URL } from "./http.ts";
 
 const TEST_HARNESS_SECRET = process.env.TEST_HARNESS_SECRET ?? "test-secret-key";
 

@@ -1,5 +1,5 @@
-import { expect, test } from "../fixtures";
-import { selectors } from "../../utils/selectors";
+import { expect, test } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
 import {
   createCohortFromProgramViaApi,
   createPartyViaApi,
@@ -7,7 +7,7 @@ import {
   createUniqueName,
   loginAndGetAuthContext,
   requestAsAuth,
-} from "../../helpers/classes/workflow";
+} from "../../helpers/classes/workflow.ts";
 
 test.describe("Classes Cohort Academy v1.1 - Applications and Enrollments", () => {
   test("scenario C: placement application -> approve -> enrolled roster", async ({

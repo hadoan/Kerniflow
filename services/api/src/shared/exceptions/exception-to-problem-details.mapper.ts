@@ -213,7 +213,7 @@ export class ExceptionToProblemDetailsMapper {
           instance: this.instance,
           code: "Common:Conflict",
           traceId: this.traceId,
-          data: this.isProduction ? undefined : { prismaCode: error.code },
+          data: this.isProduction ? undefined : { prismaCode: error.code, meta: error.meta },
         };
 
       case "P2025": // Record not found

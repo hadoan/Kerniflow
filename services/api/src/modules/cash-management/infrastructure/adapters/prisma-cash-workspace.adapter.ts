@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { Prisma } from "@prisma/client";
-import { type TransactionContext, NotFoundError } from "@corely/kernel";
-import { PrismaService } from "@corely/data";
+import { type TransactionContext } from "@corely/kernel";
+import { PrismaService, getPrismaClient } from "@corely/data";
 import {
   type CashWorkspaceRepoPort,
   type CreateWorkspaceRecord,
@@ -16,10 +16,7 @@ export class PrismaCashWorkspaceRepository implements CashWorkspaceRepoPort {
   constructor(private readonly prisma: PrismaService) {}
 
   private getClient(tx?: TransactionContext): Prisma.TransactionClient {
-    if (tx && this.prisma.isPrismaTransaction(tx)) {
-      return tx;
-    }
-    return this.prisma;
+    return getPrismaClient(this.prisma, tx);
   }
 
   async createWorkspace(

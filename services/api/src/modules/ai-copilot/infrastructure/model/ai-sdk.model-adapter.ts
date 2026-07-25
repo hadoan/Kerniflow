@@ -19,6 +19,7 @@ import { PromptUsageLogger } from "../../../../shared/prompts/prompt-usage.logge
 import { buildPromptContext } from "../../../../shared/prompts/prompt-context";
 import { copilotMessageMetadataSchema } from "../../application/validation/copilot-message-metadata.schema";
 import { type PosVerticalId, type SurfaceId } from "@corely/contracts";
+import { DeterministicLanguageModelV1 } from "./deterministic-model-registry";
 
 const normalizePromptLanguage = (locale?: string): string => {
   const normalized = locale?.trim().toLowerCase();
@@ -107,10 +108,15 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       parentSpan: params.observability,
     });
 
-    const provider = this.env.AI_MODEL_PROVIDER;
+    const provider = process.env.E2E_AI_PROVIDER || this.env.AI_MODEL_PROVIDER;
     const modelId = this.env.AI_MODEL_ID;
 
-    const model = provider === "anthropic" ? this.anthropic(modelId) : this.openai(modelId);
+    let model;
+    if (provider === "deterministic") {
+      model = new DeterministicLanguageModelV1(toolTenantId);
+    } else {
+      model = provider === "anthropic" ? this.anthropic(modelId) : this.openai(modelId);
+    }
 
     const promptContext = buildPromptContext({
       env: this.env,
@@ -303,13 +309,6 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       },
     });
 
-    let usage: LanguageModelUsage | undefined;
-    try {
-      usage = await result.usage;
-    } catch (err) {
-      this.logger.warn(`Failed to resolve usage: ${err}`);
-    }
-
-    return { result, usage };
+    return { result };
   }
 }

@@ -1,5 +1,5 @@
-import { test, expect } from "./fixtures";
-import { selectors } from "../utils/selectors";
+import { test, expect } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 
 test.describe("Authentication", () => {
   test("should login and display user in menu", async ({ page, testData }) => {

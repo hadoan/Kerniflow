@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
-import { buildDirectoryRestaurantFixtures } from "../fixtures/restaurants.fixture";
-import { DIRECTORY_SCOPE, cleanupDirectoryFixturesByPrefix, seedDirectoryRestaurants } from "./db";
-import { getRepoRoot, loadDirectoryE2eEnv } from "./env";
+import { buildDirectoryRestaurantFixtures } from "../fixtures/restaurants.fixture.ts";
+import { DIRECTORY_SCOPE, cleanupDirectoryFixturesByPrefix, seedDirectoryRestaurants } from "./db.ts";
+import { getRepoRoot, loadDirectoryE2eEnv } from "./env.ts";
 
 loadDirectoryE2eEnv();
 

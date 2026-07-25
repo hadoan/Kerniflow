@@ -89,7 +89,7 @@ export class ConfirmCashDayDraftUseCase extends BaseUseCase<
     @Inject(IDEMPOTENCY_STORAGE_PORT_TOKEN)
     private readonly idempotencyStore: IdempotencyStoragePort
   ) {
-    super({ logger: undefined, idempotency: idempotencyStore });
+    super({ logger: undefined });
   }
 
   protected async handle(

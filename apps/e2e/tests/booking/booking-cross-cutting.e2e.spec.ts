@@ -16,9 +16,9 @@
  */
 
 import type { Page } from "@playwright/test";
-import { test, expect } from "../fixtures";
-import { selectors } from "../../utils/selectors";
-import { seedTestData, resetTestData, drainOutbox } from "../../utils/testData";
+import { test, expect } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
+import { seedTestData, resetTestData, drainOutbox } from "../../utils/testData.ts";
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 const TEST_HARNESS_SECRET = process.env.TEST_HARNESS_SECRET || "test-secret-key";

@@ -5,7 +5,7 @@ import {
   openShiftFromGuard,
   installPosApiMock,
   selectRegister,
-} from "./helpers";
+} from "./helpers.ts";
 
 test.describe("POS app", () => {
   test("shows register and shift guard flow", async ({ page }) => {

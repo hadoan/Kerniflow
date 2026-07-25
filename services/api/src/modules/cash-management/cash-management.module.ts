@@ -112,6 +112,7 @@ import { CashAssistantWorkspaceController } from "./adapters/http/copilot/cash-a
     PrepareCashDayConfirmationUseCase,
     ConfirmCashDayDraftUseCase,
     GetMonthlyCashReportQueryUseCase,
+    CASH_WORKSPACE_REPO,
   ],
 })
 export class CashManagementModule {}

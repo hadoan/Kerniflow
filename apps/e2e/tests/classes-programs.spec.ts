@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "./fixtures";
-import { selectors } from "../utils/selectors";
+import { expect, test } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 
 type ApiOptions = {
   token: string;

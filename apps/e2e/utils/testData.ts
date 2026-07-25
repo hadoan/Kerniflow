@@ -1,4 +1,4 @@
-import { apiClient } from "./api";
+import { apiClient } from "./api.ts";
 
 export interface TestData {
   tenant: {

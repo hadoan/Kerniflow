@@ -1,1 +1,1 @@
-export * from "./subscribe-sse";
+export * from "./subscribe-sse.ts";

@@ -1,7 +1,7 @@
-import { test, expect } from "../fixtures";
-import { selectors } from "../../utils/selectors";
-import { loginAsSeededUser } from "../helpers/auth";
-import { primeAuthenticatedSession } from "../helpers/onboarding-helper";
+import { test, expect } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
+import { loginAsSeededUser } from "../helpers/auth.ts";
+import { primeAuthenticatedSession } from "../helpers/onboarding-helper.ts";
 
 test.describe("Cash management onboarding - AI helper", () => {
   test("opens the assistant from the onboarding helper", async ({ page, request, testData }) => {

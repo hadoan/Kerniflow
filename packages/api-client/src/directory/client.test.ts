@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError } from "../errors";
-import { createDirectoryClient } from "./client";
+import { ApiError } from "../errors.ts";
+import { createDirectoryClient } from "./client.ts";
 
 describe("directory api client", () => {
   afterEach(() => {

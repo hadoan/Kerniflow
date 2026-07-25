@@ -52,10 +52,10 @@ import {
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import type { AuthContext, SeededTestData } from "./auth";
-import { buildAuthHeaders } from "./auth";
-import { type HttpClient } from "./http-client";
-import { expectZod } from "./zod-assert";
+import type { AuthContext, SeededTestData } from "./auth.ts";
+import { buildAuthHeaders } from "./auth.ts";
+import { type HttpClient } from "./http-client.ts";
+import { expectZod } from "./zod-assert.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

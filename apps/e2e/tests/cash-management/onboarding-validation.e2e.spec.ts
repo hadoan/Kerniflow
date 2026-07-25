@@ -1,8 +1,8 @@
 import path from "node:path";
-import { test, expect } from "../fixtures";
-import { selectors } from "../../utils/selectors";
-import { loginAsSeededUser } from "../helpers/auth";
-import { getOnboardingProgress, primeAuthenticatedSession } from "../helpers/onboarding-helper";
+import { test, expect } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
+import { loginAsSeededUser } from "../helpers/auth.ts";
+import { getOnboardingProgress, primeAuthenticatedSession } from "../helpers/onboarding-helper.ts";
 
 const invalidReceiptPath = path.resolve(process.cwd(), "fixtures/receipt-invalid.txt");
 

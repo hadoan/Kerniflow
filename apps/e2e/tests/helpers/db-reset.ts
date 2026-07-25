@@ -1,4 +1,4 @@
-import { resetTestData, seedTestData, type TestData } from "../../utils/testData";
+import { resetTestData, seedTestData, type TestData } from "../../utils/testData.ts";
 
 export async function seedIsolatedTestData(): Promise<TestData> {
   const seeded = await seedTestData();

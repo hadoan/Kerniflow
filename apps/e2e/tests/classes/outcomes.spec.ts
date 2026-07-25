@@ -1,4 +1,4 @@
-import { expect, test } from "../fixtures";
+import { expect, test } from "../fixtures.ts";
 import {
   createCohortFromProgramViaApi,
   createPartyViaApi,
@@ -6,7 +6,7 @@ import {
   createUniqueName,
   loginAndGetAuthContext,
   requestAsAuth,
-} from "../../helpers/classes/workflow";
+} from "../../helpers/classes/workflow.ts";
 
 test.describe("Classes Cohort Academy v1.1 - Outcomes", () => {
   test("scenario E: milestones + completion matrix + summary persistence", async ({

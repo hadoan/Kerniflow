@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { assertApiReady } from "../helpers/bootstrap-api";
-import { closePrisma, countRestaurantsByPrefix, ensureDirectorySchemaReady } from "../helpers/db";
+import { assertApiReady } from "../helpers/bootstrap-api.ts";
+import { closePrisma, countRestaurantsByPrefix, ensureDirectorySchemaReady } from "../helpers/db.ts";
 import {
   cleanupDirectoryFixtureSet,
   createRunTag,
   runDirectoryImportSeedCli,
-} from "../helpers/directory-seed";
-import { listRestaurants } from "../helpers/http";
+} from "../helpers/directory-seed.ts";
+import { listRestaurants } from "../helpers/http.ts";
 
 test.describe("Directory UC-05: import/seed restaurants is rerunnable", () => {
   test.describe.configure({ mode: "serial" });

@@ -4,13 +4,13 @@ import {
   WorkspaceDtoSchema,
   type WorkspaceDto,
 } from "@corely/contracts";
-import { test } from "../fixtures";
-import { buildAuthHeaders, loginAsSeededUser } from "../helpers/auth";
+import { test } from "../fixtures.ts";
+import { buildAuthHeaders, loginAsSeededUser } from "../helpers/auth.ts";
 import {
   createBillingCheckoutSession,
   createBillingPortalSession,
   getBillingCurrent,
-} from "../helpers/billing-fixtures";
+} from "../helpers/billing-fixtures.ts";
 import {
   attachBelegToEntry,
   createCashEntry,
@@ -18,15 +18,15 @@ import {
   exportCashBook,
   monthKeyFromDayKey,
   uploadBase64Document,
-} from "../helpers/cash-management-fixtures";
-import { HttpClient } from "../helpers/http-client";
-import { idempotencyKey } from "../helpers/idempotency";
+} from "../helpers/cash-management-fixtures.ts";
+import { HttpClient } from "../helpers/http-client.ts";
+import { idempotencyKey } from "../helpers/idempotency.ts";
 import {
   cancelStripeSubscription,
   createCashManagementStripeSubscription,
   setStripeSubscriptionCancelAtPeriodEnd,
   updateCashManagementStripeSubscription,
-} from "../helpers/stripe-sandbox";
+} from "../helpers/stripe-sandbox.ts";
 
 const CASH_MANAGEMENT_PRODUCT_KEY = "cash-management";
 const receiptBase64 = Buffer.from("real stripe sandbox receipt", "utf8").toString("base64");

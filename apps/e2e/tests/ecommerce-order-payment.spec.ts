@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test } from "./fixtures.ts";
 import type { Page } from "@playwright/test";
 import {
   createPartyViaApi,
@@ -6,7 +6,7 @@ import {
   requestAsAuth,
   requestAsAuthFailure,
   type AuthContext,
-} from "../helpers/classes/workflow";
+} from "../helpers/classes/workflow.ts";
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 

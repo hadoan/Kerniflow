@@ -1,12 +1,12 @@
-import { test, expect } from "../fixtures";
-import { selectors } from "../../utils/selectors";
-import { loginAsSeededUser } from "../helpers/auth";
+import { test, expect } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
+import { loginAsSeededUser } from "../helpers/auth.ts";
 import {
   completeOnboarding,
   getOnboardingProgress,
   primeAuthenticatedSession,
   upsertOnboardingStep,
-} from "../helpers/onboarding-helper";
+} from "../helpers/onboarding-helper.ts";
 
 test.describe("Cash management onboarding - resume and checklist", () => {
   test("resumes at the correct step after interruption", async ({ page, request, testData }) => {

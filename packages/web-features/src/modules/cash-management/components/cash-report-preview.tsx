@@ -28,7 +28,7 @@ export const CashReportPreview: React.FC<CashReportPreviewProps> = ({ report }) 
   };
 
   return (
-    <Card className="border-border/60 bg-background/90 shadow-lg print:shadow-none print:border-none print:w-full max-w-2xl overflow-hidden">
+    <Card className="border-border/60 bg-background/90 shadow-lg print:shadow-none print:border-none print:w-full max-w-2xl overflow-hidden" data-testid="cash-report-preview">
       <CardContent className="p-6 space-y-6">
         <div className="flex justify-between items-start border-b border-border/50 pb-4">
           <div>
@@ -43,6 +43,7 @@ export const CashReportPreview: React.FC<CashReportPreviewProps> = ({ report }) 
           </div>
           <div className="text-right">
             <div
+              data-testid="cash-report-status"
               className={`px-2 py-1 rounded text-xs font-semibold ${
                 report.status === "READY_TO_CLOSE"
                   ? "bg-success/10 text-success"
@@ -63,6 +64,7 @@ export const CashReportPreview: React.FC<CashReportPreviewProps> = ({ report }) 
             {report.warnings.map((warning, i) => (
               <div
                 key={i}
+                data-testid="cash-report-warning"
                 className={`p-3 rounded-md border text-sm font-medium ${getWarningColor(warning.severity)}`}
               >
                 {warning.message}

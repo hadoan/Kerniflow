@@ -1,5 +1,5 @@
 import type { APIRequestContext, APIResponse } from "@playwright/test";
-import { buildAuthHeaders, type AuthContext } from "./auth";
+import { buildAuthHeaders, type AuthContext } from "./auth.ts";
 
 const API_BASE_URL = process.env.API_URL ?? "http://localhost:3000";
 

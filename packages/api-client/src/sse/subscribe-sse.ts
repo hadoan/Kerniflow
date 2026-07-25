@@ -7,13 +7,18 @@ export type SseParsedEvent<TData = unknown> = {
 };
 
 export class SseConnectionError extends Error {
+  public readonly status: number | null;
+  public readonly body?: string;
+
   constructor(
     message: string,
-    public readonly status: number | null,
-    public readonly body?: string
+    status: number | null,
+    body?: string
   ) {
     super(message);
     this.name = "SseConnectionError";
+    this.status = status;
+    this.body = body;
   }
 }
 

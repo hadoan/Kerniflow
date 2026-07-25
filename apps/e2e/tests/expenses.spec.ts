@@ -1,6 +1,6 @@
-import { test, expect } from "./fixtures";
-import { selectors } from "../utils/selectors";
-import { drainOutbox } from "../utils/testData";
+import { test, expect } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
+import { drainOutbox } from "../utils/testData.ts";
 
 test.describe("Expenses", () => {
   test.beforeEach(async ({ page }) => {

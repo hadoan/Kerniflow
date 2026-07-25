@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createAdminDirectoryClient } from "./admin-client";
+import { createAdminDirectoryClient } from "./admin-client.ts";
 
 describe("admin directory api client", () => {
   afterEach(() => {

@@ -52,6 +52,7 @@ import { RestaurantAiApplication } from "../restaurant/application/restaurant-ai
 import { CHAT_STORE_PORT, type ChatStorePort } from "./application/ports/chat-store.port";
 import { COPILOT_TOOLS } from "./application/ports/tool-registry.port";
 import type { DomainToolPort } from "./application/ports/domain-tool.port";
+import { CASH_WORKSPACE_REPO, type CashWorkspaceRepoPort } from "../cash-management/application/ports/cash-management.ports";
 
 import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
 import { buildInvoiceWorkflowTools } from "./infrastructure/tools/invoice-workflow.tools";
@@ -91,6 +92,7 @@ export const copilotToolsProvider: Provider = {
     bulkUpsertAttendance: BulkUpsertAttendanceUseCase,
     createExpense: CreateExpenseUseCase,
     documentsApp: DocumentsApplication,
+    cashWorkspaceRepo: CashWorkspaceRepoPort,
     listCashRegisters: ListCashRegistersQueryUseCase,
     getCashRegister: GetCashRegisterQueryUseCase,
     listCashEntries: ListCashEntriesQueryUseCase,
@@ -189,6 +191,7 @@ export const copilotToolsProvider: Provider = {
           confirmDraft,
           getMonthlyReport,
           documentsApp,
+          workspaceRepo: cashWorkspaceRepo,
         })
       ),
       ...withAppId(
@@ -230,6 +233,7 @@ export const copilotToolsProvider: Provider = {
     BulkUpsertAttendanceUseCase,
     CreateExpenseUseCase,
     DocumentsApplication,
+    CASH_WORKSPACE_REPO,
     ListCashRegistersQueryUseCase,
     GetCashRegisterQueryUseCase,
     ListCashEntriesQueryUseCase,

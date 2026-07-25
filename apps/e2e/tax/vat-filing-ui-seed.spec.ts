@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
-import { test, expect } from "../tests/fixtures";
-import { loginAsSeededUserUi } from "../tests/helpers/tax-fixtures";
-import { selectors } from "../utils/selectors";
+import { test, expect } from "../tests/fixtures.ts";
+import { loginAsSeededUserUi } from "../tests/helpers/tax-fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 
 type CreateExpenseResponse = {
   id: string;

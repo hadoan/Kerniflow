@@ -1,6 +1,6 @@
 import { CustomerDtoSchema } from "@corely/contracts";
 import type { APIRequestContext } from "@playwright/test";
-import { expect, test } from "./fixtures";
+import { expect, test } from "./fixtures.ts";
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 

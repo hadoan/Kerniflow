@@ -13,8 +13,8 @@
  */
 
 import type { Page } from "@playwright/test";
-import { test, expect } from "../fixtures";
-import { selectors } from "../../utils/selectors";
+import { test, expect } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 
