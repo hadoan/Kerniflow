@@ -18,6 +18,9 @@ import { isErr, type Result, type UseCaseError } from "@corely/kernel";
 import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
 import { buildToolCtx, validationError } from "../../../ai-copilot/infrastructure/tools/tool-utils";
 import { type DocumentsApplication } from "../../../documents/application/documents.application";
+import type { CashAssistantWorkspaceType } from "../../domain/entities";
+import { type CashWorkspaceRepoPort } from "../../application/ports/cash-management.ports";
+
 import { type ListCashRegistersQueryUseCase } from "../../application/use-cases/list-cash-registers.query";
 import { type GetCashRegisterQueryUseCase } from "../../application/use-cases/get-cash-register.query";
 import { type ListCashEntriesQueryUseCase } from "../../application/use-cases/list-cash-entries.query";
@@ -55,6 +58,7 @@ type ToolCtx = {
   userId: string;
   toolCallId?: string;
   runId?: string;
+  workspaceCtx?: CashAssistantExecutionContext | null;
 };
 
 type CashStatusCode = "OPEN" | "NEEDS_REVIEW" | "READY_TO_CLOSE" | "CLOSED";
@@ -78,6 +82,15 @@ type CashToolDeps = {
   confirmDraft: ConfirmCashDayDraftUseCase;
   getMonthlyReport: GetMonthlyCashReportQueryUseCase;
   documentsApp: DocumentsApplication;
+  workspaceRepo: CashWorkspaceRepoPort;
+};
+
+export type CashAssistantExecutionContext = {
+  type: CashAssistantWorkspaceType;
+  registerId: string | null;
+  locationId: string | null;
+  businessDate: Date | null;
+  businessMonth: Date | null;
 };
 
 const MonthKeySchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Expected YYYY-MM");
@@ -336,12 +349,55 @@ const getCtx = (params: ToolCtx) =>
     runId: params.runId,
   });
 
+const withWorkspaceContext =
+  (
+    deps: CashToolDeps,
+    allowedTypes: CashAssistantWorkspaceType[],
+    handler: (
+      params: Parameters<NonNullable<DomainToolPort["execute"]>>[0] & {
+        workspaceCtx: CashAssistantExecutionContext | null;
+      }
+    ) => Promise<unknown>
+  ): NonNullable<DomainToolPort["execute"]> =>
+  async (params) => {
+    let workspaceCtx: CashAssistantExecutionContext | null = null;
+
+    if (params.tenantId && params.workspaceId && params.runId) {
+      const ws = await deps.workspaceRepo.findWorkspaceByConversationId(
+        params.tenantId,
+        params.workspaceId,
+        params.runId
+      );
+      if (ws) {
+        workspaceCtx = {
+          type: ws.type,
+          registerId: ws.registerId,
+          locationId: ws.locationId,
+          businessDate: ws.businessDate,
+          businessMonth: ws.businessMonth,
+        };
+      }
+    }
+
+    if (workspaceCtx && allowedTypes.length > 0 && !allowedTypes.includes(workspaceCtx.type)) {
+      return failure(
+        "UNAUTHORIZED_TOOL",
+        `This tool is not allowed in ${workspaceCtx.type} workspaces.`
+      );
+    }
+
+    return handler({ ...params, workspaceCtx });
+  };
+
 const resolveRegister = async (
   deps: CashToolDeps,
   params: ToolCtx,
-  registerId?: string
+  inputRegisterId?: string
 ): Promise<CashRegister | ToolFailure> => {
   const ctx = getCtx(params);
+
+  const registerId = params.workspaceCtx?.registerId || inputRegisterId;
+
   if (registerId) {
     const result = unwrapResult(await deps.getRegister.execute({ registerId }, ctx));
     return isToolFailure(result) ? result : result.register;
@@ -774,18 +830,22 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.prepare_cash_day_confirmation,
     kind: "server",
     inputSchema: PrepareCashDayConfirmationInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = PrepareCashDayConfirmationInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = PrepareCashDayConfirmationInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+        return mapToolResult(
+          await deps.prepareConfirmation.execute(
+            { ...parsed.data, registerId: parsed.data.registerId! },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
       }
-      return mapToolResult(
-        await deps.prepareConfirmation.execute(
-          { ...parsed.data, registerId: parsed.data.registerId! },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-    },
+    ),
   },
   {
     name: "update_cash_entry",
@@ -794,80 +854,84 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.update_cash_entry,
     kind: "server",
     inputSchema: UpdateCashEntryToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = UpdateCashEntryToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY", "MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = UpdateCashEntryToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const originalResult = unwrapResult(
-        await deps.getEntry.execute(
-          { entryId: parsed.data.entryId },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-      if (isToolFailure(originalResult)) {
-        return originalResult;
-      }
-
-      const original = originalResult.entry;
-      if (original.lockedByDayCloseId) {
-        return failure(
-          "CONFLICT",
-          "Closed entries cannot be updated automatically. Reverse them manually or post a correction."
+        const originalResult = unwrapResult(
+          await deps.getEntry.execute(
+            { entryId: parsed.data.entryId },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
         );
-      }
+        if (isToolFailure(originalResult)) {
+          return originalResult;
+        }
 
-      const reversed = mapToolResult(
-        await deps.reverseEntry.execute(
-          {
-            entryId: original.id,
-            reason: parsed.data.reason,
-            dayKey: parsed.data.dayKey ?? original.dayKey,
-          },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-      if (!reversed.ok) {
-        return reversed;
-      }
+        const original = originalResult.entry;
+        if (original.lockedByDayCloseId) {
+          return failure(
+            "CONFLICT",
+            "Closed entries cannot be updated automatically. Reverse them manually or post a correction."
+          );
+        }
 
-      const replacement = mapToolResult(
-        await deps.createEntry.execute(
-          {
-            registerId: original.registerId,
-            description: parsed.data.description ?? original.description,
-            amount: parsed.data.amountCents ?? original.amount,
-            type: parsed.data.type ?? original.type,
-            direction: parsed.data.direction ?? original.direction,
-            source:
-              (parsed.data.source as (typeof CashEntrySource)[keyof typeof CashEntrySource]) ??
-              original.source,
-            paymentMethod:
-              (parsed.data
-                .paymentMethod as (typeof CashPaymentMethod)[keyof typeof CashPaymentMethod]) ??
-              original.paymentMethod,
-            occurredAt: parsed.data.occurredAt ?? original.occurredAt,
-            dayKey: parsed.data.dayKey ?? original.dayKey,
-            referenceId:
-              parsed.data.referenceId === undefined
-                ? original.referenceId
-                : parsed.data.referenceId,
-          },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-      if (!replacement.ok) {
-        return replacement;
-      }
+        const reversed = mapToolResult(
+          await deps.reverseEntry.execute(
+            {
+              entryId: original.id,
+              reason: parsed.data.reason,
+              dayKey: parsed.data.dayKey ?? original.dayKey,
+            },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
+        if (!reversed.ok) {
+          return reversed;
+        }
 
-      return {
-        ok: true,
-        originalEntry: original,
-        reversalEntry: reversed.entry,
-        replacementEntry: replacement.entry,
-      };
-    },
+        const replacement = mapToolResult(
+          await deps.createEntry.execute(
+            {
+              registerId: original.registerId,
+              description: parsed.data.description ?? original.description,
+              amount: parsed.data.amountCents ?? original.amount,
+              type: parsed.data.type ?? original.type,
+              direction: parsed.data.direction ?? original.direction,
+              source:
+                (parsed.data.source as (typeof CashEntrySource)[keyof typeof CashEntrySource]) ??
+                original.source,
+              paymentMethod:
+                (parsed.data
+                  .paymentMethod as (typeof CashPaymentMethod)[keyof typeof CashPaymentMethod]) ??
+                original.paymentMethod,
+              occurredAt: parsed.data.occurredAt ?? original.occurredAt,
+              dayKey: parsed.data.dayKey ?? original.dayKey,
+              referenceId:
+                parsed.data.referenceId === undefined
+                  ? original.referenceId
+                  : parsed.data.referenceId,
+            },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
+        if (!replacement.ok) {
+          return replacement;
+        }
+
+        return {
+          ok: true,
+          originalEntry: original,
+          reversalEntry: reversed.entry,
+          replacementEntry: replacement.entry,
+        };
+      }
+    ),
   },
   {
     name: "list_cash_entries",
@@ -875,37 +939,41 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.list_cash_entries,
     kind: "server",
     inputSchema: ListCashEntriesToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = ListCashEntriesToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY", "MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = ListCashEntriesToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
+
+        const result = unwrapResult(
+          await deps.listEntries.execute(
+            { registerId: register.id, ...parsed.data },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
+
+        return isToolFailure(result)
+          ? result
+          : {
+              ok: true,
+              register,
+              entries: result.entries,
+              total: result.entries.length,
+            };
       }
-
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
-
-      const result = unwrapResult(
-        await deps.listEntries.execute(
-          { registerId: register.id, ...parsed.data },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-
-      return isToolFailure(result)
-        ? result
-        : {
-            ok: true,
-            register,
-            entries: result.entries,
-            total: result.entries.length,
-          };
-    },
+    ),
   },
   {
     name: "upload_receipt",
@@ -914,27 +982,58 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.upload_receipt,
     kind: "server",
     inputSchema: UploadReceiptToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId, messages }) => {
-      const parsed = UploadReceiptToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY", "MONTHLY_REVIEW"],
+      async ({
+        tenantId,
+        workspaceId,
+        userId,
+        input,
+        toolCallId,
+        runId,
+        messages,
+        workspaceCtx,
+      }) => {
+        const parsed = UploadReceiptToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const uploads = [];
-      const latestAttachments = extractLatestUserAttachments(messages);
-      if (latestAttachments.length > 0) {
-        for (const [index, attachment] of latestAttachments.entries()) {
-          const normalized = normalizeAttachment(attachment, index);
-          if (!normalized) {
-            continue;
+        const uploads = [];
+        const latestAttachments = extractLatestUserAttachments(messages);
+        if (latestAttachments.length > 0) {
+          for (const [index, attachment] of latestAttachments.entries()) {
+            const normalized = normalizeAttachment(attachment, index);
+            if (!normalized) {
+              continue;
+            }
+            const uploaded = unwrapResult(
+              await deps.documentsApp.uploadFile.execute(
+                {
+                  filename: normalized.filename,
+                  contentType: normalized.contentType,
+                  base64: normalized.base64,
+                  isPublic: false,
+                  category: "cash-receipt",
+                  purpose: "copilot.cash.receipt",
+                },
+                getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+              )
+            );
+            if (isToolFailure(uploaded)) {
+              return uploaded;
+            }
+            uploads.push(uploaded.document);
           }
+        } else if (parsed.data.base64 && parsed.data.contentType) {
           const uploaded = unwrapResult(
             await deps.documentsApp.uploadFile.execute(
               {
-                filename: normalized.filename,
-                contentType: normalized.contentType,
-                base64: normalized.base64,
-                isPublic: false,
+                filename: parsed.data.filename ?? "receipt-upload",
+                contentType: parsed.data.contentType,
+                base64: parsed.data.base64,
+                isPublic: parsed.data.isPublic ?? false,
                 category: "cash-receipt",
                 purpose: "copilot.cash.receipt",
               },
@@ -945,38 +1044,20 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
             return uploaded;
           }
           uploads.push(uploaded.document);
+        } else {
+          return failure(
+            "VALIDATION_ERROR",
+            "Attach a file in chat or provide filename/contentType/base64 input"
+          );
         }
-      } else if (parsed.data.base64 && parsed.data.contentType) {
-        const uploaded = unwrapResult(
-          await deps.documentsApp.uploadFile.execute(
-            {
-              filename: parsed.data.filename ?? "receipt-upload",
-              contentType: parsed.data.contentType,
-              base64: parsed.data.base64,
-              isPublic: parsed.data.isPublic ?? false,
-              category: "cash-receipt",
-              purpose: "copilot.cash.receipt",
-            },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-          )
-        );
-        if (isToolFailure(uploaded)) {
-          return uploaded;
-        }
-        uploads.push(uploaded.document);
-      } else {
-        return failure(
-          "VALIDATION_ERROR",
-          "Attach a file in chat or provide filename/contentType/base64 input"
-        );
-      }
 
-      return {
-        ok: true,
-        documents: uploads,
-        total: uploads.length,
-      };
-    },
+        return {
+          ok: true,
+          documents: uploads,
+          total: uploads.length,
+        };
+      }
+    ),
   },
   {
     name: "attach_receipt_to_entry",
@@ -984,40 +1065,44 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.attach_receipt_to_entry,
     kind: "server",
     inputSchema: AttachReceiptToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = AttachReceiptToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
-
-      const documentIds = new Set<string>();
-      if (parsed.data.documentId) {
-        documentIds.add(parsed.data.documentId);
-      }
-      for (const documentId of parsed.data.documentIds ?? []) {
-        documentIds.add(documentId);
-      }
-
-      const attachments = [];
-      for (const documentId of documentIds) {
-        const attached = mapToolResult(
-          await deps.attachBeleg.execute(
-            { entryId: parsed.data.entryId, documentId },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-          )
-        );
-        if (!attached.ok) {
-          return attached;
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY", "MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = AttachReceiptToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
         }
-        attachments.push(attached.attachment);
-      }
 
-      return {
-        ok: true,
-        entryId: parsed.data.entryId,
-        attachments,
-      };
-    },
+        const documentIds = new Set<string>();
+        if (parsed.data.documentId) {
+          documentIds.add(parsed.data.documentId);
+        }
+        for (const documentId of parsed.data.documentIds ?? []) {
+          documentIds.add(documentId);
+        }
+
+        const attachments = [];
+        for (const documentId of documentIds) {
+          const attached = mapToolResult(
+            await deps.attachBeleg.execute(
+              { entryId: parsed.data.entryId, documentId },
+              getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            )
+          );
+          if (!attached.ok) {
+            return attached;
+          }
+          attachments.push(attached.attachment);
+        }
+
+        return {
+          ok: true,
+          entryId: parsed.data.entryId,
+          attachments,
+        };
+      }
+    ),
   },
   {
     name: "get_today_cash_status",
@@ -1025,53 +1110,57 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.get_today_cash_status,
     kind: "server",
     inputSchema: DashboardSummaryToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = DashboardSummaryToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = DashboardSummaryToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
 
-      const status = await buildTodayStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register,
-        toDayKey(parsed.data.dayKey)
-      );
-      if (isToolFailure(status)) {
-        return status;
-      }
+        const status = await buildTodayStatus(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register,
+          toDayKey(parsed.data.dayKey)
+        );
+        if (isToolFailure(status)) {
+          return status;
+        }
 
-      return {
-        ok: true,
-        register: {
-          id: status.register.id,
-          name: status.register.name,
-          location: status.register.location,
-          currency: status.register.currency,
-        },
-        dayKey: status.dayKey,
-        openingBalanceCents: status.openingBalanceCents,
-        cashInTodayCents: status.cashInTodayCents,
-        cashOutTodayCents: status.cashOutTodayCents,
-        expectedClosingCents: status.expectedClosingCents,
-        countedCashCents: status.countedCashCents,
-        differenceCents: status.differenceCents,
-        status: status.status,
-        readyToClose: status.readyToClose,
-        missingReceiptsCount: status.missingReceipts.length,
-        reviewEntriesCount: status.suspiciousEntries.length,
-        blockers: status.blockers,
-      };
-    },
+        return {
+          ok: true,
+          register: {
+            id: status.register.id,
+            name: status.register.name,
+            location: status.register.location,
+            currency: status.register.currency,
+          },
+          dayKey: status.dayKey,
+          openingBalanceCents: status.openingBalanceCents,
+          cashInTodayCents: status.cashInTodayCents,
+          cashOutTodayCents: status.cashOutTodayCents,
+          expectedClosingCents: status.expectedClosingCents,
+          countedCashCents: status.countedCashCents,
+          differenceCents: status.differenceCents,
+          status: status.status,
+          readyToClose: status.readyToClose,
+          missingReceiptsCount: status.missingReceipts.length,
+          reviewEntriesCount: status.suspiciousEntries.length,
+          blockers: status.blockers,
+        };
+      }
+    ),
   },
   {
     name: "confirm_cash_day_draft",
@@ -1080,18 +1169,22 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.confirm_cash_day_draft,
     kind: "server",
     inputSchema: ConfirmCashDayDraftInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = ConfirmCashDayDraftInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = ConfirmCashDayDraftInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+        return mapToolResult(
+          await deps.confirmDraft.execute(
+            { ...parsed.data, registerId: parsed.data.registerId! },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
       }
-      return mapToolResult(
-        await deps.confirmDraft.execute(
-          { ...parsed.data, registerId: parsed.data.registerId! },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-    },
+    ),
   },
   {
     name: "close_cash_day",
@@ -1099,87 +1192,91 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.close_cash_day,
     kind: "server",
     inputSchema: CloseCashDayToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = CloseCashDayToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = CloseCashDayToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
 
-      const dayKey = toDayKey(parsed.data.dayKey);
-      const existingDayClose = await getDayCloseOrNull(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register.id,
-        dayKey
-      );
-      if (isToolFailure(existingDayClose)) {
-        return existingDayClose;
-      }
+        const dayKey = toDayKey(parsed.data.dayKey);
+        const existingDayClose = await getDayCloseOrNull(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register.id,
+          dayKey
+        );
+        if (isToolFailure(existingDayClose)) {
+          return existingDayClose;
+        }
 
-      if (existingDayClose && isSubmittedDayClose(existingDayClose.status)) {
-        return {
-          ok: true,
-          register,
-          alreadyClosed: true,
-          dayClose: existingDayClose,
-        };
-      }
+        if (existingDayClose && isSubmittedDayClose(existingDayClose.status)) {
+          return {
+            ok: true,
+            register,
+            alreadyClosed: true,
+            dayClose: existingDayClose,
+          };
+        }
 
-      const submitInput =
-        parsed.data.countedBalanceCents !== undefined ||
-        (parsed.data.denominationCounts?.length ?? 0) > 0
-          ? {
-              registerId: register.id,
-              dayKey,
-              countedBalanceCents: parsed.data.countedBalanceCents,
-              denominationCounts: parsed.data.denominationCounts ?? [],
-              note: parsed.data.note ?? existingDayClose?.note ?? undefined,
-              idempotencyKey: parsed.data.idempotencyKey,
-            }
-          : existingDayClose
+        const submitInput =
+          parsed.data.countedBalanceCents !== undefined ||
+          (parsed.data.denominationCounts?.length ?? 0) > 0
             ? {
                 registerId: register.id,
                 dayKey,
-                countedBalanceCents: existingDayClose.countedBalance,
-                denominationCounts: existingDayClose.denominationCounts ?? [],
-                note: parsed.data.note ?? existingDayClose.note ?? undefined,
+                countedBalanceCents: parsed.data.countedBalanceCents,
+                denominationCounts: parsed.data.denominationCounts ?? [],
+                note: parsed.data.note ?? existingDayClose?.note ?? undefined,
                 idempotencyKey: parsed.data.idempotencyKey,
               }
-            : null;
+            : existingDayClose
+              ? {
+                  registerId: register.id,
+                  dayKey,
+                  countedBalanceCents: existingDayClose.countedBalance,
+                  denominationCounts: existingDayClose.denominationCounts ?? [],
+                  note: parsed.data.note ?? existingDayClose.note ?? undefined,
+                  idempotencyKey: parsed.data.idempotencyKey,
+                }
+              : null;
 
-      if (!submitInput) {
-        return failure(
-          "VALIDATION_ERROR",
-          "Counted cash is missing. Submit counted cash first or pass countedBalanceCents."
+        if (!submitInput) {
+          return failure(
+            "VALIDATION_ERROR",
+            "Counted cash is missing. Submit counted cash first or pass countedBalanceCents."
+          );
+        }
+
+        const result = mapToolResult(
+          await deps.submitDayClose.execute(
+            submitInput,
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
         );
-      }
+        if (!result.ok) {
+          return result;
+        }
 
-      const result = mapToolResult(
-        await deps.submitDayClose.execute(
-          submitInput,
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-      if (!result.ok) {
-        return result;
+        return {
+          ok: true,
+          register,
+          dayClose: result.dayClose,
+          closed: true,
+        };
       }
-
-      return {
-        ok: true,
-        register,
-        dayClose: result.dayClose,
-        closed: true,
-      };
-    },
+    ),
   },
   {
     name: "list_unclosed_days",
@@ -1187,74 +1284,78 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.list_unclosed_days,
     kind: "server",
     inputSchema: ListUnclosedDaysToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = ListUnclosedDaysToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
+    execute: withWorkspaceContext(
+      deps,
+      ["MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = ListUnclosedDaysToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
+
+        const dayKeyTo = parsed.data.dayKeyTo ?? toDayKey();
+        const dayKeyFrom = parsed.data.dayKeyFrom ?? `${dayKeyTo.slice(0, 7)}-01`;
+        const entries = await listEntriesForRange(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register.id,
+          { dayKeyFrom, dayKeyTo }
+        );
+        if (isToolFailure(entries)) {
+          return entries;
+        }
+
+        const closesResult = unwrapResult(
+          await deps.listDayCloses.execute(
+            { registerId: register.id, dayKeyFrom, dayKeyTo },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
+        if (isToolFailure(closesResult)) {
+          return closesResult;
+        }
+
+        const byDay = new Map<string, CashEntry[]>();
+        for (const entry of entries) {
+          const items = byDay.get(entry.dayKey) ?? [];
+          items.push(entry);
+          byDay.set(entry.dayKey, items);
+        }
+
+        const closeByDay = new Map(closesResult.closes.map((close) => [close.dayKey, close]));
+        const openDays = Array.from(byDay.entries())
+          .map(([dayKey, dayEntries]) => {
+            const close = closeByDay.get(dayKey) ?? null;
+            return {
+              dayKey,
+              entriesCount: dayEntries.length,
+              status: (close?.status ?? "OPEN") as CashDayClose["status"] | "OPEN",
+              countedCashCents: close?.countedBalance ?? null,
+              differenceCents: close?.difference ?? null,
+            };
+          })
+          .filter((item) => !isSubmittedDayClose(item.status))
+          .sort((a, b) => a.dayKey.localeCompare(b.dayKey));
+
+        return {
+          ok: true,
+          register,
+          dayKeyFrom,
+          dayKeyTo,
+          openDays,
+          total: openDays.length,
+        };
       }
-
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
-
-      const dayKeyTo = parsed.data.dayKeyTo ?? toDayKey();
-      const dayKeyFrom = parsed.data.dayKeyFrom ?? `${dayKeyTo.slice(0, 7)}-01`;
-      const entries = await listEntriesForRange(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register.id,
-        { dayKeyFrom, dayKeyTo }
-      );
-      if (isToolFailure(entries)) {
-        return entries;
-      }
-
-      const closesResult = unwrapResult(
-        await deps.listDayCloses.execute(
-          { registerId: register.id, dayKeyFrom, dayKeyTo },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-      if (isToolFailure(closesResult)) {
-        return closesResult;
-      }
-
-      const byDay = new Map<string, CashEntry[]>();
-      for (const entry of entries) {
-        const items = byDay.get(entry.dayKey) ?? [];
-        items.push(entry);
-        byDay.set(entry.dayKey, items);
-      }
-
-      const closeByDay = new Map(closesResult.closes.map((close) => [close.dayKey, close]));
-      const openDays = Array.from(byDay.entries())
-        .map(([dayKey, dayEntries]) => {
-          const close = closeByDay.get(dayKey) ?? null;
-          return {
-            dayKey,
-            entriesCount: dayEntries.length,
-            status: (close?.status ?? "OPEN") as CashDayClose["status"] | "OPEN",
-            countedCashCents: close?.countedBalance ?? null,
-            differenceCents: close?.difference ?? null,
-          };
-        })
-        .filter((item) => !isSubmittedDayClose(item.status))
-        .sort((a, b) => a.dayKey.localeCompare(b.dayKey));
-
-      return {
-        ok: true,
-        register,
-        dayKeyFrom,
-        dayKeyTo,
-        openDays,
-        total: openDays.length,
-      };
-    },
+    ),
   },
   {
     name: "find_missing_receipts",
@@ -1262,63 +1363,67 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.find_missing_receipts,
     kind: "server",
     inputSchema: FindMissingReceiptsToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = FindMissingReceiptsToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
+    execute: withWorkspaceContext(
+      deps,
+      ["MONTHLY_REVIEW", "DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = FindMissingReceiptsToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
+
+        const dayKeyTo = parsed.data.dayKeyTo ?? toDayKey();
+        const dayKeyFrom = parsed.data.dayKeyFrom ?? `${dayKeyTo.slice(0, 7)}-01`;
+        const entries = await listEntriesForRange(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register.id,
+          { dayKeyFrom, dayKeyTo }
+        );
+        if (isToolFailure(entries)) {
+          return entries;
+        }
+
+        const candidates = entries.filter(requiresReceipt);
+        const attachmentCounts = await listAttachmentsByEntry(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          candidates
+        );
+        if (isToolFailure(attachmentCounts)) {
+          return attachmentCounts;
+        }
+
+        const missingEntries = candidates
+          .filter((entry) => (attachmentCounts?.get(entry.id) ?? 0) === 0)
+          .map((entry) => ({
+            id: entry.id,
+            dayKey: entry.dayKey,
+            occurredAt: entry.occurredAt,
+            description: entry.description,
+            amountCents: entry.amount,
+            type: entry.type,
+          }));
+
+        return {
+          ok: true,
+          register,
+          dayKeyFrom,
+          dayKeyTo,
+          missingEntries,
+          total: missingEntries.length,
+        };
       }
-
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
-
-      const dayKeyTo = parsed.data.dayKeyTo ?? toDayKey();
-      const dayKeyFrom = parsed.data.dayKeyFrom ?? `${dayKeyTo.slice(0, 7)}-01`;
-      const entries = await listEntriesForRange(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register.id,
-        { dayKeyFrom, dayKeyTo }
-      );
-      if (isToolFailure(entries)) {
-        return entries;
-      }
-
-      const candidates = entries.filter(requiresReceipt);
-      const attachmentCounts = await listAttachmentsByEntry(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        candidates
-      );
-      if (isToolFailure(attachmentCounts)) {
-        return attachmentCounts;
-      }
-
-      const missingEntries = candidates
-        .filter((entry) => (attachmentCounts?.get(entry.id) ?? 0) === 0)
-        .map((entry) => ({
-          id: entry.id,
-          dayKey: entry.dayKey,
-          occurredAt: entry.occurredAt,
-          description: entry.description,
-          amountCents: entry.amount,
-          type: entry.type,
-        }));
-
-      return {
-        ok: true,
-        register,
-        dayKeyFrom,
-        dayKeyTo,
-        missingEntries,
-        total: missingEntries.length,
-      };
-    },
+    ),
   },
   {
     name: "generate_monthly_export",
@@ -1326,61 +1431,65 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.generate_monthly_export,
     kind: "server",
     inputSchema: GenerateMonthlyExportToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = GenerateMonthlyExportToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      ["MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = GenerateMonthlyExportToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
 
-      const monthKey = parsed.data.month ?? toMonthKey(toDayKey());
-      const exportStatus = await buildMonthExportStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register.id,
-        monthKey
-      );
-      if (isToolFailure(exportStatus)) {
-        return exportStatus;
-      }
-      if (!exportStatus.ready) {
-        return failure("CONFLICT", "Monthly export is blocked", {
-          blockingReason: exportStatus.blockingReason,
-          openDays: exportStatus.openDays,
-          missingReceiptEntryIds: exportStatus.missingReceiptEntries.map((entry) => entry.id),
-        });
-      }
+        const monthKey = parsed.data.month ?? toMonthKey(toDayKey());
+        const exportStatus = await buildMonthExportStatus(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register.id,
+          monthKey
+        );
+        if (isToolFailure(exportStatus)) {
+          return exportStatus;
+        }
+        if (!exportStatus.ready) {
+          return failure("CONFLICT", "Monthly export is blocked", {
+            blockingReason: exportStatus.blockingReason,
+            openDays: exportStatus.openDays,
+            missingReceiptEntryIds: exportStatus.missingReceiptEntries.map((entry) => entry.id),
+          });
+        }
 
-      const result = mapToolResult(
-        await deps.exportCashBook.execute(
-          {
-            registerId: register.id,
-            month: monthKey,
-            format: parsed.data.format,
-            includeAttachmentFiles: parsed.data.includeAttachmentFiles,
-            idempotencyKey: parsed.data.idempotencyKey,
-          },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
+        const result = mapToolResult(
+          await deps.exportCashBook.execute(
+            {
+              registerId: register.id,
+              month: monthKey,
+              format: parsed.data.format,
+              includeAttachmentFiles: parsed.data.includeAttachmentFiles,
+              idempotencyKey: parsed.data.idempotencyKey,
+            },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
 
-      return result.ok
-        ? {
-            ok: true,
-            register,
-            month: monthKey,
-            export: result.export,
-          }
-        : result;
-    },
+        return result.ok
+          ? {
+              ok: true,
+              register,
+              month: monthKey,
+              export: result.export,
+            }
+          : result;
+      }
+    ),
   },
   {
     name: "get_dashboard_summary",
@@ -1389,71 +1498,75 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.get_dashboard_summary,
     kind: "server",
     inputSchema: DashboardSummaryToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = DashboardSummaryToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      ["MONTHLY_REVIEW", "DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = DashboardSummaryToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
 
-      const status = await buildTodayStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register,
-        toDayKey(parsed.data.dayKey)
-      );
-      if (isToolFailure(status)) {
-        return status;
-      }
+        const status = await buildTodayStatus(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register,
+          toDayKey(parsed.data.dayKey)
+        );
+        if (isToolFailure(status)) {
+          return status;
+        }
 
-      const exportStatus = await buildMonthExportStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register.id,
-        status.monthKey
-      );
-      if (isToolFailure(exportStatus)) {
-        return exportStatus;
-      }
+        const exportStatus = await buildMonthExportStatus(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register.id,
+          status.monthKey
+        );
+        if (isToolFailure(exportStatus)) {
+          return exportStatus;
+        }
 
-      return {
-        ok: true,
-        register: {
-          id: register.id,
-          name: register.name,
-          location: register.location,
-          currency: register.currency,
-        },
-        today: {
-          dayKey: status.dayKey,
-          openingBalanceCents: status.openingBalanceCents,
-          cashInTodayCents: status.cashInTodayCents,
-          cashOutTodayCents: status.cashOutTodayCents,
-          expectedClosingCents: status.expectedClosingCents,
-          countedCashCents: status.countedCashCents,
-          differenceCents: status.differenceCents,
-          closingStatus: status.status,
-          missingReceiptsCount: status.missingReceipts.length,
-          reviewEntriesCount: status.suspiciousEntries.length,
-        },
-        month: {
-          monthKey: status.monthKey,
-          openDaysCount: exportStatus.openDays.length,
-          missingReceiptsCount: exportStatus.missingReceiptEntries.length,
-          reviewEntriesCount: exportStatus.reviewEntries.length,
-          exportReady: exportStatus.ready,
-          blockingReason: exportStatus.blockingReason,
-        },
-      };
-    },
+        return {
+          ok: true,
+          register: {
+            id: register.id,
+            name: register.name,
+            location: register.location,
+            currency: register.currency,
+          },
+          today: {
+            dayKey: status.dayKey,
+            openingBalanceCents: status.openingBalanceCents,
+            cashInTodayCents: status.cashInTodayCents,
+            cashOutTodayCents: status.cashOutTodayCents,
+            expectedClosingCents: status.expectedClosingCents,
+            countedCashCents: status.countedCashCents,
+            differenceCents: status.differenceCents,
+            closingStatus: status.status,
+            missingReceiptsCount: status.missingReceipts.length,
+            reviewEntriesCount: status.suspiciousEntries.length,
+          },
+          month: {
+            monthKey: status.monthKey,
+            openDaysCount: exportStatus.openDays.length,
+            missingReceiptsCount: exportStatus.missingReceiptEntries.length,
+            reviewEntriesCount: exportStatus.reviewEntries.length,
+            exportReady: exportStatus.ready,
+            blockingReason: exportStatus.blockingReason,
+          },
+        };
+      }
+    ),
   },
   {
     name: "get_action_required",
@@ -1461,94 +1574,98 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.get_action_required,
     kind: "server",
     inputSchema: ActionRequiredToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = ActionRequiredToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      ["MONTHLY_REVIEW", "DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = ActionRequiredToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
 
-      const status = await buildTodayStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register,
-        toDayKey(parsed.data.dayKey)
-      );
-      if (isToolFailure(status)) {
-        return status;
-      }
+        const status = await buildTodayStatus(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register,
+          toDayKey(parsed.data.dayKey)
+        );
+        if (isToolFailure(status)) {
+          return status;
+        }
 
-      const exportStatus = await buildMonthExportStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register.id,
-        status.monthKey
-      );
-      if (isToolFailure(exportStatus)) {
-        return exportStatus;
-      }
+        const exportStatus = await buildMonthExportStatus(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register.id,
+          status.monthKey
+        );
+        if (isToolFailure(exportStatus)) {
+          return exportStatus;
+        }
 
-      const items = [];
-      if (status.missingReceipts.length > 0) {
-        items.push({
-          priority: "high",
-          title: `${status.missingReceipts.length} entries are missing receipts`,
-          suggestedTool: "find_missing_receipts",
-        });
-      }
-      if (status.status !== "CLOSED") {
-        items.push({
-          priority: status.readyToClose ? "medium" : "high",
-          title: status.readyToClose
-            ? "Today's cash book can be closed now"
-            : "Today's cash book is not ready to close yet",
-          suggestedTool: status.readyToClose ? "close_cash_day" : "submit_counted_cash",
-        });
-      }
-      if (status.suspiciousEntries.length > 0) {
-        items.push({
-          priority: "medium",
-          title: `${status.suspiciousEntries.length} entries should be reviewed`,
-          suggestedTool: "list_cash_entries",
-        });
-      }
-      if (exportStatus.openDays.length > 0) {
-        items.push({
-          priority: "medium",
-          title: `${exportStatus.openDays.length} day(s) still need closing this month`,
-          suggestedTool: "list_unclosed_days",
-        });
-      }
-      if (exportStatus.ready) {
-        items.push({
-          priority: "low",
-          title: "Monthly export is ready",
-          suggestedTool: "generate_monthly_export",
-        });
-      } else if (exportStatus.blockingReason) {
-        items.push({
-          priority: "medium",
-          title: "Monthly export is blocked",
-          reason: exportStatus.blockingReason,
-          suggestedTool: "get_dashboard_summary",
-        });
-      }
+        const items = [];
+        if (status.missingReceipts.length > 0) {
+          items.push({
+            priority: "high",
+            title: `${status.missingReceipts.length} entries are missing receipts`,
+            suggestedTool: "find_missing_receipts",
+          });
+        }
+        if (status.status !== "CLOSED") {
+          items.push({
+            priority: status.readyToClose ? "medium" : "high",
+            title: status.readyToClose
+              ? "Today's cash book can be closed now"
+              : "Today's cash book is not ready to close yet",
+            suggestedTool: status.readyToClose ? "close_cash_day" : "submit_counted_cash",
+          });
+        }
+        if (status.suspiciousEntries.length > 0) {
+          items.push({
+            priority: "medium",
+            title: `${status.suspiciousEntries.length} entries should be reviewed`,
+            suggestedTool: "list_cash_entries",
+          });
+        }
+        if (exportStatus.openDays.length > 0) {
+          items.push({
+            priority: "medium",
+            title: `${exportStatus.openDays.length} day(s) still need closing this month`,
+            suggestedTool: "list_unclosed_days",
+          });
+        }
+        if (exportStatus.ready) {
+          items.push({
+            priority: "low",
+            title: "Monthly export is ready",
+            suggestedTool: "generate_monthly_export",
+          });
+        } else if (exportStatus.blockingReason) {
+          items.push({
+            priority: "medium",
+            title: "Monthly export is blocked",
+            reason: exportStatus.blockingReason,
+            suggestedTool: "get_dashboard_summary",
+          });
+        }
 
-      return {
-        ok: true,
-        register,
-        dayKey: status.dayKey,
-        items,
-      };
-    },
+        return {
+          ok: true,
+          register,
+          dayKey: status.dayKey,
+          items,
+        };
+      }
+    ),
   },
   {
     name: "explain_cashbook_term",
@@ -1556,7 +1673,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.explain_cashbook_term,
     kind: "server",
     inputSchema: ExplainCashbookTermToolInputSchema,
-    execute: async ({ input }) => {
+    execute: withWorkspaceContext(deps, [], async ({ input, workspaceCtx }) => {
       const parsed = ExplainCashbookTermToolInputSchema.safeParse(input);
       if (!parsed.success) {
         return validationError(parsed.error.flatten());
@@ -1574,7 +1691,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         term: entry[parsed.data.locale].title,
         ...entry[parsed.data.locale],
       };
-    },
+    }),
   },
   {
     name: "get_workflow_help",
@@ -1583,119 +1700,123 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.get_workflow_help,
     kind: "server",
     inputSchema: WorkflowHelpToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = WorkflowHelpToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
-      }
+    execute: withWorkspaceContext(
+      deps,
+      [],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = WorkflowHelpToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
 
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
-
-      const status = await buildTodayStatus(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        register,
-        toDayKey(parsed.data.dayKey)
-      );
-      if (isToolFailure(status)) {
-        return status;
-      }
-
-      const topic = parsed.data.topic;
-      if (topic === "close-day") {
-        return {
-          ok: true,
-          topic,
-          summary:
-            "To close the day, counted cash must be entered and blocking issues must be cleared.",
-          steps: [
-            "Check that receipt-required expense entries have attachments.",
-            "Enter counted cash or denomination counts.",
-            "Add a note if counted cash differs from the expected balance.",
-            "Run close_cash_day when the status is ready.",
-          ],
-          blockers: status.blockers,
-        };
-      }
-
-      if (topic === "missing-receipts") {
-        return {
-          ok: true,
-          topic,
-          summary: "Missing receipts block trust and can block monthly export.",
-          steps: [
-            "Upload the receipt file with upload_receipt.",
-            "Attach it to the correct entry with attach_receipt_to_entry.",
-            "Re-run find_missing_receipts to confirm nothing is left.",
-          ],
-          blockers: status.missingReceipts.map((entry) => ({
-            entryId: entry.id,
-            description: entry.description,
-            amountCents: entry.amount,
-          })),
-        };
-      }
-
-      if (topic === "balance-difference") {
-        return {
-          ok: true,
-          topic,
-          summary:
-            "A balance difference means counted cash does not match the expected drawer balance.",
-          steps: [
-            "Review the latest entries and look for wrong amounts or wrong directions.",
-            "Check private deposits or withdrawals entered today.",
-            "If the count is correct but still different, add a note before closing.",
-          ],
-          differenceCents: status.differenceCents,
-        };
-      }
-
-      if (topic === "monthly-export") {
-        const exportStatus = await buildMonthExportStatus(
+        const register = await resolveRegister(
           deps,
           { tenantId, workspaceId, userId, toolCallId, runId },
-          register.id,
-          status.monthKey
+          parsed.data.registerId
         );
-        if (isToolFailure(exportStatus)) {
-          return exportStatus;
+        if (isToolFailure(register)) {
+          return register;
         }
+
+        const status = await buildTodayStatus(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          register,
+          toDayKey(parsed.data.dayKey)
+        );
+        if (isToolFailure(status)) {
+          return status;
+        }
+
+        const topic = parsed.data.topic;
+        if (topic === "close-day") {
+          return {
+            ok: true,
+            topic,
+            summary:
+              "To close the day, counted cash must be entered and blocking issues must be cleared.",
+            steps: [
+              "Check that receipt-required expense entries have attachments.",
+              "Enter counted cash or denomination counts.",
+              "Add a note if counted cash differs from the expected balance.",
+              "Run close_cash_day when the status is ready.",
+            ],
+            blockers: status.blockers,
+          };
+        }
+
+        if (topic === "missing-receipts") {
+          return {
+            ok: true,
+            topic,
+            summary: "Missing receipts block trust and can block monthly export.",
+            steps: [
+              "Upload the receipt file with upload_receipt.",
+              "Attach it to the correct entry with attach_receipt_to_entry.",
+              "Re-run find_missing_receipts to confirm nothing is left.",
+            ],
+            blockers: status.missingReceipts.map((entry) => ({
+              entryId: entry.id,
+              description: entry.description,
+              amountCents: entry.amount,
+            })),
+          };
+        }
+
+        if (topic === "balance-difference") {
+          return {
+            ok: true,
+            topic,
+            summary:
+              "A balance difference means counted cash does not match the expected drawer balance.",
+            steps: [
+              "Review the latest entries and look for wrong amounts or wrong directions.",
+              "Check private deposits or withdrawals entered today.",
+              "If the count is correct but still different, add a note before closing.",
+            ],
+            differenceCents: status.differenceCents,
+          };
+        }
+
+        if (topic === "monthly-export") {
+          const exportStatus = await buildMonthExportStatus(
+            deps,
+            { tenantId, workspaceId, userId, toolCallId, runId },
+            register.id,
+            status.monthKey
+          );
+          if (isToolFailure(exportStatus)) {
+            return exportStatus;
+          }
+          return {
+            ok: true,
+            topic,
+            summary: exportStatus.ready
+              ? "This month is ready to export."
+              : "Monthly export is still blocked by operational issues.",
+            steps: [
+              "Close every day that has entries.",
+              "Attach missing receipts for expense and correction entries.",
+              "Resolve remaining review items before generating the export.",
+            ],
+            blockingReason: exportStatus.blockingReason,
+            openDays: exportStatus.openDays,
+          };
+        }
+
         return {
           ok: true,
-          topic,
-          summary: exportStatus.ready
-            ? "This month is ready to export."
-            : "Monthly export is still blocked by operational issues.",
-          steps: [
-            "Close every day that has entries.",
-            "Attach missing receipts for expense and correction entries.",
-            "Resolve remaining review items before generating the export.",
+          topic: "general",
+          summary:
+            "Use the cash assistant to check status, fix missing receipts, and finish day close safely.",
+          nextBestActions: [
+            { tool: "get_dashboard_summary", why: "See today's cash and export readiness." },
+            { tool: "get_action_required", why: "See the next operational tasks." },
+            { tool: "find_missing_receipts", why: "Fix the most common day-close blocker." },
           ],
-          blockingReason: exportStatus.blockingReason,
-          openDays: exportStatus.openDays,
         };
       }
-
-      return {
-        ok: true,
-        topic: "general",
-        summary:
-          "Use the cash assistant to check status, fix missing receipts, and finish day close safely.",
-        nextBestActions: [
-          { tool: "get_dashboard_summary", why: "See today's cash and export readiness." },
-          { tool: "get_action_required", why: "See the next operational tasks." },
-          { tool: "find_missing_receipts", why: "Fix the most common day-close blocker." },
-        ],
-      };
-    },
+    ),
   },
   {
     name: "get_cash_report_preview",
@@ -1703,29 +1824,33 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.get_cash_report_preview,
     kind: "server",
     inputSchema: GetCashReportPreviewToolInputSchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = GetCashReportPreviewToolInputSchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = GetCashReportPreviewToolInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+        const register = await resolveRegister(
+          deps,
+          { tenantId, workspaceId, userId, toolCallId, runId },
+          parsed.data.registerId
+        );
+        if (isToolFailure(register)) {
+          return register;
+        }
+        return mapToolResult(
+          await deps.getReportPreview.execute(
+            {
+              registerId: register.id,
+              businessDate: toDayKey(parsed.data.businessDate),
+            },
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
       }
-      const register = await resolveRegister(
-        deps,
-        { tenantId, workspaceId, userId, toolCallId, runId },
-        parsed.data.registerId
-      );
-      if (isToolFailure(register)) {
-        return register;
-      }
-      return mapToolResult(
-        await deps.getReportPreview.execute(
-          {
-            registerId: register.id,
-            businessDate: toDayKey(parsed.data.businessDate),
-          },
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-    },
+    ),
   },
   {
     name: "get_monthly_cash_report",
@@ -1733,17 +1858,21 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.get_monthly_cash_report,
     kind: "server",
     inputSchema: GetMonthlyCashReportQuerySchema,
-    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
-      const parsed = GetMonthlyCashReportQuerySchema.safeParse(input);
-      if (!parsed.success) {
-        return validationError(parsed.error.flatten());
+    execute: withWorkspaceContext(
+      deps,
+      ["MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = GetMonthlyCashReportQuerySchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+        return mapToolResult(
+          await deps.getMonthlyReport.execute(
+            parsed.data,
+            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+          )
+        );
       }
-      return mapToolResult(
-        await deps.getMonthlyReport.execute(
-          parsed.data,
-          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
-        )
-      );
-    },
+    ),
   },
 ];

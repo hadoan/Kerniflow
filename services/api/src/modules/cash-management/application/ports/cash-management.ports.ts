@@ -16,6 +16,8 @@ import type {
   CashEntryEntity,
   CashExportArtifactEntity,
   CashRegisterEntity,
+  CashAssistantWorkspaceEntity,
+  CashAssistantWorkspaceType,
 } from "../../domain/entities";
 
 export const CASH_REGISTER_REPO = Symbol("CASH_REGISTER_REPO");
@@ -24,6 +26,7 @@ export const CASH_DAY_CLOSE_REPO = Symbol("CASH_DAY_CLOSE_REPO");
 export const CASH_ATTACHMENT_REPO = Symbol("CASH_ATTACHMENT_REPO");
 export const CASH_EXPORT_REPO = Symbol("CASH_EXPORT_REPO");
 export const CASH_CONFIRMATION_REPO = Symbol("CASH_CONFIRMATION_REPO");
+export const CASH_WORKSPACE_REPO = Symbol("CASH_WORKSPACE_REPO");
 export const CASH_DOCUMENTS_PORT = Symbol("CASH_DOCUMENTS_PORT");
 export const CASH_EXPORT_PORT = Symbol("CASH_EXPORT_PORT");
 
@@ -348,6 +351,49 @@ export interface CashConfirmationRepoPort {
     id: string,
     tx?: TransactionContext
   ): Promise<void>;
+}
+
+export type CreateWorkspaceRecord = {
+  tenantId: string;
+  workspaceId: string;
+  registerId: string | null;
+  locationId: string | null;
+  type: CashAssistantWorkspaceType;
+  businessDate: Date | null;
+  businessMonth: Date | null;
+  conversationId: string;
+  cashDayId: string | null;
+  createdByUserId: string;
+};
+
+export interface CashWorkspaceRepoPort {
+  createWorkspace(
+    data: CreateWorkspaceRecord,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity>;
+
+  findCanonicalWorkspace(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string | null,
+    type: CashAssistantWorkspaceType,
+    businessDate: Date | null,
+    businessMonth: Date | null,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity | null>;
+
+  findWorkspaceByConversationId(
+    tenantId: string,
+    workspaceId: string,
+    conversationId: string,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity | null>;
+
+  listWorkspaces(
+    tenantId: string,
+    workspaceId: string,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity[]>;
 }
 
 export type CashExportPayload = {

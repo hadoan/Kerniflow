@@ -16,8 +16,10 @@ import {
   CASH_EXPORT_REPO,
   CASH_REGISTER_REPO,
   CASH_CONFIRMATION_REPO,
+  CASH_WORKSPACE_REPO,
 } from "./application/ports/cash-management.ports";
 import { PrismaCashRepository } from "./infrastructure/adapters/prisma-cash-repository.adapter";
+import { PrismaCashWorkspaceRepository } from "./infrastructure/adapters/prisma-cash-workspace.adapter";
 import { CashDocumentsPortAdapter } from "./infrastructure/documents/documents-port.adapter";
 import { CashExportAdapter } from "./infrastructure/exports/cash-export.adapter";
 import { ListCashRegistersQueryUseCase } from "./application/use-cases/list-cash-registers.query";
@@ -41,18 +43,22 @@ import { GetCashReportPreviewQueryUseCase } from "./application/use-cases/get-ca
 import { PrepareCashDayConfirmationUseCase } from "./application/use-cases/prepare-cash-day-confirmation.usecase";
 import { ConfirmCashDayDraftUseCase } from "./application/use-cases/confirm-cash-day-draft.usecase";
 import { GetMonthlyCashReportQueryUseCase } from "./application/use-cases/get-monthly-cash-report.query";
+import { ResolveCashWorkspaceUseCase } from "./application/use-cases/copilot/resolve-cash-workspace.usecase";
+import { CashAssistantWorkspaceController } from "./adapters/http/copilot/cash-assistant-workspace.controller";
 
 @Module({
   imports: [DataModule, KernelModule, IdentityModule, DocumentsModule, BillingModule, TaxModule],
-  controllers: [CashManagementController],
+  controllers: [CashManagementController, CashAssistantWorkspaceController],
   providers: [
     PrismaCashRepository,
+    PrismaCashWorkspaceRepository,
     { provide: CASH_REGISTER_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_ENTRY_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_DAY_CLOSE_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_ATTACHMENT_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_EXPORT_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_CONFIRMATION_REPO, useExisting: PrismaCashRepository },
+    { provide: CASH_WORKSPACE_REPO, useExisting: PrismaCashWorkspaceRepository },
     {
       provide: CASH_DOCUMENTS_PORT,
       useFactory: (documentsApp: DocumentsApplication) =>
@@ -84,6 +90,7 @@ import { GetMonthlyCashReportQueryUseCase } from "./application/use-cases/get-mo
     PrepareCashDayConfirmationUseCase,
     ConfirmCashDayDraftUseCase,
     GetMonthlyCashReportQueryUseCase,
+    ResolveCashWorkspaceUseCase,
   ],
   exports: [
     ListCashRegistersQueryUseCase,

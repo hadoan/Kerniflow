@@ -11,11 +11,15 @@ export interface OnboardingShellProps {
   config: OnboardingJourneyConfig;
   onCompleted?: () => void;
   onExit?: () => void;
+  onSkip?: () => void;
 }
 
-export const OnboardingShell = ({ config, onCompleted, onExit }: OnboardingShellProps) => {
+export const OnboardingShell = ({ config, onCompleted, onExit, onSkip }: OnboardingShellProps) => {
   const { t, i18n } = useTranslation();
-  const { isLoaded, isComplete, progress } = useOnboarding({ config, onCompleted });
+  const { isLoaded, isComplete, progress, completeJourney, isCompleting } = useOnboarding({
+    config,
+    onCompleted,
+  });
   const hasRedirectedRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -56,7 +60,15 @@ export const OnboardingShell = ({ config, onCompleted, onExit }: OnboardingShell
       className="flex min-h-screen flex-col bg-[#0B0F14] text-foreground selection:bg-accent/30"
       data-testid="onboarding-shell"
     >
-      <OnboardingHeader config={config} onExit={onExit} className="border-white/5" />
+      <OnboardingHeader
+        config={config}
+        onExit={onExit}
+        onSkip={async () => {
+          await completeJourney();
+          onSkip?.();
+        }}
+        className="border-white/5"
+      />
 
       <div className="flex flex-1 flex-col lg:flex-row overflow-hidden relative">
         {/* Decorative background elements */}

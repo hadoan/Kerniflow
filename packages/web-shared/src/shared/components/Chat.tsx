@@ -41,6 +41,7 @@ export interface ChatProps {
   onConversationUpdated?: () => void;
   focusMessageId?: string | null;
   toolRenderers?: Record<string, ToolRenderer>;
+  renderEmptyState?: (props: { focusComposer: (value: string) => void }) => React.ReactNode;
 }
 
 export type { CapabilityAction, CapabilityGroup, Suggestion };
@@ -63,6 +64,7 @@ export function Chat({
   onConversationUpdated,
   focusMessageId,
   toolRenderers,
+  renderEmptyState,
 }: ChatProps) {
   const { t } = useTranslation();
   const [streamEventStarted, setStreamEventStarted] = useState(false);
@@ -395,15 +397,19 @@ export function Chat({
         </div>
         <div className="relative space-y-6">
           {messages.length === 0 ? (
-            <ChatEmptyState
-              suggestions={suggestions}
-              capabilityGroups={capabilityGroups}
-              capabilityCatalogTitle={capabilityCatalogTitle}
-              capabilityCatalogDescription={capabilityCatalogDescription}
-              emptyStateTitle={emptyStateTitle}
-              emptyStateDescription={emptyStateDescription}
-              onSelectPrompt={focusComposer}
-            />
+            renderEmptyState ? (
+              renderEmptyState({ focusComposer })
+            ) : (
+              <ChatEmptyState
+                suggestions={suggestions}
+                capabilityGroups={capabilityGroups}
+                capabilityCatalogTitle={capabilityCatalogTitle}
+                capabilityCatalogDescription={capabilityCatalogDescription}
+                emptyStateTitle={emptyStateTitle}
+                emptyStateDescription={emptyStateDescription}
+                onSelectPrompt={focusComposer}
+              />
+            )
           ) : null}
 
           <ChatMessageList

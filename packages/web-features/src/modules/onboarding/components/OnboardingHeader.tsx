@@ -9,6 +9,7 @@ import { cn } from "@corely/web-shared/shared/lib/utils";
 export interface OnboardingHeaderProps {
   config: OnboardingJourneyConfig;
   onExit?: () => void;
+  onSkip?: () => void;
   onBack?: () => void;
   canGoBack?: boolean;
   className?: string;
@@ -16,6 +17,7 @@ export interface OnboardingHeaderProps {
 
 export const OnboardingHeader = ({
   onExit,
+  onSkip,
   onBack,
   canGoBack = false,
   className,
@@ -56,6 +58,18 @@ export const OnboardingHeader = ({
 
       <div className="flex items-center gap-4">
         <LanguageSelector className="text-foreground/70 hover:text-foreground hover:bg-white/5 transition-colors" />
+
+        {onSkip && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onSkip}
+            className="text-muted-foreground hover:text-foreground"
+            data-testid="onboarding-skip"
+          >
+            {t("onboarding.skip", "Skip Onboarding")}
+          </Button>
+        )}
 
         {onExit && (
           <Button

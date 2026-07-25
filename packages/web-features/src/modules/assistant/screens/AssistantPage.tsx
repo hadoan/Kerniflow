@@ -1,19 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { format, isToday, isYesterday, startOfWeek } from "date-fns";
+import { format } from "date-fns";
 import { ChevronDown, Loader2, Plus, Search, Sparkles } from "lucide-react";
-import {
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Input,
-} from "@corely/ui";
+import { Button, Collapsible, CollapsibleContent, CollapsibleTrigger } from "@corely/ui";
 import {
   listCopilotThreads,
   searchCopilotThreads,
@@ -30,42 +20,16 @@ import { CashManagementBillingFeatureKeys, CashManagementProductKey } from "@cor
 import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assistant-suggestions";
 import { CashReportPreview } from "../../cash-management/components/cash-report-preview";
 import { MonthlyCashReportPreview } from "../../cash-management/components/monthly-cash-report-preview";
-
-type ThreadGroupKey = "today" | "yesterday" | "week" | "older";
-
-interface ThreadGroup {
-  key: ThreadGroupKey;
-  label: string;
-  items: Array<{
-    id: string;
-    title: string;
-    lastMessageAt: string;
-  }>;
-}
-
-const THREAD_LIST_QUERY_KEY = ["assistant", "threads", "recent"] as const;
-
-const THREAD_GROUP_LABELS: Record<ThreadGroupKey, string> = {
-  today: "Today",
-  yesterday: "Yesterday",
-  week: "This week",
-  older: "Older",
-};
-
-const getThreadGroupKey = (isoDate: string): ThreadGroupKey => {
-  const date = new Date(isoDate);
-  if (isToday(date)) {
-    return "today";
-  }
-  if (isYesterday(date)) {
-    return "yesterday";
-  }
-  const start = startOfWeek(new Date(), { weekStartsOn: 1 });
-  if (date >= start) {
-    return "week";
-  }
-  return "older";
-};
+import {
+  type ThreadGroupKey,
+  type ThreadGroup,
+  THREAD_LIST_QUERY_KEY,
+  THREAD_GROUP_LABELS,
+  getChronologicalGroupKey,
+} from "./assistant-utils";
+import { CashAssistantEmptyState } from "../../cash-management/components/cash-assistant-empty-state";
+import { CashConversationContextHeader } from "../../cash-management/components/cash-conversation-context-header";
+import { AssistantSearchDialog } from "../components/AssistantSearchDialog";
 
 interface AssistantPageProps {
   activeModule?: string;
@@ -85,6 +49,10 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [openGroups, setOpenGroups] = useState<Record<ThreadGroupKey, boolean>>({
     today: true,
+    needsAttention: true,
+    previousDays: true,
+    monthlyReviews: true,
+    generalQuestions: false,
     yesterday: true,
     week: true,
     older: true,
@@ -113,6 +81,15 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const threadsQuery = useQuery({
     queryKey: THREAD_LIST_QUERY_KEY,
     queryFn: async () => listCopilotThreads({ pageSize: 50 }),
+  });
+
+  const workspacesQuery = useQuery({
+    queryKey: ["cash-workspaces"],
+    queryFn: async () => {
+      const { cashManagementApi } = await import("@corely/web-shared/lib/cash-management-api");
+      return cashManagementApi.listWorkspaces();
+    },
+    enabled: activeModule === "cash-management",
   });
 
   const threadQuery = useQuery({
@@ -153,10 +130,18 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const groupedThreads = useMemo<ThreadGroup[]>(() => {
     const groups: Record<ThreadGroupKey, ThreadGroup["items"]> = {
       today: [],
+      needsAttention: [],
+      previousDays: [],
+      monthlyReviews: [],
+      generalQuestions: [],
       yesterday: [],
       week: [],
       older: [],
     };
+
+    const isCashModule = activeModule === "cash-management";
+    const workspaces = workspacesQuery.data?.items ?? [];
+    const workspaceMap = new Map(workspaces.map((ws: any) => [ws.conversationId, ws]));
 
     for (const item of threadsQuery.data?.items ?? []) {
       if (
@@ -166,7 +151,26 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
       ) {
         continue;
       }
-      const key = getThreadGroupKey(item.lastMessageAt);
+
+      let key: ThreadGroupKey = getChronologicalGroupKey(item.lastMessageAt);
+
+      if (isCashModule) {
+        const workspace = workspaceMap.get(item.id);
+        if (workspace) {
+          if (workspace.type === "DAILY_CASH_DAY") {
+            if (new Date(workspace.businessDate).toDateString() === new Date().toDateString()) {
+              key = "today";
+            } else {
+              key = "previousDays";
+            }
+          } else if (workspace.type === "MONTHLY_REVIEW") {
+            key = "monthlyReviews";
+          } else if (workspace.type === "GENERAL_HELP") {
+            key = "generalQuestions";
+          }
+        }
+      }
+
       groups[key].push({
         id: item.id,
         title: item.title,
@@ -174,14 +178,23 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
       });
     }
 
-    return (["today", "yesterday", "week", "older"] as const)
+    // Limit generalQuestions to 5 items if we have daily workspaces
+    if (isCashModule && groups.generalQuestions.length > 5) {
+      groups.generalQuestions = groups.generalQuestions.slice(0, 5);
+    }
+
+    const order: ThreadGroupKey[] = isCashModule
+      ? ["today", "needsAttention", "previousDays", "monthlyReviews", "generalQuestions"]
+      : ["today", "yesterday", "week", "older"];
+
+    return order
       .map((key) => ({
         key,
         label: THREAD_GROUP_LABELS[key],
         items: groups[key],
       }))
       .filter((group) => group.items.length > 0);
-  }, [threadsQuery.data?.items]);
+  }, [threadsQuery.data?.items, activeModule, workspacesQuery.data?.items]);
 
   const activeThreadTitle = threadQuery.data?.thread.title ?? t("assistant.title");
 
@@ -227,6 +240,13 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
       navigate("/billing");
     }
   };
+
+  const currentWorkspace = useMemo(() => {
+    if (activeModule !== "cash-management" || !threadId) {
+      return null;
+    }
+    return workspacesQuery.data?.items?.find((ws) => ws.conversationId === threadId);
+  }, [activeModule, threadId, workspacesQuery.data?.items]);
 
   return (
     <div
@@ -343,24 +363,28 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
 
           <div className="flex min-w-0 min-h-0 flex-1 flex-col">
             <header className="flex-shrink-0 border-b border-border bg-background/40">
-              <div className="flex items-center gap-3 px-6 py-4 lg:px-8">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
-                  <Sparkles className="h-5 w-5 text-accent" />
+              {currentWorkspace ? (
+                <CashConversationContextHeader workspace={currentWorkspace} />
+              ) : (
+                <div className="flex items-center gap-3 px-6 py-4 lg:px-8">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
+                    <Sparkles className="h-5 w-5 text-accent" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="truncate text-lg font-semibold text-foreground">
+                      {activeThreadTitle}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {threadId
+                        ? t(
+                            "assistant.threadHeaderDescription",
+                            "Continue the conversation or start a new task."
+                          )
+                        : t("assistant.emptyStateDescription")}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h2 className="truncate text-lg font-semibold text-foreground">
-                    {activeThreadTitle}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {threadId
-                      ? t(
-                          "assistant.threadHeaderDescription",
-                          "Continue the conversation or start a new task."
-                        )
-                      : t("assistant.emptyStateDescription")}
-                  </p>
-                </div>
-              </div>
+              )}
             </header>
 
             <main className="min-h-0 flex-1 overflow-y-auto">
@@ -386,6 +410,13 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                   )}
                   emptyStateTitle={t("assistant.emptyStateTitle")}
                   emptyStateDescription={t("assistant.emptyStateDescription")}
+                  renderEmptyState={
+                    activeModule === "cash-management"
+                      ? ({ focusComposer }) => (
+                          <CashAssistantEmptyState onSelectPrompt={focusComposer} />
+                        )
+                      : undefined
+                  }
                   toolRenderers={{
                     get_cash_report_preview: (props) => {
                       if (
@@ -421,59 +452,16 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
         </div>
       </div>
 
-      <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Search chats</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-3">
-            <Input
-              autoFocus
-              placeholder="Search messages..."
-              value={searchText}
-              onChange={(event) => setSearchText(event.target.value)}
-            />
-
-            <div className="max-h-96 space-y-2 overflow-y-auto">
-              {searchQuery.isLoading ? (
-                <div className="text-sm text-muted-foreground">Searching…</div>
-              ) : null}
-
-              {!searchQuery.isLoading && debouncedSearchText.length <= 1 ? (
-                <div className="text-sm text-muted-foreground">
-                  Type at least 2 characters to search.
-                </div>
-              ) : null}
-
-              {!searchQuery.isLoading &&
-              debouncedSearchText.length > 1 &&
-              !searchQuery.data?.items.length ? (
-                <div className="text-sm text-muted-foreground">No matching messages found.</div>
-              ) : null}
-
-              {(searchQuery.data?.items ?? []).map((item) => (
-                <button
-                  key={`${item.threadId}:${item.messageId}`}
-                  type="button"
-                  onClick={() => openSearchResult(item)}
-                  className="w-full rounded-lg border border-border/60 bg-background p-3 text-left hover:border-border"
-                >
-                  <div className="truncate text-sm font-semibold text-foreground">
-                    {item.threadTitle}
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {item.snippet || "(No preview)"}
-                  </div>
-                  <div className="mt-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                    {format(new Date(item.createdAt), "PP p")}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AssistantSearchDialog
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        debouncedSearchText={debouncedSearchText}
+        isLoading={searchQuery.isLoading}
+        results={searchQuery.data?.items ?? []}
+        onSelectResult={openSearchResult}
+      />
     </div>
   );
 }

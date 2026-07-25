@@ -192,6 +192,12 @@ export class CashManagementApi {
       correlationId: apiClient.generateCorrelationId(),
     });
   }
+
+  async listWorkspaces(): Promise<{ items: any[] }> {
+    return apiClient.get<{ items: any[] }>(`/cash-management/workspaces`, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
+  }
 }
 
 export const cashManagementApi = new CashManagementApi();

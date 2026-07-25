@@ -18,6 +18,7 @@ model CashRegister {
   entryCounter    CashEntryCounter?
   exportArtifacts CashExportArtifact[]
   confirmations   CashDayConfirmation[]
+  workspaces      CashAssistantWorkspace[]
 
   tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -228,5 +229,41 @@ model CashDayConfirmation {
   @@index([tenantId, workspaceId, conversationId])
   @@index([status, expiresAt])
   @@map("cash_day_confirmations")
+  @@schema("accounting")
+}
+
+model CashAssistantWorkspace {
+  id              String   @id @default(cuid())
+  tenantId        String
+  workspaceId     String
+  registerId      String?
+  locationId      String?
+  type            String   // DAILY_CASH_DAY, MONTHLY_REVIEW, GENERAL_HELP
+  businessDate    DateTime? @db.Date
+  businessMonth   DateTime? @db.Date
+  conversationId  String   @unique
+  cashDayId       String?
+  createdByUserId String   @default("system")
+
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+  archivedAt      DateTime? @db.Timestamptz(6)
+
+  register  CashRegister? @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Unique indexes per type
+  // Note: Prisma does not support partial unique indexes natively via @@unique with conditions.
+  // We'll enforce this via standard unique index, but we need raw SQL to make it a partial index if we want it strictly in DB.
+  // Or we just rely on the repository's getOrCreate constraint.
+  // Actually, if we use a standard unique index with nullable fields, Postgres treats NULL != NULL, so it works.
+  // But to be precise, we'll create the migration and inject partial unique indexes via SQL.
+  @@unique([tenantId, locationId, registerId, businessDate, type], name: "daily_uniqueness", map: "cash_workspace_daily_idx")
+  @@unique([tenantId, locationId, registerId, businessMonth, type], name: "monthly_uniqueness", map: "cash_workspace_monthly_idx")
+  
+  @@index([tenantId, workspaceId, conversationId])
+  @@index([tenantId, workspaceId, type, businessDate])
+  @@map("cash_assistant_workspaces")
   @@schema("accounting")
 }

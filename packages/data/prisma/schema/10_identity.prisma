@@ -41,6 +41,7 @@ model Tenant {
   billingUsageCounters  BillingUsageCounter[]
   billingProviderEvents BillingProviderEvent[]
   cashDayConfirmations  CashDayConfirmation[]
+  cashAssistantWorkspaces CashAssistantWorkspace[]
 
   @@index([createdAt])
   @@schema("identity")
