@@ -374,7 +374,7 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     return ok({
       preview: {
         businessDate: dayKey,
-        reportNumber: dayClose?.dayCloseNo ? `${dayClose.dayCloseNo}` : undefined,
+        reportNumber: undefined,
         business: {
           name: register.name,
           locationName: register.location ?? undefined,

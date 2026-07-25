@@ -81,4 +81,9 @@ export const cashManagementToolDescriptions = {
     de: "Gibt eine strukturierte Kassenbericht-Vorschau zurück. Nutzen, um VOR dem Speichern von Zählungen oder dem Tagesabschluss um Bestätigung zu bitten.",
     vi: "Trả về bản xem trước Kassenbericht có cấu trúc. Sử dụng để yêu cầu xác nhận VÀO TRƯỚC KHI đóng hoặc lưu đếm tiền.",
   },
+  get_monthly_cash_report: {
+    en: "Return a structured monthly Kassenabrechnung. Use this to show a read-only monthly summary of closed cash days.",
+    de: "Gibt eine strukturierte monatliche Kassenabrechnung zurück. Nutzen, um eine schreibgeschützte monatliche Zusammenfassung der abgeschlossenen Kassentage anzuzeigen.",
+    vi: "Trả về báo cáo Kassenabrechnung hàng tháng có cấu trúc. Sử dụng để hiển thị tóm tắt báo cáo tháng chỉ đọc của các ngày sổ quỹ đã đóng.",
+  },
 } satisfies Record<string, LocalizedToolText>;

@@ -6,7 +6,7 @@ import {
   CashAttachmentRepoPort,
 } from "../ports/cash-management.ports";
 import { mock } from "vitest-mock-extended";
-import { UseCaseContext, NotFoundError } from "@corely/kernel";
+import { UseCaseContext, NotFoundError, isErr } from "@corely/kernel";
 import { CashRegister, CashEntryType, CashEntryDirection } from "@corely/contracts";
 
 describe("GetCashReportPreviewQueryUseCase", () => {
@@ -34,7 +34,7 @@ describe("GetCashReportPreviewQueryUseCase", () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("should throw NotFoundError if register is not found", async () => {
@@ -42,8 +42,8 @@ describe("GetCashReportPreviewQueryUseCase", () => {
 
     const result = await useCase.execute({ registerId: "reg-1", businessDate: "2023-10-10" }, ctx);
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
+    expect(isErr(result)).toBe(true);
+    if (isErr(result)) {
       expect(result.error).toBeInstanceOf(NotFoundError);
       expect(result.error.code).toBe("CashManagement:RegisterNotFound");
     }
@@ -80,8 +80,8 @@ describe("GetCashReportPreviewQueryUseCase", () => {
 
     const result = await useCase.execute({ registerId: "reg-1", businessDate: "2023-10-10" }, ctx);
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
+    expect(isErr(result)).toBe(false);
+    if (!isErr(result)) {
       const { preview } = result.value;
       expect(preview.previousClosingCashCents).toBe(12000); // from first entry's before-balance: 7000 - (-5000) = 12000
       expect(preview.actualClosingCashCents).toBe(20000);

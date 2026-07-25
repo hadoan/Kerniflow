@@ -109,6 +109,10 @@ import { ListCashDayClosesQueryUseCase } from "../cash-management/application/us
 import { AttachBelegToCashEntryUseCase } from "../cash-management/application/use-cases/attach-beleg-to-cash-entry.usecase";
 import { ListCashEntryAttachmentsQueryUseCase } from "../cash-management/application/use-cases/list-cash-entry-attachments.query";
 import { ExportCashBookUseCase } from "../cash-management/application/use-cases/export-cash-book.usecase";
+import { GetCashReportPreviewQueryUseCase } from "../cash-management/application/use-cases/get-cash-report-preview.query";
+import { PrepareCashDayConfirmationUseCase } from "../cash-management/application/use-cases/prepare-cash-day-confirmation.usecase";
+import { ConfirmCashDayDraftUseCase } from "../cash-management/application/use-cases/confirm-cash-day-draft.usecase";
+import { GetMonthlyCashReportQueryUseCase } from "../cash-management/application/use-cases/get-monthly-cash-report.query";
 import { buildCashManagementTools } from "../cash-management/adapters/tools/cash-management.tools";
 import { BillingModule } from "../billing/billing.module";
 import { CoachingEngagementsModule } from "../coaching-engagements";
@@ -287,6 +291,10 @@ import { PlatformModule } from "../platform/platform.module";
         attachCashBeleg: AttachBelegToCashEntryUseCase,
         listCashEntryAttachments: ListCashEntryAttachmentsQueryUseCase,
         exportCashBook: ExportCashBookUseCase,
+        getReportPreview: GetCashReportPreviewQueryUseCase,
+        prepareConfirmation: PrepareCashDayConfirmationUseCase,
+        confirmDraft: ConfirmCashDayDraftUseCase,
+        getMonthlyReport: GetMonthlyCashReportQueryUseCase,
         createIncomeTaxDraft: CreateIncomeTaxDraftUseCase,
         getIncomeTaxDraft: GetIncomeTaxDraftUseCase,
         generateIncomeTaxDraftEur: GenerateIncomeTaxDraftEurUseCase,
@@ -363,6 +371,10 @@ import { PlatformModule } from "../platform/platform.module";
               attachBeleg: attachCashBeleg,
               listAttachments: listCashEntryAttachments,
               exportCashBook,
+              getReportPreview,
+              prepareConfirmation,
+              confirmDraft,
+              getMonthlyReport,
               documentsApp,
             })
           ),
@@ -418,6 +430,10 @@ import { PlatformModule } from "../platform/platform.module";
         AttachBelegToCashEntryUseCase,
         ListCashEntryAttachmentsQueryUseCase,
         ExportCashBookUseCase,
+        GetCashReportPreviewQueryUseCase,
+        PrepareCashDayConfirmationUseCase,
+        ConfirmCashDayDraftUseCase,
+        GetMonthlyCashReportQueryUseCase,
         CreateIncomeTaxDraftUseCase,
         GetIncomeTaxDraftUseCase,
         GenerateIncomeTaxDraftEurUseCase,

@@ -11,6 +11,8 @@ import {
   localDateSchema,
   PrepareCashDayConfirmationInputSchema,
   ConfirmCashDayDraftInputSchema,
+  GetMonthlyCashReportQuerySchema,
+  type CashRegister,
 } from "@corely/contracts";
 import { isErr, type Result, type UseCaseError } from "@corely/kernel";
 import { type DomainToolPort } from "../../../ai-copilot/application/ports/domain-tool.port";
@@ -31,6 +33,8 @@ import { type ListCashEntryAttachmentsQueryUseCase } from "../../application/use
 import { type GetCashReportPreviewQueryUseCase } from "../../application/use-cases/get-cash-report-preview.query";
 import { type PrepareCashDayConfirmationUseCase } from "../../application/use-cases/prepare-cash-day-confirmation.usecase";
 import { type ConfirmCashDayDraftUseCase } from "../../application/use-cases/confirm-cash-day-draft.usecase";
+import { type GetMonthlyCashReportQueryUseCase } from "../../application/use-cases/get-monthly-cash-report.query";
+import { type ExportCashBookUseCase } from "../../application/use-cases/export-cash-book.usecase";
 import {
   extractLatestUserAttachments,
   normalizeAttachment,
@@ -72,6 +76,7 @@ type CashToolDeps = {
   getReportPreview: GetCashReportPreviewQueryUseCase;
   prepareConfirmation: PrepareCashDayConfirmationUseCase;
   confirmDraft: ConfirmCashDayDraftUseCase;
+  getMonthlyReport: GetMonthlyCashReportQueryUseCase;
   documentsApp: DocumentsApplication;
 };
 
@@ -776,7 +781,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
       }
       return mapToolResult(
         await deps.prepareConfirmation.execute(
-          parsed.data,
+          { ...parsed.data, registerId: parsed.data.registerId! },
           getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
         )
       );
@@ -1082,7 +1087,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
       }
       return mapToolResult(
         await deps.confirmDraft.execute(
-          parsed.data,
+          { ...parsed.data, registerId: parsed.data.registerId! },
           getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
         )
       );
@@ -1717,6 +1722,25 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
             registerId: register.id,
             businessDate: toDayKey(parsed.data.businessDate),
           },
+          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+        )
+      );
+    },
+  },
+  {
+    name: "get_monthly_cash_report",
+    description: "Get a structured read-only monthly Kassenabrechnung.",
+    descriptions: cashManagementToolDescriptions.get_monthly_cash_report,
+    kind: "server",
+    inputSchema: GetMonthlyCashReportQuerySchema,
+    execute: async ({ tenantId, workspaceId, userId, input, toolCallId, runId }) => {
+      const parsed = GetMonthlyCashReportQuerySchema.safeParse(input);
+      if (!parsed.success) {
+        return validationError(parsed.error.flatten());
+      }
+      return mapToolResult(
+        await deps.getMonthlyReport.execute(
+          parsed.data,
           getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
         )
       );

@@ -118,6 +118,11 @@ describe("cash-management tools", () => {
   const exportCashBookExecute = vi.fn();
   const uploadFileExecute = vi.fn();
 
+  const getReportPreviewExecute = vi.fn();
+  const prepareConfirmationExecute = vi.fn();
+  const confirmDraftExecute = vi.fn();
+  const getMonthlyReportExecute = vi.fn();
+
   const documentsApp = {
     uploadFile: { execute: uploadFileExecute },
   } as unknown as DocumentsApplication;
@@ -136,8 +141,12 @@ describe("cash-management tools", () => {
     attachBeleg: { execute: attachBelegExecute },
     listAttachments: { execute: listAttachmentsExecute },
     exportCashBook: { execute: exportCashBookExecute },
+    getReportPreview: { execute: getReportPreviewExecute },
+    prepareConfirmation: { execute: prepareConfirmationExecute },
+    confirmDraft: { execute: confirmDraftExecute },
+    getMonthlyReport: { execute: getMonthlyReportExecute },
     documentsApp,
-  } as const;
+  } as unknown as CashToolDeps;
 
   beforeEach(() => {
     listRegistersExecute.mockReset();
@@ -154,6 +163,10 @@ describe("cash-management tools", () => {
     listAttachmentsExecute.mockReset();
     exportCashBookExecute.mockReset();
     uploadFileExecute.mockReset();
+    getReportPreviewExecute.mockReset();
+    prepareConfirmationExecute.mockReset();
+    confirmDraftExecute.mockReset();
+    getMonthlyReportExecute.mockReset();
 
     listRegistersExecute.mockResolvedValue(ok({ registers: [register] }));
     getRegisterExecute.mockResolvedValue(ok({ register }));
@@ -285,38 +298,38 @@ describe("cash-management tools", () => {
     );
   });
 
-  it("marks counted cash draft as ready when no blockers remain", async () => {
-    listEntriesExecute.mockResolvedValue(
-      ok({
-        entries: [
-          baseEntry({
-            id: "entry-income",
-            amount: 15000,
-            amountCents: 15000,
-            balanceAfterCents: 15000,
-          }),
-        ],
-      })
-    );
-    saveDayCountExecute.mockResolvedValue(ok({ dayClose: draftDayClose }));
-    getDayCloseExecute.mockResolvedValue(ok({ dayClose: draftDayClose }));
+  it("prepares a cash day confirmation when valid input is provided", async () => {
+    const confirmation = {
+      id: "conf-1",
+      registerId: "reg-1",
+      status: "PENDING",
+      expiresAt: new Date(Date.now() + 100000),
+      candidatePayload: { actualClosingCashCents: 15000, movements: [] },
+    };
+    prepareConfirmationExecute.mockResolvedValue(ok({ confirmation }));
 
-    const tool = buildCashManagementTools(deps).find((item) => item.name === "submit_counted_cash");
+    const tool = buildCashManagementTools(deps).find(
+      (item) => item.name === "prepare_cash_day_confirmation"
+    );
     const result = await tool?.execute?.({
       tenantId: "tenant-1",
       workspaceId: "ws-1",
       userId: "user-1",
       input: {
-        countedBalanceCents: 15000,
+        registerId: "reg-1",
+        businessDate: "2026-03-14",
+        actualClosingCashCents: 15000,
+        movements: [],
       },
     });
 
-    expect(saveDayCountExecute).toHaveBeenCalledTimes(1);
+    expect(prepareConfirmationExecute).toHaveBeenCalledTimes(1);
     expect(result).toEqual(
       expect.objectContaining({
         ok: true,
-        readyToClose: true,
-        blockers: [],
+        confirmation: expect.objectContaining({
+          id: "conf-1",
+        }),
       })
     );
   });

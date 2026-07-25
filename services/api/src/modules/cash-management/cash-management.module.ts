@@ -40,6 +40,7 @@ import { GetCashDashboardQueryUseCase } from "./application/use-cases/get-cash-d
 import { GetCashReportPreviewQueryUseCase } from "./application/use-cases/get-cash-report-preview.query";
 import { PrepareCashDayConfirmationUseCase } from "./application/use-cases/prepare-cash-day-confirmation.usecase";
 import { ConfirmCashDayDraftUseCase } from "./application/use-cases/confirm-cash-day-draft.usecase";
+import { GetMonthlyCashReportQueryUseCase } from "./application/use-cases/get-monthly-cash-report.query";
 
 @Module({
   imports: [DataModule, KernelModule, IdentityModule, DocumentsModule, BillingModule, TaxModule],
@@ -82,6 +83,7 @@ import { ConfirmCashDayDraftUseCase } from "./application/use-cases/confirm-cash
     GetCashReportPreviewQueryUseCase,
     PrepareCashDayConfirmationUseCase,
     ConfirmCashDayDraftUseCase,
+    GetMonthlyCashReportQueryUseCase,
   ],
   exports: [
     ListCashRegistersQueryUseCase,
@@ -102,6 +104,7 @@ import { ConfirmCashDayDraftUseCase } from "./application/use-cases/confirm-cash
     GetCashReportPreviewQueryUseCase,
     PrepareCashDayConfirmationUseCase,
     ConfirmCashDayDraftUseCase,
+    GetMonthlyCashReportQueryUseCase,
   ],
 })
 export class CashManagementModule {}

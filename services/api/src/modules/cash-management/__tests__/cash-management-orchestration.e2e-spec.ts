@@ -223,4 +223,117 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
       "Check that receipt-required expense entries have attachments."
     );
   });
+
+  it("10. Exposes the get_monthly_cash_report tool and retrieves the monthly Kassenabrechnung", async () => {
+    const monthlyTool = getTool("get_monthly_cash_report");
+    expect(monthlyTool).toBeDefined();
+
+    deps.getMonthlyReport.execute.mockResolvedValue({
+      ok: true,
+      value: {
+        report: {
+          registerId: "reg-1",
+          year: 2026,
+          month: 7,
+          isComplete: true,
+          coverage: {
+            status: "KNOWN",
+            missingDayCount: 0,
+            expectedFrom: "2026-07-01",
+            expectedTo: "2026-07-31",
+            evaluatedDayCount: 31,
+          },
+          closedDayCount: 31,
+          days: [],
+          totals: {
+            openingCashCents: 10000,
+            cashSalesCents: 5000,
+            businessExpensesCents: 0,
+            privateWithdrawalsCents: 0,
+            bankDepositsCents: 0,
+            otherCashOutflowsCents: 0,
+            calculatedClosingCashCents: 15000,
+          },
+          warnings: [],
+        },
+      },
+    });
+
+    const response = await monthlyTool.execute({
+      input: { registerId: "reg-1", year: 2026, month: 7 },
+      tenantId: "t-1",
+      userId: "u-1",
+    });
+
+    expect(deps.getMonthlyReport.execute).toHaveBeenCalledWith(
+      { registerId: "reg-1", year: 2026, month: 7 },
+      expect.anything()
+    );
+    expect(response).toMatchObject({
+      ok: true,
+      report: expect.objectContaining({
+        isComplete: true,
+        closedDayCount: 31,
+        coverage: expect.objectContaining({
+          status: "KNOWN",
+          missingDayCount: 0,
+        }),
+      }),
+    });
+  });
+
+  it("11. Refuses to invoke get_monthly_cash_report with invalid input", async () => {
+    const monthlyTool = getTool("get_monthly_cash_report");
+
+    const response = await monthlyTool.execute({
+      input: { registerId: "reg-1", year: 2026, month: 13 }, // Invalid month
+      tenantId: "t-1",
+      userId: "u-1",
+    });
+
+    expect(response).toMatchObject({
+      ok: false,
+      code: "VALIDATION_ERROR",
+    });
+    expect(deps.getMonthlyReport.execute).not.toHaveBeenCalled();
+  });
+
+  it("12. Provides discrepancy context to LLM when viewing a monthly report", async () => {
+    const monthlyTool = getTool("get_monthly_cash_report");
+
+    deps.getMonthlyReport.execute.mockResolvedValue({
+      ok: true,
+      value: {
+        report: {
+          registerId: "reg-1",
+          year: 2026,
+          month: 7,
+          isComplete: false,
+          coverage: { status: "KNOWN", missingDayCount: 0 },
+          closedDayCount: 31,
+          discrepancyDayCount: 1,
+          days: [
+            {
+              date: "2026-07-15",
+              status: "DISCREPANCY",
+              discrepancyCents: 5000,
+            },
+          ],
+          totals: {} as any,
+          warnings: [{ code: "BALANCE_MISMATCH", severity: "warning", date: "2026-07-15" }],
+        },
+      },
+    });
+
+    const response = await monthlyTool.execute({
+      input: { registerId: "reg-1", year: 2026, month: 7 },
+      tenantId: "t-1",
+      userId: "u-1",
+    });
+
+    // The tool should return the rich data structure so the LLM can see warnings and discrepancy days.
+    expect(response.report.warnings).toHaveLength(1);
+    expect(response.report.discrepancyDayCount).toBe(1);
+    expect(response.report.days[0].discrepancyCents).toBe(5000);
+  });
 });

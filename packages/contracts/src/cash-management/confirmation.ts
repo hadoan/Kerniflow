@@ -27,3 +27,20 @@ export const ConfirmCashDayDraftInputSchema = z.object({
   idempotencyKey: z.string(),
 });
 export type ConfirmCashDayDraftInput = z.infer<typeof ConfirmCashDayDraftInputSchema>;
+
+export type CashDayConfirmationDto = {
+  id: string;
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  conversationId: string;
+  preparedByUserId: string;
+  businessDate: string;
+  candidatePayload: any;
+  candidateHash: string;
+  version: number;
+  status: "PENDING" | "CONFIRMED" | "CONSUMED" | "EXPIRED";
+  expiresAt: string;
+  createdAt: string;
+  summary: any;
+};

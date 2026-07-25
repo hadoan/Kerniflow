@@ -7,6 +7,7 @@ import {
   RequireTenant,
   ValidationError,
   ok,
+  isErr,
   type Result,
   type UseCaseContext,
   type UseCaseError,
@@ -101,7 +102,7 @@ export class PrepareCashDayConfirmationUseCase extends BaseUseCase<
       ctx
     );
 
-    if (previewResult.isErr()) {
+    if (isErr(previewResult)) {
       return previewResult as any;
     }
 

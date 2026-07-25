@@ -28,7 +28,8 @@ import { useToast } from "@corely/ui";
 import { billingApi } from "@corely/web-shared/lib/billing-api";
 import { CashManagementBillingFeatureKeys, CashManagementProductKey } from "@corely/contracts";
 import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assistant-suggestions";
-import { CashReportPreview } from "../components/cash-report-preview";
+import { CashReportPreview } from "../../cash-management/components/cash-report-preview";
+import { MonthlyCashReportPreview } from "../../cash-management/components/monthly-cash-report-preview";
 
 type ThreadGroupKey = "today" | "yesterday" | "week" | "older";
 
@@ -397,6 +398,20 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                         );
                       }
                       return <CashReportPreview report={props.output as any} />;
+                    },
+                    get_monthly_cash_report: (props) => {
+                      if (
+                        !props.output ||
+                        typeof props.output !== "object" ||
+                        !("totals" in props.output)
+                      ) {
+                        return (
+                          <div className="p-4 border rounded bg-muted/30">
+                            Loading monthly report...
+                          </div>
+                        );
+                      }
+                      return <MonthlyCashReportPreview report={props.output as any} />;
                     },
                   }}
                 />

@@ -6,7 +6,7 @@ import {
   CashManagementBillingMetricKeys,
   CashManagementProductKey,
   type ConfirmCashDayDraftInput,
-  type CashDayCloseDto,
+  type CashDayClose,
 } from "@corely/contracts";
 import {
   AUDIT_PORT,
@@ -61,7 +61,7 @@ const ACTION_KEY = "cash-management.draft.confirm";
 @Injectable()
 export class ConfirmCashDayDraftUseCase extends BaseUseCase<
   ConfirmCashDayDraftInput,
-  { dayClose: CashDayCloseDto }
+  { dayClose: CashDayClose }
 > {
   constructor(
     @Inject(CASH_REGISTER_REPO)
@@ -89,13 +89,13 @@ export class ConfirmCashDayDraftUseCase extends BaseUseCase<
     @Inject(IDEMPOTENCY_STORAGE_PORT_TOKEN)
     private readonly idempotencyStore: IdempotencyStoragePort
   ) {
-    super({ logger: undefined });
+    super({ logger: undefined, idempotency: idempotencyStore });
   }
 
   protected async handle(
     input: ConfirmCashDayDraftInput,
     ctx: UseCaseContext
-  ): Promise<Result<{ dayClose: CashDayCloseDto }, UseCaseError>> {
+  ): Promise<Result<{ dayClose: CashDayClose }, UseCaseError>> {
     assertCanManageCash(ctx, input.registerId);
     assertCanCloseCash(ctx, input.registerId);
 
@@ -105,7 +105,7 @@ export class ConfirmCashDayDraftUseCase extends BaseUseCase<
       throw new ValidationError("Missing tenant/workspace context");
     }
 
-    const cached = await getIdempotentBody<{ dayClose: CashDayCloseDto }>({
+    const cached = await getIdempotentBody<{ dayClose: CashDayClose }>({
       idempotency: this.idempotencyStore,
       tenantId,
       actionKey: ACTION_KEY,
