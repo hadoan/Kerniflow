@@ -661,7 +661,9 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                             </div>
                           );
                         }
-                        return <MonthlyCashReportPreview report={props.output as MonthlyCashReportDto} />;
+                        return (
+                          <MonthlyCashReportPreview report={props.output as MonthlyCashReportDto} />
+                        );
                       },
                       request_cash_clarification: (props) => (
                         <CashClarificationRenderer {...props} />

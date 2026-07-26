@@ -144,4 +144,3 @@ export type CashAssistantWorkspaceEntity = {
   updatedAt: Date;
   archivedAt: Date | null;
 };
-

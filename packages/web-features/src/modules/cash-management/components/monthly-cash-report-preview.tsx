@@ -9,7 +9,10 @@ export function MonthlyCashReportPreview({ report }: { report: MonthlyCashReport
   };
 
   return (
-    <div className="rounded-lg border bg-card text-card-foreground shadow-sm" data-testid="monthly-cash-report-preview">
+    <div
+      className="rounded-lg border bg-card text-card-foreground shadow-sm"
+      data-testid="monthly-cash-report-preview"
+    >
       <div className="flex flex-col space-y-1.5 p-6 border-b">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold leading-none tracking-tight">

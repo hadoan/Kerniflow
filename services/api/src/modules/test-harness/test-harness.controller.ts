@@ -198,8 +198,9 @@ export class TestHarnessController {
 
     // Require dynamic import to avoid bundling test-only registry in production builds if it's not needed,
     // or just import it at top.
-    const { activateScenario, deactivateScenario } = await import("../ai-copilot/infrastructure/model/deterministic-model-registry");
-    
+    const { activateScenario, deactivateScenario } =
+      await import("../ai-copilot/infrastructure/model/deterministic-model-registry");
+
     if (payload.scenario) {
       activateScenario(payload.tenantId, payload.scenario);
     } else {
@@ -207,7 +208,6 @@ export class TestHarnessController {
     }
     return { success: true };
   }
-
 
   /**
    * Seed classes billing send scenario with 2 customers/invoices.
@@ -373,12 +373,12 @@ export class TestHarnessController {
     const dbNameMatch = dbUrl.match(/\/([^/?]+)(\?|$)/);
     const database = dbNameMatch ? dbNameMatch[1] : "unknown";
 
-    return { 
-      status: "ok", 
+    return {
+      status: "ok",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
       database,
-      aiProvider: process.env.E2E_AI_PROVIDER || process.env.AI_MODEL_PROVIDER
+      aiProvider: process.env.E2E_AI_PROVIDER || process.env.AI_MODEL_PROVIDER,
     };
   }
 }
