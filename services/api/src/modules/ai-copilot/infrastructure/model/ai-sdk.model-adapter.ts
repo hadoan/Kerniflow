@@ -217,21 +217,12 @@ export class AiSdkModelAdapter implements LanguageModelPort {
 
     this.logger.debug(`Starting streamText with ${Object.keys(toolset).length} tools`);
 
-    const systemMessage: CopilotUIMessage = {
-      id: `copilot-system-${params.runId}`,
-      role: "system",
-      parts: [
-        {
-          type: "text" as const,
-          text: systemPrompt.content,
-        },
-      ],
-    };
-
-    const messagesWithIds = [systemMessage, ...params.messages].map((message, index) => ({
-      ...message,
-      id: message.id ?? `copilot-${params.runId}-${index}`,
-    }));
+    const messagesWithIds = params.messages
+      .filter((m) => m.role !== "system")
+      .map((message, index) => ({
+        ...message,
+        id: message.id ?? `copilot-${params.runId}-${index}`,
+      }));
 
     const normalizedMessages = messagesWithIds
       .map((message) => {
@@ -317,6 +308,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
 
     const result = streamText({
       model,
+      system: systemPrompt.content,
       messages: modelMessages,
       tools: toolset,
       stopWhen: stepCountIs(5),

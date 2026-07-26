@@ -39,6 +39,7 @@ export type ToolInvocationPart = {
   toolCallId?: string;
   toolName?: string;
   state?: string;
+  args?: unknown;
   input?: unknown;
   output?: unknown;
   result?: unknown;
@@ -113,7 +114,7 @@ export const renderPart = (
       inv?.toolName ??
       (part.type === "tool-invocation" ? "unknown" : part.type.replace("tool-", ""));
     const toolCallId = part.toolCallId ?? inv?.toolCallId ?? toolName;
-    const input = part.input ?? inv?.args;
+    const input = part.input ?? part.args ?? inv?.args;
     const output = part.output ?? part.result ?? inv?.result;
 
     // Default mapped state for AI SDK's toolInvocation

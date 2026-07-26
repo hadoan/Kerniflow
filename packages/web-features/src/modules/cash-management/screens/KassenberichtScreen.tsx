@@ -8,90 +8,14 @@ import { type CashReportPreviewDto } from "@corely/contracts";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
 import { formatMoney } from "@corely/web-shared/shared/lib/formatters";
 
-type Label = { de: string; vi: string; en: string };
-
-const copy = {
-  closingCash: [
-    "Kassenbestand bei Geschäftsschluss",
-    "Tổng tiền mặt thực tế của quỹ khi kết thúc ngày",
-    "Actual business cash at the end of the day",
-  ],
-  expenses: [
-    "Ausgaben im Laufe des Tages",
-    "Các khoản chi tiền mặt trong ngày",
-    "Cash expenses during the day",
-  ],
-  goods: [
-    "1. Wareneinkäufe und Warnebenkosten",
-    "1. Mua hàng và chi phí liên quan đến hàng hóa",
-    "1. Goods purchases and incidental costs",
-  ],
-  business: ["2. Geschäftsausgaben", "2. Chi phí kinh doanh", "2. Business expenses"],
-  private: ["3. Privatentnahmen", "3. Rút tiền dùng cá nhân", "3. Private withdrawals"],
-  otherOut: [
-    "4. Sonstige Ausgaben (z.B. Bankeinzahlungen)",
-    "4. Chi khác (ví dụ: nộp tiền vào ngân hàng)",
-    "4. Other expenses (for example bank deposits)",
-  ],
-  total: ["Summe", "Tổng chi", "Total"],
-  previous: [
-    "abzüglich Kassenendbestand des Vortages",
-    "trừ số tiền mặt cuối ngày hôm trước",
-    "less previous day's closing cash",
-  ],
-  cashReceived: ["= Kasseneingang", "= Tiền mặt thu vào quỹ", "= Cash received"],
-  otherIncome: [
-    "abzüglich sonstige Einnahmen",
-    "trừ các khoản thu khác không phải doanh thu",
-    "less other non-sales cash income",
-  ],
-  sales: [
-    "= Bareinnahmen (Tageslosung)",
-    "= Doanh thu tiền mặt trong ngày",
-    "= Cash sales (daily takings)",
-  ],
-  customers: ["Kundenzahl", "Số khách", "Customer count"],
-  signature: ["Unterschrift", "Chữ ký", "Signature"],
-} as const;
-
-const label = (values: readonly [string, string, string]): Label => ({
-  de: values[0],
-  vi: values[1],
-  en: values[2],
-});
-
-function BilingualLabel({ value }: { value: Label }) {
-  const { i18n } = useTranslation();
-  const language = i18n.language.startsWith("vi") ? "vi" : "en";
-  return (
-    <span>
-      <span className="font-medium text-foreground">{value.de}</span>
-      {!i18n.language.startsWith("de") ? (
-        <span className="ml-2 text-xs text-muted-foreground print:text-black">
-          ({value[language]})
-        </span>
-      ) : null}
-    </span>
-  );
-}
-
-function ReportRow({
-  value,
-  amountCents,
-  emphasis = false,
-}: {
-  value: Label;
-  amountCents: number;
-  emphasis?: boolean;
-}) {
-  return (
-    <div
-      className={`grid grid-cols-[1fr_auto] gap-4 border-b border-border py-3 ${emphasis ? "font-bold" : ""}`}
-    >
-      <BilingualLabel value={value} />
-      <span className="tabular-nums">{formatMoney(amountCents, undefined, "EUR")}</span>
-    </div>
-  );
+function formatNumber(amountCents: number) {
+  if (amountCents === 0) {
+    return "0,00";
+  }
+  return new Intl.NumberFormat("de-DE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amountCents / 100);
 }
 
 function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
@@ -108,62 +32,229 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
     report.bankWithdrawalsToCashCents +
     report.otherNonSalesCashInflowsCents;
 
-  return (
-    <article
-      className="mx-auto max-w-3xl bg-background p-5 shadow-sm print:max-w-none print:p-0 print:shadow-none"
-      data-testid="kassenbericht-paper"
-    >
-      <header className="mb-6 border-b-2 border-foreground pb-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Kassenbericht</h1>
-            <p className="mt-1 text-sm text-muted-foreground print:text-black">
-              Tagesbericht der Barkasse · Báo cáo quỹ tiền mặt hằng ngày
-            </p>
-          </div>
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-            <dt className="text-muted-foreground print:text-black">Datum</dt>
-            <dd className="font-semibold">{report.businessDate}</dd>
-            <dt className="text-muted-foreground print:text-black">Währung</dt>
-            <dd className="font-semibold">EUR</dd>
-          </dl>
-        </div>
-        <p className="mt-3 text-sm">
-          {report.business.name}
-          {report.business.locationName ? ` · ${report.business.locationName}` : ""}
-        </p>
-      </header>
+  const displayDate = new Date(report.businessDate).toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
-      <ReportRow value={label(copy.closingCash)} amountCents={closingCash} emphasis />
-      <section className="mt-5 border border-border p-4 print:border-black">
-        <h2 className="mb-2 text-sm font-bold uppercase tracking-wide">
-          <BilingualLabel value={label(copy.expenses)} />
-        </h2>
-        <ReportRow value={label(copy.goods)} amountCents={report.goodsPurchasesCents} />
-        <ReportRow value={label(copy.business)} amountCents={report.businessExpensesCents} />
-        <ReportRow value={label(copy.private)} amountCents={report.privateWithdrawalsCents} />
-        <ReportRow value={label(copy.otherOut)} amountCents={otherOutflows} />
-        <ReportRow value={label(copy.total)} amountCents={totalOutflows} emphasis />
-      </section>
-      <section className="mt-5">
-        <ReportRow value={label(copy.previous)} amountCents={report.previousClosingCashCents} />
-        <ReportRow value={label(copy.cashReceived)} amountCents={cashReceived} emphasis />
-        <ReportRow value={label(copy.otherIncome)} amountCents={otherIncome} />
-        <ReportRow
-          value={label(copy.sales)}
-          amountCents={report.calculatedCashSalesCents}
-          emphasis
-        />
-      </section>
-      <footer className="mt-12 grid grid-cols-2 gap-10 text-sm">
-        <div className="border-b border-foreground pb-2">
-          <BilingualLabel value={label(copy.customers)} />: {report.customerCount ?? "—"}
+  return (
+    <div className="w-full overflow-x-auto print:overflow-visible">
+      <article
+        className="mx-auto min-w-[700px] max-w-[800px] bg-white p-8 font-sans text-black shadow-sm print:min-w-0 print:max-w-none print:p-0 print:shadow-none"
+        data-testid="kassenbericht-paper"
+      >
+        {/* Header */}
+        <div className="mb-2 flex items-end justify-between">
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-2xl font-bold text-black">Kassenbericht</h1>
+            <div className="ml-2 text-sm">
+              Datum{" "}
+              <span
+                className="inline-block border-b border-black text-center text-lg"
+                style={{ width: "120px" }}
+              >
+                {displayDate}
+              </span>
+            </div>
+            <div className="ml-2 text-sm">
+              Nr.{" "}
+              <span className="inline-block border-b border-black" style={{ width: "60px" }}></span>
+            </div>
+          </div>
+          <div className="text-right text-sm leading-tight">
+            <div>Währung</div>
+            <div className="font-bold">EUR</div>
+          </div>
         </div>
-        <div className="border-b border-foreground pb-2">
-          <BilingualLabel value={label(copy.signature)} />
+
+        {/* Table */}
+        <table className="w-full border-collapse border border-black text-sm">
+          <colgroup>
+            <col className="w-auto" />
+            <col className="w-8" />
+            <col className="w-24" />
+            <col className="w-32" />
+            <col className="w-16" />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td colSpan={3} className="border border-black p-2 font-bold">
+                Kassenbestand bei Geschäftsschluss
+              </td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {formatNumber(closingCash)}
+              </td>
+              <td className="border border-black p-1 text-center align-top text-[10px] leading-tight">
+                Buch-
+                <br />
+                vermerk
+              </td>
+            </tr>
+
+            <tr>
+              <td className="border border-black p-2 font-bold">Ausgaben im Laufe des Tages</td>
+              <td className="border border-black p-1 text-center text-xs">%</td>
+              <td className="border border-black p-1 text-center text-xs leading-tight">
+                Vorsteuer
+                <br />
+                Betrag
+              </td>
+              <td className="border border-black p-1 text-center text-xs leading-tight">
+                Netto-/Brutto-
+                <br />
+                Betrag
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            <tr>
+              <td className="border border-black p-2">1. Wareneinkäufe und Warennebenkosten</td>
+              <td className="border border-black"></td>
+              <td className="border border-black"></td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {report.goodsPurchasesCents > 0 ? formatNumber(report.goodsPurchasesCents) : ""}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            {Array.from({ length: 6 }).map((_, i) => (
+              <tr key={`empty-1-${i}`}>
+                <td className="border border-black p-2 h-7"></td>
+                <td className="border border-black"></td>
+                <td className="border border-black"></td>
+                <td className="border border-black p-2 text-right text-lg tabular-nums"></td>
+                <td className="border-b border-r border-black"></td>
+              </tr>
+            ))}
+
+            <tr>
+              <td className="border border-black p-2">2. Geschäftsausgaben</td>
+              <td className="border border-black"></td>
+              <td className="border border-black"></td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {report.businessExpensesCents > 0 ? formatNumber(report.businessExpensesCents) : ""}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            {Array.from({ length: 3 }).map((_, i) => (
+              <tr key={`empty-2-${i}`}>
+                <td className="border border-black p-2 h-7"></td>
+                <td className="border border-black"></td>
+                <td className="border border-black"></td>
+                <td className="border border-black p-2 text-right text-lg tabular-nums"></td>
+                <td className="border-b border-r border-black"></td>
+              </tr>
+            ))}
+
+            <tr>
+              <td className="border border-black p-2">3. Privatentnahmen</td>
+              <td className="border border-black"></td>
+              <td className="border border-black"></td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {report.privateWithdrawalsCents > 0
+                  ? formatNumber(report.privateWithdrawalsCents)
+                  : ""}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            <tr>
+              <td className="border border-black p-2">
+                4. Sonstige Ausgaben (z.B. Bankeinzahlungen)
+              </td>
+              <td className="border border-black"></td>
+              <td className="border border-black"></td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {otherOutflows > 0 ? formatNumber(otherOutflows) : ""}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            {Array.from({ length: 3 }).map((_, i) => (
+              <tr key={`empty-3-${i}`}>
+                <td className="border border-black p-2 h-7"></td>
+                <td className="border border-black"></td>
+                <td className="border border-black"></td>
+                <td className="border border-black p-2 text-right text-lg tabular-nums"></td>
+                <td className="border-b border-r border-black"></td>
+              </tr>
+            ))}
+
+            <tr>
+              <td colSpan={3} className="border border-black p-2 text-right text-sm">
+                Summe
+              </td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {formatNumber(totalOutflows)}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            <tr>
+              <td colSpan={3} className="border border-black p-2 text-sm">
+                abzüglich Kassenendbestand des Vortages
+              </td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {formatNumber(report.previousClosingCashCents)}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            <tr>
+              <td colSpan={3} className="border border-black p-2 text-sm font-bold">
+                = Kasseneingang
+              </td>
+              <td className="border border-black p-2 text-right text-lg font-bold tabular-nums">
+                {formatNumber(cashReceived)}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            <tr>
+              <td className="border border-black p-2 text-sm">abzüglich sonstige Einnahmen</td>
+              <td className="border border-black"></td>
+              <td className="border border-black"></td>
+              <td className="border border-black p-2 text-right text-lg tabular-nums">
+                {formatNumber(otherIncome)}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+
+            <tr>
+              <td colSpan={3} className="border border-black p-2 text-sm font-bold">
+                = Bareinnahmen (Tageslosung)
+              </td>
+              <td className="border border-black p-2 text-right text-lg font-bold tabular-nums">
+                {formatNumber(report.calculatedCashSalesCents)}
+              </td>
+              <td className="border-b border-r border-black"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Footer */}
+        <div className="mt-8 flex justify-between text-sm">
+          <div className="flex items-end">
+            <span>Kundenzahl</span>
+            <span
+              className="ml-2 inline-block border-b border-black text-center text-xl"
+              style={{ width: "100px" }}
+            >
+              {report.customerCount ?? ""}
+            </span>
+          </div>
+          <div className="flex items-end">
+            <span>Unterschrift</span>
+            <span
+              className="ml-2 inline-block border-b border-black"
+              style={{ width: "250px" }}
+            ></span>
+          </div>
         </div>
-      </footer>
-    </article>
+      </article>
+    </div>
   );
 }
 

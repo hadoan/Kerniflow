@@ -39,7 +39,9 @@ export const CopilotToolInvocationSchema = z.object({
   // `tool-collect_inputs`) and do not include a separate `toolName`.
   // Dynamic tools still provide `toolName`, so support both persisted shapes.
   toolName: z.string().optional(),
-  state: ToolInvocationStateSchema,
+  state: ToolInvocationStateSchema.optional(),
+  args: z.any().optional(),
+  result: z.any().optional(),
   input: z.any().optional(),
   rawInput: z.any().optional(),
   output: z.any().optional(),
