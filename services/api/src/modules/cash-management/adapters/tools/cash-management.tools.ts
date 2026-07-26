@@ -12,6 +12,7 @@ import {
   PrepareCashDayConfirmationInputSchema,
   ConfirmCashDayDraftInputSchema,
   GetMonthlyCashReportQuerySchema,
+  RequestCashClarificationInputSchema,
   type CashRegister,
 } from "@corely/contracts";
 import { isErr, type Result, type UseCaseError } from "@corely/kernel";
@@ -1810,5 +1811,13 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         );
       }
     ),
+  },
+  {
+    name: "request_cash_clarification",
+    description:
+      "Request clarification from the user when a material cash fact is ambiguous before proceeding.",
+    descriptions: cashManagementToolDescriptions.request_cash_clarification,
+    kind: "client-auto",
+    inputSchema: RequestCashClarificationInputSchema,
   },
 ];

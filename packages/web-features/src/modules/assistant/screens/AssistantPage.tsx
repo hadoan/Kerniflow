@@ -20,6 +20,7 @@ import { CashManagementBillingFeatureKeys, CashManagementProductKey } from "@cor
 import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assistant-suggestions";
 import { CashReportPreview } from "../../cash-management/components/cash-report-preview";
 import { MonthlyCashReportPreview } from "../../cash-management/components/monthly-cash-report-preview";
+import { CashClarificationRenderer } from "../components/CashClarificationRenderer";
 import {
   type ThreadGroupKey,
   type ThreadGroup,
@@ -466,6 +467,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                       }
                       return <MonthlyCashReportPreview report={props.output as any} />;
                     },
+                    request_cash_clarification: (props) => <CashClarificationRenderer {...props} />,
                   }}
                 />
               </div>

@@ -9,7 +9,10 @@ import { buildAiTools } from "../tools/tools.factory";
 import type { ToolExecutionRepositoryPort } from "../../application/ports/tool-execution-repository.port";
 import type { AuditPort } from "../../application/ports/audit.port";
 import type { OutboxPort } from "@corely/kernel";
-import { buildCollectInputsTool } from "../tools/interactive-tools";
+import {
+  buildCollectInputsTool,
+  buildRequestCashClarificationTool,
+} from "../tools/interactive-tools";
 import { type CopilotUIMessage } from "../../domain/types/ui-message";
 import { CopilotDataPartSchemas } from "@corely/contracts";
 import { type ObservabilityPort, type ObservabilitySpanRef } from "@corely/kernel";
@@ -49,6 +52,10 @@ const resolveSystemPromptId = (
 
   if (activeAppId === "restaurant") {
     return "restaurant.copilot.system";
+  }
+
+  if (activeAppId === "cash-management") {
+    return "cash.copilot.system";
   }
 
   return "copilot.system";
@@ -148,12 +155,18 @@ export class AiSdkModelAdapter implements LanguageModelPort {
               CRM_FOLLOW_UP_TOOL: "crm_generateFollowUps",
               COLLECT_INPUTS_TOOL: "collect_inputs",
             }
-          : {
-              CUSTOMER_SEARCH_TOOL: "customer_search",
-              INVOICE_CREATE_FROM_CUSTOMER_TOOL: "invoice_create_from_customer",
-              COLLECT_INPUTS_TOOL: "collect_inputs",
-              LANGUAGE: normalizePromptLanguage(params.locale),
-            };
+          : systemPromptId === "cash.copilot.system"
+            ? {
+                LANGUAGE: normalizePromptLanguage(params.locale),
+                REQUEST_CLARIFICATION_TOOL: "request_cash_clarification",
+                COLLECT_INPUTS_TOOL: "collect_inputs",
+              }
+            : {
+                CUSTOMER_SEARCH_TOOL: "customer_search",
+                INVOICE_CREATE_FROM_CUSTOMER_TOOL: "invoice_create_from_customer",
+                COLLECT_INPUTS_TOOL: "collect_inputs",
+                LANGUAGE: normalizePromptLanguage(params.locale),
+              };
     const systemPrompt = this.promptRegistry.render(
       systemPromptId,
       promptContext,
@@ -196,6 +209,9 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     const toolset = {
       ...aiTools,
       collect_inputs: buildCollectInputsTool(collectInputsDescription.content),
+      request_cash_clarification: buildRequestCashClarificationTool(
+        "Request clarification from the user when a material cash fact is ambiguous before proceeding."
+      ),
     };
 
     this.logger.debug(`Starting streamText with ${Object.keys(toolset).length} tools`);

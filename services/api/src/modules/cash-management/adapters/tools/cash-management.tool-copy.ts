@@ -86,4 +86,9 @@ export const cashManagementToolDescriptions = {
     de: "Gibt eine strukturierte monatliche Kassenabrechnung zurück. Nutzen, um eine schreibgeschützte monatliche Zusammenfassung der abgeschlossenen Kassentage anzuzeigen.",
     vi: "Trả về báo cáo Kassenabrechnung hàng tháng có cấu trúc. Sử dụng để hiển thị tóm tắt báo cáo tháng chỉ đọc của các ngày sổ quỹ đã đóng.",
   },
+  request_cash_clarification: {
+    en: "Request clarification from the user when a material cash fact is ambiguous before proceeding.",
+    de: "Bitte den Benutzer um Klärung, wenn eine wesentliche Kassenangabe unklar ist, bevor fortgefahren wird.",
+    vi: "Yêu cầu người dùng làm rõ khi thông tin tiền mặt quan trọng chưa rõ ràng trước khi tiếp tục.",
+  },
 } satisfies Record<string, LocalizedToolText>;

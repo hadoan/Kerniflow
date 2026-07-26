@@ -17,6 +17,11 @@ export type ToolRendererProps = {
   input?: unknown;
   output?: unknown;
   error?: unknown;
+  toolCallId?: string;
+  addToolResult?: (params: { toolCallId: string; output: unknown; tool: string }) => unknown;
+  submittingToolIds?: Set<string>;
+  markSubmitting?: (id: string, value: boolean) => void;
+  sendPrompt?: (prompt: string) => void;
 };
 
 export type ToolRenderer = (props: ToolRendererProps) => React.ReactNode;
@@ -135,6 +140,11 @@ export const renderPart = (
         input,
         output,
         error: part.errorText,
+        toolCallId,
+        addToolResult: helpers.addToolResult,
+        submittingToolIds: helpers.submittingToolIds,
+        markSubmitting: helpers.markSubmitting,
+        sendPrompt: helpers.sendPrompt,
       });
       if (rendered) {
         return rendered;
