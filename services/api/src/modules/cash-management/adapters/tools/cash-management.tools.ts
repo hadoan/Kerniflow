@@ -43,8 +43,15 @@ import {
   normalizeAttachment,
 } from "../../../../shared/adapters/tools/file-parts";
 import { mapToolResult } from "../../../../shared/adapters/tools/tool-mappers";
+import { type PromptRegistry } from "@corely/prompts";
+import { type AiTextPort } from "../../../../shared/ai/ai-text.port";
 import { cashManagementToolDescriptions } from "./cash-management.tool-copy";
-import { glossary, resolveGlossaryEntry } from "./cash-management.glossary";
+import {
+  glossary,
+  resolveGlossaryEntry,
+  fuzzyResolveGlossaryEntry,
+  type GlossaryLocalizedContent,
+} from "./cash-management.glossary";
 
 type ToolFailure = {
   ok: false;
@@ -84,6 +91,8 @@ type CashToolDeps = {
   getMonthlyReport: GetMonthlyCashReportQueryUseCase;
   documentsApp: DocumentsApplication;
   workspaceRepo: CashWorkspaceRepoPort;
+  aiText?: AiTextPort;
+  promptRegistry?: PromptRegistry;
 };
 
 export type CashAssistantExecutionContext = {
@@ -327,6 +336,53 @@ const isToolFailure = (value: unknown): value is ToolFailure =>
   "ok" in value &&
   (value as { ok?: unknown }).ok === false &&
   "message" in value;
+
+const resolveCashbookTermWithLlm = async (
+  aiText: AiTextPort,
+  term: string,
+  locale: "en" | "de" | "vi",
+  promptRegistry?: PromptRegistry
+): Promise<GlossaryLocalizedContent | null> => {
+  const langLabel = { en: "English", de: "German", vi: "Vietnamese" }[locale];
+  const viInstruction =
+    locale === "vi" ? "Use proper Vietnamese with full diacritics (tiếng Việt có dấu)." : "";
+
+  let systemPrompt: string;
+  if (promptRegistry) {
+    systemPrompt = promptRegistry.render(
+      "cash-management.explain-term.system",
+      {},
+      {
+        LANG_LABEL: langLabel,
+        VIETNAMESE_INSTRUCTION: viInstruction,
+      }
+    );
+  } else {
+    systemPrompt = `You are a cash-book assistant for salon and small business owners.
+Explain the term the user provides in the context of a physical cash register / Kassenbuch.
+Respond ONLY with a JSON object with exactly these keys:
+{ "title": string, "meaning": string, "whenToUse": string }
+Use ${langLabel}. Be concise (2–3 sentences max per field).
+${viInstruction}`;
+  }
+
+  try {
+    const raw = await aiText.generateText({
+      systemPrompt,
+      userPrompt: `Term: "${term}"`,
+      temperature: 0.2,
+      maxOutputTokens: 300,
+    });
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+    const json = JSON.parse(cleaned);
+    if (json?.title && json?.meaning && json?.whenToUse) {
+      return json as GlossaryLocalizedContent;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 const unwrapResult = <T extends Record<string, unknown>>(
   result: Result<T, UseCaseError>
@@ -1589,23 +1645,54 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.explain_cashbook_term,
     kind: "server",
     inputSchema: ExplainCashbookTermToolInputSchema,
-    execute: withWorkspaceContext(deps, [], async ({ input, workspaceCtx }) => {
+    execute: withWorkspaceContext(deps, [], async ({ input }) => {
       const parsed = ExplainCashbookTermToolInputSchema.safeParse(input);
       if (!parsed.success) {
         return validationError(parsed.error.flatten());
       }
 
-      const entry = resolveGlossaryEntry(parsed.data.term);
+      const { term, locale } = parsed.data;
+
+      // Layer 1: Exact match
+      let entry = resolveGlossaryEntry(term);
+      const source = "glossary";
+
+      // Layer 2: Fuzzy match (substring & Levenshtein)
+      if (!entry) {
+        entry = fuzzyResolveGlossaryEntry(term);
+      }
+
+      // Layer 3: LLM fallback
+      if (!entry && deps.aiText) {
+        const llmContent = await resolveCashbookTermWithLlm(
+          deps.aiText,
+          term,
+          locale,
+          deps.promptRegistry
+        );
+        if (llmContent) {
+          return {
+            ok: true,
+            term: llmContent.title,
+            ...llmContent,
+            source: "llm",
+          };
+        }
+      }
+
       if (!entry) {
         return failure("NOT_FOUND", "No glossary entry was found for that term", {
-          supportedTerms: Object.values(glossary).map((item) => item.en.title),
+          supportedTerms: Object.values(glossary).map(
+            (item) => item[locale]?.title || item.en.title
+          ),
         });
       }
 
       return {
         ok: true,
-        term: entry[parsed.data.locale].title,
-        ...entry[parsed.data.locale],
+        term: entry[locale].title,
+        ...entry[locale],
+        source,
       };
     }),
   },

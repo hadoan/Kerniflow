@@ -2,6 +2,7 @@ import { type Provider } from "@nestjs/common";
 import { EnvService } from "@corely/config";
 import { PromptRegistry } from "@corely/prompts";
 import { PromptUsageLogger } from "../../shared/prompts/prompt-usage.logger";
+import { AI_TEXT_PORT, type AiTextPort } from "../../shared/ai/ai-text.port";
 import { InvoicesApplication } from "../invoices/application/invoices.application";
 import { PartyApplication } from "../party/application/party.application";
 import { CrmApplication } from "../crm/application/crm.application";
@@ -52,7 +53,10 @@ import { RestaurantAiApplication } from "../restaurant/application/restaurant-ai
 import { CHAT_STORE_PORT, type ChatStorePort } from "./application/ports/chat-store.port";
 import { COPILOT_TOOLS } from "./application/ports/tool-registry.port";
 import type { DomainToolPort } from "./application/ports/domain-tool.port";
-import { CASH_WORKSPACE_REPO, type CashWorkspaceRepoPort } from "../cash-management/application/ports/cash-management.ports";
+import {
+  CASH_WORKSPACE_REPO,
+  type CashWorkspaceRepoPort,
+} from "../cash-management/application/ports/cash-management.ports";
 
 import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
 import { buildInvoiceWorkflowTools } from "./infrastructure/tools/invoice-workflow.tools";
@@ -124,7 +128,8 @@ export const copilotToolsProvider: Provider = {
     chatStore: ChatStorePort,
     env: EnvService,
     promptRegistry: PromptRegistry,
-    promptUsageLogger: PromptUsageLogger
+    promptUsageLogger: PromptUsageLogger,
+    aiText: AiTextPort
   ) => {
     const withAppId = (appId: string, tools: DomainToolPort[]): DomainToolPort[] =>
       tools.map((tool) => ({ ...tool, appId }));
@@ -192,6 +197,8 @@ export const copilotToolsProvider: Provider = {
           getMonthlyReport,
           documentsApp,
           workspaceRepo: cashWorkspaceRepo,
+          aiText,
+          promptRegistry,
         })
       ),
       ...withAppId(
@@ -266,5 +273,6 @@ export const copilotToolsProvider: Provider = {
     EnvService,
     PromptRegistry,
     PromptUsageLogger,
+    AI_TEXT_PORT,
   ],
 };

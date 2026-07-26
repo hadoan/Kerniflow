@@ -8,6 +8,7 @@ import { cmsPrompts } from "./cms";
 import { websitePrompts } from "./website";
 import { invoicePrompts } from "./invoices";
 import { restaurantPrompts } from "./restaurant";
+import { cashManagementPrompts } from "./cash-management";
 
 export const promptDefinitions = [
   ...copilotPrompts,
@@ -20,4 +21,5 @@ export const promptDefinitions = [
   ...websitePrompts,
   ...invoicePrompts,
   ...restaurantPrompts,
+  ...cashManagementPrompts,
 ];

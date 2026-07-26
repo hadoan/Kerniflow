@@ -20,7 +20,10 @@ export const glossary: Glossary = {
       "start balance",
       "opening cash",
       "anfangsbestand",
+      "số dư đầu ngày",
       "so du dau ngay",
+      "số dư ban đầu",
+      "tiền mặt đầu ngày",
     ],
     en: {
       title: "Opening balance",
@@ -34,13 +37,20 @@ export const glossary: Glossary = {
       whenToUse: "Er ist die Grundlage fuer den erwarteten Tagesendbestand.",
     },
     vi: {
-      title: "So du dau ngay",
-      meaning: "So tien mat co trong ngan keo luc bat dau ngay truoc khi ghi giao dich moi.",
-      whenToUse: "Dung lam moc de tinh so du cuoi ngay du kien.",
+      title: "Số dư đầu ngày",
+      meaning: "Số tiền mặt có trong ngăn kéo lúc bắt đầu ngày, trước khi ghi giao dịch mới.",
+      whenToUse: "Dùng làm mốc để tính số dư cuối ngày dự kiến.",
     },
   },
   privateinlage: {
-    aliases: ["privateinlage", "private deposit", "owner deposit", "nop tien ca nhan"],
+    aliases: [
+      "privateinlage",
+      "private deposit",
+      "owner deposit",
+      "nộp tiền cá nhân",
+      "nop tien ca nhan",
+      "nộp tiền riêng",
+    ],
     en: {
       title: "Private deposit",
       meaning: "Cash the owner adds personally to the register, for example to prepare change.",
@@ -53,13 +63,20 @@ export const glossary: Glossary = {
       whenToUse: "Buche es, wenn privates Geld in die Kasse eingelegt wird.",
     },
     vi: {
-      title: "Nop tien ca nhan",
-      meaning: "Tien mat chu salon bo them vao quy, vi du de co tien le.",
-      whenToUse: "Ghi lai khi tien ca nhan duoc them vao ngan keo tien mat.",
+      title: "Nộp tiền cá nhân",
+      meaning: "Tiền mặt chủ salon bỏ thêm vào quỹ, ví dụ để có tiền lẻ.",
+      whenToUse: "Ghi lại khi tiền cá nhân được thêm vào ngăn kéo tiền mặt.",
     },
   },
   privatentnahme: {
-    aliases: ["privatentnahme", "private withdrawal", "owner withdrawal", "rut tien ca nhan"],
+    aliases: [
+      "privatentnahme",
+      "private withdrawal",
+      "owner withdrawal",
+      "rút tiền cá nhân",
+      "rut tien ca nhan",
+      "rút tiền riêng",
+    ],
     en: {
       title: "Private withdrawal",
       meaning: "Cash the owner removes personally from the register.",
@@ -72,13 +89,19 @@ export const glossary: Glossary = {
       whenToUse: "Buche es immer, wenn Geld privat aus der Kasse genommen wird.",
     },
     vi: {
-      title: "Rut tien ca nhan",
-      meaning: "Tien mat chu salon lay ra khoi quy de dung cho viec rieng.",
-      whenToUse: "Ghi lai moi lan tien duoc lay ra cho muc dich ca nhan.",
+      title: "Rút tiền cá nhân",
+      meaning: "Tiền mặt chủ salon lấy ra khỏi quỹ để dùng cho việc riêng.",
+      whenToUse: "Ghi lại mỗi lần tiền được lấy ra cho mục đích cá nhân.",
     },
   },
   counted_cash: {
-    aliases: ["counted cash", "gezaehltes bargeld", "tien dem thuc te"],
+    aliases: [
+      "counted cash",
+      "gezaehltes bargeld",
+      "tiền đếm thực tế",
+      "tien dem thuc te",
+      "tiền kiểm kê",
+    ],
     en: {
       title: "Counted cash",
       meaning: "The physical cash amount actually counted in the drawer at close time.",
@@ -90,13 +113,20 @@ export const glossary: Glossary = {
       whenToUse: "Erfasse ihn vor dem Tagesabschluss zum Abgleich mit dem Sollbestand.",
     },
     vi: {
-      title: "Tien dem thuc te",
-      meaning: "So tien mat dem duoc thuc te trong ngan keo luc ket ngay.",
-      whenToUse: "Nhap truoc khi dong ngay de so sanh voi so du du kien.",
+      title: "Tiền đếm thực tế",
+      meaning: "Số tiền mặt đếm được thực tế trong ngăn kéo lúc kết ngày.",
+      whenToUse: "Nhập trước khi đóng ngày để so sánh với số dư dự kiến.",
     },
   },
   difference: {
-    aliases: ["difference", "differenz", "chenh lech", "balance short", "balance over"],
+    aliases: [
+      "difference",
+      "differenz",
+      "chênh lệch",
+      "chenh lech",
+      "balance short",
+      "balance over",
+    ],
     en: {
       title: "Difference",
       meaning: "The gap between expected cash and counted cash.",
@@ -110,16 +140,70 @@ export const glossary: Glossary = {
         "Pruefe sie sofort. Eine Abweichung sollte vor oder beim Abschluss erklaert werden.",
     },
     vi: {
-      title: "Chenh lech",
-      meaning: "Khoang cach giua so du du kien va tien dem thuc te.",
-      whenToUse: "Can kiem tra ngay. Neu khac 0 thi phai giai thich truoc hoac khi dong ngay.",
+      title: "Chênh lệch",
+      meaning: "Khoảng cách giữa số dư dự kiến và tiền đếm thực tế.",
+      whenToUse: "Cần kiểm tra ngay. Nếu khác 0 thì phải giải thích trước hoặc khi đóng ngày.",
     },
   },
+};
+
+export const normalizeTerm = (s: string): string =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .trim();
+
+export const levenshtein = (a: string, b: string): number => {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) {
+    dp[i][0] = i;
+  }
+  for (let j = 0; j <= n; j++) {
+    dp[0][j] = j;
+  }
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+    }
+  }
+
+  return dp[m][n];
 };
 
 export const resolveGlossaryEntry = (term: string): GlossaryEntry | undefined => {
   const normalized = term.trim().toLowerCase();
   return Object.values(glossary).find((entry) =>
     entry.aliases.some((alias) => alias.toLowerCase() === normalized)
+  );
+};
+
+export const fuzzyResolveGlossaryEntry = (term: string): GlossaryEntry | undefined => {
+  const norm = normalizeTerm(term);
+  if (!norm) {
+    return undefined;
+  }
+
+  // 1. Substring containment
+  const substringHit = Object.values(glossary).find((entry) =>
+    entry.aliases.some((alias) => {
+      const normAlias = normalizeTerm(alias);
+      return normAlias.includes(norm) || norm.includes(normAlias);
+    })
+  );
+  if (substringHit) {
+    return substringHit;
+  }
+
+  // 2. Levenshtein distance <= 2
+  return Object.values(glossary).find((entry) =>
+    entry.aliases.some((alias) => levenshtein(normalizeTerm(alias), norm) <= 2)
   );
 };
