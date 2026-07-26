@@ -3307,6 +3307,24 @@
     }
   },
   "cashDashboard": {
+    "workspace": {
+      "dailyCash": "Daily Cash",
+      "monthlyReview": "Monthly Review",
+      "generalHelp": "General Help",
+      "generalHelpTitle": "Cash Assistant",
+      "cashDayFor": "Cash Day",
+      "reviewFor": "Review",
+      "register": "Register",
+      "location": "Location",
+      "boundRegisterLabel": "Cash register"
+    },
+    "registerSelector": {
+      "title": "Choose a cash register",
+      "description": "This conversation will use the selected register.",
+      "binding": "Selecting register...",
+      "error": "Could not set the cash register.",
+      "retry": "Try again"
+    },
     "headerTitle": "Cash control dashboard",
     "headerSubtitle": "Daily cash and receipt control for the salon floor.",
     "previewLabel": "Preview state",

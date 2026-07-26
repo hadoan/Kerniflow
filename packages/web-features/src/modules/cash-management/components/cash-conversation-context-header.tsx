@@ -2,10 +2,11 @@ import React from "react";
 import { format } from "date-fns";
 import { Badge } from "@corely/ui";
 import { useTranslation } from "react-i18next";
-import { MapPin, MonitorSmartphone, Calendar, Sparkles } from "lucide-react";
+import { MonitorSmartphone, Calendar, Sparkles } from "lucide-react";
+import { type CashAssistantWorkspace } from "@corely/contracts";
 
 export interface CashConversationContextHeaderProps {
-  workspace: any; // CashAssistantWorkspaceEntity
+  workspace: CashAssistantWorkspace;
 }
 
 export function CashConversationContextHeader({ workspace }: CashConversationContextHeaderProps) {
@@ -15,7 +16,7 @@ export function CashConversationContextHeader({ workspace }: CashConversationCon
     return null;
   }
 
-  const { type, businessDate, businessMonth, registerId, locationId } = workspace;
+  const { type, businessDate, businessMonth, registerId, register } = workspace;
 
   const renderBadge = () => {
     switch (type) {
@@ -51,8 +52,14 @@ export function CashConversationContextHeader({ workspace }: CashConversationCon
   const formattedDate = businessDate ? format(new Date(businessDate), "dd.MM.yyyy") : null;
   const formattedMonth = businessMonth ? format(new Date(businessMonth), "MMMM yyyy") : null;
 
+  const registerTitle = register
+    ? `${register.name}${register.location ? ` · ${register.location}` : ""}`
+    : registerId
+      ? t("cashDashboard.workspace.register", "Register")
+      : null;
+
   return (
-    <div className="flex items-center gap-4 px-6 py-4 lg:px-8">
+    <div className="flex items-center gap-4 px-6 py-4 lg:px-8" data-testid="cash-context-header">
       <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent/10">
         <Sparkles className="h-5 w-5 text-accent" />
       </div>
@@ -72,36 +79,22 @@ export function CashConversationContextHeader({ workspace }: CashConversationCon
           {renderBadge()}
         </div>
 
-        {type !== "GENERAL_HELP" && (
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            {formattedDate && (
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>{formattedDate}</span>
-              </div>
-            )}
-            {registerId && (
-              <div className="flex items-center gap-1.5">
-                <MonitorSmartphone className="h-3.5 w-3.5" />
-                <span>{t("cashDashboard.workspace.register", "Register")}</span>
-              </div>
-            )}
-            {locationId && (
-              <div className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5" />
-                <span>{t("cashDashboard.workspace.location", "Location")}</span>
-              </div>
-            )}
-          </div>
-        )}
-        {type === "GENERAL_HELP" && (
-          <p className="text-sm text-muted-foreground truncate">
-            {t(
-              "assistant.threadHeaderDescription",
-              "Continue the conversation or start a new task."
-            )}
-          </p>
-        )}
+        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+          {formattedDate && (
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{formattedDate}</span>
+            </div>
+          )}
+          {registerTitle && (
+            <div className="flex items-center gap-1.5 font-medium text-foreground">
+              <MonitorSmartphone className="h-3.5 w-3.5 text-muted-foreground" />
+              <span>
+                {t("cashDashboard.workspace.boundRegisterLabel", "Cash register")}: {registerTitle}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

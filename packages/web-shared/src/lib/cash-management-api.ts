@@ -16,6 +16,12 @@ import type {
   ReverseCashEntryInput,
   SubmitCashDayCloseInput,
   UpdateCashRegister,
+  CashAssistantWorkspace,
+  ResolveCashAssistantWorkspaceInput,
+} from "@corely/contracts";
+import {
+  CashAssistantWorkspaceSchema,
+  ResolveCashAssistantWorkspaceOutputSchema,
 } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
@@ -193,10 +199,23 @@ export class CashManagementApi {
     });
   }
 
-  async listWorkspaces(): Promise<{ items: any[] }> {
-    return apiClient.get<{ items: any[] }>(`/cash-management/workspaces`, {
+  async listWorkspaces(): Promise<{ items: CashAssistantWorkspace[] }> {
+    const response = await apiClient.get<{ items: unknown[] }>(`/cash-management/workspaces`, {
       correlationId: apiClient.generateCorrelationId(),
     });
+    return {
+      items: response.items.map((workspace) => CashAssistantWorkspaceSchema.parse(workspace)),
+    };
+  }
+
+  async resolveWorkspace(
+    input: ResolveCashAssistantWorkspaceInput
+  ): Promise<CashAssistantWorkspace> {
+    const response = await apiClient.post<unknown>(`/cash-management/workspaces/resolve`, input, {
+      idempotencyKey: apiClient.generateIdempotencyKey(),
+      correlationId: apiClient.generateCorrelationId(),
+    });
+    return ResolveCashAssistantWorkspaceOutputSchema.parse(response);
   }
 }
 

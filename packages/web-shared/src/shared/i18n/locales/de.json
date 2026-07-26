@@ -3254,6 +3254,24 @@
     }
   },
   "cashDashboard": {
+    "workspace": {
+      "dailyCash": "Tagesabschluss",
+      "monthlyReview": "Monatsprüfung",
+      "generalHelp": "Allgemeine Hilfe",
+      "generalHelpTitle": "Kassenassistent",
+      "cashDayFor": "Tagesabschluss",
+      "reviewFor": "Prüfung",
+      "register": "Kassenbuch",
+      "location": "Standort",
+      "boundRegisterLabel": "Kassenbuch"
+    },
+    "registerSelector": {
+      "title": "Wählen Sie ein Kassenbuch",
+      "description": "Dieses Gespräch nutzt das ausgewählte Kassenbuch.",
+      "binding": "Kassenbuch wird zugewiesen...",
+      "error": "Kassenbuch konnte nicht zugewiesen werden.",
+      "retry": "Erneut versuchen"
+    },
     "headerTitle": "Dashboard Kassenkontrolle",
     "headerSubtitle": "Tägliche Kontrolle für Bargeld und Belege im Salon.",
     "previewLabel": "Vorschaustatus",

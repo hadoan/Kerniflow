@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
@@ -16,7 +16,15 @@ import { cn } from "@corely/web-shared/shared/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@corely/ui";
 import { billingApi } from "@corely/web-shared/lib/billing-api";
-import { CashManagementBillingFeatureKeys, CashManagementProductKey } from "@corely/contracts";
+import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
+import {
+  CashManagementBillingFeatureKeys,
+  CashManagementProductKey,
+  type CashAssistantWorkspace,
+  type CashRegister,
+  type CashReportPreviewDto,
+  type MonthlyCashReportDto,
+} from "@corely/contracts";
 import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assistant-suggestions";
 import { CashReportPreview } from "../../cash-management/components/cash-report-preview";
 import { MonthlyCashReportPreview } from "../../cash-management/components/monthly-cash-report-preview";
@@ -30,11 +38,20 @@ import {
 } from "./assistant-utils";
 import { CashAssistantEmptyState } from "../../cash-management/components/cash-assistant-empty-state";
 import { CashConversationContextHeader } from "../../cash-management/components/cash-conversation-context-header";
+import { CashAssistantRegisterSelector } from "../../cash-management/components/cash-assistant-register-selector";
 import { AssistantSearchDialog } from "../components/AssistantSearchDialog";
 
 interface AssistantPageProps {
   activeModule?: string;
 }
+
+type RegisterBindingRequest = {
+  registerId: string;
+  conversationId?: string;
+};
+
+const getErrorMessage = (error: unknown): string | undefined =>
+  error instanceof Error ? error.message : undefined;
 
 export default function AssistantPage({ activeModule = "assistant" }: AssistantPageProps) {
   const { t, i18n } = useTranslation();
@@ -49,6 +66,10 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [hasUserMessages, setHasUserMessages] = useState(false);
+  const [registerBindingError, setRegisterBindingError] = useState<string | null>(null);
+  const [lastBindingRequest, setLastBindingRequest] = useState<RegisterBindingRequest | null>(null);
+  const lastAutoBindingKeyRef = useRef<string | null>(null);
+  const previousThreadIdRef = useRef<string | undefined>(threadId);
   const [openGroups, setOpenGroups] = useState<Record<ThreadGroupKey, boolean>>({
     today: true,
     needsAttention: true,
@@ -91,11 +112,53 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
 
   const workspacesQuery = useQuery({
     queryKey: ["cash-workspaces"],
-    queryFn: async () => {
-      const { cashManagementApi } = await import("@corely/web-shared/lib/cash-management-api");
-      return cashManagementApi.listWorkspaces();
-    },
+    queryFn: () => cashManagementApi.listWorkspaces(),
     enabled: activeModule === "cash-management",
+  });
+
+  const registersQuery = useQuery({
+    queryKey: ["cash-registers"],
+    queryFn: () => cashManagementApi.listRegisters(),
+    enabled: activeModule === "cash-management",
+  });
+
+  const resolveWorkspaceMutation = useMutation({
+    mutationFn: (params: RegisterBindingRequest) =>
+      cashManagementApi.resolveWorkspace({
+        type: "GENERAL_HELP",
+        registerId: params.registerId,
+        conversationId: params.conversationId,
+      }),
+    onMutate: () => {
+      setRegisterBindingError(null);
+    },
+    onSuccess: (ws) => {
+      setRegisterBindingError(null);
+      queryClient.setQueryData<{ items: CashAssistantWorkspace[] }>(
+        ["cash-workspaces"],
+        (current) => ({
+          items: [
+            ...(current?.items ?? []).filter(
+              (workspace) => workspace.conversationId !== ws.conversationId
+            ),
+            ws,
+          ],
+        })
+      );
+      void queryClient.invalidateQueries({ queryKey: THREAD_LIST_QUERY_KEY });
+      if (ws.conversationId && ws.conversationId !== threadId) {
+        navigate(`/assistant/t/${ws.conversationId}`);
+      }
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error);
+      setRegisterBindingError(message ?? t("cashDashboard.registerSelector.error"));
+      toast({
+        title: t("cashDashboard.registerSelector.error", "Could not set the cash register."),
+        description: message,
+        variant: "destructive",
+      });
+    },
   });
 
   const threadQuery = useQuery({
@@ -109,7 +172,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
 
   const billingQuery = useQuery({
     queryKey: ["billing", "current", billingProductKey],
-    queryFn: () => billingApi.getCurrent(billingProductKey!),
+    queryFn: () => billingApi.getCurrent(billingProductKey ?? CashManagementProductKey),
     enabled: Boolean(billingProductKey),
   });
 
@@ -133,6 +196,66 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     },
   });
 
+  const currentWorkspace = useMemo(() => {
+    if (activeModule !== "cash-management" || !threadId) {
+      return null;
+    }
+    return workspacesQuery.data?.items?.find((ws) => ws.conversationId === threadId);
+  }, [activeModule, threadId, workspacesQuery.data?.items]);
+
+  const isCashModule = activeModule === "cash-management";
+  const registers = registersQuery.data?.registers ?? [];
+  const isExistingConversationWorkspaceResolved = !threadId || workspacesQuery.isSuccess;
+  const needsRegisterBinding =
+    isCashModule &&
+    isExistingConversationWorkspaceResolved &&
+    !currentWorkspace?.registerId &&
+    registers.length > 0;
+  const soleRegister = registers.length === 1 ? registers[0] : null;
+  const autoBindingKey = soleRegister ? `${threadId ?? "new"}:${soleRegister.id}` : null;
+  const shouldAutoBind = Boolean(needsRegisterBinding && soleRegister && autoBindingKey);
+
+  const bindRegister = useCallback(
+    (request: RegisterBindingRequest) => {
+      setLastBindingRequest(request);
+      setRegisterBindingError(null);
+      resolveWorkspaceMutation.mutate(request);
+    },
+    [resolveWorkspaceMutation.mutate]
+  );
+
+  useEffect(() => {
+    if (previousThreadIdRef.current !== threadId) {
+      previousThreadIdRef.current = threadId;
+      lastAutoBindingKeyRef.current = null;
+      setRegisterBindingError(null);
+      setLastBindingRequest(null);
+    }
+  }, [threadId]);
+
+  useEffect(() => {
+    if (
+      !shouldAutoBind ||
+      !soleRegister ||
+      !autoBindingKey ||
+      resolveWorkspaceMutation.isPending ||
+      registerBindingError ||
+      lastAutoBindingKeyRef.current === autoBindingKey
+    ) {
+      return;
+    }
+    lastAutoBindingKeyRef.current = autoBindingKey;
+    bindRegister({ registerId: soleRegister.id, conversationId: threadId });
+  }, [
+    autoBindingKey,
+    bindRegister,
+    registerBindingError,
+    resolveWorkspaceMutation.isPending,
+    shouldAutoBind,
+    soleRegister,
+    threadId,
+  ]);
+
   const groupedThreads = useMemo<ThreadGroup[]>(() => {
     const groups: Record<ThreadGroupKey, ThreadGroup["items"]> = {
       today: [],
@@ -147,7 +270,9 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
 
     const isCashModule = activeModule === "cash-management";
     const workspaces = workspacesQuery.data?.items ?? [];
-    const workspaceMap = new Map(workspaces.map((ws: any) => [ws.conversationId, ws]));
+    const workspaceMap = new Map(
+      workspaces.map((workspace) => [workspace.conversationId, workspace])
+    );
 
     for (const item of threadsQuery.data?.items ?? []) {
       if (
@@ -184,7 +309,6 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
       });
     }
 
-    // Limit generalQuestions to 5 items if we have daily workspaces
     if (isCashModule && groups.generalQuestions.length > 5) {
       groups.generalQuestions = groups.generalQuestions.slice(0, 5);
     }
@@ -249,12 +373,55 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     }
   };
 
-  const currentWorkspace = useMemo(() => {
-    if (activeModule !== "cash-management" || !threadId) {
-      return null;
+  const handleNewChat = () => {
+    if (activeModule === "cash-management") {
+      navigate("/assistant");
+    } else {
+      createThreadMutation.mutate();
     }
-    return workspacesQuery.data?.items?.find((ws) => ws.conversationId === threadId);
-  }, [activeModule, threadId, workspacesQuery.data?.items]);
+  };
+
+  const needsRegisterSelection = Boolean(needsRegisterBinding) && registers.length > 1;
+
+  const isRegisterContextLoading =
+    isCashModule &&
+    (registersQuery.isLoading ||
+      (Boolean(threadId) && workspacesQuery.isLoading) ||
+      resolveWorkspaceMutation.isPending ||
+      (shouldAutoBind && !registerBindingError));
+
+  const registerContextError =
+    registerBindingError ??
+    (registersQuery.isError
+      ? t("cashDashboard.registerSelector.error", "Could not set the cash register.")
+      : null) ??
+    (threadId && workspacesQuery.isError
+      ? t("cashDashboard.registerSelector.error", "Could not set the cash register.")
+      : null);
+
+  const handleSelectRegister = (reg: CashRegister) => {
+    bindRegister({
+      registerId: reg.id,
+      conversationId: threadId,
+    });
+  };
+
+  const handleRetryRegisterBinding = () => {
+    setRegisterBindingError(null);
+    if (registersQuery.isError) {
+      void registersQuery.refetch();
+      return;
+    }
+    if (threadId && workspacesQuery.isError) {
+      void workspacesQuery.refetch();
+      return;
+    }
+    if (lastBindingRequest) {
+      bindRegister(lastBindingRequest);
+      return;
+    }
+    lastAutoBindingKeyRef.current = null;
+  };
 
   return (
     <div
@@ -272,10 +439,14 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
             {t("assistant.searchAction", "Search")}
           </Button>
           <Button
-            onClick={() => createThreadMutation.mutate()}
-            disabled={createThreadMutation.isPending || !hasUserMessages}
+            onClick={handleNewChat}
+            disabled={
+              (isCashModule
+                ? resolveWorkspaceMutation.isPending
+                : createThreadMutation.isPending) || !hasUserMessages
+            }
           >
-            {createThreadMutation.isPending ? (
+            {createThreadMutation.isPending || resolveWorkspaceMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Plus className="mr-2 h-4 w-4" />
@@ -303,10 +474,14 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
             <div className="border-b border-border px-6 py-4 lg:px-8">
               <Button
                 className="w-full"
-                onClick={() => createThreadMutation.mutate()}
-                disabled={createThreadMutation.isPending || !hasUserMessages}
+                onClick={handleNewChat}
+                disabled={
+                  (isCashModule
+                    ? resolveWorkspaceMutation.isPending
+                    : createThreadMutation.isPending) || !hasUserMessages
+                }
               >
-                {createThreadMutation.isPending ? (
+                {createThreadMutation.isPending || resolveWorkspaceMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Plus className="mr-2 h-4 w-4" />
@@ -408,69 +583,93 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
             </header>
 
             <main className="min-h-0 flex-1 overflow-y-auto">
-              <div className="px-6 py-6 lg:px-8 lg:py-8" data-testid="assistant-messages">
-                <Chat
-                  key={threadId ?? "new-thread"}
-                  activeModule={activeModule}
-                  locale={i18n.language}
-                  runId={threadId}
-                  runIdMode="controlled"
-                  canSend={canChat}
-                  onSendBlocked={handleChatBlocked}
-                  onRunIdResolved={handleRunResolved}
-                  onConversationUpdated={handleConversationUpdated}
-                  onHasUserMessagesChange={setHasUserMessages}
-                  focusMessageId={focusedMessageId}
-                  placeholder={t("assistant.placeholder")}
-                  suggestions={suggestions}
-                  capabilityGroups={capabilityGroups}
-                  capabilityCatalogTitle={t("cashDashboard.assistant.capabilityCatalogTitle", "")}
-                  capabilityCatalogDescription={t(
-                    "cashDashboard.assistant.capabilityCatalogDescription",
-                    ""
-                  )}
-                  emptyStateTitle={t("assistant.emptyStateTitle")}
-                  emptyStateDescription={t("assistant.emptyStateDescription")}
-                  renderEmptyState={
-                    activeModule === "cash-management"
-                      ? ({ focusComposer }) => (
-                          <CashAssistantEmptyState onSelectPrompt={focusComposer} />
-                        )
-                      : undefined
-                  }
-                  toolRenderers={{
-                    get_cash_report_preview: (props) => {
-                      if (
-                        !props.output ||
-                        typeof props.output !== "object" ||
-                        !("business" in props.output)
-                      ) {
-                        return (
-                          <div className="p-4 border rounded bg-muted/30">
-                            {t("assistant.loadingPreview", "Loading preview...")}
-                          </div>
-                        );
-                      }
-                      return <CashReportPreview report={props.output as any} />;
-                    },
-                    get_monthly_cash_report: (props) => {
-                      if (
-                        !props.output ||
-                        typeof props.output !== "object" ||
-                        !("totals" in props.output)
-                      ) {
-                        return (
-                          <div className="p-4 border rounded bg-muted/30">
-                            {t("assistant.loadingMonthlyReport", "Loading monthly report...")}
-                          </div>
-                        );
-                      }
-                      return <MonthlyCashReportPreview report={props.output as any} />;
-                    },
-                    request_cash_clarification: (props) => <CashClarificationRenderer {...props} />,
-                  }}
+              {registerContextError ? (
+                <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 p-6 text-center">
+                  <p className="text-sm text-destructive">{registerContextError}</p>
+                  <Button type="button" variant="outline" onClick={handleRetryRegisterBinding}>
+                    {t("cashDashboard.registerSelector.retry", "Try again")}
+                  </Button>
+                </div>
+              ) : needsRegisterSelection ? (
+                <CashAssistantRegisterSelector
+                  registers={registers}
+                  onSelectRegister={handleSelectRegister}
+                  isBinding={resolveWorkspaceMutation.isPending}
                 />
-              </div>
+              ) : isRegisterContextLoading ? (
+                <div className="flex h-full min-h-[300px] items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <span>
+                    {t("cashDashboard.registerSelector.binding", "Selecting register...")}
+                  </span>
+                </div>
+              ) : (
+                <div className="px-6 py-6 lg:px-8 lg:py-8" data-testid="assistant-messages">
+                  <Chat
+                    key={threadId ?? "new-thread"}
+                    activeModule={activeModule}
+                    locale={i18n.language}
+                    runId={threadId}
+                    runIdMode="controlled"
+                    canSend={canChat}
+                    onSendBlocked={handleChatBlocked}
+                    onRunIdResolved={handleRunResolved}
+                    onConversationUpdated={handleConversationUpdated}
+                    onHasUserMessagesChange={setHasUserMessages}
+                    focusMessageId={focusedMessageId}
+                    placeholder={t("assistant.placeholder")}
+                    suggestions={suggestions}
+                    capabilityGroups={capabilityGroups}
+                    capabilityCatalogTitle={t("cashDashboard.assistant.capabilityCatalogTitle", "")}
+                    capabilityCatalogDescription={t(
+                      "cashDashboard.assistant.capabilityCatalogDescription",
+                      ""
+                    )}
+                    emptyStateTitle={t("assistant.emptyStateTitle")}
+                    emptyStateDescription={t("assistant.emptyStateDescription")}
+                    renderEmptyState={
+                      activeModule === "cash-management"
+                        ? ({ focusComposer }) => (
+                            <CashAssistantEmptyState onSelectPrompt={focusComposer} />
+                          )
+                        : undefined
+                    }
+                    toolRenderers={{
+                      get_cash_report_preview: (props) => {
+                        if (
+                          !props.output ||
+                          typeof props.output !== "object" ||
+                          !("business" in props.output)
+                        ) {
+                          return (
+                            <div className="p-4 border rounded bg-muted/30">
+                              {t("assistant.loadingPreview", "Loading preview...")}
+                            </div>
+                          );
+                        }
+                        return <CashReportPreview report={props.output as CashReportPreviewDto} />;
+                      },
+                      get_monthly_cash_report: (props) => {
+                        if (
+                          !props.output ||
+                          typeof props.output !== "object" ||
+                          !("totals" in props.output)
+                        ) {
+                          return (
+                            <div className="p-4 border rounded bg-muted/30">
+                              {t("assistant.loadingMonthlyReport", "Loading monthly report...")}
+                            </div>
+                          );
+                        }
+                        return <MonthlyCashReportPreview report={props.output as MonthlyCashReportDto} />;
+                      },
+                      request_cash_clarification: (props) => (
+                        <CashClarificationRenderer {...props} />
+                      ),
+                    }}
+                  />
+                </div>
+              )}
             </main>
           </div>
         </div>
