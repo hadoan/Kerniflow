@@ -13,35 +13,41 @@ export function CashAssistantEmptyState({ onSelectPrompt }: CashAssistantEmptySt
     {
       icon: Receipt,
       label: t(
-        "cashDashboard.assistant.suggestions.recordTransactions.label",
+        "cashDashboard.assistant.emptyStateActions.recordTransactions.label",
         "Record today's transactions"
       ),
       prompt: t(
-        "cashDashboard.assistant.suggestions.recordTransactions.value",
+        "cashDashboard.assistant.emptyStateActions.recordTransactions.value",
         "I want to record today's cash transactions."
       ),
     },
     {
       icon: FileText,
-      label: t("cashDashboard.assistant.suggestions.reviewMonth.label", "Review monthly report"),
+      label: t(
+        "cashDashboard.assistant.emptyStateActions.reviewMonth.label",
+        "Review monthly report"
+      ),
       prompt: t(
-        "cashDashboard.assistant.suggestions.reviewMonth.value",
+        "cashDashboard.assistant.emptyStateActions.reviewMonth.value",
         "I want to review this month's cash report."
       ),
     },
     {
       icon: TrendingUp,
-      label: t("cashDashboard.assistant.suggestions.closeDay.label", "Close the cash day"),
+      label: t("cashDashboard.assistant.emptyStateActions.closeDay.label", "Close the cash day"),
       prompt: t(
-        "cashDashboard.assistant.suggestions.closeDay.value",
+        "cashDashboard.assistant.emptyStateActions.closeDay.value",
         "I want to close the cash register for today."
       ),
     },
     {
       icon: AlertCircle,
-      label: t("cashDashboard.assistant.suggestions.generalHelp.label", "Ask a general question"),
+      label: t(
+        "cashDashboard.assistant.emptyStateActions.generalHelp.label",
+        "Ask a general question"
+      ),
       prompt: t(
-        "cashDashboard.assistant.suggestions.generalHelp.value",
+        "cashDashboard.assistant.emptyStateActions.generalHelp.value",
         "I have a general question about cash management."
       ),
     },

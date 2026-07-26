@@ -1,7 +1,7 @@
 import { isProblemDetails } from "@corely/contracts";
 import type { ProblemDetails } from "@corely/contracts";
-import { HttpError } from "../http/request.ts";
-import { ApiError } from "./api-error.ts";
+import { HttpError } from "../http/request";
+import { ApiError } from "./api-error";
 
 type ApiErrorOptions = ConstructorParameters<typeof ApiError>[0];
 

@@ -24,7 +24,7 @@ import {
   type ThreadGroupKey,
   type ThreadGroup,
   THREAD_LIST_QUERY_KEY,
-  THREAD_GROUP_LABELS,
+  getThreadGroupLabels,
   getChronologicalGroupKey,
 } from "./assistant-utils";
 import { CashAssistantEmptyState } from "../../cash-management/components/cash-assistant-empty-state";
@@ -187,14 +187,16 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
       ? ["today", "needsAttention", "previousDays", "monthlyReviews", "generalQuestions"]
       : ["today", "yesterday", "week", "older"];
 
+    const groupLabels = getThreadGroupLabels(t);
+
     return order
       .map((key) => ({
         key,
-        label: THREAD_GROUP_LABELS[key],
+        label: groupLabels[key],
         items: groups[key],
       }))
       .filter((group) => group.items.length > 0);
-  }, [threadsQuery.data?.items, activeModule, workspacesQuery.data?.items]);
+  }, [threadsQuery.data?.items, activeModule, workspacesQuery.data?.items, t]);
 
   const activeThreadTitle = threadQuery.data?.thread.title ?? t("assistant.title");
 
@@ -261,7 +263,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setSearchOpen(true)}>
             <Search className="mr-2 h-4 w-4" />
-            Search
+            {t("assistant.searchAction", "Search")}
           </Button>
           <Button
             onClick={() => createThreadMutation.mutate()}
@@ -272,7 +274,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
             ) : (
               <Plus className="mr-2 h-4 w-4" />
             )}
-            New chat
+            {t("assistant.newChat", "New chat")}
           </Button>
         </div>
       </div>
@@ -281,9 +283,14 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
         <div className="grid h-full min-h-0 md:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="hidden min-h-0 border-r border-border bg-background/40 md:flex md:flex-col">
             <div className="border-b border-border px-6 py-4 lg:px-8">
-              <div className="text-sm font-semibold text-foreground">Recent chats</div>
+              <div className="text-sm font-semibold text-foreground">
+                {t("assistant.recentChats", "Recent chats")}
+              </div>
               <div className="mt-1 text-xs text-muted-foreground">
-                Browse previous conversations or start a new one.
+                {t(
+                  "assistant.recentChatsDescription",
+                  "Browse previous conversations or start a new one."
+                )}
               </div>
             </div>
 
@@ -298,20 +305,27 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                 ) : (
                   <Plus className="mr-2 h-4 w-4" />
                 )}
-                New chat
+                {t("assistant.newChat", "New chat")}
               </Button>
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-4 lg:px-8">
               {threadsQuery.isLoading ? (
-                <div className="py-2 text-sm text-muted-foreground">Loading chats...</div>
+                <div className="py-2 text-sm text-muted-foreground">
+                  {t("assistant.loadingChats", "Loading chats...")}
+                </div>
               ) : null}
 
               {!threadsQuery.isLoading && groupedThreads.length === 0 ? (
                 <div className="space-y-1 py-2">
-                  <div className="text-sm font-medium text-foreground">No chats yet</div>
+                  <div className="text-sm font-medium text-foreground">
+                    {t("assistant.noChats", "No chats yet")}
+                  </div>
                   <div className="text-xs text-muted-foreground">
-                    Start a conversation and it will appear here.
+                    {t(
+                      "assistant.noChatsDescription",
+                      "Start a conversation and it will appear here."
+                    )}
                   </div>
                 </div>
               ) : null}
@@ -425,7 +439,9 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                         !("business" in props.output)
                       ) {
                         return (
-                          <div className="p-4 border rounded bg-muted/30">Loading preview...</div>
+                          <div className="p-4 border rounded bg-muted/30">
+                            {t("assistant.loadingPreview", "Loading preview...")}
+                          </div>
                         );
                       }
                       return <CashReportPreview report={props.output as any} />;
@@ -438,7 +454,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                       ) {
                         return (
                           <div className="p-4 border rounded bg-muted/30">
-                            Loading monthly report...
+                            {t("assistant.loadingMonthlyReport", "Loading monthly report...")}
                           </div>
                         );
                       }

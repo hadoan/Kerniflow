@@ -22,7 +22,14 @@ export type ToolRendererProps = {
 export type ToolRenderer = (props: ToolRendererProps) => React.ReactNode;
 
 export type ToolInvocationPart = {
-  type: "dynamic-tool" | `tool-${string}` | "tool-call" | "tool-result";
+  type: "dynamic-tool" | `tool-${string}` | "tool-call" | "tool-result" | "tool-invocation";
+  toolInvocation?: {
+    state: string;
+    toolCallId: string;
+    toolName: string;
+    args?: unknown;
+    result?: unknown;
+  };
   toolCallId?: string;
   toolName?: string;
   state?: string;
@@ -93,8 +100,20 @@ export const renderPart = (
   }
 
   if (isToolPart(part)) {
-    const toolName = part.toolName ?? part.type.replace("tool-", "");
-    const toolCallId = part.toolCallId || toolName;
+    const inv = part.toolInvocation;
+    const toolName =
+      part.toolName ??
+      inv?.toolName ??
+      (part.type === "tool-invocation" ? "unknown" : part.type.replace("tool-", ""));
+    const toolCallId = part.toolCallId ?? inv?.toolCallId ?? toolName;
+    const input = part.input ?? inv?.args;
+    const output = part.output ?? part.result ?? inv?.result;
+
+    // Default mapped state for AI SDK's toolInvocation
+    let state = part.state;
+    if (!state && inv) {
+      state = inv.state === "result" ? "output-available" : "input-available";
+    }
 
     if (helpers.toolRenderers && helpers.toolRenderers[toolName]) {
       const Renderer = helpers.toolRenderers[toolName];
@@ -106,16 +125,15 @@ export const renderPart = (
         "approval-requested",
         "output-denied",
       ];
-      const state = (
-        validStates.includes(part.state ?? "") ? part.state : "output-available"
+      const safeState = (
+        validStates.includes(state ?? "") ? state : "output-available"
       ) as ToolRendererProps["state"];
-      const rawOutput = part.output ?? part.result ?? part.input;
 
       const rendered = Renderer({
         toolName,
-        state,
-        input: part.input,
-        output: rawOutput,
+        state: safeState,
+        input,
+        output,
         error: part.errorText,
       });
       if (rendered) {
@@ -123,8 +141,8 @@ export const renderPart = (
       }
     }
 
-    if (toolName === "collect_inputs" && part.state !== "output-available") {
-      const request = part.input as CollectInputsToolInput | undefined;
+    if (toolName === "collect_inputs" && state !== "output-available") {
+      const request = input as CollectInputsToolInput | undefined;
       const isSubmitting = helpers.submittingToolIds.has(toolCallId);
       if (!request) {
         return (
@@ -169,11 +187,7 @@ export const renderPart = (
       );
     }
 
-    if (
-      part.state === "approval-requested" &&
-      part.approval?.id &&
-      helpers.addToolApprovalResponse
-    ) {
+    if (state === "approval-requested" && part.approval?.id && helpers.addToolApprovalResponse) {
       const approvalId = part.approval.id;
       return (
         <Card className="border-dashed border-accent/40 bg-accent/5 shadow-[0_20px_60px_-45px_rgba(0,0,0,0.6)]">
@@ -209,8 +223,8 @@ export const renderPart = (
       );
     }
 
-    if (part.state === "output-available") {
-      const rawOutput = part.output ?? part.result ?? part.input;
+    if (state === "output-available") {
+      const rawOutput = output ?? input;
       const outputRecord =
         rawOutput && typeof rawOutput === "object" ? (rawOutput as Record<string, unknown>) : null;
       const draftRecord =
@@ -384,7 +398,7 @@ export const renderPart = (
       );
     }
 
-    if (part.state === "output-error" || part.state === "output-denied") {
+    if (state === "output-error" || state === "output-denied") {
       return (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
           {i18n.t("assistant.toolFailed", {

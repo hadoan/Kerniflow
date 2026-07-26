@@ -10,15 +10,13 @@ export class SseConnectionError extends Error {
   public readonly status: number | null;
   public readonly body?: string;
 
-  constructor(
-    message: string,
-    status: number | null,
-    body?: string
-  ) {
+  constructor(message: string, status: number | null, body?: string) {
     super(message);
     this.name = "SseConnectionError";
     this.status = status;
-    this.body = body;
+    if (body !== undefined) {
+      this.body = body;
+    }
   }
 }
 

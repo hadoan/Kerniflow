@@ -1,2 +1,2 @@
-export * from "./api-error.ts";
-export * from "./normalize-error.ts";
+export * from "./api-error";
+export * from "./normalize-error";

@@ -5,18 +5,14 @@ import {
   type RetryableResult,
   type RetryPolicyOptions,
   shouldRetry,
-} from "../retry/retryPolicy.ts";
-import { createIdempotencyKey } from "../idempotency.ts";
+} from "../retry/retryPolicy";
+import { createIdempotencyKey } from "../idempotency";
 
 export class HttpError extends Error {
   public status: number | null;
   public body?: unknown;
 
-  constructor(
-    message: string,
-    status: number | null,
-    body?: unknown
-  ) {
+  constructor(message: string, status: number | null, body?: unknown) {
     super(message);
     this.name = "HttpError";
     this.status = status;

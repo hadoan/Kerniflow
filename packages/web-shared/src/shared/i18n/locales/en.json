@@ -110,7 +110,8 @@
       "modalDescription": "Your workspace now uses the Free plan. Historical data is still available, but export, AI, and multi-location features are locked until you subscribe.",
       "modalLater": "Later",
       "choosePlan": "Choose a plan"
-    }
+    },
+    "searching": "Searching..."
   },
   "onboarding": {
     "title": "Onboarding",
@@ -1637,7 +1638,7 @@
   "assistant": {
     "title": "Assistant",
     "subtitle": "Ask anything, extract receipts, generate invoices, or request quick summaries.",
-    "placeholder": "Ask anything...",
+    "placeholder": "Ask anything, extract receipts, draft invoices, or request quick summaries.",
     "emptyStateTitle": "How can I help you?",
     "emptyStateDescription": "Ask anything, extract receipts, generate invoices, or request quick summaries.",
     "awaitingInputs": "Awaiting your input...",
@@ -1687,7 +1688,33 @@
     "issueInvoice": "Issue invoice",
     "userRole": "You",
     "assistantRole": "Assistant",
-    "systemRole": "System"
+    "systemRole": "System",
+    "searchAction": "Search",
+    "newChat": "New chat",
+    "recentChats": "Recent chats",
+    "recentChatsDescription": "Browse previous conversations or start a new one.",
+    "loadingChats": "Loading chats...",
+    "noChats": "No chats yet",
+    "noChatsDescription": "Start a conversation and it will appear here.",
+    "loadingPreview": "Loading preview...",
+    "loadingMonthlyReport": "Loading monthly report...",
+    "search": {
+      "title": "Search chats",
+      "placeholder": "Search messages...",
+      "minLength": "Type at least 2 characters to search.",
+      "noResults": "No matching messages found.",
+      "noPreview": "(No preview)"
+    },
+    "groups": {
+      "today": "Today",
+      "needsAttention": "Needs attention",
+      "previousDays": "Previous days",
+      "monthlyReviews": "Monthly reviews",
+      "generalQuestions": "General questions",
+      "yesterday": "Yesterday",
+      "week": "This week",
+      "older": "Older"
+    }
   },
   "copilot": {
     "title": "Assistant",
@@ -3549,12 +3576,34 @@
       "languages": "German, English, Vietnamese",
       "lockedTitle": "AI help is locked on this plan",
       "lockedDescription": "Upgrade to Pro to unlock the cash assistant, multilingual explanations, and guided issue review.",
-      "lockedBadge": "AI locked"
+      "lockedBadge": "AI locked",
+      "emptyStateActions": {
+        "recordTransactions": {
+          "label": "Record today's transactions",
+          "value": "I want to record today's cash transactions."
+        },
+        "reviewMonth": {
+          "label": "Review monthly report",
+          "value": "I want to review this month's cash report."
+        },
+        "closeDay": {
+          "label": "Close the cash day",
+          "value": "I want to close the cash register for today."
+        },
+        "generalHelp": {
+          "label": "Ask a general question",
+          "value": "I have a general question about cash management."
+        }
+      }
     },
     "severity": {
       "high": "High",
       "medium": "Medium",
       "low": "Low"
+    },
+    "workspace": {
+      "register": "Register",
+      "location": "Location"
     }
   }
 }

@@ -1,5 +1,5 @@
-import type { ProblemDetails, ValidationErrorItem, isProblemDetails } from "@corely/contracts";
-import { type HttpError } from "../http/request.ts";
+import type { ValidationErrorItem } from "@corely/contracts";
+import { type HttpError } from "../http/request";
 
 /**
  * Structured API error that wraps HTTP errors with ProblemDetails support

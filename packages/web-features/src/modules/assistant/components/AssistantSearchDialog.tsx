@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Input } from "@corely/ui";
 import { type CopilotThreadSearchResult } from "@corely/web-shared/lib/copilot-api";
 
@@ -23,32 +24,39 @@ export function AssistantSearchDialog({
   results,
   onSelectResult,
 }: AssistantSearchDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Search chats</DialogTitle>
+          <DialogTitle>{t("assistant.search.title", "Search chats")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
           <Input
             autoFocus
-            placeholder="Search messages..."
+            placeholder={t("assistant.search.placeholder", "Search messages...")}
             value={searchText}
             onChange={(event) => onSearchTextChange(event.target.value)}
           />
 
           <div className="max-h-96 space-y-2 overflow-y-auto">
-            {isLoading ? <div className="text-sm text-muted-foreground">Searching…</div> : null}
+            {isLoading ? (
+              <div className="text-sm text-muted-foreground">
+                {t("common.searching", "Searching...")}
+              </div>
+            ) : null}
 
             {!isLoading && debouncedSearchText.length <= 1 ? (
               <div className="text-sm text-muted-foreground">
-                Type at least 2 characters to search.
+                {t("assistant.search.minLength", "Type at least 2 characters to search.")}
               </div>
             ) : null}
 
             {!isLoading && debouncedSearchText.length > 1 && !results.length ? (
-              <div className="text-sm text-muted-foreground">No matching messages found.</div>
+              <div className="text-sm text-muted-foreground">
+                {t("assistant.search.noResults", "No matching messages found.")}
+              </div>
             ) : null}
 
             {results.map((item) => (
@@ -62,7 +70,7 @@ export function AssistantSearchDialog({
                   {item.threadTitle}
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
-                  {item.snippet || "(No preview)"}
+                  {item.snippet || t("assistant.search.noPreview", "(No preview)")}
                 </div>
                 <div className="mt-2 text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                   {format(new Date(item.createdAt), "PP p")}

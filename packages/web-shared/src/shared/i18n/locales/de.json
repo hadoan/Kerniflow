@@ -108,7 +108,8 @@
       "modalDescription": "Ihr Arbeitsbereich nutzt nun den kostenlosen Plan. Historische Daten sind weiterhin verfügbar, aber Export-, KI- und Multi-Standort-Funktionen sind gesperrt, bis Sie ein Abonnement abschließen.",
       "modalLater": "Später",
       "choosePlan": "Plan wählen"
-    }
+    },
+    "searching": "Suchen..."
   },
   "onboarding": {
     "title": "Onboarding",
@@ -1618,7 +1619,7 @@
   "assistant": {
     "title": "Assistent",
     "subtitle": "Fragen Sie alles, extrahieren Sie Belege, erstellen Sie Rechnungen oder fordern Sie Zusammenfassungen an.",
-    "placeholder": "Fragen Sie mich alles...",
+    "placeholder": "Alles fragen, Belege extrahieren, Rechnungen entwerfen oder schnelle Zusammenfassungen anfordern.",
     "emptyStateTitle": "Wie kann ich Ihnen helfen?",
     "emptyStateDescription": "Fragen Sie alles, extrahieren Sie Belege, erstellen Sie Rechnungen oder fordern Sie Zusammenfassungen an.",
     "awaitingInputs": "Warte auf Ihre Eingabe...",
@@ -1668,7 +1669,33 @@
     "issueInvoice": "Rechnung ausstellen",
     "userRole": "Sie",
     "assistantRole": "Assistent",
-    "systemRole": "System"
+    "systemRole": "System",
+    "searchAction": "Suchen",
+    "newChat": "Neuer Chat",
+    "recentChats": "Letzte Chats",
+    "recentChatsDescription": "Durchsuchen Sie frühere Unterhaltungen oder beginnen Sie eine neue.",
+    "loadingChats": "Chats werden geladen...",
+    "noChats": "Noch keine Chats",
+    "noChatsDescription": "Beginnen Sie eine Unterhaltung, und sie wird hier angezeigt.",
+    "loadingPreview": "Vorschau wird geladen...",
+    "loadingMonthlyReport": "Monatsbericht wird geladen...",
+    "search": {
+      "title": "Chats durchsuchen",
+      "placeholder": "Nachrichten suchen...",
+      "minLength": "Geben Sie mindestens 2 Zeichen ein, um zu suchen.",
+      "noResults": "Keine passenden Nachrichten gefunden.",
+      "noPreview": "(Keine Vorschau)"
+    },
+    "groups": {
+      "today": "Heute",
+      "needsAttention": "Benötigt Aufmerksamkeit",
+      "previousDays": "Vorherige Tage",
+      "monthlyReviews": "Monatliche Überprüfungen",
+      "generalQuestions": "Allgemeine Fragen",
+      "yesterday": "Gestern",
+      "week": "Diese Woche",
+      "older": "Älter"
+    }
   },
   "copilot": {
     "title": "Assistent",
@@ -3496,12 +3523,34 @@
       "languages": "Deutsch, Englisch, Vietnamesisch",
       "lockedTitle": "KI-Hilfe ist in diesem Tarif gesperrt",
       "lockedDescription": "Upgrade auf Pro, um den Kassenassistenten, mehrsprachige Erklärungen und geführte Prüfung freizuschalten.",
-      "lockedBadge": "KI gesperrt"
+      "lockedBadge": "KI gesperrt",
+      "emptyStateActions": {
+        "recordTransactions": {
+          "label": "Heutige Transaktionen erfassen",
+          "value": "Ich möchte die heutigen Kassentransaktionen erfassen."
+        },
+        "reviewMonth": {
+          "label": "Monatsbericht überprüfen",
+          "value": "Ich möchte den Kassenbericht dieses Monats überprüfen."
+        },
+        "closeDay": {
+          "label": "Kassentag abschließen",
+          "value": "Ich möchte die Kasse für heute abschließen."
+        },
+        "generalHelp": {
+          "label": "Allgemeine Frage stellen",
+          "value": "Ich habe eine allgemeine Frage zur Kassenführung."
+        }
+      }
     },
     "severity": {
       "high": "Hoch",
       "medium": "Mittel",
       "low": "Niedrig"
+    },
+    "workspace": {
+      "register": "Kasse",
+      "location": "Standort"
     }
   }
 }

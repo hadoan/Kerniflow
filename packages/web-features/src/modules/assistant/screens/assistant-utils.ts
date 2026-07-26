@@ -22,16 +22,18 @@ export interface ThreadGroup {
 
 export const THREAD_LIST_QUERY_KEY = ["assistant", "threads", "recent"] as const;
 
-export const THREAD_GROUP_LABELS: Record<ThreadGroupKey, string> = {
-  today: "Today",
-  needsAttention: "Needs attention",
-  previousDays: "Previous days",
-  monthlyReviews: "Monthly reviews",
-  generalQuestions: "General questions",
-  yesterday: "Yesterday",
-  week: "This week",
-  older: "Older",
-};
+import type { TFunction } from "i18next";
+
+export const getThreadGroupLabels = (t: TFunction): Record<ThreadGroupKey, string> => ({
+  today: t("assistant.groups.today", "Today"),
+  needsAttention: t("assistant.groups.needsAttention", "Needs attention"),
+  previousDays: t("assistant.groups.previousDays", "Previous days"),
+  monthlyReviews: t("assistant.groups.monthlyReviews", "Monthly reviews"),
+  generalQuestions: t("assistant.groups.generalQuestions", "General questions"),
+  yesterday: t("assistant.groups.yesterday", "Yesterday"),
+  week: t("assistant.groups.week", "This week"),
+  older: t("assistant.groups.older", "Older"),
+});
 
 export const getChronologicalGroupKey = (isoDate: string): ThreadGroupKey => {
   const date = new Date(isoDate);

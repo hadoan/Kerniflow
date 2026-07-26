@@ -108,7 +108,8 @@
       "modalDescription": "Không gian làm việc của bạn hiện sử dụng gói Miễn phí. Dữ liệu lịch sử vẫn khả dụng, nhưng các tính năng xuất dữ liệu, AI và đa địa điểm sẽ bị khóa cho đến khi bạn đăng ký.",
       "modalLater": "Để sau",
       "choosePlan": "Chọn gói"
-    }
+    },
+    "searching": "Đang tìm kiếm..."
   },
   "onboarding": {
     "title": "Thiết lập",
@@ -1619,7 +1620,7 @@
   "assistant": {
     "title": "Trợ lý",
     "subtitle": "Hỏi bất cứ điều gì, trích xuất biên lai, tạo hóa đơn hoặc yêu cầu tóm tắt nhanh.",
-    "placeholder": "Hỏi tôi bất cứ điều gì...",
+    "placeholder": "Hỏi bất cứ điều gì, trích xuất biên lai, tạo hóa đơn hoặc yêu cầu tóm tắt nhanh.",
     "emptyStateTitle": "Tôi có thể giúp gì cho bạn?",
     "emptyStateDescription": "Hỏi bất cứ điều gì, trích xuất biên lai, tạo hóa đơn hoặc yêu cầu tóm tắt nhanh.",
     "awaitingInputs": "Đang chờ dữ liệu nhập từ bạn...",
@@ -1669,7 +1670,33 @@
     "issueInvoice": "Phát hành hóa đơn",
     "userRole": "Bạn",
     "assistantRole": "Trợ lý",
-    "systemRole": "Hệ thống"
+    "systemRole": "Hệ thống",
+    "searchAction": "Tìm kiếm",
+    "newChat": "Cuộc trò chuyện mới",
+    "recentChats": "Trò chuyện gần đây",
+    "recentChatsDescription": "Duyệt các cuộc trò chuyện trước đó hoặc bắt đầu một cuộc trò chuyện mới.",
+    "loadingChats": "Đang tải các cuộc trò chuyện...",
+    "noChats": "Chưa có cuộc trò chuyện nào",
+    "noChatsDescription": "Bắt đầu một cuộc trò chuyện và nó sẽ xuất hiện ở đây.",
+    "loadingPreview": "Đang tải bản xem trước...",
+    "loadingMonthlyReport": "Đang tải báo cáo hàng tháng...",
+    "search": {
+      "title": "Tìm kiếm trò chuyện",
+      "placeholder": "Tìm kiếm tin nhắn...",
+      "minLength": "Nhập ít nhất 2 ký tự để tìm kiếm.",
+      "noResults": "Không tìm thấy tin nhắn phù hợp.",
+      "noPreview": "(Không có bản xem trước)"
+    },
+    "groups": {
+      "today": "Hôm nay",
+      "needsAttention": "Cần chú ý",
+      "previousDays": "Những ngày trước",
+      "monthlyReviews": "Đánh giá hàng tháng",
+      "generalQuestions": "Câu hỏi chung",
+      "yesterday": "Hôm qua",
+      "week": "Tuần này",
+      "older": "Cũ hơn"
+    }
   },
   "copilot": {
     "title": "Trợ lý",
@@ -3508,12 +3535,34 @@
       "languages": "Tiếng Đức, Tiếng Anh, Tiếng Việt",
       "lockedTitle": "Trợ lý AI bị khóa trong gói này",
       "lockedDescription": "Nâng cấp lên Pro để mở trợ lý sổ quỹ, giải thích đa ngôn ngữ, và gợi ý xử lý vấn đề.",
-      "lockedBadge": "AI bị khóa"
+      "lockedBadge": "AI bị khóa",
+      "emptyStateActions": {
+        "recordTransactions": {
+          "label": "Ghi lại giao dịch hôm nay",
+          "value": "Tôi muốn ghi lại các giao dịch tiền mặt hôm nay."
+        },
+        "reviewMonth": {
+          "label": "Xem lại báo cáo hàng tháng",
+          "value": "Tôi muốn đánh giá báo cáo tiền mặt của tháng này."
+        },
+        "closeDay": {
+          "label": "Chốt sổ ngày",
+          "value": "Tôi muốn đóng sổ tiền mặt cho ngày hôm nay."
+        },
+        "generalHelp": {
+          "label": "Hỏi một câu hỏi chung",
+          "value": "Tôi có một câu hỏi chung về quản lý tiền mặt."
+        }
+      }
     },
     "severity": {
       "high": "Cao",
       "medium": "Trung bình",
       "low": "Thấp"
+    },
+    "workspace": {
+      "register": "Máy tính tiền",
+      "location": "Vị trí"
     }
   }
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { HttpError } from "../../http/request.ts";
-import { normalizeError } from "../normalize-error.ts";
-import { ApiError } from "../api-error.ts";
+import { HttpError } from "../../http/request.js";
+import { normalizeError } from "../normalize-error.js";
+import { ApiError } from "../api-error.js";
 
 describe("normalizeError", () => {
   describe("ProblemDetails responses", () => {

@@ -83,13 +83,13 @@ export function CashConversationContextHeader({ workspace }: CashConversationCon
             {registerId && (
               <div className="flex items-center gap-1.5">
                 <MonitorSmartphone className="h-3.5 w-3.5" />
-                <span>Register</span>
+                <span>{t("cashDashboard.workspace.register", "Register")}</span>
               </div>
             )}
             {locationId && (
               <div className="flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5" />
-                <span>Location</span>
+                <span>{t("cashDashboard.workspace.location", "Location")}</span>
               </div>
             )}
           </div>
