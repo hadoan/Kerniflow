@@ -100,7 +100,7 @@ export class PrismaBillingRepositoryAdapter
     tx?: TransactionContext
   ): Promise<BillingAccountRecord> {
     const providerVal = input.provider !== undefined ? toProviderEnum(input.provider) : undefined;
-    
+
     const row = await this.client(tx).billingAccount.upsert({
       where: { tenantId: input.tenantId },
       update: {

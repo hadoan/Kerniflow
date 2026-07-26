@@ -13,7 +13,10 @@ export type DeterministicScenario = {
 };
 
 // Global in-memory registry of scenarios keyed by tenantId
-export const activeScenarios = new Map<string, { scenario: DeterministicScenario; currentStep: number }>();
+export const activeScenarios = new Map<
+  string,
+  { scenario: DeterministicScenario; currentStep: number }
+>();
 
 export function activateScenario(tenantId: string, scenario: DeterministicScenario) {
   activeScenarios.set(tenantId, { scenario, currentStep: 0 });
@@ -50,34 +53,57 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
         const lastMessage = options.prompt?.[options.prompt.length - 1];
         if (lastMessage && lastMessage.role === "tool") {
           console.log(`[DeterministicLanguageModelV1] Received tool result loop, returning stop`);
-          await new Promise(r => setTimeout(r, 500)); controller.enqueue({
+          await new Promise((r) => setTimeout(r, 500));
+          controller.enqueue({
             type: "finish",
             finishReason: "stop",
-            usage: { promptTokens: 10, completionTokens: 10, inputTokens: { total: 10 }, outputTokens: { total: 10 } },
+            usage: {
+              promptTokens: 10,
+              completionTokens: 10,
+              inputTokens: { total: 10 },
+              outputTokens: { total: 10 },
+            },
           });
           controller.close();
           return;
         }
 
-        console.log(`[DeterministicLanguageModelV1] Executing step ${currentStep} of scenario ${scenario?.id}`);
+        console.log(
+          `[DeterministicLanguageModelV1] Executing step ${currentStep} of scenario ${scenario?.id}`
+        );
         const step = scenario.steps[currentStep];
 
         if (!step) {
           console.log(`[DeterministicLanguageModelV1] Ran out of steps, returning stop`);
-          await new Promise(r => setTimeout(r, 500)); controller.enqueue({
+          await new Promise((r) => setTimeout(r, 500));
+          controller.enqueue({
             type: "finish",
             finishReason: "stop",
-            usage: { promptTokens: 10, completionTokens: 10, inputTokens: { total: 10 }, outputTokens: { total: 10 } },
+            usage: {
+              promptTokens: 10,
+              completionTokens: 10,
+              inputTokens: { total: 10 },
+              outputTokens: { total: 10 },
+            },
           });
           controller.close();
           return;
         }
 
         if (step.assistantText) {
-          console.log(`[DeterministicLanguageModelV1] Yielding assistantText: ${step.assistantText}`);
+          console.log(
+            `[DeterministicLanguageModelV1] Yielding assistantText: ${step.assistantText}`
+          );
           const id = `txt_${Math.random().toString(36).substring(2, 9)}`;
-          await new Promise(r => setTimeout(r, 500)); controller.enqueue({ type: "text-start", id });
-          await new Promise(r => setTimeout(r, 500)); controller.enqueue({ type: "text-delta", id, textDelta: step.assistantText, delta: step.assistantText });
+          await new Promise((r) => setTimeout(r, 500));
+          controller.enqueue({ type: "text-start", id });
+          await new Promise((r) => setTimeout(r, 500));
+          controller.enqueue({
+            type: "text-delta",
+            id,
+            textDelta: step.assistantText,
+            delta: step.assistantText,
+          });
         }
 
         // Dynamic variable substitution
@@ -87,15 +113,22 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
             const msg = options.prompt[i];
             if (msg.role === "tool" && Array.isArray(msg.content)) {
               for (const contentPart of msg.content) {
-                if (contentPart.type === "tool-result" && contentPart.toolName === "prepare_cash_day_confirmation") {
-                  if (contentPart.result && typeof contentPart.result === "object" && "id" in contentPart.result) {
+                if (
+                  contentPart.type === "tool-result" &&
+                  contentPart.toolName === "prepare_cash_day_confirmation"
+                ) {
+                  if (
+                    contentPart.result &&
+                    typeof contentPart.result === "object" &&
+                    "id" in contentPart.result
+                  ) {
                     latestConfirmationId = (contentPart.result as any).id;
                   }
                   break;
                 }
               }
             }
-            if (latestConfirmationId) break;
+            if (latestConfirmationId) {break;}
           }
         }
 
@@ -104,10 +137,17 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
             console.log(`[DeterministicLanguageModelV1] Yielding tool-call: ${call.name}`);
             let stringifiedArgs = JSON.stringify(call.args);
             if (latestConfirmationId) {
-               stringifiedArgs = stringifiedArgs.replace(/\$\$LAST_CONFIRMATION_ID\$\$/g, latestConfirmationId);
-               stringifiedArgs = stringifiedArgs.replace(/\$\$LAST_IDEMPOTENCY_KEY\$\$/g, `idemp-${latestConfirmationId}`);
+              stringifiedArgs = stringifiedArgs.replace(
+                /\$\$LAST_CONFIRMATION_ID\$\$/g,
+                latestConfirmationId
+              );
+              stringifiedArgs = stringifiedArgs.replace(
+                /\$\$LAST_IDEMPOTENCY_KEY\$\$/g,
+                `idemp-${latestConfirmationId}`
+              );
             }
-            await new Promise(r => setTimeout(r, 500)); controller.enqueue({
+            await new Promise((r) => setTimeout(r, 500));
+            controller.enqueue({
               type: "tool-call",
               toolCallType: "function",
               toolCallId: `call_${Math.random().toString(36).substring(2, 9)}`,
@@ -119,12 +159,20 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
         }
 
         active.currentStep++;
-        console.log(`[DeterministicLanguageModelV1] Step finished. Next step is ${active.currentStep}`);
+        console.log(
+          `[DeterministicLanguageModelV1] Step finished. Next step is ${active.currentStep}`
+        );
 
-        await new Promise(r => setTimeout(r, 500)); controller.enqueue({
+        await new Promise((r) => setTimeout(r, 500));
+        controller.enqueue({
           type: "finish",
           finishReason: step.toolCalls && step.toolCalls.length > 0 ? "tool-calls" : "stop",
-          usage: { promptTokens: 10, completionTokens: 10, inputTokens: { total: 10 }, outputTokens: { total: 10 } },
+          usage: {
+            promptTokens: 10,
+            completionTokens: 10,
+            inputTokens: { total: 10 },
+            outputTokens: { total: 10 },
+          },
         });
         controller.close();
       },

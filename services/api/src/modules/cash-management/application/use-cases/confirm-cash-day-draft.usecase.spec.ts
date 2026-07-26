@@ -129,7 +129,7 @@ describe("ConfirmCashDayDraftUseCase", () => {
   });
 
   it("should return cached result instantly for identical idempotencyKey", async () => {
-    idempotencyStore.run.mockResolvedValue(ok({ dayClose: { id: "close-99" } } as any));
+    idempotencyStore.get.mockResolvedValue({ body: { dayClose: { id: "close-99" } } } as any);
 
     const result = await useCase.execute(
       { registerId: "reg-1", confirmationId: "conf-1", idempotencyKey: "idem-2" },

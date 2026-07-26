@@ -29,7 +29,7 @@ describe("ExceptionToProblemDetailsMapper - Prisma Errors", () => {
         instance,
         code: "Common:Conflict",
         traceId,
-        data: { prismaCode: "P2002" },
+        data: { prismaCode: "P2002", meta: { target: ["email"] } },
       });
     });
 

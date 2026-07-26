@@ -3266,6 +3266,24 @@
     }
   },
   "cashDashboard": {
+    "workspace": {
+      "dailyCash": "Đóng quỹ hàng ngày",
+      "monthlyReview": "Kiểm tra hàng tháng",
+      "generalHelp": "Trợ giúp chung",
+      "generalHelpTitle": "Trợ lý tiền mặt",
+      "cashDayFor": "Ngày tiền mặt",
+      "reviewFor": "Kiểm tra",
+      "register": "Sổ quỹ / Két",
+      "location": "Chi nhánh",
+      "boundRegisterLabel": "Sổ quỹ / Két"
+    },
+    "registerSelector": {
+      "title": "Chọn quỹ / két tiền mặt",
+      "description": "Cuộc trò chuyện này sẽ sử dụng quỹ đã chọn.",
+      "binding": "Đang kết nối quỹ...",
+      "error": "Không thể thiết lập quỹ tiền mặt.",
+      "retry": "Thử lại"
+    },
     "headerTitle": "Bảng điều khiển tiền mặt",
     "headerSubtitle": "Kiểm soát tiền mặt và hóa đơn hàng ngày cho salon.",
     "previewLabel": "Trạng thái mẫu",

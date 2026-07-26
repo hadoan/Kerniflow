@@ -12,30 +12,33 @@ import {
 } from "../../../application/ports/cash-management.ports";
 import { Inject } from "@nestjs/common";
 import { isErr } from "@corely/kernel";
-import { z } from "zod";
-
-const ResolveWorkspaceSchema = z.object({
-  type: z.enum(["DAILY_CASH_DAY", "MONTHLY_REVIEW", "GENERAL_HELP"]),
-  registerId: z.string().optional(),
-  locationId: z.string().optional(),
-  businessDate: z.string().optional(),
-  businessMonth: z.string().optional(),
-});
-
-type ResolveWorkspaceDto = z.infer<typeof ResolveWorkspaceSchema>;
+import { ResolveCashAssistantWorkspaceInputSchema } from "@corely/contracts";
+import { PrismaService } from "@corely/data";
 
 @Controller("cash-management/workspaces")
 @UseGuards(AuthGuard)
 export class CashAssistantWorkspaceController {
   constructor(
     private readonly resolveWorkspaceUseCase: ResolveCashWorkspaceUseCase,
-    @Inject(CASH_WORKSPACE_REPO) private readonly workspaceRepo: CashWorkspaceRepoPort
+    @Inject(CASH_WORKSPACE_REPO) private readonly workspaceRepo: CashWorkspaceRepoPort,
+    private readonly prisma: PrismaService
   ) {}
 
   @Get()
   async list(@CurrentTenantId() tenantId: string, @CurrentWorkspaceId() workspaceId: string) {
     const workspaces = await this.workspaceRepo.listWorkspaces(tenantId, workspaceId);
-    return { items: workspaces };
+    const registers = await this.prisma.cashRegister.findMany({
+      where: { tenantId, workspaceId },
+      select: { id: true, name: true, location: true, currency: true },
+    });
+    const regMap = new Map(registers.map((r) => [r.id, r]));
+
+    const items = workspaces.map((ws) => ({
+      ...ws,
+      register: ws.registerId ? (regMap.get(ws.registerId) ?? null) : null,
+    }));
+
+    return { items };
   }
 
   @Post("resolve")
@@ -43,13 +46,14 @@ export class CashAssistantWorkspaceController {
     @CurrentTenantId() tenantId: string,
     @CurrentWorkspaceId() workspaceId: string,
     @CurrentUserId() userId: string,
-    @Body() body: ResolveWorkspaceDto
+    @Body() body: unknown
   ) {
-    const validated = ResolveWorkspaceSchema.parse(body);
+    const validated = ResolveCashAssistantWorkspaceInputSchema.parse(body);
 
     const result = await this.resolveWorkspaceUseCase.execute(
       {
         type: validated.type,
+        conversationId: validated.conversationId,
         registerId: validated.registerId,
         locationId: validated.locationId,
         businessDate: validated.businessDate,
@@ -66,6 +70,18 @@ export class CashAssistantWorkspaceController {
       throw result.error;
     }
 
-    return result.value.workspace;
+    const ws = result.value.workspace;
+    let registerSummary = null;
+    if (ws.registerId) {
+      registerSummary = await this.prisma.cashRegister.findFirst({
+        where: { id: ws.registerId, tenantId, workspaceId },
+        select: { id: true, name: true, location: true, currency: true },
+      });
+    }
+
+    return {
+      ...ws,
+      register: registerSummary,
+    };
   }
 }

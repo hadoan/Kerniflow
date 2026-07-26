@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type * as CorelyUi from "@corely/ui";
@@ -29,6 +29,14 @@ vi.mock("@corely/web-shared/lib/billing-api", () => ({
   },
 }));
 
+vi.mock("@corely/web-shared/lib/cash-management-api", () => ({
+  cashManagementApi: {
+    listRegisters: vi.fn(async () => ({ registers: [] })),
+    listWorkspaces: vi.fn(async () => ({ items: [] })),
+    resolveWorkspace: vi.fn(),
+  },
+}));
+
 vi.mock("@corely/ui", async () => {
   const actual = (await vi.importActual("@corely/ui")) as typeof CorelyUi;
   return {
@@ -37,7 +45,10 @@ vi.mock("@corely/ui", async () => {
   };
 });
 
-const renderPage = () => {
+const renderPage = (
+  activeModule: "cash-management" | "assistant" = "cash-management",
+  initialEntry = "/assistant"
+) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -45,10 +56,14 @@ const renderPage = () => {
   });
 
   return render(
-    <MemoryRouter initialEntries={["/assistant"]}>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <QueryClientProvider client={queryClient}>
         <Routes>
-          <Route path="/assistant" element={<AssistantPage activeModule="cash-management" />} />
+          <Route path="/assistant" element={<AssistantPage activeModule={activeModule} />} />
+          <Route
+            path="/assistant/t/:threadId"
+            element={<AssistantPage activeModule={activeModule} />}
+          />
         </Routes>
       </QueryClientProvider>
     </MemoryRouter>
@@ -56,8 +71,14 @@ const renderPage = () => {
 };
 
 describe("AssistantPage billing access", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     chatSpy.mockClear();
+    const { cashManagementApi } = await import("@corely/web-shared/lib/cash-management-api");
+    vi.mocked(cashManagementApi.listRegisters).mockReset();
+    vi.mocked(cashManagementApi.listRegisters).mockResolvedValue({ registers: [] });
+    vi.mocked(cashManagementApi.listWorkspaces).mockReset();
+    vi.mocked(cashManagementApi.listWorkspaces).mockResolvedValue({ items: [] });
+    vi.mocked(cashManagementApi.resolveWorkspace).mockReset();
   });
 
   it("allows sending when cash management AI is enabled through trial entitlements", async () => {
@@ -161,7 +182,7 @@ describe("AssistantPage billing access", () => {
       plan: null,
     } as any);
 
-    renderPage();
+    renderPage("assistant");
 
     await screen.findByTestId("assistant-chat-mock");
 
@@ -185,5 +206,123 @@ describe("AssistantPage billing access", () => {
     for (const btn of newChatButtons) {
       expect(btn).not.toBeDisabled();
     }
+  });
+
+  it("binds the sole register before mounting Chat", async () => {
+    const { cashManagementApi } = await import("@corely/web-shared/lib/cash-management-api");
+    vi.mocked(cashManagementApi.listRegisters).mockResolvedValue({
+      registers: [
+        {
+          id: "reg-1",
+          tenantId: "tenant-1",
+          workspaceId: "ws-1",
+          name: "Front Desk",
+          location: "Berlin",
+          currency: "EUR",
+          currentBalanceCents: 0,
+          disallowNegativeBalance: false,
+          createdAt: "2026-03-14T00:00:00.000Z",
+          updatedAt: "2026-03-14T00:00:00.000Z",
+        },
+      ],
+    });
+    vi.mocked(cashManagementApi.resolveWorkspace).mockResolvedValue({
+      id: "cash-ws-1",
+      tenantId: "tenant-1",
+      workspaceId: "ws-1",
+      registerId: "reg-1",
+      type: "GENERAL_HELP",
+      conversationId: "thread-1",
+      register: { id: "reg-1", name: "Front Desk", location: "Berlin", currency: "EUR" },
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(cashManagementApi.resolveWorkspace).toHaveBeenCalledWith({
+        type: "GENERAL_HELP",
+        registerId: "reg-1",
+        conversationId: undefined,
+      });
+    });
+    expect(await screen.findByTestId("assistant-chat-mock")).toBeInTheDocument();
+  });
+
+  it("shows a retry action when automatic register binding fails", async () => {
+    const { cashManagementApi } = await import("@corely/web-shared/lib/cash-management-api");
+    vi.mocked(cashManagementApi.listRegisters).mockResolvedValue({
+      registers: [
+        {
+          id: "reg-1",
+          tenantId: "tenant-1",
+          workspaceId: "ws-1",
+          name: "Front Desk",
+          location: "Berlin",
+          currency: "EUR",
+          currentBalanceCents: 0,
+          disallowNegativeBalance: false,
+          createdAt: "2026-03-14T00:00:00.000Z",
+          updatedAt: "2026-03-14T00:00:00.000Z",
+        },
+      ],
+    });
+    vi.mocked(cashManagementApi.resolveWorkspace)
+      .mockRejectedValueOnce(new Error("Temporary connection problem"))
+      .mockResolvedValue({
+        id: "cash-ws-1",
+        tenantId: "tenant-1",
+        workspaceId: "ws-1",
+        registerId: "reg-1",
+        type: "GENERAL_HELP",
+        conversationId: "thread-1",
+        register: { id: "reg-1", name: "Front Desk", location: "Berlin", currency: "EUR" },
+      });
+
+    renderPage();
+
+    expect(await screen.findByText("Temporary connection problem")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+
+    await waitFor(() => {
+      expect(cashManagementApi.resolveWorkspace).toHaveBeenCalledTimes(2);
+    });
+    expect(await screen.findByTestId("assistant-chat-mock")).toBeInTheDocument();
+  });
+
+  it("shows the selector for an existing unbound conversation with multiple registers", async () => {
+    const { cashManagementApi } = await import("@corely/web-shared/lib/cash-management-api");
+    vi.mocked(cashManagementApi.listRegisters).mockResolvedValue({
+      registers: [
+        {
+          id: "reg-1",
+          tenantId: "tenant-1",
+          workspaceId: "ws-1",
+          name: "Front Desk",
+          location: "Berlin",
+          currency: "EUR",
+          currentBalanceCents: 0,
+          disallowNegativeBalance: false,
+          createdAt: "2026-03-14T00:00:00.000Z",
+          updatedAt: "2026-03-14T00:00:00.000Z",
+        },
+        {
+          id: "reg-2",
+          tenantId: "tenant-1",
+          workspaceId: "ws-1",
+          name: "Back Office",
+          location: "Hamburg",
+          currency: "EUR",
+          currentBalanceCents: 0,
+          disallowNegativeBalance: false,
+          createdAt: "2026-03-14T00:00:00.000Z",
+          updatedAt: "2026-03-14T00:00:00.000Z",
+        },
+      ],
+    });
+
+    renderPage("cash-management", "/assistant/t/legacy-thread");
+
+    expect(await screen.findByTestId("cash-register-selector")).toBeInTheDocument();
+    expect(screen.queryByTestId("assistant-chat-mock")).not.toBeInTheDocument();
   });
 });

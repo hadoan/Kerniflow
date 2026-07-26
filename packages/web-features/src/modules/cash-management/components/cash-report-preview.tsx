@@ -28,7 +28,10 @@ export const CashReportPreview: React.FC<CashReportPreviewProps> = ({ report }) 
   };
 
   return (
-    <Card className="border-border/60 bg-background/90 shadow-lg print:shadow-none print:border-none print:w-full max-w-2xl overflow-hidden" data-testid="cash-report-preview">
+    <Card
+      className="border-border/60 bg-background/90 shadow-lg print:shadow-none print:border-none print:w-full max-w-2xl overflow-hidden"
+      data-testid="cash-report-preview"
+    >
       <CardContent className="p-6 space-y-6">
         <div className="flex justify-between items-start border-b border-border/50 pb-4">
           <div>

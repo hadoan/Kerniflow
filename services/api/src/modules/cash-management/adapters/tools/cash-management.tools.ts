@@ -102,9 +102,7 @@ export type CashAssistantExecutionContext = {
 
 const MonthKeySchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Expected YYYY-MM");
 
-const RegisterScopedSchema = z.object({
-  registerId: z.string().min(1).optional(),
-});
+const RegisterScopedSchema = z.object({});
 
 const CreateCashEntryToolInputSchema = RegisterScopedSchema.extend({
   description: z.string().min(1),
@@ -347,6 +345,15 @@ const unwrapResult = <T extends Record<string, unknown>>(
   return result.value;
 };
 
+const toCashToolCtx = (params: {
+  tenantId: string;
+  workspaceId?: string;
+  userId: string;
+  toolCallId?: string;
+  runId?: string;
+  workspaceCtx: CashAssistantExecutionContext | null;
+}): ToolCtx => params;
+
 const getCtx = (params: ToolCtx) =>
   buildToolCtx({
     tenantId: params.tenantId,
@@ -386,7 +393,12 @@ const withWorkspaceContext =
       }
     }
 
-    if (workspaceCtx && allowedTypes.length > 0 && !allowedTypes.includes(workspaceCtx.type)) {
+    if (
+      workspaceCtx &&
+      workspaceCtx.type !== "GENERAL_HELP" &&
+      allowedTypes.length > 0 &&
+      !allowedTypes.includes(workspaceCtx.type)
+    ) {
       return failure(
         "UNAUTHORIZED_TOOL",
         `This tool is not allowed in ${workspaceCtx.type} workspaces.`
@@ -396,20 +408,39 @@ const withWorkspaceContext =
     return handler({ ...params, workspaceCtx });
   };
 
-const resolveRegister = async (
+export const resolveRegister = async (
   deps: CashToolDeps,
   params: ToolCtx,
   inputRegisterId?: string
 ): Promise<CashRegister | ToolFailure> => {
   const ctx = getCtx(params);
 
-  const registerId = params.workspaceCtx?.registerId || inputRegisterId;
-
-  if (registerId) {
-    const result = unwrapResult(await deps.getRegister.execute({ registerId }, ctx));
-    return isToolFailure(result) ? result : result.register;
+  // 1. Persisted conversation register
+  if (params.workspaceCtx?.registerId) {
+    const boundId = params.workspaceCtx.registerId;
+    if (inputRegisterId && inputRegisterId !== boundId) {
+      return failure("CONFLICT", "Cannot override the register bound to this conversation.");
+    }
+    const result = unwrapResult(await deps.getRegister.execute({ registerId: boundId }, ctx));
+    if (isToolFailure(result)) {
+      return failure(
+        "NOT_FOUND",
+        "The bound cash register for this conversation could not be found."
+      );
+    }
+    return result.register;
   }
 
+  if (inputRegisterId) {
+    const result = unwrapResult(
+      await deps.getRegister.execute({ registerId: inputRegisterId }, ctx)
+    );
+    if (!isToolFailure(result)) {
+      return result.register;
+    }
+  }
+
+  // 2. Sole-register fallback for legacy/unbound conversations
   const result = unwrapResult(await deps.listRegisters.execute({}, ctx));
   if (isToolFailure(result)) {
     return result;
@@ -419,21 +450,28 @@ const resolveRegister = async (
     return failure("NOT_FOUND", "No cash registers found in the current workspace");
   }
 
+  // 3. REGISTER_SELECTION_REQUIRED when multiple registers exist
   if (result.registers.length > 1) {
-    return failure(
-      "VALIDATION_ERROR",
-      "registerId is required because multiple cash registers exist",
-      {
-        availableRegisters: result.registers.map((register) => ({
-          id: register.id,
-          name: register.name,
-          location: register.location,
-        })),
-      }
-    );
+    return failure("REGISTER_SELECTION_REQUIRED", "Select a cash register before continuing.", {
+      availableRegisters: result.registers.map((register) => ({
+        id: register.id,
+        name: register.name,
+        location: register.location,
+      })),
+    });
   }
 
   return result.registers[0];
+};
+
+const assertEntryMatchesBoundRegister = (
+  entry: CashEntry,
+  workspaceCtx: CashAssistantExecutionContext | null
+): ToolFailure | null => {
+  if (workspaceCtx?.registerId && entry.registerId !== workspaceCtx.registerId) {
+    return failure("NOT_FOUND", "The cash entry does not belong to this conversation's register.");
+  }
+  return null;
 };
 
 const getDayCloseOrNull = async (
@@ -720,8 +758,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     inputSchema: PrepareCashDayConfirmationInputSchema.omit({
       tenantId: true,
       workspaceId: true,
-    }).extend({
-      registerId: z.string().optional(),
+      registerId: true,
     }),
     execute: withWorkspaceContext(
       deps,
@@ -730,18 +767,21 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         const parsed = PrepareCashDayConfirmationInputSchema.omit({
           tenantId: true,
           workspaceId: true,
-        })
-          .extend({ registerId: z.string().optional() })
-          .safeParse(input);
+          registerId: true,
+        }).safeParse(input);
         if (!parsed.success) {
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
@@ -749,7 +789,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         return mapToolResult(
           await deps.prepareConfirmation.execute(
             { ...parsed.data, registerId: register.id },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            getCtx(toolCtx)
           )
         );
       }
@@ -782,6 +822,10 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         }
 
         const original = originalResult.entry;
+        const registerMismatch = assertEntryMatchesBoundRegister(original, workspaceCtx);
+        if (registerMismatch) {
+          return registerMismatch;
+        }
         if (original.lockedByDayCloseId) {
           return failure(
             "CONFLICT",
@@ -856,11 +900,15 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
@@ -868,7 +916,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         const result = unwrapResult(
           await deps.listEntries.execute(
             { registerId: register.id, ...parsed.data },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            getCtx(toolCtx)
           )
         );
 
@@ -926,7 +974,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
                   category: "cash-receipt",
                   purpose: "copilot.cash.receipt",
                 },
-                getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+                getCtx({ tenantId, workspaceId, userId, toolCallId, runId, workspaceCtx })
               )
             );
             if (isToolFailure(uploaded)) {
@@ -945,7 +993,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
                 category: "cash-receipt",
                 purpose: "copilot.cash.receipt",
               },
-              getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+              getCtx({ tenantId, workspaceId, userId, toolCallId, runId, workspaceCtx })
             )
           );
           if (isToolFailure(uploaded)) {
@@ -982,6 +1030,25 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const entryResult = unwrapResult(
+          await deps.getEntry.execute({ entryId: parsed.data.entryId }, getCtx(toolCtx))
+        );
+        if (isToolFailure(entryResult)) {
+          return entryResult;
+        }
+        const registerMismatch = assertEntryMatchesBoundRegister(entryResult.entry, workspaceCtx);
+        if (registerMismatch) {
+          return registerMismatch;
+        }
+
         const documentIds = new Set<string>();
         if (parsed.data.documentId) {
           documentIds.add(parsed.data.documentId);
@@ -995,7 +1062,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           const attached = mapToolResult(
             await deps.attachBeleg.execute(
               { entryId: parsed.data.entryId, documentId },
-              getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+              getCtx(toolCtx)
             )
           );
           if (!attached.ok) {
@@ -1027,18 +1094,22 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const status = await buildTodayStatus(
           deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
+          toolCtx,
           register,
           toDayKey(parsed.data.dayKey)
         );
@@ -1076,25 +1147,33 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
       "Confirm a previously prepared cash day draft by atomically saving the proposed movements and submitting the counted cash.",
     descriptions: cashManagementToolDescriptions.confirm_cash_day_draft,
     kind: "server",
-    inputSchema: ConfirmCashDayDraftInputSchema.omit({ tenantId: true, workspaceId: true }).extend({
-      registerId: z.string().optional(),
+    inputSchema: ConfirmCashDayDraftInputSchema.omit({
+      tenantId: true,
+      workspaceId: true,
+      registerId: true,
     }),
     execute: withWorkspaceContext(
       deps,
       ["DAILY_CASH_DAY"],
       async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
-        const parsed = ConfirmCashDayDraftInputSchema.omit({ tenantId: true, workspaceId: true })
-          .extend({ registerId: z.string().optional() })
-          .safeParse(input);
+        const parsed = ConfirmCashDayDraftInputSchema.omit({
+          tenantId: true,
+          workspaceId: true,
+          registerId: true,
+        }).safeParse(input);
         if (!parsed.success) {
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
@@ -1102,7 +1181,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         return mapToolResult(
           await deps.confirmDraft.execute(
             { ...parsed.data, registerId: register.id },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            getCtx(toolCtx)
           )
         );
       }
@@ -1123,22 +1202,21 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const dayKey = toDayKey(parsed.data.dayKey);
-        const existingDayClose = await getDayCloseOrNull(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          register.id,
-          dayKey
-        );
+        const existingDayClose = await getDayCloseOrNull(deps, toolCtx, register.id, dayKey);
         if (isToolFailure(existingDayClose)) {
           return existingDayClose;
         }
@@ -1215,23 +1293,25 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const dayKeyTo = parsed.data.dayKeyTo ?? toDayKey();
         const dayKeyFrom = parsed.data.dayKeyFrom ?? `${dayKeyTo.slice(0, 7)}-01`;
-        const entries = await listEntriesForRange(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          register.id,
-          { dayKeyFrom, dayKeyTo }
-        );
+        const entries = await listEntriesForRange(deps, toolCtx, register.id, {
+          dayKeyFrom,
+          dayKeyTo,
+        });
         if (isToolFailure(entries)) {
           return entries;
         }
@@ -1239,7 +1319,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         const closesResult = unwrapResult(
           await deps.listDayCloses.execute(
             { registerId: register.id, dayKeyFrom, dayKeyTo },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            getCtx(toolCtx)
           )
         );
         if (isToolFailure(closesResult)) {
@@ -1294,33 +1374,31 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const dayKeyTo = parsed.data.dayKeyTo ?? toDayKey();
         const dayKeyFrom = parsed.data.dayKeyFrom ?? `${dayKeyTo.slice(0, 7)}-01`;
-        const entries = await listEntriesForRange(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          register.id,
-          { dayKeyFrom, dayKeyTo }
-        );
+        const entries = await listEntriesForRange(deps, toolCtx, register.id, {
+          dayKeyFrom,
+          dayKeyTo,
+        });
         if (isToolFailure(entries)) {
           return entries;
         }
 
         const candidates = entries.filter(requiresReceipt);
-        const attachmentCounts = await listAttachmentsByEntry(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          candidates
-        );
+        const attachmentCounts = await listAttachmentsByEntry(deps, toolCtx, candidates);
         if (isToolFailure(attachmentCounts)) {
           return attachmentCounts;
         }
@@ -1362,22 +1440,21 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const monthKey = parsed.data.month ?? toMonthKey(toDayKey());
-        const exportStatus = await buildMonthExportStatus(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          register.id,
-          monthKey
-        );
+        const exportStatus = await buildMonthExportStatus(deps, toolCtx, register.id, monthKey);
         if (isToolFailure(exportStatus)) {
           return exportStatus;
         }
@@ -1398,7 +1475,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
               includeAttachmentFiles: parsed.data.includeAttachmentFiles,
               idempotencyKey: parsed.data.idempotencyKey,
             },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            getCtx(toolCtx)
           )
         );
 
@@ -1429,18 +1506,22 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const status = await buildTodayStatus(
           deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
+          toolCtx,
           register,
           toDayKey(parsed.data.dayKey)
         );
@@ -1450,7 +1531,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
 
         const exportStatus = await buildMonthExportStatus(
           deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
+          toolCtx,
           register.id,
           status.monthKey
         );
@@ -1505,18 +1586,22 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const status = await buildTodayStatus(
           deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
+          toolCtx,
           register,
           toDayKey(parsed.data.dayKey)
         );
@@ -1526,7 +1611,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
 
         const exportStatus = await buildMonthExportStatus(
           deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
+          toolCtx,
           register.id,
           status.monthKey
         );
@@ -1646,18 +1731,22 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
           return validationError(parsed.error.flatten());
         }
 
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
 
         const status = await buildTodayStatus(
           deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
+          toolCtx,
           register,
           toDayKey(parsed.data.dayKey)
         );
@@ -1718,7 +1807,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         if (topic === "monthly-export") {
           const exportStatus = await buildMonthExportStatus(
             deps,
-            { tenantId, workspaceId, userId, toolCallId, runId },
+            toolCtx,
             register.id,
             status.monthKey
           );
@@ -1769,11 +1858,15 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
         if (!parsed.success) {
           return validationError(parsed.error.flatten());
         }
-        const register = await resolveRegister(
-          deps,
-          { tenantId, workspaceId, userId, toolCallId, runId },
-          parsed.data.registerId
-        );
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
         if (isToolFailure(register)) {
           return register;
         }
@@ -1783,7 +1876,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
               registerId: register.id,
               businessDate: toDayKey(parsed.data.businessDate),
             },
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            getCtx(toolCtx)
           )
         );
       }
@@ -1794,19 +1887,31 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     description: "Get a structured read-only monthly Kassenabrechnung.",
     descriptions: cashManagementToolDescriptions.get_monthly_cash_report,
     kind: "server",
-    inputSchema: GetMonthlyCashReportQuerySchema,
+    inputSchema: GetMonthlyCashReportQuerySchema.omit({ registerId: true }),
     execute: withWorkspaceContext(
       deps,
       ["MONTHLY_REVIEW"],
       async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
-        const parsed = GetMonthlyCashReportQuerySchema.safeParse(input);
+        const parsed = GetMonthlyCashReportQuerySchema.omit({ registerId: true }).safeParse(input);
         if (!parsed.success) {
           return validationError(parsed.error.flatten());
         }
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
+        if (isToolFailure(register)) {
+          return register;
+        }
         return mapToolResult(
           await deps.getMonthlyReport.execute(
-            parsed.data,
-            getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+            { ...parsed.data, registerId: register.id },
+            getCtx(toolCtx)
           )
         );
       }
