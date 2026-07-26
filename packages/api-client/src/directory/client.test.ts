@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError } from "../errors.js";
+import { ApiError } from "../errors/index.js";
 import { createDirectoryClient } from "./client.js";
 
 describe("directory api client", () => {
