@@ -61,6 +61,8 @@ import { CoachingEngagementsModule } from "../coaching-engagements";
 import { RestaurantModule } from "../restaurant/restaurant.module";
 import { PlatformModule } from "../platform/platform.module";
 import { copilotToolsProvider } from "./ai-copilot.tools.provider";
+import { AI_TEXT_PORT } from "../../shared/ai/ai-text.port";
+import { AiSdkTextAdapter } from "../../shared/ai/ai-sdk-text.adapter";
 
 @Module({
   imports: [
@@ -97,6 +99,8 @@ import { copilotToolsProvider } from "./ai-copilot.tools.provider";
     IdempotencyService,
     PrismaCopilotIdempotencyAdapter,
     TenantGuard,
+    AiSdkTextAdapter,
+    { provide: AI_TEXT_PORT, useExisting: AiSdkTextAdapter },
     { provide: "COPILOT_LOGGER", useClass: NestLoggerAdapter },
     {
       provide: AiSdkModelAdapter,

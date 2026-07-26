@@ -13,6 +13,14 @@ export interface GlossaryEntry {
 
 export type Glossary = Record<string, GlossaryEntry>;
 
+export interface GlossaryMatch {
+  canonicalKey: string;
+  matchType: "exact" | "fuzzy";
+  matchedAlias: string;
+  confidence: number;
+  content: GlossaryLocalizedContent;
+}
+
 export const glossary: Glossary = {
   opening_balance: {
     aliases: [
@@ -42,10 +50,10 @@ export const glossary: Glossary = {
       whenToUse: "Dùng làm mốc để tính số dư cuối ngày dự kiến.",
     },
   },
-  privateinlage: {
+  private_deposit: {
     aliases: [
-      "privateinlage",
       "private deposit",
+      "privateinlage",
       "owner deposit",
       "nộp tiền cá nhân",
       "nop tien ca nhan",
@@ -68,10 +76,10 @@ export const glossary: Glossary = {
       whenToUse: "Ghi lại khi tiền cá nhân được thêm vào ngăn kéo tiền mặt.",
     },
   },
-  privatentnahme: {
+  private_withdrawal: {
     aliases: [
-      "privatentnahme",
       "private withdrawal",
+      "privatentnahme",
       "owner withdrawal",
       "rút tiền cá nhân",
       "rut tien ca nhan",
@@ -178,32 +186,86 @@ export const levenshtein = (a: string, b: string): number => {
   return dp[m][n];
 };
 
-export const resolveGlossaryEntry = (term: string): GlossaryEntry | undefined => {
-  const normalized = term.trim().toLowerCase();
-  return Object.values(glossary).find((entry) =>
-    entry.aliases.some((alias) => alias.toLowerCase() === normalized)
-  );
+export const resolveGlossaryEntry = (
+  term: string,
+  locale: "en" | "de" | "vi"
+): GlossaryMatch | undefined => {
+  const normalized = normalizeTerm(term);
+  for (const [key, entry] of Object.entries(glossary)) {
+    const matchedAlias = entry.aliases.find((alias) => normalizeTerm(alias) === normalized);
+    if (matchedAlias) {
+      return {
+        canonicalKey: key,
+        matchType: "exact",
+        matchedAlias,
+        confidence: 1.0,
+        content: entry[locale],
+      };
+    }
+  }
+  return undefined;
 };
 
-export const fuzzyResolveGlossaryEntry = (term: string): GlossaryEntry | undefined => {
+export const fuzzyResolveGlossaryEntry = (
+  term: string,
+  locale: "en" | "de" | "vi"
+): GlossaryMatch | undefined => {
   const norm = normalizeTerm(term);
-  if (!norm) {
+  if (!norm || norm.length < 3) {
     return undefined;
   }
 
-  // 1. Substring containment
-  const substringHit = Object.values(glossary).find((entry) =>
-    entry.aliases.some((alias) => {
+  const candidates: Array<{
+    canonicalKey: string;
+    matchedAlias: string;
+    distance: number;
+    confidence: number;
+    content: GlossaryLocalizedContent;
+  }> = [];
+
+  for (const [key, entry] of Object.entries(glossary)) {
+    for (const alias of entry.aliases) {
       const normAlias = normalizeTerm(alias);
-      return normAlias.includes(norm) || norm.includes(normAlias);
-    })
-  );
-  if (substringHit) {
-    return substringHit;
+      const distance = levenshtein(normAlias, norm);
+
+      const maxDistance = norm.length <= 4 ? 1 : norm.length <= 7 ? 2 : 3;
+
+      if (distance <= maxDistance) {
+        const confidence = 1 - distance / Math.max(norm.length, normAlias.length);
+        candidates.push({
+          canonicalKey: key,
+          matchedAlias: alias,
+          distance,
+          confidence,
+          content: entry[locale],
+        });
+      }
+    }
   }
 
-  // 2. Levenshtein distance <= 2
-  return Object.values(glossary).find((entry) =>
-    entry.aliases.some((alias) => levenshtein(normalizeTerm(alias), norm) <= 2)
-  );
+  if (candidates.length === 0) {
+    return undefined;
+  }
+
+  candidates.sort((a, b) => b.confidence - a.confidence);
+
+  if (candidates.length > 1) {
+    const top = candidates[0];
+    const second = candidates[1];
+    if (top.canonicalKey !== second.canonicalKey) {
+      const diff = top.confidence - second.confidence;
+      if (diff < 0.1) {
+        return undefined; // Ambiguous match
+      }
+    }
+  }
+
+  const best = candidates[0];
+  return {
+    canonicalKey: best.canonicalKey,
+    matchType: "fuzzy",
+    matchedAlias: best.matchedAlias,
+    confidence: best.confidence,
+    content: best.content,
+  };
 };

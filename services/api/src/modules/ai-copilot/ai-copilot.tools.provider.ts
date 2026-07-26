@@ -197,8 +197,6 @@ export const copilotToolsProvider: Provider = {
           getMonthlyReport,
           documentsApp,
           workspaceRepo: cashWorkspaceRepo,
-          aiText,
-          promptRegistry,
         })
       ),
       ...withAppId(
