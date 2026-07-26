@@ -1504,7 +1504,8 @@
         "closeDayFor": "Tag abschließen für {{register}}",
         "day": "Tag",
         "expectedBalance": "Soll-Bestand",
-        "countedBalance": "Ist-Bestand",
+        "countedBalance": "Gesamter gezählter Bargeldbestand (Ist)",
+        "countedBalanceHelp": "Zählen Sie das gesamte Bargeld derselben Geschäftskasse, einschließlich Bargeld in Schublade, Tresor oder Geldbox.",
         "denomination": "Stückelung",
         "count": "Anzahl",
         "subtotal": "Zwischensumme",
@@ -1679,6 +1680,17 @@
     "noChatsDescription": "Beginnen Sie eine Unterhaltung, und sie wird hier angezeigt.",
     "loadingPreview": "Vorschau wird geladen...",
     "loadingMonthlyReport": "Monatsbericht wird geladen...",
+    "cashConfirmation": {
+      "title": "Entwurf zur Bestätigung bereit",
+      "description": "Prüfen Sie die Zusammenfassung für den {{date}} und bestätigen Sie anschließend das Speichern der Kassenbucheinträge.",
+      "confirm": "Bestätigen und speichern",
+      "confirming": "Wird bestätigt...",
+      "confirmPrompt": "Ich bestätige ausdrücklich und autorisiere das Speichern dieses Kassen-Tagesentwurfs.",
+      "savedTitle": "Kassen-Tagesentwurf gespeichert",
+      "savedDescription": "Die bestätigten Kassenbewegungen wurden erfolgreich gespeichert.",
+      "taxProfileRequiredTitle": "Steuerprofil vor dem Speichern erforderlich",
+      "taxProfileRequiredDescription": "Wählen Sie, ob das Unternehmen die deutsche Regelbesteuerung oder die Kleinunternehmerregelung verwendet. Die App darf diese Steuereinstellung nicht erraten."
+    },
     "search": {
       "title": "Chats durchsuchen",
       "placeholder": "Nachrichten suchen...",

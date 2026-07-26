@@ -22,6 +22,7 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
+    "dev:debug": "tsdown --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "author": "Ha Doan <ha@oneway8x.com>"

@@ -163,6 +163,9 @@ export function DailyCloseScreen() {
               <p className="text-sm text-muted-foreground">
                 {t("cash.ui.dayClose.countedBalance")}
               </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("cash.ui.dayClose.countedBalanceHelp")}
+              </p>
               <p className="text-lg font-semibold">
                 {formatMoney(countedBalance, undefined, registerQuery.data.register.currency)}
               </p>

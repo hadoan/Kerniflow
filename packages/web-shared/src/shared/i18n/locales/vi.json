@@ -1505,7 +1505,8 @@
         "closeDayFor": "Chốt ngày cho {{register}}",
         "day": "Ngày",
         "expectedBalance": "Số dư kỳ vọng (Soll)",
-        "countedBalance": "Số dư kiểm đếm (Ist)",
+        "countedBalance": "Tổng tiền mặt kiểm đếm (Ist)",
+        "countedBalanceHelp": "Đếm toàn bộ tiền thuộc cùng quỹ, gồm tiền trong ngăn kéo và tiền đã cất trong két hoặc hộp.",
         "denomination": "Mệnh giá",
         "count": "Số lượng",
         "subtotal": "Thành tiền",
@@ -1680,6 +1681,17 @@
     "noChatsDescription": "Bắt đầu một cuộc trò chuyện và nó sẽ xuất hiện ở đây.",
     "loadingPreview": "Đang tải bản xem trước...",
     "loadingMonthlyReport": "Đang tải báo cáo hàng tháng...",
+    "cashConfirmation": {
+      "title": "Bản nháp đã sẵn sàng để xác nhận",
+      "description": "Kiểm tra bản tóm tắt ngày {{date}}, sau đó xác nhận để lưu các giao dịch tiền mặt.",
+      "confirm": "Xác nhận và lưu",
+      "confirming": "Đang xác nhận...",
+      "confirmPrompt": "Tôi xác nhận rõ ràng và cho phép lưu bản nháp ngày tiền mặt này.",
+      "savedTitle": "Đã lưu bản nháp ngày tiền mặt",
+      "savedDescription": "Các giao dịch tiền mặt đã xác nhận được lưu thành công.",
+      "taxProfileRequiredTitle": "Cần cấu hình hồ sơ thuế trước khi lưu",
+      "taxProfileRequiredDescription": "Hãy chọn doanh nghiệp áp dụng VAT tiêu chuẩn của Đức hay chế độ Kleinunternehmer. Ứng dụng không được tự đoán cấu hình thuế này."
+    },
     "search": {
       "title": "Tìm kiếm trò chuyện",
       "placeholder": "Tìm kiếm tin nhắn...",

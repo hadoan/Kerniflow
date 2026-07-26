@@ -1920,7 +1920,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
   {
     name: "request_cash_clarification",
     description:
-      "Request clarification from the user when a material cash fact is ambiguous before proceeding.",
+      "Ask for exactly one unresolved material cash fact, then wait for the user's answer. Call this tool at most once per assistant response. Never ask for a fact already stated by the user or deterministically derivable from those stated facts.",
     descriptions: cashManagementToolDescriptions.request_cash_clarification,
     kind: "client-auto",
     inputSchema: RequestCashClarificationInputSchema,

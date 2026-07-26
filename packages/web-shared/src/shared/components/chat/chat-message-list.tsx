@@ -32,6 +32,8 @@ interface ChatMessageListProps {
   showWaitingStatus: boolean;
   statusText?: string;
   toolRenderers?: Record<string, ToolRenderer>;
+  sendPrompt?: (prompt: string) => void;
+  isChatLoading?: boolean;
 }
 
 export function ChatMessageList({
@@ -45,6 +47,8 @@ export function ChatMessageList({
   showWaitingStatus,
   statusText,
   toolRenderers,
+  sendPrompt,
+  isChatLoading,
 }: ChatMessageListProps) {
   return (
     <div className="space-y-6">
@@ -92,6 +96,8 @@ export function ChatMessageList({
                   submittingToolIds,
                   markSubmitting,
                   toolRenderers,
+                  sendPrompt,
+                  isChatLoading,
                 });
                 if (!rendered) {
                   return null;

@@ -94,6 +94,26 @@ describe("prompt snapshots", () => {
     );
   });
 
+  it("does not re-ask known cash-day facts after same-fund storage confirmation", () => {
+    const result = registry.render("cash.copilot.system", context, {
+      LANGUAGE: "vi",
+      REQUEST_CLARIFICATION_TOOL: "request_cash_clarification",
+    });
+
+    expect(result.content).toContain(
+      "Do not call ACTUAL_CLOSING_CASH or collect_inputs for businessDate or actualClosingCashCents"
+    );
+    expect(result.promptVersion).toBe("v3");
+    expect(result.content).toContain(
+      "Call at most one request_cash_clarification per assistant response"
+    );
+    expect(result.content).toContain("SALE_CASH=12960 cents, actualClosingCashCents=12960");
+    expect(result.content).toContain("Ask no additional date, payment-method, or cash-count form");
+    expect(result.content).toContain(
+      "the unaccented Vietnamese 'xac nhan'—call confirm_cash_day_draft immediately"
+    );
+  });
+
   it("renders approvals policy prompt", () => {
     const result = registry.render("approvals.suggest_policy", context, {
       ACTION_KEY: "sales.create-invoice",

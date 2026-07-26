@@ -22,6 +22,7 @@ export type ToolRendererProps = {
   submittingToolIds?: Set<string>;
   markSubmitting?: (id: string, value: boolean) => void;
   sendPrompt?: (prompt: string) => void;
+  isChatLoading?: boolean;
 };
 
 export type ToolRenderer = (props: ToolRendererProps) => React.ReactNode;
@@ -80,6 +81,7 @@ export const renderPart = (
     submittingToolIds: Set<string>;
     markSubmitting: (id: string, value: boolean) => void;
     sendPrompt?: (prompt: string) => void;
+    isChatLoading?: boolean;
     toolRenderers?: Record<string, ToolRenderer>;
   }
 ) => {
@@ -145,6 +147,7 @@ export const renderPart = (
         submittingToolIds: helpers.submittingToolIds,
         markSubmitting: helpers.markSubmitting,
         sendPrompt: helpers.sendPrompt,
+        isChatLoading: helpers.isChatLoading,
       });
       if (rendered) {
         return rendered;

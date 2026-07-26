@@ -35,7 +35,10 @@ const ToolInvocationStateSchema = z.enum([
 export const CopilotToolInvocationSchema = z.object({
   type: z.string().min(1),
   toolCallId: z.string(),
-  toolName: z.string(),
+  // AI SDK static tools encode the tool name in `type` (for example,
+  // `tool-collect_inputs`) and do not include a separate `toolName`.
+  // Dynamic tools still provide `toolName`, so support both persisted shapes.
+  toolName: z.string().optional(),
   state: ToolInvocationStateSchema,
   input: z.any().optional(),
   rawInput: z.any().optional(),

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const CashClarificationType = {
   MONEY_DESTINATION: "MONEY_DESTINATION",
+  CASH_FUND_SCOPE: "CASH_FUND_SCOPE",
   ACCOUNT_OWNERSHIP: "ACCOUNT_OWNERSHIP",
   PURCHASE_PURPOSE: "PURCHASE_PURPOSE",
   ACTUAL_CLOSING_CASH: "ACTUAL_CLOSING_CASH",
@@ -20,6 +21,10 @@ export const CashClarificationChoiceId = {
   GOODS_PURCHASE: "GOODS_PURCHASE",
   STILL_IN_DRAWER: "STILL_IN_DRAWER",
   OTHER: "OTHER",
+
+  // CASH_FUND_SCOPE
+  SAME_BUSINESS_CASH_FUND: "SAME_BUSINESS_CASH_FUND",
+  SEPARATE_CASH_FUND: "SEPARATE_CASH_FUND",
 
   // ACCOUNT_OWNERSHIP
   PERSONAL_ACCOUNT: "PERSONAL_ACCOUNT",
@@ -107,6 +112,31 @@ export const CASH_CLARIFICATION_CONTENT: Record<
       },
     ],
   },
+  CASH_FUND_SCOPE: {
+    question: {
+      en: "Does this cash still belong to the same business cash fund, just stored outside the drawer?",
+      de: "Gehört dieses Bargeld weiterhin zur gleichen Geschäftskasse und wird nur außerhalb der Kassenschublade aufbewahrt?",
+      vi: "Số tiền này vẫn thuộc cùng quỹ tiền mặt của tiệm, chỉ được cất trong két hoặc hộp khác đúng không?",
+    },
+    choices: [
+      {
+        id: "SAME_BUSINESS_CASH_FUND",
+        label: {
+          en: "Yes, it is still the same business cash fund",
+          de: "Ja, es bleibt dieselbe Geschäftskasse",
+          vi: "Đúng, vẫn thuộc cùng quỹ của tiệm",
+        },
+      },
+      {
+        id: "SEPARATE_CASH_FUND",
+        label: {
+          en: "No, it moved to a separate cash fund",
+          de: "Nein, es wurde in eine separate Kasse übertragen",
+          vi: "Không, đã chuyển sang một quỹ riêng",
+        },
+      },
+    ],
+  },
   ACCOUNT_OWNERSHIP: {
     question: {
       en: "Which account are you depositing into?",
@@ -167,9 +197,9 @@ export const CASH_CLARIFICATION_CONTENT: Record<
   },
   ACTUAL_CLOSING_CASH: {
     question: {
-      en: "How much cash is physically left in the drawer at closing?",
-      de: "Wie viel Bargeld ist bei Geschäftsschluss tatsächlich in der Kasse?",
-      vi: "Sau khi kiểm tra, trong ngăn kéo thực tế còn bao nhiêu tiền mặt?",
+      en: "How much cash does the business have in total at closing, including cash in the drawer and cash stored in a safe or box?",
+      de: "Wie viel Bargeld gehört der Geschäftskasse bei Geschäftsschluss insgesamt, einschließlich Bargeld in der Schublade und im Tresor oder einer Geldbox?",
+      vi: "Cuối ngày, tổng cộng tiệm còn bao nhiêu tiền mặt thuộc quỹ, bao gồm tiền trong ngăn kéo và tiền đã cất trong két hoặc hộp?",
     },
     choices: [
       {

@@ -112,18 +112,24 @@ export const glossary: Glossary = {
     ],
     en: {
       title: "Counted cash",
-      meaning: "The physical cash amount actually counted in the drawer at close time.",
-      whenToUse: "Enter it before closing the day to compare real cash with the expected balance.",
+      meaning:
+        "The total business cash physically counted at close time, including cash in the drawer, safe, or another storage box belonging to the same cash fund.",
+      whenToUse:
+        "Count all cash belonging to the same business cash fund before closing the day and compare the total with the expected balance.",
     },
     de: {
       title: "Gezaehltes Bargeld",
-      meaning: "Der tatsaechlich gezaehlte Bargeldbestand in der Kasse beim Abschluss.",
-      whenToUse: "Erfasse ihn vor dem Tagesabschluss zum Abgleich mit dem Sollbestand.",
+      meaning:
+        "Der beim Abschluss tatsächlich gezählte gesamte Bargeldbestand der Geschäftskasse, einschließlich Bargeld in Schublade, Tresor oder einer anderen Aufbewahrungsbox derselben Kasse.",
+      whenToUse:
+        "Zähle vor dem Tagesabschluss das gesamte Bargeld derselben Geschäftskasse und vergleiche es mit dem Sollbestand.",
     },
     vi: {
       title: "Tiền đếm thực tế",
-      meaning: "Số tiền mặt đếm được thực tế trong ngăn kéo lúc kết ngày.",
-      whenToUse: "Nhập trước khi đóng ngày để so sánh với số dư dự kiến.",
+      meaning:
+        "Tổng số tiền mặt thực tế của quỹ được đếm lúc kết ngày, gồm tiền trong ngăn kéo, két hoặc hộp cất tiền thuộc cùng quỹ.",
+      whenToUse:
+        "Đếm toàn bộ tiền thuộc cùng quỹ trước khi đóng ngày rồi so sánh với số dư dự kiến.",
     },
   },
   difference: {

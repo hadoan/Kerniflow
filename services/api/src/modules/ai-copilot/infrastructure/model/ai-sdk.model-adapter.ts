@@ -210,7 +210,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       ...aiTools,
       collect_inputs: buildCollectInputsTool(collectInputsDescription.content),
       request_cash_clarification: buildRequestCashClarificationTool(
-        "Request clarification from the user when a material cash fact is ambiguous before proceeding."
+        "Ask for exactly one unresolved material cash fact, then wait for the user's answer. Call this tool at most once per assistant response. Never ask for a fact already stated by the user or deterministically derivable from those stated facts."
       ),
     };
 

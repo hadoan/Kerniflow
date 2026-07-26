@@ -1520,7 +1520,8 @@
         "closeDayFor": "Close day for {{register}}",
         "day": "Day",
         "expectedBalance": "Expected balance (Soll)",
-        "countedBalance": "Counted balance (Ist)",
+        "countedBalance": "Total counted cash (Ist)",
+        "countedBalanceHelp": "Count all cash belonging to the same business cash fund, including cash in the drawer, safe, or box.",
         "denomination": "Denomination",
         "count": "Count",
         "subtotal": "Subtotal",
@@ -1698,6 +1699,17 @@
     "noChatsDescription": "Start a conversation and it will appear here.",
     "loadingPreview": "Loading preview...",
     "loadingMonthlyReport": "Loading monthly report...",
+    "cashConfirmation": {
+      "title": "Draft ready for confirmation",
+      "description": "Review the summary for {{date}}, then confirm to save the cash entries.",
+      "confirm": "Confirm and save",
+      "confirming": "Confirming...",
+      "confirmPrompt": "I explicitly confirm and authorize saving this cash-day draft.",
+      "savedTitle": "Cash-day draft saved",
+      "savedDescription": "The confirmed cash movements were saved successfully.",
+      "taxProfileRequiredTitle": "Tax profile required before saving",
+      "taxProfileRequiredDescription": "Choose whether the business uses standard German VAT or the Kleinunternehmer scheme. The app must not guess this tax setting."
+    },
     "search": {
       "title": "Search chats",
       "placeholder": "Search messages...",

@@ -7,6 +7,7 @@ import { useAuth } from "@corely/web-shared/lib/auth-provider";
 import { useTranslation } from "react-i18next";
 import { normalizeError } from "@corely/api-client";
 import { pingApi } from "../../lib/ping-api";
+import { COPILOT_AUTH_RETURN_TO_KEY } from "@corely/web-shared/lib/copilot-auth-fetch";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -35,7 +36,9 @@ export const LoginPage = () => {
     try {
       await signin({ email, password });
       await ensureDefaultWorkspace(email);
-      navigate("/cash/registers", { replace: true });
+      const returnTo = window.sessionStorage.getItem(COPILOT_AUTH_RETURN_TO_KEY);
+      window.sessionStorage.removeItem(COPILOT_AUTH_RETURN_TO_KEY);
+      navigate(returnTo?.startsWith("/") ? returnTo : "/cash/registers", { replace: true });
     } catch (err) {
       const apiError = normalizeError(err);
       const message = apiError.isNetworkError

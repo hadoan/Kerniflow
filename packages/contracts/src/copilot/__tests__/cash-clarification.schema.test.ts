@@ -43,4 +43,20 @@ describe("Cash Clarification Contracts", () => {
     const parsed = RequestCashClarificationOutputSchema.safeParse(output);
     expect(parsed.success).toBe(true);
   });
+
+  it("offers a same-fund choice for cash stored outside the drawer", () => {
+    const content = CASH_CLARIFICATION_CONTENT[CashClarificationType.CASH_FUND_SCOPE];
+
+    expect(content.question.vi).toContain("cùng quỹ tiền mặt");
+    expect(content.choices.map((choice) => choice.id)).toEqual([
+      "SAME_BUSINESS_CASH_FUND",
+      "SEPARATE_CASH_FUND",
+    ]);
+  });
+
+  it("asks for total business cash across storage locations", () => {
+    expect(
+      CASH_CLARIFICATION_CONTENT[CashClarificationType.ACTUAL_CLOSING_CASH].question.vi
+    ).toContain("bao gồm tiền trong ngăn kéo và tiền đã cất trong két hoặc hộp");
+  });
 });

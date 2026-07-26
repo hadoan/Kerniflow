@@ -242,6 +242,27 @@ export function Chat({
     }
   };
 
+  const handleSendPrompt = useCallback(
+    (prompt: string) => {
+      if (!sendMessage || isLoading || !canSend) {
+        if (!canSend) {
+          onSendBlocked?.();
+        }
+        return;
+      }
+      setStreamEventStarted(false);
+      setToolRequestPending(false);
+      void Promise.resolve(sendMessage({ text: prompt }))
+        .then(() => {
+          onConversationUpdated?.();
+        })
+        .catch((error) => {
+          console.error("Failed to send suggested prompt:", error);
+        });
+    },
+    [canSend, isLoading, onConversationUpdated, onSendBlocked, sendMessage]
+  );
+
   const markSubmitting = (id: string, value: boolean) => {
     setSubmittingToolIds((prev) => {
       const next = new Set(prev);
@@ -435,6 +456,8 @@ export function Chat({
             showWaitingStatus={showWaitingStatus}
             statusText={statusText}
             toolRenderers={toolRenderers}
+            sendPrompt={handleSendPrompt}
+            isChatLoading={isLoading}
           />
         </div>
       </div>

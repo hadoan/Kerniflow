@@ -29,6 +29,8 @@ import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assista
 import { CashReportPreview } from "../../cash-management/components/cash-report-preview";
 import { MonthlyCashReportPreview } from "../../cash-management/components/monthly-cash-report-preview";
 import { CashClarificationRenderer } from "../components/CashClarificationRenderer";
+import { CashDayConfirmationRenderer } from "../components/CashDayConfirmationRenderer";
+import { CashDayConfirmationResultRenderer } from "../components/CashDayConfirmationResultRenderer";
 import {
   type ThreadGroupKey,
   type ThreadGroup,
@@ -675,6 +677,12 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                       },
                       request_cash_clarification: (props) => (
                         <CashClarificationRenderer {...props} />
+                      ),
+                      prepare_cash_day_confirmation: (props) => (
+                        <CashDayConfirmationRenderer {...props} />
+                      ),
+                      confirm_cash_day_draft: (props) => (
+                        <CashDayConfirmationResultRenderer {...props} />
                       ),
                     }}
                   />
