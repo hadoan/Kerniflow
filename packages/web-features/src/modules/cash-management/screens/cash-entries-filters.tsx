@@ -30,8 +30,14 @@ export function CashEntriesFilters({
   const { t } = useTranslation();
 
   return (
-    <>
-      <div className="grid min-w-[18rem] grid-cols-2 gap-3 sm:min-w-[22rem]">
+    <div className="grid w-full gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end">
+      <Input
+        value={filters.q}
+        onChange={(event) => setFilters((prev) => ({ ...prev, q: event.target.value }))}
+        placeholder={t("cash.ui.entries.filters.searchDescription")}
+        className="order-first w-full lg:order-none lg:w-48"
+      />
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:w-auto">
         <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-muted-foreground">
           <span>{t("cash.ui.entries.filters.dayFrom")}</span>
           <Input
@@ -56,7 +62,7 @@ export function CashEntriesFilters({
         </label>
       </div>
       <select
-        className="h-9 rounded-md border bg-background px-3 text-sm"
+        className="h-11 w-full rounded-md border bg-background px-3 text-base sm:text-sm lg:h-10 lg:w-auto"
         value={filters.type}
         onChange={(event) => setFilters((prev) => ({ ...prev, type: event.target.value }))}
       >
@@ -68,7 +74,7 @@ export function CashEntriesFilters({
         ))}
       </select>
       <select
-        className="h-9 rounded-md border bg-background px-3 text-sm"
+        className="h-11 w-full rounded-md border bg-background px-3 text-base sm:text-sm lg:h-10 lg:w-auto"
         value={filters.source}
         onChange={(event) => setFilters((prev) => ({ ...prev, source: event.target.value }))}
       >
@@ -79,12 +85,6 @@ export function CashEntriesFilters({
           </option>
         ))}
       </select>
-      <Input
-        value={filters.q}
-        onChange={(event) => setFilters((prev) => ({ ...prev, q: event.target.value }))}
-        placeholder={t("cash.ui.entries.filters.searchDescription")}
-        className="w-48"
-      />
-    </>
+    </div>
   );
 }

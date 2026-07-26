@@ -53,6 +53,7 @@ export interface AppSidebarProps {
   workspaceSwitcherMode?: WorkspaceSwitcherMode;
   notificationBell?: React.ReactNode;
   logo?: React.ReactNode;
+  onNavigate?: () => void;
 }
 
 const isWorkspaceSwitcherVisible = (mode: WorkspaceSwitcherMode, workspaceCount: number) => {
@@ -97,6 +98,7 @@ export function AppSidebar({
   workspaceSwitcherMode = "always",
   notificationBell,
   logo,
+  onNavigate,
 }: AppSidebarProps) {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useThemeStore();
@@ -148,11 +150,11 @@ export function AppSidebar({
   return (
     <aside
       className={cn(
-        "flex flex-col h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+        "flex h-[100dvh] w-full flex-col overflow-hidden bg-sidebar border-r border-sidebar-border transition-all duration-300",
+        collapsed ? "lg:w-16" : "lg:w-64"
       )}
     >
-      <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-4 pt-[env(safe-area-inset-top)]">
         {collapsed ? (
           <Button
             variant="ghost"
@@ -226,6 +228,7 @@ export function AppSidebar({
                         target={openInNewTab ? "_blank" : undefined}
                         rel={openInNewTab ? "noreferrer" : undefined}
                         data-testid={`nav-${item.id}`}
+                        onClick={onNavigate}
                         className={({ isActive }) =>
                           cn(
                             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
@@ -297,7 +300,7 @@ export function AppSidebar({
         ) : null}
       </nav>
 
-      <div className="border-t border-sidebar-border p-3 space-y-2">
+      <div className="shrink-0 space-y-2 border-t border-sidebar-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className={cn("flex items-center", collapsed ? "flex-col gap-2" : "gap-2 px-2")}>
           {notificationBell ?? null}
 
@@ -343,7 +346,7 @@ export function AppSidebar({
                     </div>
                   );
                 })()}
-                <div className="flex-1 text-left">
+                <div className="min-w-0 flex-1 text-left">
                   <div className="text-sm font-medium text-sidebar-foreground truncate">
                     {user?.name ?? unknownLabel}
                   </div>

@@ -258,7 +258,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
 
   return (
     <div
-      className="flex h-[calc(100vh-3.5rem)] min-h-0 flex-col gap-6 p-6 lg:h-screen lg:p-8"
+      className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col gap-4 px-4 py-5 sm:px-5 sm:py-6 lg:h-screen lg:gap-6 lg:p-8"
       data-testid="assistant-chat"
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -266,12 +266,17 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
           <h1 className="text-h1 text-foreground">{t("assistant.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("assistant.subtitle")}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setSearchOpen(true)}>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => setSearchOpen(true)}
+          >
             <Search className="mr-2 h-4 w-4" />
             {t("assistant.searchAction", "Search")}
           </Button>
           <Button
+            className="w-full sm:w-auto"
             onClick={() => createThreadMutation.mutate()}
             disabled={createThreadMutation.isPending || !hasUserMessages}
           >
@@ -285,7 +290,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="grid h-full min-h-0 md:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="hidden min-h-0 border-r border-border bg-background/40 md:flex md:flex-col">
             <div className="border-b border-border px-6 py-4 lg:px-8">
@@ -386,7 +391,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
               {currentWorkspace ? (
                 <CashConversationContextHeader workspace={currentWorkspace} />
               ) : (
-                <div className="flex items-center gap-3 px-6 py-4 lg:px-8">
+                <div className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
                     <Sparkles className="h-5 w-5 text-accent" />
                   </div>
@@ -407,8 +412,11 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
               )}
             </header>
 
-            <main className="min-h-0 flex-1 overflow-y-auto">
-              <div className="px-6 py-6 lg:px-8 lg:py-8" data-testid="assistant-messages">
+            <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div
+                className="flex min-h-0 flex-1 flex-col px-4 py-3 sm:px-6 sm:py-6 lg:px-8 lg:py-8"
+                data-testid="assistant-messages"
+              >
                 <Chat
                   key={threadId ?? "new-thread"}
                   activeModule={activeModule}

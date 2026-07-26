@@ -20,7 +20,7 @@ export const SettingsPage = () => {
       <TaxDetailsDialog open={taxDialogOpen} onOpenChange={setTaxDialogOpen} />
       <ContactDetailsDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
 
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="min-w-0 space-y-5 px-4 py-5 sm:px-5 sm:py-6 lg:space-y-6 lg:p-8">
         <div>
           <h1 className="text-2xl font-semibold">Settings</h1>
           <p className="text-sm text-muted-foreground">

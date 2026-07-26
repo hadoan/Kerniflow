@@ -241,6 +241,24 @@ export function AppShell({
       return <AppSidebar {...props} />;
     });
 
+  useEffect(() => {
+    if (!mobileSidebarOpen) {
+      return;
+    }
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileSidebarOpen(false);
+      }
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileSidebarOpen]);
+
   return (
     <CommandPaletteProvider
       commandContext={commandContext}
@@ -248,7 +266,7 @@ export function AppShell({
       initialNamespace={namespace}
     >
       <CommandPaletteSync commands={commands} namespace={namespace} />
-      <div className="flex h-screen w-full bg-background overflow-hidden">
+      <div className="flex h-[100dvh] w-full overflow-hidden bg-background">
         <div className="hidden lg:block relative z-30 pointer-events-auto">
           {sidebarRenderer({
             ...baseSidebarProps,
@@ -259,15 +277,17 @@ export function AppShell({
         </div>
 
         {mobileSidebarOpen && (
-          <div
-            className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+          <button
+            type="button"
+            aria-label={t("common.close", "Close navigation")}
+            className="fixed inset-0 z-40 cursor-default bg-background/80 backdrop-blur-sm lg:hidden"
             onClick={() => setMobileSidebarOpen(false)}
           />
         )}
 
         <div
           className={cn(
-            "fixed inset-y-0 left-0 z-50 lg:hidden transition-transform duration-300",
+            "fixed inset-y-0 left-0 z-50 w-[min(85vw,20rem)] lg:hidden transition-transform duration-300",
             mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
@@ -275,12 +295,18 @@ export function AppShell({
             ...baseSidebarProps,
             variant: "mobile",
             onToggle: () => setMobileSidebarOpen(false),
+            onNavigate: () => setMobileSidebarOpen(false),
           })}
         </div>
 
-        <main className="relative z-0 flex-1 flex flex-col overflow-hidden">
-          <header className="lg:hidden flex items-center h-14 px-4 border-b border-border bg-background">
-            <Button variant="ghost" size="icon" onClick={() => setMobileSidebarOpen(true)}>
+        <main className="relative z-0 flex min-w-0 flex-1 flex-col overflow-hidden">
+          <header className="flex h-14 items-center border-b border-border bg-background px-4 pt-[env(safe-area-inset-top)] lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileSidebarOpen(true)}
+              aria-label={t("common.openNavigation", "Open navigation")}
+            >
               <Menu className="h-5 w-5" />
             </Button>
             {showMobileSwitcher ? (
@@ -292,7 +318,7 @@ export function AppShell({
             )}
           </header>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
             {topContent}
             <Outlet />
           </div>

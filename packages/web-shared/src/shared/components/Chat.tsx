@@ -113,7 +113,7 @@ export function Chat({
   const [attachmentError, setAttachmentError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const composerRef = useRef<HTMLFormElement | null>(null);
-  const composerInputRef = useRef<HTMLInputElement | null>(null);
+  const composerInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // AI SDK v3 API - manage input state ourselves
   const messages = (chat.messages ?? []) as ChatMessage[];
@@ -153,8 +153,10 @@ export function Chat({
   const getRoleStyle = (role: string) =>
     roleConfig[role as keyof typeof roleConfig] ?? roleConfig.assistant;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
+    e.currentTarget.style.height = "auto";
+    e.currentTarget.style.height = `${Math.min(e.currentTarget.scrollHeight, 128)}px`;
   };
 
   const focusComposer = useCallback((value: string) => {
@@ -396,8 +398,8 @@ export function Chat({
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/40 p-4 md:p-6 animate-fade-in">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="relative min-h-0 flex-1 overflow-y-auto rounded-xl border border-border/60 bg-card/40 p-4 sm:rounded-3xl md:p-6 animate-fade-in">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
           <div className="absolute -right-20 -top-8 h-72 w-72 rounded-full bg-warning/20 blur-3xl" />
@@ -437,25 +439,27 @@ export function Chat({
         </div>
       </div>
 
-      <ChatComposer
-        input={input}
-        placeholder={placeholder}
-        isLoading={isLoading}
-        pendingFiles={pendingFiles}
-        attachmentError={attachmentError}
-        onInputChange={handleInputChange}
-        onSubmit={handleSubmit}
-        onFileSelection={handleFileSelection}
-        removePendingFile={removePendingFile}
-        fileInputRef={fileInputRef}
-        composerRef={composerRef}
-        inputRef={composerInputRef}
-        sendLabel={t("assistant.send")}
-        sendingLabel={t("assistant.sending")}
-        canSubmit={Boolean(input.trim()) || pendingFiles.length > 0}
-        addAttachmentLabel={t("assistant.attachments.add")}
-        removeAttachmentLabel={t("assistant.attachments.remove")}
-      />
+      <div className="sticky bottom-0 z-10 bg-background/95 pt-2 backdrop-blur">
+        <ChatComposer
+          input={input}
+          placeholder={placeholder}
+          isLoading={isLoading}
+          pendingFiles={pendingFiles}
+          attachmentError={attachmentError}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          onFileSelection={handleFileSelection}
+          removePendingFile={removePendingFile}
+          fileInputRef={fileInputRef}
+          composerRef={composerRef}
+          inputRef={composerInputRef}
+          sendLabel={t("assistant.send")}
+          sendingLabel={t("assistant.sending")}
+          canSubmit={Boolean(input.trim()) || pendingFiles.length > 0}
+          addAttachmentLabel={t("assistant.attachments.add")}
+          removeAttachmentLabel={t("assistant.attachments.remove")}
+        />
+      </div>
     </div>
   );
 }

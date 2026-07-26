@@ -78,7 +78,7 @@ export function CashExportsScreen() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-6">
+    <div className="mx-auto max-w-2xl space-y-4 px-4 py-5 sm:px-5 sm:py-6 lg:p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">
           {t("cash.ui.exports.title", { register: registerQuery.data.register.name })}
