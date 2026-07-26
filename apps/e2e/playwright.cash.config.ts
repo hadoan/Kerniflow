@@ -26,6 +26,10 @@ export default defineConfig({
       name: "cash-chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "cash-mobile",
+      use: { ...devices["iPhone 13"] },
+    },
   ],
   webServer: {
     command: `pnpm --filter @corely/cash-management dev --host 0.0.0.0 --port ${port}`,

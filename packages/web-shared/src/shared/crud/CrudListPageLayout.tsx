@@ -21,18 +21,29 @@ export const CrudListPageLayout: React.FC<CrudListPageLayoutProps> = ({
   className,
 }) => {
   return (
-    <div className={cn("space-y-6 p-6 lg:p-8 animate-fade-in", className)}>
+    <div
+      className={cn(
+        "min-w-0 space-y-5 px-4 py-5 sm:px-5 sm:py-6 lg:space-y-6 lg:p-8 animate-fade-in",
+        className
+      )}
+    >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-h1 text-foreground">{title}</h1>
           {subtitle ? <p className="text-sm text-muted-foreground mt-1">{subtitle}</p> : null}
         </div>
-        {primaryAction ? <div className="flex items-center gap-2">{primaryAction}</div> : null}
+        {primaryAction ? (
+          <div className="flex w-full items-center gap-2 lg:w-auto">{primaryAction}</div>
+        ) : null}
       </div>
 
-      {toolbar ? <div className="flex flex-wrap items-center gap-3">{toolbar}</div> : null}
+      {toolbar ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          {toolbar}
+        </div>
+      ) : null}
       {filters ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/50 px-3 py-2">
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-3 sm:flex-row sm:flex-wrap sm:items-center">
           {filters}
         </div>
       ) : null}

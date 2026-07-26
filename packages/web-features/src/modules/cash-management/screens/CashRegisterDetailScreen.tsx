@@ -77,24 +77,24 @@ export function CashRegisterDetailScreen() {
     .sort((a, b) => (a.dayKey < b.dayKey ? 1 : -1))[0];
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{register.name}</h1>
+    <div className="min-w-0 space-y-5 px-4 py-5 sm:px-5 sm:py-6 lg:space-y-6 lg:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="break-words text-2xl font-semibold">{register.name}</h1>
           <p className="text-sm text-muted-foreground">
             {register.location ?? t("cash.ui.common.noLocation")} · {register.currency}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
           {canManageCash ? (
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <Link to={`/cash/registers/${id}/entries`}>
                 {t("cash.ui.registerDetail.newCashEntry")}
               </Link>
             </Button>
           ) : null}
           {canCloseCash ? (
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="w-full sm:w-auto">
               <Link
                 to={`/cash/registers/${id}/day-close?day=${new Date().toISOString().slice(0, 10)}`}
               >
@@ -103,19 +103,19 @@ export function CashRegisterDetailScreen() {
             </Button>
           ) : null}
           {canExportCash ? (
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="w-full sm:w-auto">
               <Link to={`/cash/registers/${id}/exports`}>{t("cash.ui.registerDetail.export")}</Link>
             </Button>
           ) : null}
           {canManageCash ? (
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="w-full sm:w-auto">
               <Link to={`/cash/registers/${id}/edit`}>{t("cash.ui.registerDetail.edit")}</Link>
             </Button>
           ) : null}
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
@@ -159,9 +159,11 @@ export function CashRegisterDetailScreen() {
         <TabsContent value="overview">
           <Card>
             <CardContent className="space-y-2 pt-6 text-sm">
-              <p>
+              <p className="break-words">
                 {t("cash.ui.registerDetail.registerId")}:{" "}
-                <span className="font-mono">{register.id}</span>
+                <code className="break-all rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                  {register.id}
+                </code>
               </p>
               <p>
                 {t("cash.ui.registerDetail.negativeBalancePolicy")}:{" "}
@@ -187,7 +189,7 @@ export function CashRegisterDetailScreen() {
                     {entries.map((entry) => (
                       <div
                         key={entry.id}
-                        className="flex items-center justify-between rounded-md border p-3 text-sm"
+                        className="flex flex-col gap-2 rounded-md border p-3 text-sm sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div>
                           <p className="font-medium">{entry.description}</p>
@@ -196,7 +198,7 @@ export function CashRegisterDetailScreen() {
                           </p>
                         </div>
                         <p
-                          className={entry.direction === "OUT" ? "text-red-600" : "text-green-600"}
+                          className={`shrink-0 ${entry.direction === "OUT" ? "text-red-600" : "text-green-600"}`}
                         >
                           {entry.direction === "OUT" ? "-" : "+"}
                           {formatMoney(entry.amount, undefined, entry.currency)}

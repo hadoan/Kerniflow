@@ -216,7 +216,9 @@ function ReceiptPicker(props: ReceiptPickerProps) {
         >
           {takePictureLabel}
         </Button>
-        <span className="truncate text-sm text-muted-foreground">{file?.name ?? noFileLabel}</span>
+        <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+          {file?.name ?? noFileLabel}
+        </span>
       </div>
       <input
         ref={fileInputRef}
@@ -326,18 +328,18 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[520px]">
-        <DialogHeader>
+      <DialogContent className="h-[100dvh] max-h-[100dvh] gap-0 overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-[520px]">
+        <DialogHeader className="sticky top-0 z-10 border-b bg-background px-4 py-4 pr-14 sm:px-6">
           <DialogTitle>{t("cash.ui.entries.createDialog.title")}</DialogTitle>
           <DialogDescription>{t("cash.ui.entries.createDialog.description")}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 pb-28 sm:px-6 sm:pb-6">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="create-entry-type">{t("cash.ui.entries.createDialog.type")}</Label>
               <select
                 id="create-entry-type"
-                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                className="h-11 w-full rounded-md border bg-background px-3 text-base sm:h-10 sm:text-sm"
                 value={form.type}
                 onChange={(event) =>
                   setForm((prev) => ({
@@ -374,10 +376,11 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
               <AlertTitle>{t("cash.ui.entries.createDialog.taxProfileRequiredTitle")}</AlertTitle>
               <AlertDescription className="space-y-3">
                 <p>{t("cash.ui.entries.createDialog.taxProfileRequiredDescription")}</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid gap-2 sm:grid-cols-2">
                   <Button
                     type="button"
                     variant="outline"
+                    className="w-full"
                     onClick={onUseStandardVat}
                     disabled={isPending || isTaxProfileSetupPending}
                   >
@@ -385,7 +388,8 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
                   </Button>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
+                    className="w-full"
                     onClick={onUseSmallBusiness}
                     disabled={isPending || isTaxProfileSetupPending}
                   >
@@ -404,7 +408,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
               </Label>
               <select
                 id="create-entry-tax-code"
-                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                className="h-11 w-full rounded-md border bg-background px-3 text-base sm:h-10 sm:text-sm"
                 value={form.taxCodeId}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, taxCodeId: event.target.value }))
@@ -516,11 +520,15 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
             <p className="text-sm text-destructive">{t("cash.ui.entries.createDialog.failed")}</p>
           ) : null}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="sticky bottom-0 z-10 grid grid-cols-2 gap-2 border-t bg-background px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex sm:px-6">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => onOpenChange(false)}
+          >
             {t("cash.ui.common.cancel")}
           </Button>
-          <Button onClick={onSave} disabled={isPending || !canSave}>
+          <Button className="w-full sm:w-auto" onClick={onSave} disabled={isPending || !canSave}>
             {isPending && form.attachmentFile
               ? t("cash.ui.entries.createDialog.uploading")
               : t("cash.ui.entries.createDialog.save")}

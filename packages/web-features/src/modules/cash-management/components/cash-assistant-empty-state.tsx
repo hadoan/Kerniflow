@@ -54,21 +54,21 @@ export function CashAssistantEmptyState({ onSelectPrompt }: CashAssistantEmptySt
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10">
-        <Sparkles className="h-8 w-8 text-accent" />
+    <div className="flex flex-col items-center justify-center py-5 text-center sm:py-10 animate-fade-in">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 sm:mb-6 sm:h-16 sm:w-16 sm:rounded-2xl">
+        <Sparkles className="h-6 w-6 text-accent sm:h-8 sm:w-8" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
+      <h2 className="mb-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
         {t("assistant.emptyStateTitle", "How can I help you today?")}
       </h2>
-      <p className="mb-8 max-w-md text-muted-foreground">
+      <p className="mb-5 max-w-md text-sm text-muted-foreground sm:mb-8 sm:text-base">
         {t(
           "assistant.emptyStateDescription",
           "Select an action below or type a message to get started."
         )}
       </p>
 
-      <div className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid w-full max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
         {primaryActions.map((action, idx) => {
           const Icon = action.icon;
           return (
@@ -76,9 +76,9 @@ export function CashAssistantEmptyState({ onSelectPrompt }: CashAssistantEmptySt
               key={idx}
               type="button"
               onClick={() => onSelectPrompt(action.prompt)}
-              className="group flex flex-col items-start gap-3 rounded-xl border border-border/60 bg-background/50 p-5 text-left transition-all hover:border-accent/50 hover:bg-accent/5 hover:shadow-sm"
+              className={`group flex min-h-14 items-center gap-3 rounded-xl border border-border/60 bg-background/50 p-3 text-left transition-all hover:border-accent/50 hover:bg-accent/5 hover:shadow-sm sm:min-h-0 sm:flex-col sm:items-start sm:p-5 ${idx === 0 ? "border-accent/60 bg-accent/10" : ""}`}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:bg-accent/10 group-hover:text-accent">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:bg-accent/10 group-hover:text-accent">
                 <Icon className="h-5 w-5" />
               </div>
               <div>

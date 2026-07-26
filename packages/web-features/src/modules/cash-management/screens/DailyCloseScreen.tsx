@@ -116,7 +116,7 @@ export function DailyCloseScreen() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 p-6">
+    <div className="mx-auto max-w-4xl space-y-4 px-4 py-5 sm:px-5 sm:py-6 lg:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">{t("cash.ui.dayClose.title")}</h1>
         <div className="flex gap-2">
