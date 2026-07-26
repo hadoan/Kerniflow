@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type * as CorelyUi from "@corely/ui";
@@ -244,6 +244,47 @@ describe("AssistantPage billing access", () => {
         registerId: "reg-1",
         conversationId: undefined,
       });
+    });
+    expect(await screen.findByTestId("assistant-chat-mock")).toBeInTheDocument();
+  });
+
+  it("shows a retry action when automatic register binding fails", async () => {
+    const { cashManagementApi } = await import("@corely/web-shared/lib/cash-management-api");
+    vi.mocked(cashManagementApi.listRegisters).mockResolvedValue({
+      registers: [
+        {
+          id: "reg-1",
+          tenantId: "tenant-1",
+          workspaceId: "ws-1",
+          name: "Front Desk",
+          location: "Berlin",
+          currency: "EUR",
+          currentBalanceCents: 0,
+          disallowNegativeBalance: false,
+          createdAt: "2026-03-14T00:00:00.000Z",
+          updatedAt: "2026-03-14T00:00:00.000Z",
+        },
+      ],
+    });
+    vi.mocked(cashManagementApi.resolveWorkspace)
+      .mockRejectedValueOnce(new Error("Temporary connection problem"))
+      .mockResolvedValue({
+        id: "cash-ws-1",
+        tenantId: "tenant-1",
+        workspaceId: "ws-1",
+        registerId: "reg-1",
+        type: "GENERAL_HELP",
+        conversationId: "thread-1",
+        register: { id: "reg-1", name: "Front Desk", location: "Berlin", currency: "EUR" },
+      });
+
+    renderPage();
+
+    expect(await screen.findByText("Temporary connection problem")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /try again/i }));
+
+    await waitFor(() => {
+      expect(cashManagementApi.resolveWorkspace).toHaveBeenCalledTimes(2);
     });
     expect(await screen.findByTestId("assistant-chat-mock")).toBeInTheDocument();
   });
