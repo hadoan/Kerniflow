@@ -150,4 +150,40 @@ describe("AssistantPage billing access", () => {
       expect(lastCall?.capabilityGroups?.length).toBeGreaterThan(0);
     });
   });
+
+  it("disables 'New chat' button until a user message is sent", async () => {
+    const { billingApi } = await import("@corely/web-shared/lib/billing-api");
+    vi.mocked(billingApi.getCurrent).mockResolvedValue({
+      subscription: null,
+      entitlements: null,
+      trial: null,
+      upgradeContext: null,
+      plan: null,
+    } as any);
+
+    renderPage();
+
+    await screen.findByTestId("assistant-chat-mock");
+
+    const newChatButtons = screen.getAllByRole("button", { name: /New chat/i });
+    expect(newChatButtons.length).toBeGreaterThan(0);
+    for (const btn of newChatButtons) {
+      expect(btn).toBeDisabled();
+    }
+
+    // Simulate Chat notifying AssistantPage that a user message was sent
+    const lastCall = chatSpy.mock.calls.at(-1)?.[0] as {
+      onHasUserMessagesChange?: (hasUserMessages: boolean) => void;
+    };
+    expect(lastCall?.onHasUserMessagesChange).toBeDefined();
+
+    const { act } = await import("@testing-library/react");
+    act(() => {
+      lastCall.onHasUserMessagesChange?.(true);
+    });
+
+    for (const btn of newChatButtons) {
+      expect(btn).not.toBeDisabled();
+    }
+  });
 });

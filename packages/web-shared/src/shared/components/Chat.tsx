@@ -39,6 +39,7 @@ export interface ChatProps {
   runIdMode?: "persisted" | "controlled";
   onRunIdResolved?: (runId: string) => void;
   onConversationUpdated?: () => void;
+  onHasUserMessagesChange?: (hasUserMessages: boolean) => void;
   focusMessageId?: string | null;
   toolRenderers?: Record<string, ToolRenderer>;
   renderEmptyState?: (props: { focusComposer: (value: string) => void }) => React.ReactNode;
@@ -62,6 +63,7 @@ export function Chat({
   runIdMode = "persisted",
   onRunIdResolved,
   onConversationUpdated,
+  onHasUserMessagesChange,
   focusMessageId,
   toolRenderers,
   renderEmptyState,
@@ -306,6 +308,12 @@ export function Chat({
     }
     return -1;
   }, [messages]);
+
+  const hasUserMessages = lastUserIndex >= 0;
+
+  useEffect(() => {
+    onHasUserMessagesChange?.(hasUserMessages);
+  }, [hasUserMessages, onHasUserMessagesChange]);
 
   const assistantHasOutputAfterLastUser = useMemo(() => {
     if (lastUserIndex < 0) {

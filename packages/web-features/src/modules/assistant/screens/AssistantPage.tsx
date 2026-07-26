@@ -47,6 +47,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
+  const [hasUserMessages, setHasUserMessages] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<ThreadGroupKey, boolean>>({
     today: true,
     needsAttention: true,
@@ -57,6 +58,10 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     week: true,
     older: true,
   });
+
+  useEffect(() => {
+    setHasUserMessages(false);
+  }, [threadId]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -267,7 +272,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
           </Button>
           <Button
             onClick={() => createThreadMutation.mutate()}
-            disabled={createThreadMutation.isPending}
+            disabled={createThreadMutation.isPending || !hasUserMessages}
           >
             {createThreadMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -298,7 +303,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
               <Button
                 className="w-full"
                 onClick={() => createThreadMutation.mutate()}
-                disabled={createThreadMutation.isPending}
+                disabled={createThreadMutation.isPending || !hasUserMessages}
               >
                 {createThreadMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -413,6 +418,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                   onSendBlocked={handleChatBlocked}
                   onRunIdResolved={handleRunResolved}
                   onConversationUpdated={handleConversationUpdated}
+                  onHasUserMessagesChange={setHasUserMessages}
                   focusMessageId={focusedMessageId}
                   placeholder={t("assistant.placeholder")}
                   suggestions={suggestions}

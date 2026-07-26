@@ -120,17 +120,10 @@ test.describe("Assistant – customer chat persistence", () => {
       timeout: 15_000,
     });
 
-    // ── 3. Click "New chat" ───────────────────────────────────────────
+    // ── 3. Verify "New chat" button is disabled initially ─────────────
     const newChatBtn = page.getByRole("button", { name: /new chat/i }).first();
     await expect(newChatBtn).toBeVisible();
-    await newChatBtn.click();
-
-    // Wait for navigation to /assistant/t/<id>
-    await page.waitForURL("**/assistant/t/**", { timeout: 15_000 });
-    const threadIdMatch = page.url().match(/\/assistant\/t\/([^/?]+)/);
-    expect(threadIdMatch).toBeTruthy();
-    const threadId = threadIdMatch![1];
-    console.log(`[E2E] Thread created: ${threadId}`);
+    await expect(newChatBtn).toBeDisabled();
 
     // ── 4. Send the customer creation message ─────────────────────────
     const customerMessage =
@@ -144,9 +137,17 @@ test.describe("Assistant – customer chat persistence", () => {
     await chatInput.fill(customerMessage);
     await page.keyboard.press("Enter");
 
-    // ── 5. Wait for user message to appear ───────────────────────────
+    // Wait for navigation to /assistant/t/<id>
+    await page.waitForURL("**/assistant/t/**", { timeout: 15_000 });
+    const threadIdMatch = page.url().match(/\/assistant\/t\/([^/?]+)/);
+    expect(threadIdMatch).toBeTruthy();
+    const threadId = threadIdMatch![1];
+    console.log(`[E2E] Thread created: ${threadId}`);
+
+    // ── 5. Wait for user message to appear and New chat button to be enabled ──
     await expect(page.getByText("The Nails 80").first()).toBeVisible({ timeout: 15_000 });
     console.log("[E2E] User message visible");
+    await expect(newChatBtn).toBeEnabled();
 
     // ── 6. Wait for assistant to respond (stream completes) ───────────
     // Wait until we see at least one "Assistant" role badge in the chat
