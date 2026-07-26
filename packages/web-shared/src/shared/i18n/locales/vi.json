@@ -553,6 +553,8 @@
       "vatIdOptional": "Mã số thuế (Tùy chọn)",
       "filingFrequency": "Tần suất Kê khai",
       "accountingMethod": "Phương pháp Kế toán",
+      "effectiveFrom": "Áp dụng từ ngày",
+      "effectiveFromHelp": "Chọn ngày bằng hoặc trước các giao dịch tiền mặt mà hồ sơ thuế này cần áp dụng.",
       "taxYearStartMonth": "Tháng Bắt đầu Năm Thuế",
       "localTaxOffice": "Cơ quan Thuế Địa phương",
       "save": "Lưu Hồ sơ Thuế",
@@ -1367,6 +1369,7 @@
       "registerDetail": {
         "newCashEntry": "Bút toán mới",
         "closeDay": "Chốt ngày (Kassensturz)",
+        "kassenbericht": "Kassenbericht",
         "export": "Xuất",
         "edit": "Chỉnh sửa",
         "currentBalance": "Số dư hiện tại",
@@ -1454,6 +1457,7 @@
           "noVat": "Không VAT",
           "taxProfileRequiredTitle": "Cần thiết lập thuế",
           "taxProfileRequiredDescription": "Hãy chọn cách Kassenbuch này xử lý VAT trước khi ghi nhận các giao dịch bán tiền mặt chịu thuế.",
+          "configureTaxSettings": "Cấu hình Thuế & VAT",
           "setupStandardVat": "Dùng VAT chuẩn của Đức",
           "setupSmallBusiness": "Dùng Kleinunternehmer (không VAT)",
           "taxSummary": "Tóm tắt VAT",
@@ -1502,6 +1506,7 @@
         "title": "Chốt ngày (Kassensturz)",
         "backToRegister": "Quay lại quầy thu",
         "addCorrectionEntry": "Thêm bút toán điều chỉnh",
+        "viewReport": "Xem Kassenbericht",
         "closeDayFor": "Chốt ngày cho {{register}}",
         "day": "Ngày",
         "expectedBalance": "Số dư kỳ vọng (Soll)",
@@ -1518,6 +1523,15 @@
         "submitAndLock": "Gửi và khóa ngày",
         "lockedInfo": "Ngày này đã bị khóa. Chỉ được thêm bút toán điều chỉnh.",
         "loadExistingFailed": "Không thể tải bản chốt ngày hiện có."
+      },
+      "kassenbericht": {
+        "title": "Kassenbericht hằng ngày",
+        "subtitle": "Mẫu Đức có giải thích tiếng Việt để đối chiếu hoặc chép sang sổ giấy.",
+        "back": "Quay lại quầy thu",
+        "download": "Tải PDF",
+        "downloading": "Đang tạo PDF...",
+        "loading": "Đang tải Kassenbericht...",
+        "loadFailed": "Không thể tải Kassenbericht cho ngày này."
       },
       "exports": {
         "title": "Xuất dữ liệu · {{register}}",
@@ -1690,7 +1704,8 @@
       "savedTitle": "Đã lưu bản nháp ngày tiền mặt",
       "savedDescription": "Các giao dịch tiền mặt đã xác nhận được lưu thành công.",
       "taxProfileRequiredTitle": "Cần cấu hình hồ sơ thuế trước khi lưu",
-      "taxProfileRequiredDescription": "Hãy chọn doanh nghiệp áp dụng VAT tiêu chuẩn của Đức hay chế độ Kleinunternehmer. Ứng dụng không được tự đoán cấu hình thuế này."
+      "taxProfileRequiredDescription": "Hãy chọn doanh nghiệp áp dụng VAT tiêu chuẩn của Đức hay chế độ Kleinunternehmer. Ứng dụng không được tự đoán cấu hình thuế này.",
+      "configureTaxSettings": "Cấu hình Thuế & VAT"
     },
     "search": {
       "title": "Tìm kiếm trò chuyện",

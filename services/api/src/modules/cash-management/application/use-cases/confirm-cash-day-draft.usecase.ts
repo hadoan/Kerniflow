@@ -54,6 +54,7 @@ import { TaxProfileRepoPort } from "../../../tax/domain/ports/tax-profile-repo.p
 import { TaxRateRepoPort } from "../../../tax/domain/ports/tax-rate-repo.port";
 import { resolveCashEntryTax, type CashEntryTaxSnapshot } from "../../domain/cash-entry-tax";
 import { normalizeCashEntryInput } from "../../domain/cash-entry-rules";
+import { ensureDeStandardVatCodes } from "../../../tax/application/services/ensure-de-standard-vat-codes";
 
 const ACTION_KEY = "cash-management.draft.confirm";
 
@@ -179,6 +180,18 @@ export class ConfirmCashDayDraftUseCase extends BaseUseCase<
     const movements = payload.movements || [];
     const dayKey = payload.businessDate;
     const countedBalance = payload.actualClosingCashCents;
+    // The day key is the accounting date. Never replace it with confirmation
+    // time, which can select a different tax profile and corrupt the audit trail.
+    const businessDate = new Date(`${dayKey}T12:00:00.000Z`);
+    const taxProfile = await this.taxProfileRepo.getActive(workspaceId, businessDate);
+    if (taxProfile?.country === "DE" && taxProfile.regime === "STANDARD_VAT") {
+      await ensureDeStandardVatCodes({
+        tenantId: workspaceId,
+        effectiveFrom: taxProfile.effectiveFrom,
+        taxCodeRepo: this.taxCodeRepo,
+        taxRateRepo: this.taxRateRepo,
+      });
+    }
 
     const existing = await this.dayCloseRepo.findDayCloseByRegisterAndDay(
       tenantId,
@@ -203,7 +216,7 @@ export class ConfirmCashDayDraftUseCase extends BaseUseCase<
           registerId: register.id,
           type: movement.type,
           amountCents: movement.amountCents,
-          occurredAt: movement.occurredAt || new Date().toISOString(),
+          occurredAt: movement.occurredAt || businessDate.toISOString(),
           description: movement.description,
           paymentMethod: movement.paymentMethod || "CASH",
           tax: movement.tax,

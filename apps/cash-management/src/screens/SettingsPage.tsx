@@ -45,14 +45,18 @@ export const SettingsPage = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tax defaults</CardTitle>
+              <CardTitle>Tax &amp; VAT</CardTitle>
               <CardDescription>
-                Maintain tax identifiers used across exports and financial workflows.
+                Configure the VAT regime, effective date, filing frequency and tax identifiers for
+                this business.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
+              <Button asChild>
+                <Link to="/settings/tax">Configure tax &amp; VAT</Link>
+              </Button>
               <Button variant="outline" onClick={() => setTaxDialogOpen(true)}>
-                Edit tax info
+                Edit tax IDs
               </Button>
             </CardContent>
           </Card>

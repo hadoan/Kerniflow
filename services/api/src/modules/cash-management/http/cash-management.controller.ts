@@ -50,6 +50,7 @@ import { ExportCashBookUseCase } from "../application/use-cases/export-cash-book
 import { ListCashDayClosesQueryUseCase } from "../application/use-cases/list-cash-day-closes.query";
 import { GetCashExportArtifactQueryUseCase } from "../application/use-cases/get-cash-export-artifact.query";
 import { GetCashDashboardQueryUseCase } from "../application/use-cases/get-cash-dashboard.query";
+import { GetCashReportPreviewQueryUseCase } from "../application/use-cases/get-cash-report-preview.query";
 
 @AllowSurfaces("platform", "pos")
 @Controller()
@@ -70,7 +71,8 @@ export class CashManagementController {
     private readonly listAttachmentsQuery: ListCashEntryAttachmentsQueryUseCase,
     private readonly exportCashBookUseCase: ExportCashBookUseCase,
     private readonly getExportArtifactQuery: GetCashExportArtifactQueryUseCase,
-    private readonly getCashDashboardQuery: GetCashDashboardQueryUseCase
+    private readonly getCashDashboardQuery: GetCashDashboardQueryUseCase,
+    private readonly getCashReportPreviewQuery: GetCashReportPreviewQueryUseCase
   ) {}
 
   @Get("cash-registers")
@@ -190,6 +192,131 @@ export class CashManagementController {
     const ctx = buildUseCaseContext(req);
     const result = await this.getDayCloseQuery.execute({ registerId, dayKey }, ctx);
     return mapResultToHttp(result);
+  }
+
+  @Get("cash-registers/:id/kassenbericht/:dayKey")
+  async getKassenbericht(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("dayKey") businessDate: string
+  ) {
+    const result = await this.getCashReportPreviewQuery.execute(
+      { registerId, businessDate },
+      buildUseCaseContext(req)
+    );
+    return mapResultToHttp(result);
+  }
+
+  @Get("cash-registers/:id/kassenbericht/:dayKey/pdf")
+  @Header("Cache-Control", "no-store")
+  async downloadKassenberichtPdf(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("dayKey") businessDate: string,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const result = await this.getCashReportPreviewQuery.execute(
+      { registerId, businessDate },
+      buildUseCaseContext(req)
+    );
+    const { preview } = mapResultToHttp(result);
+    const buffer = await this.createKassenberichtPdf(preview);
+    const fileName = `kassenbericht-${preview.businessDate}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Length", String(buffer.byteLength));
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    return new StreamableFile(buffer);
+  }
+
+  private async createKassenberichtPdf(preview: {
+    businessDate: string;
+    business: { name: string; locationName?: string };
+    actualClosingCashCents?: number;
+    goodsPurchasesCents: number;
+    businessExpensesCents: number;
+    privateWithdrawalsCents: number;
+    bankDepositsCents: number;
+    otherCashOutflowsCents: number;
+    previousClosingCashCents: number;
+    privateDepositsCents: number;
+    bankWithdrawalsToCashCents: number;
+    otherNonSalesCashInflowsCents: number;
+    calculatedCashSalesCents: number;
+  }): Promise<Buffer> {
+    const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
+    const pdf = await PDFDocument.create();
+    const page = pdf.addPage([595.28, 841.89]);
+    const font = await pdf.embedFont(StandardFonts.Helvetica);
+    const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+    const format = (cents: number) => `${(cents / 100).toFixed(2).replace(".", ",")} EUR`;
+    const otherOutflows = preview.bankDepositsCents + preview.otherCashOutflowsCents;
+    const totalOutflows =
+      preview.goodsPurchasesCents +
+      preview.businessExpensesCents +
+      preview.privateWithdrawalsCents +
+      otherOutflows;
+    const closingCash = preview.actualClosingCashCents ?? 0;
+    const cashReceived = closingCash + totalOutflows - preview.previousClosingCashCents;
+    const otherIncome =
+      preview.privateDepositsCents +
+      preview.bankWithdrawalsToCashCents +
+      preview.otherNonSalesCashInflowsCents;
+    const rows: Array<[string, number, boolean?]> = [
+      ["Kassenbestand bei Geschäftsschluss", closingCash, true],
+      ["1. Wareneinkäufe und Warnebenkosten", preview.goodsPurchasesCents],
+      ["2. Geschäftsausgaben", preview.businessExpensesCents],
+      ["3. Privatentnahmen", preview.privateWithdrawalsCents],
+      ["4. Sonstige Ausgaben (z.B. Bankeinzahlungen)", otherOutflows],
+      ["Summe", totalOutflows, true],
+      ["abzüglich Kassenendbestand des Vortages", preview.previousClosingCashCents],
+      ["= Kasseneingang", cashReceived, true],
+      ["abzüglich sonstige Einnahmen", otherIncome],
+      ["= Bareinnahmen (Tageslosung)", preview.calculatedCashSalesCents, true],
+    ];
+
+    page.drawText("Kassenbericht", { x: 48, y: 790, size: 22, font: bold });
+    page.drawText(`Datum: ${preview.businessDate}    Währung: EUR`, {
+      x: 48,
+      y: 764,
+      size: 10,
+      font,
+    });
+    page.drawText(
+      `${preview.business.name}${preview.business.locationName ? ` · ${preview.business.locationName}` : ""}`,
+      {
+        x: 48,
+        y: 748,
+        size: 10,
+        font,
+      }
+    );
+
+    let y = 710;
+    for (const [label, amount, emphasis] of rows) {
+      if (label.startsWith("1.")) {
+        page.drawText("Ausgaben im Laufe des Tages", { x: 48, y: y + 20, size: 11, font: bold });
+      }
+      page.drawLine({
+        start: { x: 48, y: y - 5 },
+        end: { x: 547, y: y - 5 },
+        thickness: 0.5,
+        color: rgb(0.65, 0.65, 0.65),
+      });
+      page.drawText(label, { x: 54, y, size: 10, font: emphasis ? bold : font });
+      const amountText = format(amount);
+      page.drawText(amountText, {
+        x: 535 - (emphasis ? bold : font).widthOfTextAtSize(amountText, 10),
+        y,
+        size: 10,
+        font: emphasis ? bold : font,
+      });
+      y -= 34;
+    }
+
+    page.drawText("Kundenzahl: __________", { x: 48, y: 120, size: 10, font });
+    page.drawText("Unterschrift: __________________________", { x: 285, y: 120, size: 10, font });
+    return Buffer.from(await pdf.save());
   }
 
   @Get("cash-registers/:id/dashboard")

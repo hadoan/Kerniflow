@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { UpsertTaxProfileUseCase } from "../upsert-tax-profile.use-case";
 import { GetTaxProfileUseCase } from "../get-tax-profile.use-case";
 import { InMemoryTaxProfileRepo } from "../../../testkit/fakes/in-memory-tax-profile-repo";
+import { InMemoryTaxCodeRepo } from "../../../testkit/fakes/in-memory-tax-code-repo";
+import { InMemoryTaxRateRepo } from "../../../testkit/fakes/in-memory-tax-rate-repo";
 import type { UpsertTaxProfileInput } from "@corely/contracts";
 import type { UseCaseContext } from "../use-case-context";
 import { isErr, type Result } from "@corely/kernel";
@@ -15,6 +17,8 @@ describe("UpsertTaxProfileUseCase", () => {
   let upsertUseCase: UpsertTaxProfileUseCase;
   let getUseCase: GetTaxProfileUseCase;
   let profileRepo: InMemoryTaxProfileRepo;
+  let taxCodeRepo: InMemoryTaxCodeRepo;
+  let taxRateRepo: InMemoryTaxRateRepo;
 
   const ctx: UseCaseContext = {
     tenantId: "tenant-1",
@@ -25,7 +29,9 @@ describe("UpsertTaxProfileUseCase", () => {
 
   beforeEach(() => {
     profileRepo = new InMemoryTaxProfileRepo();
-    upsertUseCase = new UpsertTaxProfileUseCase(profileRepo);
+    taxCodeRepo = new InMemoryTaxCodeRepo();
+    taxRateRepo = new InMemoryTaxRateRepo();
+    upsertUseCase = new UpsertTaxProfileUseCase(profileRepo, taxCodeRepo, taxRateRepo);
     getUseCase = new GetTaxProfileUseCase(profileRepo);
   });
 
@@ -52,6 +58,7 @@ describe("UpsertTaxProfileUseCase", () => {
       expect(profile.currency).toBe("EUR");
       expect(profile.filingFrequency).toBe("QUARTERLY");
       expect(profile.effectiveTo).toBeNull();
+      expect(await taxCodeRepo.findByCode("DE_STD_19", ctx.workspaceId!)).not.toBeNull();
     });
 
     it("creates profile without optional VAT ID", async () => {

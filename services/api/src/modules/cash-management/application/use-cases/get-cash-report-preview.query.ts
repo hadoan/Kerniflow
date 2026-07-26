@@ -26,7 +26,7 @@ import {
   type CashDayCloseRepoPort,
   type CashAttachmentRepoPort,
 } from "../ports/cash-management.ports";
-import { assertCanManageCash } from "../../policies/assert-cash-policies";
+import { assertCanReadCash } from "../../policies/assert-cash-policies";
 
 const receiptRequiredTypes = new Set<string>([
   "EXPENSE_CASH",
@@ -64,7 +64,7 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     input: GetCashReportPreviewQuery,
     ctx: UseCaseContext
   ): Promise<Result<{ preview: CashReportPreviewDto }, UseCaseError>> {
-    assertCanManageCash(ctx, input.registerId);
+    assertCanReadCash(ctx, input.registerId);
 
     const tenantId = ctx.tenantId;
     const workspaceId = ctx.workspaceId;

@@ -25,6 +25,15 @@ export const assertCanManageCash = (ctx: UseCaseContext, _registerId?: string) =
   }
 };
 
+export const assertCanReadCash = (ctx: UseCaseContext, _registerId?: string) => {
+  assertCan(ctx);
+  assertAuthenticated(ctx);
+
+  if (!hasPermission(ctx, "cash.read")) {
+    throw new ForbiddenError("Missing permission", undefined, "CashManagement:PermissionDenied");
+  }
+};
+
 export const assertCanCloseCash = (ctx: UseCaseContext, _registerId?: string) => {
   assertCan(ctx);
   assertAuthenticated(ctx);

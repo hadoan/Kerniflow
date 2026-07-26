@@ -330,7 +330,7 @@ describe("cash-management screens", () => {
     );
   });
 
-  it("requires tax setup before saving a cash sale when no profile exists", async () => {
+  it("routes cash sales without a profile to the central tax settings", async () => {
     const user = userEvent.setup();
 
     apiMocks.getRegister.mockResolvedValue({
@@ -352,25 +352,11 @@ describe("cash-management screens", () => {
     await user.click(await screen.findByRole("button", { name: "New cash entry" }));
 
     expect(await screen.findByText("Tax setup required")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Use standard German VAT" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Use Kleinunternehmer (No VAT)" })
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save entry" })).toBeDisabled();
-
-    await user.click(screen.getByRole("button", { name: "Use standard German VAT" }));
-
-    await waitFor(() =>
-      expect(taxApiMocks.upsertProfile).toHaveBeenCalledWith(
-        expect.objectContaining({
-          country: "DE",
-          regime: "STANDARD_VAT",
-          currency: "EUR",
-          filingFrequency: "MONTHLY",
-          vatAccountingMethod: "IST",
-        })
-      )
+    expect(screen.getByRole("link", { name: "Configure tax & VAT" })).toHaveAttribute(
+      "href",
+      "/settings/tax"
     );
+    expect(screen.getByRole("button", { name: "Save entry" })).toBeDisabled();
   });
 
   it("stops the camera stream after capturing a receipt photo", async () => {
@@ -418,9 +404,6 @@ describe("cash-management screens", () => {
         taxCodeOptions={[]}
         taxRelevant={false}
         requiresTaxProfileSetup={false}
-        isTaxProfileSetupPending={false}
-        onUseStandardVat={() => undefined}
-        onUseSmallBusiness={() => undefined}
         taxCodeRequired={false}
         taxCodeLabel="VAT"
         registerCurrency="EUR"

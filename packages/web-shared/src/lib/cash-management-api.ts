@@ -17,6 +17,7 @@ import type {
   SubmitCashDayCloseInput,
   UpdateCashRegister,
   CashAssistantWorkspace,
+  CashReportPreviewDto,
   ResolveCashAssistantWorkspaceInput,
 } from "@corely/contracts";
 import {
@@ -123,6 +124,22 @@ export class CashManagementApi {
         correlationId: apiClient.generateCorrelationId(),
       }
     );
+  }
+
+  async getKassenbericht(
+    registerId: string,
+    dayKey: string
+  ): Promise<{ preview: CashReportPreviewDto }> {
+    return apiClient.get<{ preview: CashReportPreviewDto }>(
+      `/cash-registers/${registerId}/kassenbericht/${dayKey}`,
+      { correlationId: apiClient.generateCorrelationId() }
+    );
+  }
+
+  async downloadKassenberichtPdf(registerId: string, dayKey: string): Promise<Blob> {
+    return apiClient.getBlob(`/cash-registers/${registerId}/kassenbericht/${dayKey}/pdf`, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
   }
 
   async getDashboard(

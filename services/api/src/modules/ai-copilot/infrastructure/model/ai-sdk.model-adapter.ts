@@ -158,6 +158,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
           : systemPromptId === "cash.copilot.system"
             ? {
                 LANGUAGE: normalizePromptLanguage(params.locale),
+                CURRENT_DATE: new Date().toISOString().slice(0, 10),
                 REQUEST_CLARIFICATION_TOOL: "request_cash_clarification",
                 COLLECT_INPUTS_TOOL: "collect_inputs",
               }

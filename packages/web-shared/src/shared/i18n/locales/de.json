@@ -552,6 +552,8 @@
       "vatIdOptional": "Umsatzsteuer-ID (Optional)",
       "filingFrequency": "Meldezeitraum",
       "accountingMethod": "Gewinnermittlungsart",
+      "effectiveFrom": "Gültig ab",
+      "effectiveFromHelp": "Wählen Sie ein Datum, das am oder vor den Kassenbewegungen liegt, die dieses Steuerprofil abdecken soll.",
       "taxYearStartMonth": "Beginn des Steuerjahres",
       "localTaxOffice": "Zuständiges Finanzamt",
       "save": "Steuerprofil speichern",
@@ -1366,6 +1368,7 @@
       "registerDetail": {
         "newCashEntry": "Neue Buchung",
         "closeDay": "Tag abschließen (Kassensturz)",
+        "kassenbericht": "Kassenbericht",
         "export": "Export",
         "edit": "Bearbeiten",
         "currentBalance": "Aktueller Saldo",
@@ -1453,6 +1456,7 @@
           "noVat": "Keine USt",
           "taxProfileRequiredTitle": "Steuer-Setup erforderlich",
           "taxProfileRequiredDescription": "Legen Sie fest, wie dieses Kassenbuch steuerlich behandelt wird, bevor Sie steuerpflichtige Barverkäufe erfassen.",
+          "configureTaxSettings": "Steuern & USt konfigurieren",
           "setupStandardVat": "Deutsche Standard-USt verwenden",
           "setupSmallBusiness": "Kleinunternehmer verwenden (keine USt)",
           "taxSummary": "USt-Zusammenfassung",
@@ -1501,6 +1505,7 @@
         "title": "Tagesabschluss (Kassensturz)",
         "backToRegister": "Zurück zur Kasse",
         "addCorrectionEntry": "Korrekturbuchung hinzufügen",
+        "viewReport": "Kassenbericht anzeigen",
         "closeDayFor": "Tag abschließen für {{register}}",
         "day": "Tag",
         "expectedBalance": "Soll-Bestand",
@@ -1517,6 +1522,15 @@
         "submitAndLock": "Abschließen und Tag sperren",
         "lockedInfo": "Dieser Tag ist gesperrt. Nur Korrekturbuchungen sind erlaubt.",
         "loadExistingFailed": "Vorhandener Tagesabschluss konnte nicht geladen werden."
+      },
+      "kassenbericht": {
+        "title": "Täglicher Kassenbericht",
+        "subtitle": "Druckansicht für den täglichen Kassenbericht.",
+        "back": "Zurück zur Kasse",
+        "download": "PDF herunterladen",
+        "downloading": "PDF wird erstellt...",
+        "loading": "Kassenbericht wird geladen...",
+        "loadFailed": "Der Kassenbericht für diesen Tag konnte nicht geladen werden."
       },
       "exports": {
         "title": "Exporte · {{register}}",
@@ -1689,7 +1703,8 @@
       "savedTitle": "Kassen-Tagesentwurf gespeichert",
       "savedDescription": "Die bestätigten Kassenbewegungen wurden erfolgreich gespeichert.",
       "taxProfileRequiredTitle": "Steuerprofil vor dem Speichern erforderlich",
-      "taxProfileRequiredDescription": "Wählen Sie, ob das Unternehmen die deutsche Regelbesteuerung oder die Kleinunternehmerregelung verwendet. Die App darf diese Steuereinstellung nicht erraten."
+      "taxProfileRequiredDescription": "Wählen Sie, ob das Unternehmen die deutsche Regelbesteuerung oder die Kleinunternehmerregelung verwendet. Die App darf diese Steuereinstellung nicht erraten.",
+      "configureTaxSettings": "Steuern & USt konfigurieren"
     },
     "search": {
       "title": "Chats durchsuchen",

@@ -97,13 +97,14 @@ describe("prompt snapshots", () => {
   it("does not re-ask known cash-day facts after same-fund storage confirmation", () => {
     const result = registry.render("cash.copilot.system", context, {
       LANGUAGE: "vi",
+      CURRENT_DATE: "2026-07-26",
       REQUEST_CLARIFICATION_TOOL: "request_cash_clarification",
     });
 
     expect(result.content).toContain(
       "Do not call ACTUAL_CLOSING_CASH or collect_inputs for businessDate or actualClosingCashCents"
     );
-    expect(result.promptVersion).toBe("v3");
+    expect(result.promptVersion).toBe("v4");
     expect(result.content).toContain(
       "Call at most one request_cash_clarification per assistant response"
     );

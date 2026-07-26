@@ -569,6 +569,8 @@
       "vatIdOptional": "VAT/Tax ID (Optional)",
       "filingFrequency": "Filing Frequency",
       "accountingMethod": "Accounting Method",
+      "effectiveFrom": "Effective from",
+      "effectiveFromHelp": "Choose a date on or before the cash transactions this tax profile must cover.",
       "taxYearStartMonth": "Tax Year Start Month",
       "localTaxOffice": "Local Tax Office",
       "save": "Save Tax Profile",
@@ -1382,6 +1384,7 @@
       "registerDetail": {
         "newCashEntry": "New cash entry",
         "closeDay": "Close day (Kassensturz)",
+        "kassenbericht": "Kassenbericht",
         "export": "Export",
         "edit": "Edit",
         "currentBalance": "Current balance",
@@ -1469,6 +1472,7 @@
           "noVat": "No VAT",
           "taxProfileRequiredTitle": "Tax setup required",
           "taxProfileRequiredDescription": "Choose how this cashbook should treat VAT before recording taxable cash sales.",
+          "configureTaxSettings": "Configure tax & VAT",
           "setupStandardVat": "Use standard German VAT",
           "setupSmallBusiness": "Use Kleinunternehmer (No VAT)",
           "taxSummary": "VAT summary",
@@ -1517,6 +1521,7 @@
         "title": "Day close (Kassensturz)",
         "backToRegister": "Back to register",
         "addCorrectionEntry": "Add correction entry",
+        "viewReport": "View Kassenbericht",
         "closeDayFor": "Close day for {{register}}",
         "day": "Day",
         "expectedBalance": "Expected balance (Soll)",
@@ -1533,6 +1538,15 @@
         "submitAndLock": "Submit and lock day",
         "lockedInfo": "This day is locked. Use correction entries only.",
         "loadExistingFailed": "Failed to load existing day close."
+      },
+      "kassenbericht": {
+        "title": "Daily Kassenbericht",
+        "subtitle": "German paper-form layout with plain-language explanations for checking or copying by hand.",
+        "back": "Back to register",
+        "download": "Download PDF",
+        "downloading": "Generating PDF...",
+        "loading": "Loading Kassenbericht...",
+        "loadFailed": "Could not load the Kassenbericht for this day."
       },
       "exports": {
         "title": "Exports · {{register}}",
@@ -1708,7 +1722,8 @@
       "savedTitle": "Cash-day draft saved",
       "savedDescription": "The confirmed cash movements were saved successfully.",
       "taxProfileRequiredTitle": "Tax profile required before saving",
-      "taxProfileRequiredDescription": "Choose whether the business uses standard German VAT or the Kleinunternehmer scheme. The app must not guess this tax setting."
+      "taxProfileRequiredDescription": "Choose whether the business uses standard German VAT or the Kleinunternehmer scheme. The app must not guess this tax setting.",
+      "configureTaxSettings": "Configure tax & VAT"
     },
     "search": {
       "title": "Search chats",

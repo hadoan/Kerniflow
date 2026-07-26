@@ -102,6 +102,13 @@ export function CashRegisterDetailScreen() {
               </Link>
             </Button>
           ) : null}
+          {lastClosed ? (
+            <Button variant="outline" asChild className="w-full sm:w-auto">
+              <Link to={`/cash/registers/${id}/kassenbericht?day=${lastClosed.dayKey}`}>
+                {t("cash.ui.registerDetail.kassenbericht")}
+              </Link>
+            </Button>
+          ) : null}
           {canExportCash ? (
             <Button variant="outline" asChild className="w-full sm:w-auto">
               <Link to={`/cash/registers/${id}/exports`}>{t("cash.ui.registerDetail.export")}</Link>

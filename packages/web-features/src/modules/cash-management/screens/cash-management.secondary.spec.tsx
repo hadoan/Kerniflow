@@ -141,9 +141,6 @@ describe("cash-management screens secondary", () => {
         taxCodeOptions={[]}
         taxRelevant={false}
         requiresTaxProfileSetup={false}
-        isTaxProfileSetupPending={false}
-        onUseStandardVat={() => undefined}
-        onUseSmallBusiness={() => undefined}
         taxCodeRequired={false}
         taxCodeLabel="VAT"
         registerCurrency="EUR"
@@ -169,9 +166,6 @@ describe("cash-management screens secondary", () => {
         taxCodeOptions={[]}
         taxRelevant={false}
         requiresTaxProfileSetup={false}
-        isTaxProfileSetupPending={false}
-        onUseStandardVat={() => undefined}
-        onUseSmallBusiness={() => undefined}
         taxCodeRequired={false}
         taxCodeLabel="VAT"
         registerCurrency="EUR"

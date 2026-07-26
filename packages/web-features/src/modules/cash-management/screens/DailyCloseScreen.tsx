@@ -124,11 +124,18 @@ export function DailyCloseScreen() {
             <Link to={`/cash/registers/${id}`}>{t("cash.ui.dayClose.backToRegister")}</Link>
           </Button>
           {isClosed ? (
-            <Button asChild>
-              <Link to={`/cash/registers/${id}/entries`}>
-                {t("cash.ui.dayClose.addCorrectionEntry")}
-              </Link>
-            </Button>
+            <>
+              <Button variant="outline" asChild>
+                <Link to={`/cash/registers/${id}/kassenbericht?day=${dayKey}`}>
+                  {t("cash.ui.dayClose.viewReport")}
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to={`/cash/registers/${id}/entries`}>
+                  {t("cash.ui.dayClose.addCorrectionEntry")}
+                </Link>
+              </Button>
+            </>
           ) : null}
         </div>
       </div>

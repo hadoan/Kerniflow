@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { type TaxCodeEntity } from "../../domain/entities";
 import { TaxCodeRepoPort, TaxProfileRepoPort, TaxRateRepoPort } from "../../domain/ports";
+import { ensureDeStandardVatCodes } from "../services/ensure-de-standard-vat-codes";
 import {
   BaseUseCase,
   type Result,
@@ -30,41 +31,11 @@ export class ListTaxCodesUseCase extends BaseUseCase<void, TaxCodeEntity[]> {
     if (codes.length === 0) {
       const profile = await this.taxProfileRepo.getActive(scopeId, new Date());
       if (profile?.country === "DE" && profile.regime === "STANDARD_VAT") {
-        const effectiveFrom = new Date(Date.UTC(new Date().getUTCFullYear(), 0, 1));
-        const standard = await this.repo.create({
+        await ensureDeStandardVatCodes({
           tenantId: scopeId,
-          code: "DE_STD_19",
-          kind: "STANDARD",
-          label: "USt 19%",
-          isActive: true,
-        });
-        const reduced = await this.repo.create({
-          tenantId: scopeId,
-          code: "DE_RED_7",
-          kind: "REDUCED",
-          label: "USt 7%",
-          isActive: true,
-        });
-        await this.repo.create({
-          tenantId: scopeId,
-          code: "DE_EXEMPT",
-          kind: "EXEMPT",
-          label: "Steuerfrei",
-          isActive: true,
-        });
-        await this.taxRateRepo.create({
-          tenantId: scopeId,
-          taxCodeId: standard.id,
-          rateBps: 1900,
-          effectiveFrom,
-          effectiveTo: null,
-        });
-        await this.taxRateRepo.create({
-          tenantId: scopeId,
-          taxCodeId: reduced.id,
-          rateBps: 700,
-          effectiveFrom,
-          effectiveTo: null,
+          effectiveFrom: profile.effectiveFrom,
+          taxCodeRepo: this.repo,
+          taxRateRepo: this.taxRateRepo,
         });
         codes = await this.repo.findAll(scopeId);
       }
