@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, Button, Input } from "@corely/ui";
 import { type CashReportPreviewDto } from "@corely/contracts";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
-import { formatMoney } from "@corely/web-shared/shared/lib/formatters";
+
 
 function formatNumber(amountCents: number) {
   if (amountCents === 0) {
@@ -27,9 +27,7 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
     report.privateWithdrawalsCents +
     otherOutflows;
 
-  const hasClosingCash =
-    report.actualClosingCashCents !== undefined && report.actualClosingCashCents !== null;
-  const closingCash = report.actualClosingCashCents ?? 0;
+  const closingCash = report.effectiveClosingCashCents;
   const cashReceived = closingCash + totalOutflows - report.previousClosingCashCents;
   const otherIncome =
     report.privateDepositsCents +
@@ -109,7 +107,7 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
                 )}
               </td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
-                {hasClosingCash ? formatNumber(closingCash) : ""}
+                {formatNumber(closingCash)}
               </td>
               <td className="border border-black p-1 text-center align-top text-[10px] leading-tight">
                 Buch-
@@ -296,7 +294,7 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
                 )}
               </td>
               <td className="border border-black p-2 text-right text-lg font-bold tabular-nums">
-                {hasClosingCash ? formatNumber(cashReceived) : ""}
+                {formatNumber(cashReceived)}
               </td>
               <td className="border-b border-r border-black"></td>
             </tr>
@@ -328,7 +326,7 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
                 )}
               </td>
               <td className="border border-black p-2 text-right text-lg font-bold tabular-nums">
-                {hasClosingCash ? formatNumber(report.calculatedCashSalesCents) : ""}
+                {formatNumber(report.calculatedCashSalesCents)}
               </td>
               <td className="border-b border-r border-black"></td>
             </tr>

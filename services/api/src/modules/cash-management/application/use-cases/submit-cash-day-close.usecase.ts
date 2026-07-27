@@ -127,20 +127,33 @@ export class SubmitCashDayCloseUseCase extends BaseUseCase<
       dayKey
     );
 
-    const countedFromLines = input.denominationCounts.reduce(
-      (total, line) => total + line.subtotal,
-      0
-    );
-    const countedBalance = input.countedBalance ?? input.countedBalanceCents ?? countedFromLines;
+    let countedBalance: number | null = null;
+    let difference: number | null = null;
+    let verificationStatus = "NOT_COUNTED";
 
-    const difference = countedBalance - expectedBalance;
     const note = input.note ?? input.notes ?? null;
-    if (difference !== 0 && !note) {
-      throw new ValidationError(
-        "A note is required when counted and expected balances differ",
-        { differenceCents: difference },
-        "CashManagement:DifferenceNoteRequired"
+
+    if (input.mode === "COUNTED") {
+      const countedFromLines = input.denominationCounts.reduce(
+        (total, line) => total + line.subtotal,
+        0
       );
+      countedBalance = input.countedClosingCashCents ?? input.countedBalance ?? input.countedBalanceCents ?? countedFromLines;
+
+      if (countedBalance < 0) {
+        throw new ValidationError("Counted closing cash cannot be negative.", { countedBalance });
+      }
+
+      difference = countedBalance - expectedBalance;
+      verificationStatus = difference === 0 ? "COUNTED_MATCH" : "COUNTED_DIFFERENCE";
+
+      if (difference !== 0 && !note) {
+        throw new ValidationError(
+          "A note is required when counted and expected balances differ",
+          { differenceCents: difference },
+          "CashManagement:DifferenceNoteRequired"
+        );
+      }
     }
 
     const existing = await this.dayCloseRepo.findDayCloseByRegisterAndDay(
@@ -170,6 +183,7 @@ export class SubmitCashDayCloseUseCase extends BaseUseCase<
           expectedBalanceCents: expectedBalance,
           countedBalanceCents: countedBalance,
           differenceCents: difference,
+          verificationStatus: verificationStatus,
           note,
           submittedAt: new Date(),
           submittedByUserId: ctx.userId ?? "system",
@@ -200,7 +214,7 @@ export class SubmitCashDayCloseUseCase extends BaseUseCase<
         tx
       );
 
-      if (difference !== 0) {
+      if (difference !== null && difference !== 0) {
         const direction = difference >= 0 ? CashEntryDirection.IN : CashEntryDirection.OUT;
         const entryNo = await this.entryRepo.nextEntryNo(tenantId, workspaceId, register.id, tx);
         const amountCents = Math.abs(difference);
