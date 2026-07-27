@@ -103,7 +103,10 @@ export class SignInUseCase {
     }
 
     const selectedTenantId =
-      input.tenantId === undefined ? memberships[0].getTenantId() : input.tenantId;
+      input.tenantId === undefined
+        ? (memberships.find((m) => m.getTenantId() !== null)?.getTenantId() ??
+          memberships[0].getTenantId())
+        : input.tenantId;
 
     if (selectedTenantId) {
       const tenant = await this.tenantRepo.findById(selectedTenantId);

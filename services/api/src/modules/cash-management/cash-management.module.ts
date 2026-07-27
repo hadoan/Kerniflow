@@ -17,6 +17,8 @@ import {
   CASH_REGISTER_REPO,
   CASH_CONFIRMATION_REPO,
   CASH_WORKSPACE_REPO,
+  CASH_ENTRY_CONFIRMATION_REPO,
+  CASH_WORKSPACE_HANDOFF_REPO,
 } from "./application/ports/cash-management.ports";
 import { PrismaCashRepository } from "./infrastructure/adapters/prisma-cash-repository.adapter";
 import { PrismaCashWorkspaceRepository } from "./infrastructure/adapters/prisma-cash-workspace.adapter";
@@ -42,9 +44,15 @@ import { GetCashDashboardQueryUseCase } from "./application/use-cases/get-cash-d
 import { GetCashReportPreviewQueryUseCase } from "./application/use-cases/get-cash-report-preview.query";
 import { PrepareCashDayConfirmationUseCase } from "./application/use-cases/prepare-cash-day-confirmation.usecase";
 import { ConfirmCashDayDraftUseCase } from "./application/use-cases/confirm-cash-day-draft.usecase";
+import { PrepareCashEntryConfirmationUseCase } from "./application/use-cases/prepare-cash-entry-confirmation.usecase";
+import { ConfirmCashEntryUseCase } from "./application/use-cases/confirm-cash-entry.usecase";
+import { AddEntryUseCase } from "./application/use-cases/add-entry.usecase";
 import { GetMonthlyCashReportQueryUseCase } from "./application/use-cases/get-monthly-cash-report.query";
 import { ResolveCashWorkspaceUseCase } from "./application/use-cases/copilot/resolve-cash-workspace.usecase";
+import { OpenCashDayWorkspaceUseCase } from "./application/use-cases/copilot/open-cash-day-workspace.usecase";
 import { CashAssistantWorkspaceController } from "./adapters/http/copilot/cash-assistant-workspace.controller";
+
+import { ConfirmHandoffUseCase } from "./application/use-cases/confirm-handoff.usecase";
 
 @Module({
   imports: [DataModule, KernelModule, IdentityModule, DocumentsModule, BillingModule, TaxModule],
@@ -58,6 +66,8 @@ import { CashAssistantWorkspaceController } from "./adapters/http/copilot/cash-a
     { provide: CASH_ATTACHMENT_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_EXPORT_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_CONFIRMATION_REPO, useExisting: PrismaCashRepository },
+    { provide: CASH_ENTRY_CONFIRMATION_REPO, useExisting: PrismaCashRepository },
+    { provide: CASH_WORKSPACE_HANDOFF_REPO, useExisting: PrismaCashRepository },
     { provide: CASH_WORKSPACE_REPO, useExisting: PrismaCashWorkspaceRepository },
     {
       provide: CASH_DOCUMENTS_PORT,
@@ -89,8 +99,13 @@ import { CashAssistantWorkspaceController } from "./adapters/http/copilot/cash-a
     GetCashReportPreviewQueryUseCase,
     PrepareCashDayConfirmationUseCase,
     ConfirmCashDayDraftUseCase,
+    PrepareCashEntryConfirmationUseCase,
+    ConfirmCashEntryUseCase,
+    ConfirmHandoffUseCase,
+    AddEntryUseCase,
     GetMonthlyCashReportQueryUseCase,
     ResolveCashWorkspaceUseCase,
+    OpenCashDayWorkspaceUseCase,
   ],
   exports: [
     ListCashRegistersQueryUseCase,
@@ -113,6 +128,9 @@ import { CashAssistantWorkspaceController } from "./adapters/http/copilot/cash-a
     ConfirmCashDayDraftUseCase,
     GetMonthlyCashReportQueryUseCase,
     CASH_WORKSPACE_REPO,
+    PrepareCashEntryConfirmationUseCase,
+    ConfirmCashEntryUseCase,
+    OpenCashDayWorkspaceUseCase,
   ],
 })
 export class CashManagementModule {}

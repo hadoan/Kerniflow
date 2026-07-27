@@ -39,6 +39,10 @@ import { MonthlyCashReportPreview } from "../../cash-management/components/month
 import { CashClarificationRenderer } from "../components/CashClarificationRenderer";
 import { CashDayConfirmationRenderer } from "../components/CashDayConfirmationRenderer";
 import { CashDayConfirmationResultRenderer } from "../components/CashDayConfirmationResultRenderer";
+import { CashEntryConfirmationRenderer } from "../components/CashEntryConfirmationRenderer";
+import { CashEntryConfirmationResultRenderer } from "../components/CashEntryConfirmationResultRenderer";
+import { OpenCashDayWorkspaceRenderer } from "../components/OpenCashDayWorkspaceRenderer";
+import { CashHandoffConfirmationCard } from "../components/CashHandoffConfirmationCard";
 import {
   type ThreadGroupKey,
   type ThreadGroup,
@@ -68,8 +72,9 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const { toast } = useToast();
   const navigate = useNavigate();
   const { threadId } = useParams<{ threadId?: string }>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const focusedMessageId = searchParams.get("m");
+  const handoffId = searchParams.get("handoffId");
   const queryClient = useQueryClient();
 
   const [searchOpen, setSearchOpen] = useState(false);
@@ -177,6 +182,71 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     queryFn: async () => getCopilotThread(threadId || ""),
     enabled: Boolean(threadId),
   });
+
+  const handoffQuery = useQuery({
+    queryKey: ["cash-management", "handoff", handoffId],
+    queryFn: () => cashManagementApi.getHandoff(handoffId!),
+    enabled: Boolean(handoffId),
+  });
+
+  const idempotencyKeyRef = useRef<string | null>(null);
+
+  const confirmHandoffMutation = useMutation({
+    mutationFn: async () => {
+      if (!handoffQuery.data || !threadId) {return;}
+      if (!idempotencyKeyRef.current) {
+        idempotencyKeyRef.current = crypto.randomUUID();
+      }
+      return cashManagementApi.confirmHandoff(
+        threadId,
+        handoffQuery.data.id,
+        idempotencyKeyRef.current
+      );
+    },
+    onSuccess: () => {
+      // Clear the handoffId from the URL and update data
+      idempotencyKeyRef.current = null; // Clear on success
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("handoffId");
+      setSearchParams(nextParams, { replace: true });
+      void handoffQuery.refetch();
+    },
+    onError: (error) => {
+      // Do not clear idempotency key on failure so it can be retried safely
+      console.error("Failed to confirm handoff", error);
+    },
+  });
+
+  const cancelHandoffMutation = useMutation({
+    mutationFn: async () => {
+      if (!handoffQuery.data || !threadId) {return;}
+      return cashManagementApi.cancelHandoff(threadId, handoffQuery.data.id);
+    },
+    onSuccess: () => {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("handoffId");
+      setSearchParams(nextParams, { replace: true });
+      void handoffQuery.refetch();
+    },
+  });
+
+  const markedViewedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const handoff = handoffQuery.data;
+    if (
+      handoff &&
+      threadId &&
+      handoff.status === "PENDING" &&
+      !handoff.viewedAt &&
+      markedViewedRef.current !== handoff.id
+    ) {
+      markedViewedRef.current = handoff.id;
+      void cashManagementApi.markHandoffViewed(threadId, handoff.id).catch(() => {
+        markedViewedRef.current = null;
+      });
+    }
+  }, [handoffQuery.data, threadId]);
 
   const billingProductKey =
     activeModule === "cash-management" ? CashManagementProductKey : undefined;
@@ -641,6 +711,20 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                   className="flex min-h-0 flex-1 flex-col px-4 py-3 sm:px-6 sm:py-6 lg:px-8 lg:py-8"
                   data-testid="assistant-messages"
                 >
+                  {handoffId && handoffQuery.data && (
+                    <CashHandoffConfirmationCard
+                      handoff={handoffQuery.data}
+                      isConfirming={confirmHandoffMutation.isPending}
+                      onConfirm={() => confirmHandoffMutation.mutate()}
+                      isCancelling={cancelHandoffMutation.isPending}
+                      onCancel={() => cancelHandoffMutation.mutate()}
+                      onNextAction={() => {
+                        const nextParams = new URLSearchParams(searchParams);
+                        nextParams.delete("handoffId");
+                        setSearchParams(nextParams, { replace: true });
+                      }}
+                    />
+                  )}
                   <Chat
                     key={threadId ?? "new-thread"}
                     activeModule={activeModule}
@@ -709,6 +793,15 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                       ),
                       confirm_cash_day_draft: (props) => (
                         <CashDayConfirmationResultRenderer {...props} />
+                      ),
+                      prepare_cash_entry_confirmation: (props) => (
+                        <CashEntryConfirmationRenderer {...props} />
+                      ),
+                      confirm_cash_entry: (props) => (
+                        <CashEntryConfirmationResultRenderer {...props} />
+                      ),
+                      open_cash_day_workspace: (props) => (
+                        <OpenCashDayWorkspaceRenderer {...props} />
                       ),
                     }}
                   />

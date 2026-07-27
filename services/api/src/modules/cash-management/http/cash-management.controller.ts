@@ -51,6 +51,7 @@ import { ListCashDayClosesQueryUseCase } from "../application/use-cases/list-cas
 import { GetCashExportArtifactQueryUseCase } from "../application/use-cases/get-cash-export-artifact.query";
 import { GetCashDashboardQueryUseCase } from "../application/use-cases/get-cash-dashboard.query";
 import { GetCashReportPreviewQueryUseCase } from "../application/use-cases/get-cash-report-preview.query";
+import { ConfirmCashEntryUseCase } from "../application/use-cases/confirm-cash-entry.usecase";
 import { createKassenberichtPdf } from "./kassenbericht-pdf.generator";
 
 @AllowSurfaces("platform", "pos")
@@ -73,7 +74,8 @@ export class CashManagementController {
     private readonly exportCashBookUseCase: ExportCashBookUseCase,
     private readonly getExportArtifactQuery: GetCashExportArtifactQueryUseCase,
     private readonly getCashDashboardQuery: GetCashDashboardQueryUseCase,
-    private readonly getCashReportPreviewQuery: GetCashReportPreviewQueryUseCase
+    private readonly getCashReportPreviewQuery: GetCashReportPreviewQueryUseCase,
+    private readonly confirmCashEntryUseCase: ConfirmCashEntryUseCase
   ) {}
 
   @Get("cash-registers")
@@ -146,6 +148,30 @@ export class CashManagementController {
         ...parsed,
         registerId,
         idempotencyKey: resolveIdempotencyKey(req) ?? parsed.idempotencyKey,
+      },
+      ctx
+    );
+    return mapResultToHttp(result);
+  }
+
+  @Post("cash-registers/:id/confirm-entry/:confirmationId")
+  async confirmCashEntry(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("confirmationId") confirmationId: string
+  ) {
+    const ctx = buildUseCaseContext(req);
+    const idempotencyKey = resolveIdempotencyKey(req);
+
+    if (!idempotencyKey) {
+      throw new ValidationError("Idempotency key is required");
+    }
+
+    const result = await this.confirmCashEntryUseCase.execute(
+      {
+        registerId,
+        confirmationId,
+        idempotencyKey,
       },
       ctx
     );

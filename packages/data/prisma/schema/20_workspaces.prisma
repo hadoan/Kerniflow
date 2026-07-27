@@ -57,26 +57,29 @@ model Workspace {
   invoiceSettings Json? // WorkspaceInvoiceSettings: { prefix?, nextNumber?, defaultPaymentTermsDays? }
 
   // Relations
-  tenant                 Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  legalEntity            LegalEntity             @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
-  memberships            WorkspaceMembership[]
-  invites                WorkspaceInvite[]
-  domains                WorkspaceDomain[]
-  registers              Register[]
-  shiftSessions          ShiftSession[]
-  posSaleIdempotency     PosSaleIdempotency[]
-  posSaleRecords         PosSaleRecord[]
-  paymentAttempts        PaymentAttempt[]
-  cashRegisters          CashRegister[]
-  cashEntries            CashEntry[]
-  cashDayCloses          CashDayClose[]
-  integrationConnections IntegrationConnection[]
-  crmMailboxes           CrmMailbox[]
-  crmMailThreads         CrmMailThread[]
-  crmMailMessages        CrmMailMessage[]
-  channelTemplates       ChannelTemplate[]
-  cashDayConfirmations   CashDayConfirmation[]
+  tenant                  Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  legalEntity             LegalEntity              @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  memberships             WorkspaceMembership[]
+  invites                 WorkspaceInvite[]
+  domains                 WorkspaceDomain[]
+  registers               Register[]
+  shiftSessions           ShiftSession[]
+  posSaleIdempotency      PosSaleIdempotency[]
+  posSaleRecords          PosSaleRecord[]
+  paymentAttempts         PaymentAttempt[]
+  cashRegisters           CashRegister[]
+  cashEntries             CashEntry[]
+  cashDayCloses           CashDayClose[]
+  integrationConnections  IntegrationConnection[]
+  crmMailboxes            CrmMailbox[]
+  crmMailThreads          CrmMailThread[]
+  crmMailMessages         CrmMailMessage[]
+  channelTemplates        ChannelTemplate[]
+  cashDayConfirmations    CashDayConfirmation[]
   cashAssistantWorkspaces CashAssistantWorkspace[]
+  cashEntryConfirmations  CashEntryConfirmation[]
+  cashHandoffsSourced     CashWorkspaceHandoff[]   @relation("HandoffSource")
+  cashHandoffsTargeted    CashWorkspaceHandoff[]   @relation("HandoffTarget")
 
   @@unique([tenantId, name])
   @@index([tenantId])

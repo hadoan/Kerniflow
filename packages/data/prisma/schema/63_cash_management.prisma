@@ -13,12 +13,14 @@ model CashRegister {
   createdAt               DateTime @default(now()) @db.Timestamptz(6)
   updatedAt               DateTime @updatedAt @db.Timestamptz(6)
 
-  entries         CashEntry[]
-  dayCloses       CashDayClose[]
-  entryCounter    CashEntryCounter?
-  exportArtifacts CashExportArtifact[]
-  confirmations   CashDayConfirmation[]
-  workspaces      CashAssistantWorkspace[]
+  entries                CashEntry[]
+  dayCloses              CashDayClose[]
+  entryCounter           CashEntryCounter?
+  exportArtifacts        CashExportArtifact[]
+  confirmations          CashDayConfirmation[]
+  workspaces             CashAssistantWorkspace[]
+  cashWorkspaceHandoffs  CashWorkspaceHandoff[]
+  cashEntryConfirmations CashEntryConfirmation[]
 
   tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -233,21 +235,21 @@ model CashDayConfirmation {
 }
 
 model CashAssistantWorkspace {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   tenantId        String
   workspaceId     String
   registerId      String?
   locationId      String?
-  type            String   // DAILY_CASH_DAY, MONTHLY_REVIEW, GENERAL_HELP
+  type            String // DAILY_CASH_DAY, MONTHLY_REVIEW, GENERAL_HELP
   businessDate    DateTime? @db.Date
   businessMonth   DateTime? @db.Date
-  conversationId  String   @unique
+  conversationId  String    @unique
   cashDayId       String?
-  createdByUserId String   @default("system")
+  createdByUserId String    @default("system")
 
-  createdAt       DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
-  archivedAt      DateTime? @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @db.Timestamptz(6)
+  archivedAt DateTime? @db.Timestamptz(6)
 
   register  CashRegister? @relation(fields: [registerId], references: [id], onDelete: Cascade)
   tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -261,9 +263,85 @@ model CashAssistantWorkspace {
   // But to be precise, we'll create the migration and inject partial unique indexes via SQL.
   @@unique([tenantId, locationId, registerId, businessDate, type], name: "daily_uniqueness", map: "cash_workspace_daily_idx")
   @@unique([tenantId, locationId, registerId, businessMonth, type], name: "monthly_uniqueness", map: "cash_workspace_monthly_idx")
-  
   @@index([tenantId, workspaceId, conversationId])
   @@index([tenantId, workspaceId, type, businessDate])
   @@map("cash_assistant_workspaces")
+  @@schema("accounting")
+}
+
+model CashWorkspaceHandoff {
+  id         String  @id @default(cuid())
+  tenantId   String
+  locationId String?
+  registerId String
+
+  sourceWorkspaceId String
+  targetWorkspaceId String
+
+  sourceConversationId String
+  sourceMessageId      String
+
+  businessDate        String
+  movementType        String
+  amountCents         Int
+  description         String
+  evidenceRequirement String?
+
+  candidateHash String
+  version       Int    @default(1)
+
+  confirmationId String?
+
+  status String @default("PENDING") // PENDING, CONSUMED, CANCELLED, EXPIRED
+
+  viewedAt       DateTime? @db.Timestamptz(6)
+  viewedByUserId String?
+
+  consumedAt  DateTime? @db.Timestamptz(6)
+  cancelledAt DateTime? @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  expiresAt DateTime @db.Timestamptz(6)
+
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sourceWorkspace Workspace    @relation("HandoffSource", fields: [sourceWorkspaceId], references: [id], onDelete: Cascade)
+  targetWorkspace Workspace    @relation("HandoffTarget", fields: [targetWorkspaceId], references: [id], onDelete: Cascade)
+  register        CashRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, targetWorkspaceId])
+  @@index([status, expiresAt])
+  @@map("cash_workspace_handoffs")
+  @@schema("accounting")
+}
+
+model CashEntryConfirmation {
+  id               String  @id @default(cuid())
+  tenantId         String
+  workspaceId      String
+  registerId       String
+  conversationId   String?
+  preparedByUserId String
+
+  businessDate     String
+  candidatePayload Json
+  candidateHash    String
+  version          Int    @default(1)
+
+  status    String   @default("PENDING") // PENDING, CONFIRMED, CONSUMED, EXPIRED
+  expiresAt DateTime @db.Timestamptz(6)
+
+  confirmedAt DateTime? @db.Timestamptz(6)
+  consumedAt  DateTime? @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  register  CashRegister @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  tenant    Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, workspaceId, registerId])
+  @@index([status, expiresAt])
+  @@map("cash_entry_confirmations")
   @@schema("accounting")
 }

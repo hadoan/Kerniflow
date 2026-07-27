@@ -8,6 +8,8 @@ import {
   type CashExportArtifact,
   type CashRegister,
   type CashDayConfirmation,
+  type CashEntryConfirmation,
+  type CashWorkspaceHandoff,
 } from "@prisma/client";
 import { PrismaService, getPrismaClient } from "@corely/data";
 import type { CashDayCloseStatus, CashEntryDirection, CashEntryType } from "@corely/contracts";
@@ -26,6 +28,10 @@ import type {
   UpsertDayCloseRecord,
   CashConfirmationRepoPort,
   CreateCashConfirmationRecord,
+  CashEntryConfirmationRepoPort,
+  CreateCashEntryConfirmationRecord,
+  CashWorkspaceHandoffRepoPort,
+  CreateCashWorkspaceHandoffRecord,
 } from "../../application/ports/cash-management.ports";
 import type {
   CashDayCloseEntity,
@@ -52,7 +58,9 @@ export class PrismaCashRepository
     CashDayCloseRepoPort,
     CashAttachmentRepoPort,
     CashExportRepoPort,
-    CashConfirmationRepoPort
+    CashConfirmationRepoPort,
+    CashEntryConfirmationRepoPort,
+    CashWorkspaceHandoffRepoPort
 {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -976,5 +984,133 @@ export class PrismaCashRepository
       createdAt: row.createdAt,
       expiresAt: row.expiresAt,
     };
+  }
+
+  async createHandoff(
+    data: CreateCashWorkspaceHandoffRecord,
+    tx?: TransactionContext
+  ): Promise<any> {
+    const row = await this.client(tx).cashWorkspaceHandoff.create({
+      data: {
+        tenantId: data.tenantId,
+        locationId: data.locationId,
+        registerId: data.registerId,
+        sourceWorkspaceId: data.sourceWorkspaceId,
+        targetWorkspaceId: data.targetWorkspaceId,
+        sourceConversationId: data.sourceConversationId,
+        sourceMessageId: data.sourceMessageId,
+        businessDate: data.businessDate,
+        movementType: data.movementType,
+        amountCents: data.amountCents,
+        description: data.description,
+        evidenceRequirement: data.evidenceRequirement,
+        candidateHash: data.candidateHash,
+        version: data.version,
+        confirmationId: data.confirmationId,
+        status: data.status,
+        expiresAt: data.expiresAt,
+      },
+    });
+
+    return row;
+  }
+
+  async findHandoffById(
+    tenantId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<any | null> {
+    const row = await this.client(tx).cashWorkspaceHandoff.findFirst({
+      where: { id, tenantId },
+    });
+    return row;
+  }
+
+  async getHandoffForUpdate(id: string, tx?: TransactionContext): Promise<any | null> {
+    const rows = await this.client(tx).$queryRaw<any[]>`
+      SELECT * FROM accounting.cash_workspace_handoffs
+      WHERE id = ${id}
+      FOR UPDATE
+    `;
+    return rows[0] ?? null;
+  }
+
+  async markHandoffViewed(id: string, userId: string, tx?: TransactionContext): Promise<void> {
+    await this.client(tx).cashWorkspaceHandoff.update({
+      where: { id },
+      data: { viewedAt: new Date(), viewedByUserId: userId },
+    });
+  }
+
+  async markHandoffConsumed(id: string, tx?: TransactionContext): Promise<void> {
+    await this.client(tx).cashWorkspaceHandoff.update({
+      where: { id },
+      data: { status: "CONSUMED", consumedAt: new Date() },
+    });
+  }
+
+  async markHandoffCancelled(id: string, tx?: TransactionContext): Promise<void> {
+    await this.client(tx).cashWorkspaceHandoff.update({
+      where: { id },
+      data: { status: "CANCELLED", cancelledAt: new Date() },
+    });
+  }
+
+  async createEntryConfirmation(
+    data: CreateCashEntryConfirmationRecord,
+    tx?: TransactionContext
+  ): Promise<any> {
+    const row = await this.client(tx).cashEntryConfirmation.create({
+      data: {
+        tenantId: data.tenantId,
+        workspaceId: data.workspaceId,
+        registerId: data.registerId,
+        conversationId: data.conversationId,
+        preparedByUserId: data.preparedByUserId,
+        businessDate: data.businessDate,
+        candidatePayload: data.candidatePayload as Prisma.InputJsonValue,
+        candidateHash: data.candidateHash,
+        version: data.version,
+        status: data.status,
+        expiresAt: data.expiresAt,
+      },
+    });
+    return row;
+  }
+
+  async findEntryConfirmationById(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<any | null> {
+    const row = await this.client(tx).cashEntryConfirmation.findFirst({
+      where: { id, tenantId, workspaceId },
+    });
+    return row;
+  }
+
+  async markEntryConfirmationConsumed(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void> {
+    await this.client(tx).cashEntryConfirmation.updateMany({
+      where: { id, tenantId, workspaceId, status: "PENDING" },
+      data: { status: "CONSUMED", consumedAt: new Date() },
+    });
+  }
+
+  async markEntryConfirmationExpired(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void> {
+    await this.client(tx).cashEntryConfirmation.updateMany({
+      where: { id, tenantId, workspaceId, status: "PENDING" },
+      data: { status: "EXPIRED" },
+    });
   }
 }

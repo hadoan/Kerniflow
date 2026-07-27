@@ -64,6 +64,11 @@ type LabelFn = (value: string) => string;
 
 import { ReceiptPicker } from "../components/receipt-picker";
 
+export type TaxCodeOption = {
+  id: string;
+  label: string;
+};
+
 type CreateEntryDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;

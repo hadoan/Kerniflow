@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { tool, type Tool, type ToolCallOptions } from "ai";
 import { SpanStatusCode } from "@opentelemetry/api";
 import type {
@@ -10,6 +11,8 @@ import type { AuditPort } from "../../application/ports/audit.port";
 import type { OutboxPort } from "@corely/kernel";
 import { type ObservabilityPort, type ObservabilitySpanRef, type JsonValue } from "@corely/kernel";
 import { isToolInActiveAppScope } from "./app-scope";
+
+const logger = new Logger("ToolsFactory");
 
 export function buildAiTools(
   tools: DomainToolPort[],
@@ -108,9 +111,15 @@ export function buildAiTools(
           deps.observability.endSpan(span);
           return result;
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorStack = error instanceof Error ? error.stack : undefined;
+          logger.error(
+            `[tool:${t.name}] runId=${deps.runId} toolCallId=${toolCallId} FAILED: ${errorMessage}`,
+            errorStack
+          );
           await deps.toolExecutions.complete(deps.tenantId, deps.runId, toolCallId, {
             status: "failed",
-            errorJson: error instanceof Error ? error.message : String(error),
+            errorJson: errorMessage,
           });
           const durationMs = Date.now() - startedAt;
           deps.observability.recordToolObservation(span, {
@@ -120,7 +129,7 @@ export function buildAiTools(
             status: "error",
             durationMs,
             errorType: "tool",
-            errorMessage: error instanceof Error ? error.message : String(error),
+            errorMessage,
           });
           deps.observability.endSpan(span, { code: SpanStatusCode.ERROR, message: "tool_failed" });
           throw error;

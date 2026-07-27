@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { z } from "zod";
 import {
   CashDayCloseStatus,
@@ -13,6 +14,9 @@ import {
   ConfirmCashDayDraftInputSchema,
   GetMonthlyCashReportQuerySchema,
   RequestCashClarificationInputSchema,
+  PrepareCashEntryConfirmationInputSchema,
+  ConfirmCashEntryInputSchema,
+  OpenCashDayWorkspaceInputSchema,
   type CashRegister,
 } from "@corely/contracts";
 import { isErr, type Result, type UseCaseError } from "@corely/kernel";
@@ -37,6 +41,9 @@ import { type ListCashEntryAttachmentsQueryUseCase } from "../../application/use
 import { type GetCashReportPreviewQueryUseCase } from "../../application/use-cases/get-cash-report-preview.query";
 import { type PrepareCashDayConfirmationUseCase } from "../../application/use-cases/prepare-cash-day-confirmation.usecase";
 import { type ConfirmCashDayDraftUseCase } from "../../application/use-cases/confirm-cash-day-draft.usecase";
+import { type PrepareCashEntryConfirmationUseCase } from "../../application/use-cases/prepare-cash-entry-confirmation.usecase";
+import { type ConfirmCashEntryUseCase } from "../../application/use-cases/confirm-cash-entry.usecase";
+import { type OpenCashDayWorkspaceUseCase } from "../../application/use-cases/copilot/open-cash-day-workspace.usecase";
 import { type GetMonthlyCashReportQueryUseCase } from "../../application/use-cases/get-monthly-cash-report.query";
 import { type ExportCashBookUseCase } from "../../application/use-cases/export-cash-book.usecase";
 import {
@@ -70,6 +77,8 @@ type ToolCtx = {
 
 type CashStatusCode = "OPEN" | "NEEDS_REVIEW" | "READY_TO_CLOSE" | "CLOSED";
 
+const cashToolsLogger = new Logger("CashManagementTools");
+
 type CashToolDeps = {
   listRegisters: ListCashRegistersQueryUseCase;
   getRegister: GetCashRegisterQueryUseCase;
@@ -87,6 +96,9 @@ type CashToolDeps = {
   getReportPreview: GetCashReportPreviewQueryUseCase;
   prepareConfirmation: PrepareCashDayConfirmationUseCase;
   confirmDraft: ConfirmCashDayDraftUseCase;
+  prepareEntryConfirmation: PrepareCashEntryConfirmationUseCase;
+  confirmEntry: ConfirmCashEntryUseCase;
+  openCashDayWorkspace: OpenCashDayWorkspaceUseCase;
   getMonthlyReport: GetMonthlyCashReportQueryUseCase;
   documentsApp: DocumentsApplication;
   workspaceRepo: CashWorkspaceRepoPort;
@@ -374,38 +386,57 @@ const withWorkspaceContext =
     ) => Promise<unknown>
   ): NonNullable<DomainToolPort["execute"]> =>
   async (params) => {
-    let workspaceCtx: CashAssistantExecutionContext | null = null;
+    try {
+      let workspaceCtx: CashAssistantExecutionContext | null = null;
 
-    if (params.tenantId && params.workspaceId && params.runId) {
-      const ws = await deps.workspaceRepo.findWorkspaceByConversationId(
-        params.tenantId,
-        params.workspaceId,
-        params.runId
-      );
-      if (ws) {
-        workspaceCtx = {
-          type: ws.type,
-          registerId: ws.registerId,
-          locationId: ws.locationId,
-          businessDate: ws.businessDate,
-          businessMonth: ws.businessMonth,
-        };
+      if (params.tenantId && params.workspaceId && params.runId) {
+        try {
+          const ws = await deps.workspaceRepo.findWorkspaceByConversationId(
+            params.tenantId,
+            params.workspaceId,
+            params.runId
+          );
+          if (ws) {
+            workspaceCtx = {
+              type: ws.type,
+              registerId: ws.registerId,
+              locationId: ws.locationId,
+              businessDate: ws.businessDate,
+              businessMonth: ws.businessMonth,
+            };
+          }
+        } catch (wsErr) {
+          cashToolsLogger.warn(
+            `Failed to load workspace context for runId=${params.runId}: ${
+              wsErr instanceof Error ? wsErr.message : String(wsErr)
+            }`
+          );
+          // Non-fatal: proceed without workspace context
+        }
       }
-    }
 
-    if (
-      workspaceCtx &&
-      workspaceCtx.type !== "GENERAL_HELP" &&
-      allowedTypes.length > 0 &&
-      !allowedTypes.includes(workspaceCtx.type)
-    ) {
-      return failure(
-        "UNAUTHORIZED_TOOL",
-        `This tool is not allowed in ${workspaceCtx.type} workspaces.`
+      if (
+        workspaceCtx &&
+        workspaceCtx.type !== "GENERAL_HELP" &&
+        allowedTypes.length > 0 &&
+        !allowedTypes.includes(workspaceCtx.type)
+      ) {
+        return failure(
+          "UNAUTHORIZED_TOOL",
+          `This tool is not allowed in ${workspaceCtx.type} workspaces.`
+        );
+      }
+
+      return await handler({ ...params, workspaceCtx });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      const stack = err instanceof Error ? err.stack : undefined;
+      cashToolsLogger.error(
+        `[CashTool] Unhandled exception in tool execute (tenantId=${params.tenantId} runId=${params.runId}): ${message}`,
+        stack
       );
+      return failure("INTERNAL_ERROR", `An internal error occurred: ${message}`);
     }
-
-    return handler({ ...params, workspaceCtx });
   };
 
 export const resolveRegister = async (
@@ -415,53 +446,63 @@ export const resolveRegister = async (
 ): Promise<CashRegister | ToolFailure> => {
   const ctx = getCtx(params);
 
-  // 1. Persisted conversation register
-  if (params.workspaceCtx?.registerId) {
-    const boundId = params.workspaceCtx.registerId;
-    if (inputRegisterId && inputRegisterId !== boundId) {
-      return failure("CONFLICT", "Cannot override the register bound to this conversation.");
-    }
-    const result = unwrapResult(await deps.getRegister.execute({ registerId: boundId }, ctx));
-    if (isToolFailure(result)) {
-      return failure(
-        "NOT_FOUND",
-        "The bound cash register for this conversation could not be found."
-      );
-    }
-    return result.register;
-  }
-
-  if (inputRegisterId) {
-    const result = unwrapResult(
-      await deps.getRegister.execute({ registerId: inputRegisterId }, ctx)
-    );
-    if (!isToolFailure(result)) {
+  try {
+    // 1. Persisted conversation register
+    if (params.workspaceCtx?.registerId) {
+      const boundId = params.workspaceCtx.registerId;
+      if (inputRegisterId && inputRegisterId !== boundId) {
+        return failure("CONFLICT", "Cannot override the register bound to this conversation.");
+      }
+      const result = unwrapResult(await deps.getRegister.execute({ registerId: boundId }, ctx));
+      if (isToolFailure(result)) {
+        return failure(
+          "NOT_FOUND",
+          "The bound cash register for this conversation could not be found."
+        );
+      }
       return result.register;
     }
-  }
 
-  // 2. Sole-register fallback for legacy/unbound conversations
-  const result = unwrapResult(await deps.listRegisters.execute({}, ctx));
-  if (isToolFailure(result)) {
-    return result;
-  }
+    if (inputRegisterId) {
+      const result = unwrapResult(
+        await deps.getRegister.execute({ registerId: inputRegisterId }, ctx)
+      );
+      if (!isToolFailure(result)) {
+        return result.register;
+      }
+    }
 
-  if (result.registers.length === 0) {
-    return failure("NOT_FOUND", "No cash registers found in the current workspace");
-  }
+    // 2. Sole-register fallback for legacy/unbound conversations
+    const result = unwrapResult(await deps.listRegisters.execute({}, ctx));
+    if (isToolFailure(result)) {
+      return result;
+    }
 
-  // 3. REGISTER_SELECTION_REQUIRED when multiple registers exist
-  if (result.registers.length > 1) {
-    return failure("REGISTER_SELECTION_REQUIRED", "Select a cash register before continuing.", {
-      availableRegisters: result.registers.map((register) => ({
-        id: register.id,
-        name: register.name,
-        location: register.location,
-      })),
-    });
-  }
+    if (result.registers.length === 0) {
+      return failure("NOT_FOUND", "No cash registers found in the current workspace");
+    }
 
-  return result.registers[0];
+    // 3. REGISTER_SELECTION_REQUIRED when multiple registers exist
+    if (result.registers.length > 1) {
+      return failure("REGISTER_SELECTION_REQUIRED", "Select a cash register before continuing.", {
+        availableRegisters: result.registers.map((register) => ({
+          id: register.id,
+          name: register.name,
+          location: register.location,
+        })),
+      });
+    }
+
+    return result.registers[0];
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    cashToolsLogger.error(
+      `[resolveRegister] Unhandled exception (tenantId=${params.tenantId}): ${message}`,
+      stack
+    );
+    return failure("INTERNAL_ERROR", `Failed to resolve cash register: ${message}`);
+  }
 };
 
 const assertEntryMatchesBoundRegister = (
@@ -1924,5 +1965,134 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
     descriptions: cashManagementToolDescriptions.request_cash_clarification,
     kind: "client-auto",
     inputSchema: RequestCashClarificationInputSchema,
+  },
+  {
+    name: "prepare_cash_entry_confirmation",
+    description: "Prepare an entry confirmation record to safely transition state to the frontend.",
+    descriptions: cashManagementToolDescriptions.prepare_cash_entry_confirmation,
+    kind: "server",
+    inputSchema: PrepareCashEntryConfirmationInputSchema.omit({
+      tenantId: true,
+      workspaceId: true,
+      registerId: true,
+    }),
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = PrepareCashEntryConfirmationInputSchema.omit({
+          tenantId: true,
+          workspaceId: true,
+          registerId: true,
+        }).safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
+        if (isToolFailure(register)) {
+          return register;
+        }
+        return mapToolResult(
+          await deps.prepareEntryConfirmation.execute(
+            { ...parsed.data, registerId: register.id },
+            getCtx(toolCtx)
+          )
+        );
+      }
+    ),
+  },
+  {
+    name: "confirm_cash_entry",
+    description: "Submit a confirmed cash entry idempotently.",
+    descriptions: cashManagementToolDescriptions.confirm_cash_entry,
+    kind: "server",
+    inputSchema: ConfirmCashEntryInputSchema.omit({
+      tenantId: true,
+      workspaceId: true,
+      registerId: true,
+    }),
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = ConfirmCashEntryInputSchema.omit({
+          tenantId: true,
+          workspaceId: true,
+          registerId: true,
+        }).safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
+        if (isToolFailure(register)) {
+          return register;
+        }
+        return mapToolResult(
+          await deps.confirmEntry.execute(
+            { ...parsed.data, registerId: register.id },
+            getCtx(toolCtx)
+          )
+        );
+      }
+    ),
+  },
+  {
+    name: "open_cash_day_workspace",
+    description: "Handoff to the DAILY_CASH_DAY workspace from a general workspace context.",
+    descriptions: cashManagementToolDescriptions.open_cash_day_workspace,
+    kind: "client-auto", // Client needs to handle navigation
+    inputSchema: OpenCashDayWorkspaceInputSchema.omit({
+      tenantId: true,
+      workspaceId: true,
+      registerId: true,
+    }),
+    execute: withWorkspaceContext(
+      deps,
+      ["GENERAL_HELP", "MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = OpenCashDayWorkspaceInputSchema.omit({
+          tenantId: true,
+          workspaceId: true,
+          registerId: true,
+        }).safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+        const register = await resolveRegister(deps, toolCtx);
+        if (isToolFailure(register)) {
+          return register;
+        }
+        return mapToolResult(
+          await deps.openCashDayWorkspace.execute(
+            { ...parsed.data, registerId: register.id },
+            getCtx(toolCtx)
+          )
+        );
+      }
+    ),
   },
 ];

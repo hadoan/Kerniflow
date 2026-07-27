@@ -137,9 +137,12 @@ export class ApiClient {
   async post<T>(
     endpoint: string,
     body?: unknown,
-    opts?: { idempotencyKey?: string; correlationId?: string }
+    opts?: { idempotencyKey?: string; correlationId?: string; headers?: HeadersInit }
   ): Promise<T> {
     const requestInit: RequestInit = { method: "POST" };
+    if (opts?.headers) {
+      requestInit.headers = opts.headers;
+    }
     if (body !== undefined) {
       requestInit.body = body as BodyInit | null;
     }

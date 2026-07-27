@@ -29,6 +29,8 @@ export const CASH_CONFIRMATION_REPO = Symbol("CASH_CONFIRMATION_REPO");
 export const CASH_WORKSPACE_REPO = Symbol("CASH_WORKSPACE_REPO");
 export const CASH_DOCUMENTS_PORT = Symbol("CASH_DOCUMENTS_PORT");
 export const CASH_EXPORT_PORT = Symbol("CASH_EXPORT_PORT");
+export const CASH_ENTRY_CONFIRMATION_REPO = Symbol("CASH_ENTRY_CONFIRMATION_REPO");
+export const CASH_WORKSPACE_HANDOFF_REPO = Symbol("CASH_WORKSPACE_HANDOFF_REPO");
 
 export type RegisterListFilters = {
   q?: string;
@@ -421,4 +423,72 @@ export type ExportModel = {
 
 export interface ExportPort {
   generate(model: ExportModel): Promise<CashExportPayload>;
+}
+
+export type CreateCashEntryConfirmationRecord = {
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  conversationId: string | null;
+  preparedByUserId: string;
+  businessDate: string;
+  candidatePayload: any;
+  candidateHash: string;
+  version: number;
+  status: "PENDING" | "CONFIRMED" | "CONSUMED" | "EXPIRED";
+  expiresAt: Date;
+};
+
+export interface CashEntryConfirmationRepoPort {
+  createEntryConfirmation(
+    data: CreateCashEntryConfirmationRecord,
+    tx?: TransactionContext
+  ): Promise<any>;
+  findEntryConfirmationById(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<any | null>;
+  markEntryConfirmationConsumed(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
+  markEntryConfirmationExpired(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
+}
+
+export type CreateCashWorkspaceHandoffRecord = {
+  tenantId: string;
+  locationId: string | null;
+  registerId: string;
+  sourceWorkspaceId: string;
+  targetWorkspaceId: string;
+  sourceConversationId: string;
+  sourceMessageId: string;
+  businessDate: string;
+  movementType: string;
+  amountCents: number;
+  description: string;
+  evidenceRequirement: string | null;
+  candidateHash: string;
+  version: number;
+  confirmationId: string | null;
+  status: "PENDING" | "CONSUMED" | "CANCELLED" | "EXPIRED";
+  expiresAt: Date;
+};
+
+export interface CashWorkspaceHandoffRepoPort {
+  createHandoff(data: CreateCashWorkspaceHandoffRecord, tx?: TransactionContext): Promise<any>;
+  findHandoffById(tenantId: string, id: string, tx?: TransactionContext): Promise<any | null>;
+  getHandoffForUpdate(id: string, tx?: TransactionContext): Promise<any | null>;
+  markHandoffViewed(id: string, userId: string, tx?: TransactionContext): Promise<void>;
+  markHandoffConsumed(id: string, tx?: TransactionContext): Promise<void>;
+  markHandoffCancelled(id: string, tx?: TransactionContext): Promise<void>;
 }

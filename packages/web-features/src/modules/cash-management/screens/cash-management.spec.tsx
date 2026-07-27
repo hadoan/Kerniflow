@@ -114,7 +114,7 @@ describe("cash-management screens", () => {
         disallowNegativeBalance: false,
       },
     });
-    apiMocks.listEntries.mockImplementation(async () => ({ entries }));
+    apiMocks.listEntries.mockImplementation(async () => ({ entries: [...entries] }));
     apiMocks.listAttachments.mockResolvedValue({ attachments: [] });
     apiMocks.createEntry.mockImplementation(async () => {
       entries.push({
@@ -157,7 +157,11 @@ describe("cash-management screens", () => {
     await user.click(screen.getByRole("button", { name: "Save entry" }));
 
     await waitFor(() => expect(apiMocks.createEntry).toHaveBeenCalled());
-    await waitFor(() => expect(screen.getByText("Opening cash")).toBeInTheDocument());
+    await waitFor(() => {
+      const elements = screen.getAllByText("Opening cash");
+      expect(elements.length).toBeGreaterThan(0);
+      expect(elements[0]).toBeInTheDocument();
+    });
   }, 15_000);
 
   it("create entry uploads and attaches a beleg file", async () => {

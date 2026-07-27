@@ -23,6 +23,7 @@ import type {
 import {
   CashAssistantWorkspaceSchema,
   ResolveCashAssistantWorkspaceOutputSchema,
+  type CashWorkspaceHandoffDto,
 } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
@@ -233,6 +234,68 @@ export class CashManagementApi {
       correlationId: apiClient.generateCorrelationId(),
     });
     return ResolveCashAssistantWorkspaceOutputSchema.parse(response);
+  }
+
+  async getHandoff(id: string): Promise<CashWorkspaceHandoffDto> {
+    return apiClient.get<CashWorkspaceHandoffDto>(`/cash-management/workspaces/handoff/${id}`, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
+  }
+
+  async confirmHandoff(
+    conversationId: string,
+    handoffId: string,
+    idempotencyKey: string
+  ): Promise<{ entryId: string }> {
+    return apiClient.post<{ entryId: string }>(
+      `/cash-management/workspaces/conversations/${conversationId}/handoffs/${handoffId}/confirm`,
+      {}, // Empty body
+      {
+        headers: { "idempotency-key": idempotencyKey },
+        idempotencyKey, // For apiClient internals
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
+  async confirmCashEntry(
+    registerId: string,
+    confirmationId: string,
+    idempotencyKey: string
+  ): Promise<{ entryId: string }> {
+    return apiClient.post<{ entryId: string }>(
+      `/cash-registers/${registerId}/confirm-entry/${confirmationId}`,
+      {}, // Empty body
+      {
+        headers: { "idempotency-key": idempotencyKey },
+        idempotencyKey,
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
+  async cancelHandoff(conversationId: string, handoffId: string): Promise<{ success: boolean }> {
+    return apiClient.post<{ success: boolean }>(
+      `/cash-management/workspaces/conversations/${conversationId}/handoffs/${handoffId}/cancel`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
+  async markHandoffViewed(
+    conversationId: string,
+    handoffId: string
+  ): Promise<{ success: boolean }> {
+    return apiClient.post<{ success: boolean }>(
+      `/cash-management/workspaces/conversations/${conversationId}/handoffs/${handoffId}/view`,
+      {},
+      {
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
   }
 }
 

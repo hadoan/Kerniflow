@@ -263,7 +263,17 @@ export function Chat({
     [canSend, isLoading, onConversationUpdated, onSendBlocked, sendMessage]
   );
 
-  const markSubmitting = (id: string, value: boolean) => {
+  useEffect(() => {
+    const handleGlobalSendPrompt = (e: CustomEvent<{ prompt: string }>) => {
+      handleSendPrompt(e.detail.prompt);
+    };
+    window.addEventListener("copilot:send-prompt", handleGlobalSendPrompt as EventListener);
+    return () => {
+      window.removeEventListener("copilot:send-prompt", handleGlobalSendPrompt as EventListener);
+    };
+  }, [handleSendPrompt]);
+
+  const markSubmitting = useCallback((id: string, value: boolean) => {
     setSubmittingToolIds((prev) => {
       const next = new Set(prev);
       if (value) {
@@ -273,7 +283,7 @@ export function Chat({
       }
       return next;
     });
-  };
+  }, []);
 
   useEffect(() => {
     if (status === "submitted") {

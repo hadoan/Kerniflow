@@ -38,6 +38,9 @@ import { ExportCashBookUseCase } from "../cash-management/application/use-cases/
 import { GetCashReportPreviewQueryUseCase } from "../cash-management/application/use-cases/get-cash-report-preview.query";
 import { PrepareCashDayConfirmationUseCase } from "../cash-management/application/use-cases/prepare-cash-day-confirmation.usecase";
 import { ConfirmCashDayDraftUseCase } from "../cash-management/application/use-cases/confirm-cash-day-draft.usecase";
+import { PrepareCashEntryConfirmationUseCase } from "../cash-management/application/use-cases/prepare-cash-entry-confirmation.usecase";
+import { ConfirmCashEntryUseCase } from "../cash-management/application/use-cases/confirm-cash-entry.usecase";
+import { OpenCashDayWorkspaceUseCase } from "../cash-management/application/use-cases/copilot/open-cash-day-workspace.usecase";
 import { GetMonthlyCashReportQueryUseCase } from "../cash-management/application/use-cases/get-monthly-cash-report.query";
 import { CreateIncomeTaxDraftUseCase } from "../tax/application/use-cases/create-income-tax-draft.use-case";
 import { GetIncomeTaxDraftUseCase } from "../tax/application/use-cases/get-income-tax-draft.use-case";
@@ -113,6 +116,9 @@ export const copilotToolsProvider: Provider = {
     getReportPreview: GetCashReportPreviewQueryUseCase,
     prepareConfirmation: PrepareCashDayConfirmationUseCase,
     confirmDraft: ConfirmCashDayDraftUseCase,
+    prepareEntryConfirmation: PrepareCashEntryConfirmationUseCase,
+    confirmEntry: ConfirmCashEntryUseCase,
+    openCashDayWorkspace: OpenCashDayWorkspaceUseCase,
     getMonthlyReport: GetMonthlyCashReportQueryUseCase,
     createIncomeTaxDraft: CreateIncomeTaxDraftUseCase,
     getIncomeTaxDraft: GetIncomeTaxDraftUseCase,
@@ -194,6 +200,9 @@ export const copilotToolsProvider: Provider = {
           getReportPreview,
           prepareConfirmation,
           confirmDraft,
+          prepareEntryConfirmation,
+          confirmEntry,
+          openCashDayWorkspace,
           getMonthlyReport,
           documentsApp,
           workspaceRepo: cashWorkspaceRepo,
@@ -255,6 +264,9 @@ export const copilotToolsProvider: Provider = {
     GetCashReportPreviewQueryUseCase,
     PrepareCashDayConfirmationUseCase,
     ConfirmCashDayDraftUseCase,
+    PrepareCashEntryConfirmationUseCase,
+    ConfirmCashEntryUseCase,
+    OpenCashDayWorkspaceUseCase,
     GetMonthlyCashReportQueryUseCase,
     CreateIncomeTaxDraftUseCase,
     GetIncomeTaxDraftUseCase,

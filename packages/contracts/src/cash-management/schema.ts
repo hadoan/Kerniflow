@@ -539,4 +539,24 @@ export type ResolveCashAssistantWorkspaceOutput = z.infer<
   typeof ResolveCashAssistantWorkspaceOutputSchema
 >;
 
+export const OpenCashDayWorkspaceInputSchema = z.object({
+  tenantId: z.string().optional(),
+  workspaceId: z.string().optional(),
+  registerId: z.string(),
+  businessDate: DayKeySchema,
+  movementType: z.string().min(1),
+  amountCents: z.number().int(),
+  description: z.string().min(1),
+  evidenceRequirement: z.string().optional().nullable(),
+});
+export type OpenCashDayWorkspaceInput = z.infer<typeof OpenCashDayWorkspaceInputSchema>;
+
+export const OpenCashDayWorkspaceOutputSchema = z.object({
+  workspaceId: z.string(),
+  conversationId: z.string(),
+  handoffId: z.string(),
+  confirmationId: z.string(),
+});
+export type OpenCashDayWorkspaceOutput = z.infer<typeof OpenCashDayWorkspaceOutputSchema>;
+
 export { DayKeySchema, MonthKeySchema, DailyCloseStatus };

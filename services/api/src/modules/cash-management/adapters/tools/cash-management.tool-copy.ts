@@ -91,4 +91,19 @@ export const cashManagementToolDescriptions = {
     de: "Bitte den Benutzer um Klärung, wenn eine wesentliche Kassenangabe unklar ist, bevor fortgefahren wird.",
     vi: "Yêu cầu người dùng làm rõ khi thông tin tiền mặt quan trọng chưa rõ ràng trước khi tiếp tục.",
   },
+  prepare_cash_entry_confirmation: {
+    en: "Prepare an entry confirmation record to safely transition state to the frontend.",
+    de: "Erstellt einen Bestätigungsdatensatz für einen Kassenbucheintrag, um den Status sicher an das Frontend zu übergeben.",
+    vi: "Chuẩn bị bản ghi xác nhận giao dịch để chuyển trạng thái an toàn sang giao diện người dùng.",
+  },
+  confirm_cash_entry: {
+    en: "Submit a confirmed cash entry idempotently.",
+    de: "Sendet einen bestätigten Kassenbucheintrag idempotent ab.",
+    vi: "Gửi một giao dịch sổ quỹ đã được xác nhận một cách an toàn (idempotent).",
+  },
+  open_cash_day_workspace: {
+    en: "Handoff to the DAILY_CASH_DAY workspace from a general workspace context.",
+    de: "Übergabe an den DAILY_CASH_DAY-Arbeitsbereich aus einem allgemeinen Arbeitsbereichskontext.",
+    vi: "Chuyển giao sang không gian làm việc DAILY_CASH_DAY từ ngữ cảnh chung.",
+  },
 } satisfies Record<string, LocalizedToolText>;
