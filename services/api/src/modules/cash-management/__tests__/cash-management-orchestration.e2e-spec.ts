@@ -25,10 +25,21 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
       getReportPreview: { execute: vi.fn() },
       prepareConfirmation: { execute: vi.fn() },
       confirmDraft: { execute: vi.fn() },
+      getMonthlyReport: { execute: vi.fn() },
       documentsApp: { uploadFile: { execute: vi.fn() } },
     };
 
     tools = buildCashManagementTools(deps);
+
+    deps.getRegister.execute.mockResolvedValue({
+      ok: true,
+      value: { register: { id: "reg-1", tenantId: "t-1", currency: "EUR", name: "Test" } },
+    });
+
+    deps.listRegisters.execute.mockResolvedValue({
+      ok: true,
+      value: { registers: [{ id: "reg-1", tenantId: "t-1", currency: "EUR", name: "Test" }] },
+    });
   });
 
   const getTool = (name: string) => tools.find((t) => t.name === name);
@@ -71,7 +82,7 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
 
     // The schema only takes registerId and businessDate. It does NOT take new entries.
     const inputSchemaKeys = Object.keys(previewTool.inputSchema.shape);
-    expect(inputSchemaKeys).toEqual(["registerId", "businessDate"]);
+    expect(inputSchemaKeys).toEqual(["businessDate"]);
 
     deps.getReportPreview.execute.mockResolvedValue({
       ok: true,
@@ -85,7 +96,7 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
     });
 
     expect(deps.getReportPreview.execute).toHaveBeenCalledWith(
-      { registerId: undefined, businessDate: "2026-07-24" },
+      { registerId: "reg-1", businessDate: "2026-07-24" },
       expect.anything()
     );
   });

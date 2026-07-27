@@ -89,6 +89,6 @@ export type MonthlyCashReportDto = z.infer<typeof MonthlyCashReportDtoSchema>;
 export const GetMonthlyCashReportQuerySchema = z.object({
   registerId: z.string(),
   year: z.number().int(),
-  month: z.number().int(),
+  month: z.number().int().min(1).max(12),
 });
 export type GetMonthlyCashReportQuery = z.infer<typeof GetMonthlyCashReportQuerySchema>;
