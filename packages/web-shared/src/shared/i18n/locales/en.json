@@ -1546,7 +1546,28 @@
         "download": "Download PDF",
         "downloading": "Generating PDF...",
         "loading": "Loading Kassenbericht...",
-        "loadFailed": "Could not load the Kassenbericht for this day."
+        "loadFailed": "Could not load the Kassenbericht for this day.",
+        "explanations": {
+          "date": "Date",
+          "number": "Number",
+          "currency": "Currency",
+          "closingCash": "Closing cash balance",
+          "bookNote": "Book note",
+          "outflows": "Expenses during the day",
+          "taxAmount": "Tax amount",
+          "netGrossAmount": "Net/Gross amount",
+          "purchases": "1. Goods purchases and costs",
+          "expenses": "2. Business expenses",
+          "withdrawals": "3. Private withdrawals",
+          "otherOutflows": "4. Other expenses (e.g. Bank deposits)",
+          "total": "Total",
+          "previousClosingCash": "minus previous day closing cash",
+          "cashReceived": "= Cash received",
+          "otherIncome": "minus other income",
+          "cashSales": "= Cash sales of the day",
+          "customerCount": "Customer count",
+          "signature": "Signature"
+        }
       },
       "exports": {
         "title": "Exports · {{register}}",

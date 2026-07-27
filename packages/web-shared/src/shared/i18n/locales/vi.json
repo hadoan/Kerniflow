@@ -1531,7 +1531,28 @@
         "download": "Tải PDF",
         "downloading": "Đang tạo PDF...",
         "loading": "Đang tải Kassenbericht...",
-        "loadFailed": "Không thể tải Kassenbericht cho ngày này."
+        "loadFailed": "Không thể tải Kassenbericht cho ngày này.",
+        "explanations": {
+          "date": "Ngày",
+          "number": "Số",
+          "currency": "Tiền tệ",
+          "closingCash": "Tiền mặt tồn quỹ cuối ngày",
+          "bookNote": "Ghi chú sổ sách",
+          "outflows": "Các khoản chi trong ngày",
+          "taxAmount": "Thuế GTGT",
+          "netGrossAmount": "Số tiền Netto/Brutto",
+          "purchases": "1. Mua hàng và chi phí mua hàng",
+          "expenses": "2. Chi phí kinh doanh",
+          "withdrawals": "3. Rút tiền cá nhân",
+          "otherOutflows": "4. Chi phí khác (VD: Nộp tiền vào NH)",
+          "total": "Tổng cộng",
+          "previousClosingCash": "trừ đi Tiền mặt tồn quỹ đầu ngày",
+          "cashReceived": "= Tổng thu tiền mặt",
+          "otherIncome": "trừ đi Các khoản thu khác",
+          "cashSales": "= Doanh thu tiền mặt trong ngày",
+          "customerCount": "Số lượng khách",
+          "signature": "Chữ ký"
+        }
       },
       "exports": {
         "title": "Xuất dữ liệu · {{register}}",

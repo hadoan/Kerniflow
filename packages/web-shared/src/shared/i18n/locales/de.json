@@ -1530,7 +1530,28 @@
         "download": "PDF herunterladen",
         "downloading": "PDF wird erstellt...",
         "loading": "Kassenbericht wird geladen...",
-        "loadFailed": "Der Kassenbericht für diesen Tag konnte nicht geladen werden."
+        "loadFailed": "Der Kassenbericht für diesen Tag konnte nicht geladen werden.",
+        "explanations": {
+          "date": "",
+          "number": "",
+          "currency": "",
+          "closingCash": "",
+          "bookNote": "",
+          "outflows": "",
+          "taxAmount": "",
+          "netGrossAmount": "",
+          "purchases": "",
+          "expenses": "",
+          "withdrawals": "",
+          "otherOutflows": "",
+          "total": "",
+          "previousClosingCash": "",
+          "cashReceived": "",
+          "otherIncome": "",
+          "cashSales": "",
+          "customerCount": "",
+          "signature": ""
+        }
       },
       "exports": {
         "title": "Exporte · {{register}}",
