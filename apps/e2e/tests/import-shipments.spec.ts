@@ -1,6 +1,6 @@
 import type { APIRequestContext, Page } from "@playwright/test";
-import { expect, test } from "./fixtures";
-import { selectors } from "../utils/selectors";
+import { expect, test } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 

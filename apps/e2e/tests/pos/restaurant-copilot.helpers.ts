@@ -10,7 +10,7 @@ import type {
   RestaurantOrderItemModifier,
   TableSession,
 } from "@corely/contracts";
-import { installPosApiMock, POS_IDS } from "./helpers";
+import { installPosApiMock, POS_IDS } from "./helpers.ts";
 
 const TENANT_ID = "f6f4f2c0-b49a-4bdb-9a0a-f88c1f0a8f10";
 const ROOM_ID = "1c9cc5c3-63d9-4bb5-a537-f1546c783b31";

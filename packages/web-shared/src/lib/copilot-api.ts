@@ -9,12 +9,13 @@ import {
 import { createIdempotencyKey } from "@corely/api-client";
 import { authClient } from "./auth-client";
 import { apiClient } from "./api-client";
+import { COPILOT_AUTH_RETURN_TO_KEY, createCopilotAuthFetch } from "./copilot-auth-fetch";
+import { parseCopilotHistoryPayload } from "./copilot-history";
 import {
   getActiveWorkspaceId,
   subscribeWorkspace,
 } from "@corely/web-shared/shared/workspaces/workspace-store";
 import {
-  CopilotUIMessageSchema,
   type CopilotUIMessage,
   CreateCopilotThreadResponseSchema,
   GetCopilotThreadResponseSchema,
@@ -59,6 +60,21 @@ export interface CopilotOptionsInput {
 }
 
 const RUN_ID_STORAGE_KEY = "copilot:run";
+
+const handleCopilotAuthFailure = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  window.sessionStorage.setItem(COPILOT_AUTH_RETURN_TO_KEY, returnTo);
+  window.location.assign("/auth/login");
+};
+
+const copilotAuthFetch = createCopilotAuthFetch(
+  authClient.client,
+  globalThis.fetch.bind(globalThis),
+  handleCopilotAuthFailure
+);
 
 const buildRunIdStorageKey = (
   activeModule: string,
@@ -248,6 +264,7 @@ export const useCopilotChatOptions = (
     () =>
       new DefaultChatTransport<CopilotChatMessage>({
         api: `${apiBase}/copilot/chat`,
+        fetch: copilotAuthFetch,
         headers: async () => ({
           ...getAuthHeaders(),
           "X-Idempotency-Key": createIdempotencyKey(),
@@ -331,7 +348,7 @@ export const fetchCopilotHistory = async (params: {
   if (!params.runId) {
     return [];
   }
-  const response = await fetch(
+  const response = await copilotAuthFetch(
     `${params.apiBase}/copilot/threads/${params.runId}/messages?pageSize=200`,
     {
       headers: {
@@ -344,22 +361,7 @@ export const fetchCopilotHistory = async (params: {
     return [];
   }
   const json = await response.json();
-  const parsedList = ListCopilotThreadMessagesResponseSchema.safeParse(json);
-  if (!parsedList.success) {
-    return [];
-  }
-  const uiMessages = parsedList.data.items.map((item) => ({
-    id: item.id,
-    role: item.role,
-    parts: item.parts,
-    content: item.content,
-    metadata: item.metadata,
-  }));
-  const parsed = CopilotUIMessageSchema.array().safeParse(uiMessages);
-  if (parsed.success) {
-    return normalizeMessages(parsed.data);
-  }
-  return [];
+  return normalizeMessages(parseCopilotHistoryPayload(json));
 };
 
 const encodeQuery = (params: Record<string, string | number | undefined>): string => {

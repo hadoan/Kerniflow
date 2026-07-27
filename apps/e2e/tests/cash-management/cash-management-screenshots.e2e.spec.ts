@@ -1,12 +1,12 @@
 import { expect, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { test } from "../fixtures";
-import { selectors } from "../../utils/selectors";
-import { loginAsSeededUser } from "../helpers/auth";
-import { createCashEntry, createCashRegister } from "../helpers/cash-management-fixtures";
-import { HttpClient } from "../helpers/http-client";
-import { idempotencyKey } from "../helpers/idempotency";
+import { test } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
+import { loginAsSeededUser } from "../helpers/auth.ts";
+import { createCashEntry, createCashRegister } from "../helpers/cash-management-fixtures.ts";
+import { HttpClient } from "../helpers/http-client.ts";
+import { idempotencyKey } from "../helpers/idempotency.ts";
 
 const shouldCapture = process.env.CASH_CAPTURE_SCREENS === "true";
 

@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
-import { expect, test } from "./fixtures";
-import { selectors } from "../utils/selectors";
+import { expect, test } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 
 async function login(
   page: Page,

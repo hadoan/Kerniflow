@@ -107,7 +107,7 @@ export function BillingScreen() {
 
   if (overviewQuery.isLoading) {
     return (
-      <div className="space-y-6 p-6 lg:p-8 animate-fade-in">
+      <div className="space-y-5 px-4 py-5 sm:px-5 sm:py-6 lg:space-y-6 lg:p-8 animate-fade-in">
         <div className="space-y-3">
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-5 w-[32rem] max-w-full" />
@@ -132,7 +132,7 @@ export function BillingScreen() {
 
   if (overviewQuery.isError || !billing) {
     return (
-      <div className="space-y-6 p-6 lg:p-8 animate-fade-in">
+      <div className="space-y-5 px-4 py-5 sm:px-5 sm:py-6 lg:space-y-6 lg:p-8 animate-fade-in">
         <div>
           <h1 className="text-h1 text-foreground">{copy.title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{copy.subtitle}</p>
@@ -177,7 +177,7 @@ export function BillingScreen() {
     "starter-monthly";
 
   return (
-    <div className="space-y-6 p-6 lg:p-8 animate-fade-in">
+    <div className="space-y-5 px-4 py-5 sm:px-5 sm:py-6 lg:space-y-6 lg:p-8 animate-fade-in">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-h1 text-foreground">{copy.title}</h1>

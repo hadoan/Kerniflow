@@ -49,10 +49,6 @@ const isClosedStatus = (status: string): boolean => {
   return status === "SUBMITTED" || status === "LOCKED";
 };
 
-const requiresSupportingDocument = (entryType: string): boolean => {
-  return entryType !== "OPENING_FLOAT";
-};
-
 @RequireTenant()
 @Injectable()
 export class CreateCashEntryUseCase extends BaseUseCase<
@@ -211,14 +207,6 @@ export class CreateCashEntryUseCase extends BaseUseCase<
     const sourceDocumentId = input.sourceDocument?.documentId?.trim() || null;
     const sourceDocumentRef = input.sourceDocument?.reference?.trim() || null;
     const sourceDocumentKind = input.sourceDocument?.kind?.trim() || null;
-
-    if (requiresSupportingDocument(normalized.type) && !sourceDocumentId && !sourceDocumentRef) {
-      throw new ValidationError(
-        "A receipt reference or linked beleg is required",
-        { entryType: normalized.type },
-        "CashManagement:SupportingDocumentRequired"
-      );
-    }
 
     const entry = await this.unitOfWork.withinTransaction(async (tx) => {
       const entryNo = await this.entryRepo.nextEntryNo(tenantId, workspaceId, register.id, tx);

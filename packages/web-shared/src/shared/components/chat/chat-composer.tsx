@@ -1,6 +1,6 @@
 import type { ChangeEvent, FormEvent, RefObject } from "react";
 import { FileText, Image as ImageIcon, Paperclip, X } from "lucide-react";
-import { Button, Input } from "@corely/ui";
+import { Button, Textarea } from "@corely/ui";
 
 interface ChatComposerProps {
   input: string;
@@ -8,13 +8,13 @@ interface ChatComposerProps {
   isLoading: boolean;
   pendingFiles: File[];
   attachmentError: string | null;
-  onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onInputChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onSubmit: (event: FormEvent) => void;
   onFileSelection: (event: ChangeEvent<HTMLInputElement>) => void;
   removePendingFile: (index: number) => void;
   fileInputRef: RefObject<HTMLInputElement>;
   composerRef?: RefObject<HTMLFormElement>;
-  inputRef?: RefObject<HTMLInputElement>;
+  inputRef?: RefObject<HTMLTextAreaElement>;
   sendLabel: string;
   sendingLabel: string;
   canSubmit: boolean;
@@ -42,7 +42,11 @@ export function ChatComposer({
   removeAttachmentLabel,
 }: ChatComposerProps) {
   return (
-    <form ref={composerRef} onSubmit={onSubmit} className="flex flex-col gap-2">
+    <form
+      ref={composerRef}
+      onSubmit={onSubmit}
+      className="flex flex-col gap-2 pb-[env(safe-area-inset-bottom)]"
+    >
       <input
         ref={fileInputRef}
         type="file"
@@ -68,7 +72,7 @@ export function ChatComposer({
                 <span className="max-w-[240px] truncate">{file.name}</span>
                 <button
                   type="button"
-                  className="rounded p-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                  className="flex h-11 w-11 items-center justify-center rounded text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   onClick={() => removePendingFile(index)}
                   aria-label={removeAttachmentLabel}
                 >
@@ -80,31 +84,33 @@ export function ChatComposer({
         </div>
       ) : null}
       {attachmentError ? <div className="text-xs text-destructive">{attachmentError}</div> : null}
-      <div className="glass flex items-center gap-2 rounded-2xl p-2 shadow-[0_18px_60px_-36px_rgba(0,0,0,0.6)]">
+      <div className="glass flex items-end gap-2 rounded-2xl p-2 shadow-[0_18px_60px_-36px_rgba(0,0,0,0.6)]">
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-xl"
+          className="rounded-xl"
           onClick={() => fileInputRef.current?.click()}
           disabled={isLoading}
           aria-label={addAttachmentLabel}
         >
           <Paperclip className="h-4 w-4" />
         </Button>
-        <Input
+        <Textarea
           ref={inputRef}
           value={input}
           onChange={onInputChange}
           placeholder={placeholder}
-          className="h-12 flex-1 border-transparent bg-transparent text-base shadow-none focus:border-transparent focus:ring-0"
+          rows={1}
+          className="min-h-11 max-h-32 flex-1 resize-none border-transparent bg-transparent text-base shadow-none focus:border-transparent focus:ring-0"
           disabled={isLoading}
+          data-testid="cash-assistant-message-input"
         />
         <Button
           type="submit"
           variant="accent"
           size="lg"
-          className="px-6"
+          className="h-11 shrink-0 px-4 sm:px-6"
           disabled={isLoading || !canSubmit}
         >
           {isLoading ? sendingLabel : sendLabel}

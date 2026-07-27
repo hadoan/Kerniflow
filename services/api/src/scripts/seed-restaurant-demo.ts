@@ -592,22 +592,6 @@ async function ensureTenantUserWorkspace(
     MEMBER: memberRole.id,
   } as const;
 
-  if (DEMO_ROLE_PERMISSION_KEYS.length > 0) {
-    await prisma.rolePermissionGrant.createMany({
-      data: Object.values(roleBySystemKey).flatMap((roleId) =>
-        DEMO_ROLE_PERMISSION_KEYS.map((permissionKey) => ({
-          id: randomUUID(),
-          tenantId,
-          roleId,
-          permissionKey,
-          effect: "ALLOW" as const,
-          createdBy: DEMO_IDS.userId,
-        }))
-      ),
-      skipDuplicates: true,
-    });
-  }
-
   for (const demoUser of demoAuthUsers) {
     await prisma.user.upsert({
       where: { id: demoUser.userId },
@@ -644,6 +628,22 @@ async function ensureTenantUserWorkspace(
         userId: demoUser.userId,
         roleId: roleBySystemKey[demoUser.tenantRoleSystemKey],
       },
+    });
+  }
+
+  if (DEMO_ROLE_PERMISSION_KEYS.length > 0) {
+    await prisma.rolePermissionGrant.createMany({
+      data: Object.values(roleBySystemKey).flatMap((roleId) =>
+        DEMO_ROLE_PERMISSION_KEYS.map((permissionKey) => ({
+          id: randomUUID(),
+          tenantId,
+          roleId,
+          permissionKey,
+          effect: "ALLOW" as const,
+          createdBy: DEMO_IDS.userId,
+        }))
+      ),
+      skipDuplicates: true,
     });
   }
 

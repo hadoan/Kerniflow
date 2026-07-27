@@ -2,8 +2,8 @@ import { expect, type Page, type TestInfo } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { test } from "./fixtures";
-import { selectors } from "../utils/selectors";
+import { test } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 
 const SCREENSHOT_STAMP = new Date().toISOString().replace(/[:.]/g, "-");
 const E2E_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");

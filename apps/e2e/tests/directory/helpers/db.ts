@@ -2,7 +2,7 @@ import { PrismaClient, type DirectoryRestaurantStatus } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { DIRECTORY_EVENT_TYPES } from "@corely/contracts";
 import { Pool } from "pg";
-import { loadDirectoryE2eEnv } from "./env";
+import { loadDirectoryE2eEnv } from "./env.ts";
 
 loadDirectoryE2eEnv();
 

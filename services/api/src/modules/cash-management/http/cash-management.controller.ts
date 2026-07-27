@@ -50,6 +50,9 @@ import { ExportCashBookUseCase } from "../application/use-cases/export-cash-book
 import { ListCashDayClosesQueryUseCase } from "../application/use-cases/list-cash-day-closes.query";
 import { GetCashExportArtifactQueryUseCase } from "../application/use-cases/get-cash-export-artifact.query";
 import { GetCashDashboardQueryUseCase } from "../application/use-cases/get-cash-dashboard.query";
+import { GetCashReportPreviewQueryUseCase } from "../application/use-cases/get-cash-report-preview.query";
+import { ConfirmCashEntryUseCase } from "../application/use-cases/confirm-cash-entry.usecase";
+import { createKassenberichtPdf } from "./kassenbericht-pdf.generator";
 
 @AllowSurfaces("platform", "pos")
 @Controller()
@@ -70,7 +73,9 @@ export class CashManagementController {
     private readonly listAttachmentsQuery: ListCashEntryAttachmentsQueryUseCase,
     private readonly exportCashBookUseCase: ExportCashBookUseCase,
     private readonly getExportArtifactQuery: GetCashExportArtifactQueryUseCase,
-    private readonly getCashDashboardQuery: GetCashDashboardQueryUseCase
+    private readonly getCashDashboardQuery: GetCashDashboardQueryUseCase,
+    private readonly getCashReportPreviewQuery: GetCashReportPreviewQueryUseCase,
+    private readonly confirmCashEntryUseCase: ConfirmCashEntryUseCase
   ) {}
 
   @Get("cash-registers")
@@ -95,6 +100,7 @@ export class CashManagementController {
   async createCashRegister(@Req() req: ContextAwareRequest, @Body() body: unknown) {
     const ctx = buildUseCaseContext(req);
     const parsed = CreateCashRegisterSchema.parse(body);
+    console.log(`[API] createRegister called for tenant ${ctx.tenantId} with name ${parsed.name}`);
     const result = await this.createRegisterUseCase.execute(
       {
         ...parsed,
@@ -148,6 +154,30 @@ export class CashManagementController {
     return mapResultToHttp(result);
   }
 
+  @Post("cash-registers/:id/confirm-entry/:confirmationId")
+  async confirmCashEntry(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("confirmationId") confirmationId: string
+  ) {
+    const ctx = buildUseCaseContext(req);
+    const idempotencyKey = resolveIdempotencyKey(req);
+
+    if (!idempotencyKey) {
+      throw new ValidationError("Idempotency key is required");
+    }
+
+    const result = await this.confirmCashEntryUseCase.execute(
+      {
+        registerId,
+        confirmationId,
+        idempotencyKey,
+      },
+      ctx
+    );
+    return mapResultToHttp(result);
+  }
+
   @Post("cash-entries/:id/reverse")
   async reverseCashEntry(
     @Req() req: ContextAwareRequest,
@@ -189,6 +219,41 @@ export class CashManagementController {
     const ctx = buildUseCaseContext(req);
     const result = await this.getDayCloseQuery.execute({ registerId, dayKey }, ctx);
     return mapResultToHttp(result);
+  }
+
+  @Get("cash-registers/:id/kassenbericht/:dayKey")
+  async getKassenbericht(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("dayKey") businessDate: string
+  ) {
+    const result = await this.getCashReportPreviewQuery.execute(
+      { registerId, businessDate },
+      buildUseCaseContext(req)
+    );
+    return mapResultToHttp(result);
+  }
+
+  @Get("cash-registers/:id/kassenbericht/:dayKey/pdf")
+  @Header("Cache-Control", "no-store")
+  async downloadKassenberichtPdf(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("dayKey") businessDate: string,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const result = await this.getCashReportPreviewQuery.execute(
+      { registerId, businessDate },
+      buildUseCaseContext(req)
+    );
+    const { preview } = mapResultToHttp(result);
+    const buffer = await createKassenberichtPdf(preview);
+    const fileName = `kassenbericht-${preview.businessDate}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Length", String(buffer.byteLength));
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    return new StreamableFile(buffer);
   }
 
   @Get("cash-registers/:id/dashboard")

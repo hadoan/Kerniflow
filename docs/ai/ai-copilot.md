@@ -41,3 +41,10 @@
 - `classes_getTeacherDashboardUnpaidInvoices` (READ): count unpaid class-related invoices.
 - `classes_markSessionDone` (WRITE): mark a session done; requires explicit user confirmation.
 - `classes_bulkUpsertAttendance` (WRITE): bulk attendance updates; requires explicit user confirmation.
+
+### Cash Management Workflow
+
+- The assistant must use the conversational workflow: "Chat -> Clarify -> Confirm -> Save -> HTML Kassenbericht Preview".
+- When dealing with cash amounts, the assistant must never guess the destination or purpose of withdrawn money. Always clarify ambiguity with the user.
+- **Do not let the model calculate official cash sales.** The model must call `get_cash_report_preview` first, which calculates the official retrograde calculation based on persisted domain records.
+- Write tools like `create_cash_entry`, `submit_counted_cash`, and `close_cash_day` MUST only be called AFTER explicit user confirmation of the extracted details or the preview.

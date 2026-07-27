@@ -1,6 +1,6 @@
-import { test, expect } from "../fixtures";
-import { selectors } from "../../utils/selectors";
-import { seedPlatformTenants } from "../../utils/testData";
+import { test, expect } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
+import { seedPlatformTenants } from "../../utils/testData.ts";
 
 test.describe("Manual Tenant Plan Update", () => {
   let testTenants: Array<{ id: string; name: string }> = [];

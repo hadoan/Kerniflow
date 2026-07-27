@@ -1,11 +1,15 @@
 import { spawn, spawnSync } from "child_process";
 import { once } from "events";
+import { watch } from "node:fs";
 import net from "node:net";
+import { fileURLToPath } from "node:url";
 import { context } from "esbuild";
 import { decoratorPlugin } from "./esbuild-decorator-plugin.mjs";
 
 let nodeProcess = null;
 let restartPromise = Promise.resolve();
+let promptRestartTimer = null;
+let promptWatcher = null;
 
 const apiPort = Number(process.env.PORT || 3000);
 
@@ -120,6 +124,25 @@ const startNode = async () => {
   });
 };
 
+const scheduleRestart = (reason) => {
+  if (promptRestartTimer) {
+    clearTimeout(promptRestartTimer);
+  }
+
+  promptRestartTimer = setTimeout(() => {
+    promptRestartTimer = null;
+    console.log(`[dev] ${reason}; restarting API to load the rebuilt package.`);
+    restartPromise = restartPromise.then(async () => {
+      try {
+        await stopNode();
+        await startNode();
+      } catch (error) {
+        console.error(`[dev] Failed to restart: ${error?.message ?? error}`);
+      }
+    });
+  }, 150);
+};
+
 const buildContext = await context({
   entryPoints: ["src/main.ts"],
   bundle: true,
@@ -156,7 +179,27 @@ console.log("👀 Watching for changes...\n");
 
 await buildContext.watch();
 
+const promptsDistDirectory = fileURLToPath(
+  new URL("../../packages/prompts/dist/", import.meta.url)
+);
+
+try {
+  promptWatcher = watch(promptsDistDirectory, (eventType, filename) => {
+    const changedFile = filename?.toString();
+    if (!changedFile || /^index\.(?:mjs|cjs)$/.test(changedFile)) {
+      scheduleRestart(`@corely/prompts ${eventType}`);
+    }
+  });
+  console.log("👀 Watching @corely/prompts build output for changes...\n");
+} catch (error) {
+  console.warn(`[dev] Could not watch @corely/prompts build output: ${error?.message ?? error}`);
+}
+
 process.on("SIGINT", async () => {
+  if (promptRestartTimer) {
+    clearTimeout(promptRestartTimer);
+  }
+  promptWatcher?.close();
   await stopNode();
   buildContext.dispose();
   process.exit(0);

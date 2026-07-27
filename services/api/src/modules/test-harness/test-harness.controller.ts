@@ -18,6 +18,7 @@ import {
 } from "./test-harness.service";
 import { CrmTestHooksService } from "./crm-test-hooks.service";
 import type { BillingProviderTestOperation } from "../billing";
+import type { DeterministicScenario } from "../ai-copilot/infrastructure/model/deterministic-model-registry";
 
 @Controller("test")
 @UseGuards(TestHarnessGuard)
@@ -186,6 +187,28 @@ export class TestHarnessController {
     return this.testHarnessService.seedCopilotThreadMessage(payload);
   }
 
+  @Post("copilot/deterministic-scenario")
+  @HttpCode(HttpStatus.OK)
+  async setDeterministicScenario(
+    @Body() payload: { tenantId: string; scenario: DeterministicScenario | null }
+  ) {
+    if (!payload.tenantId) {
+      throw new BadRequestException("Missing required fields: tenantId");
+    }
+
+    // Require dynamic import to avoid bundling test-only registry in production builds if it's not needed,
+    // or just import it at top.
+    const { activateScenario, deactivateScenario } =
+      await import("../ai-copilot/infrastructure/model/deterministic-model-registry");
+
+    if (payload.scenario) {
+      activateScenario(payload.tenantId, payload.scenario);
+    } else {
+      deactivateScenario(payload.tenantId);
+    }
+    return { success: true };
+  }
+
   /**
    * Seed classes billing send scenario with 2 customers/invoices.
    */
@@ -346,6 +369,16 @@ export class TestHarnessController {
   @Post("health")
   @HttpCode(HttpStatus.OK)
   health() {
-    return { status: "ok", timestamp: new Date().toISOString() };
+    const dbUrl = process.env.DATABASE_URL || "";
+    const dbNameMatch = dbUrl.match(/\/([^/?]+)(\?|$)/);
+    const database = dbNameMatch ? dbNameMatch[1] : "unknown";
+
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      database,
+      aiProvider: process.env.E2E_AI_PROVIDER || process.env.AI_MODEL_PROVIDER,
+    };
   }
 }

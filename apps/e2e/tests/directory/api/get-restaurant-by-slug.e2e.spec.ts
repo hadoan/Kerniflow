@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { DIRECTORY_ERROR_CODES } from "@corely/contracts";
-import { assertApiReady } from "../helpers/bootstrap-api";
-import { ensureDirectorySchemaReady, closePrisma } from "../helpers/db";
+import { assertApiReady } from "../helpers/bootstrap-api.ts";
+import { ensureDirectorySchemaReady, closePrisma } from "../helpers/db.ts";
 import {
   cleanupDirectoryFixtureSet,
   createRunTag,
   seedDirectoryFixtureSet,
-} from "../helpers/directory-seed";
-import { API_BASE_URL, expectProblemDetails, getRestaurantBySlug } from "../helpers/http";
+} from "../helpers/directory-seed.ts";
+import { API_BASE_URL, expectProblemDetails, getRestaurantBySlug } from "../helpers/http.ts";
 
 test.describe("Directory UC-02: get restaurant by slug (public)", () => {
   test.describe.configure({ mode: "serial" });

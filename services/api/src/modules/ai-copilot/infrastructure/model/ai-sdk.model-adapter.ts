@@ -9,7 +9,10 @@ import { buildAiTools } from "../tools/tools.factory";
 import type { ToolExecutionRepositoryPort } from "../../application/ports/tool-execution-repository.port";
 import type { AuditPort } from "../../application/ports/audit.port";
 import type { OutboxPort } from "@corely/kernel";
-import { buildCollectInputsTool } from "../tools/interactive-tools";
+import {
+  buildCollectInputsTool,
+  buildRequestCashClarificationTool,
+} from "../tools/interactive-tools";
 import { type CopilotUIMessage } from "../../domain/types/ui-message";
 import { CopilotDataPartSchemas } from "@corely/contracts";
 import { type ObservabilityPort, type ObservabilitySpanRef } from "@corely/kernel";
@@ -19,6 +22,7 @@ import { PromptUsageLogger } from "../../../../shared/prompts/prompt-usage.logge
 import { buildPromptContext } from "../../../../shared/prompts/prompt-context";
 import { copilotMessageMetadataSchema } from "../../application/validation/copilot-message-metadata.schema";
 import { type PosVerticalId, type SurfaceId } from "@corely/contracts";
+import { DeterministicLanguageModelV1 } from "./deterministic-model-registry";
 
 const normalizePromptLanguage = (locale?: string): string => {
   const normalized = locale?.trim().toLowerCase();
@@ -48,6 +52,10 @@ const resolveSystemPromptId = (
 
   if (activeAppId === "restaurant") {
     return "restaurant.copilot.system";
+  }
+
+  if (activeAppId === "cash-management") {
+    return "cash.copilot.system";
   }
 
   return "copilot.system";
@@ -107,10 +115,15 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       parentSpan: params.observability,
     });
 
-    const provider = this.env.AI_MODEL_PROVIDER;
+    const provider = process.env.E2E_AI_PROVIDER || this.env.AI_MODEL_PROVIDER;
     const modelId = this.env.AI_MODEL_ID;
 
-    const model = provider === "anthropic" ? this.anthropic(modelId) : this.openai(modelId);
+    let model;
+    if (provider === "deterministic") {
+      model = new DeterministicLanguageModelV1(toolTenantId);
+    } else {
+      model = provider === "anthropic" ? this.anthropic(modelId) : this.openai(modelId);
+    }
 
     const promptContext = buildPromptContext({
       env: this.env,
@@ -142,12 +155,19 @@ export class AiSdkModelAdapter implements LanguageModelPort {
               CRM_FOLLOW_UP_TOOL: "crm_generateFollowUps",
               COLLECT_INPUTS_TOOL: "collect_inputs",
             }
-          : {
-              CUSTOMER_SEARCH_TOOL: "customer_search",
-              INVOICE_CREATE_FROM_CUSTOMER_TOOL: "invoice_create_from_customer",
-              COLLECT_INPUTS_TOOL: "collect_inputs",
-              LANGUAGE: normalizePromptLanguage(params.locale),
-            };
+          : systemPromptId === "cash.copilot.system"
+            ? {
+                LANGUAGE: normalizePromptLanguage(params.locale),
+                CURRENT_DATE: new Date().toISOString().slice(0, 10),
+                REQUEST_CLARIFICATION_TOOL: "request_cash_clarification",
+                COLLECT_INPUTS_TOOL: "collect_inputs",
+              }
+            : {
+                CUSTOMER_SEARCH_TOOL: "customer_search",
+                INVOICE_CREATE_FROM_CUSTOMER_TOOL: "invoice_create_from_customer",
+                COLLECT_INPUTS_TOOL: "collect_inputs",
+                LANGUAGE: normalizePromptLanguage(params.locale),
+              };
     const systemPrompt = this.promptRegistry.render(
       systemPromptId,
       promptContext,
@@ -190,25 +210,19 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     const toolset = {
       ...aiTools,
       collect_inputs: buildCollectInputsTool(collectInputsDescription.content),
+      request_cash_clarification: buildRequestCashClarificationTool(
+        "Ask for exactly one unresolved material cash fact, then wait for the user's answer. Call this tool at most once per assistant response. Never ask for a fact already stated by the user or deterministically derivable from those stated facts."
+      ),
     };
 
     this.logger.debug(`Starting streamText with ${Object.keys(toolset).length} tools`);
 
-    const systemMessage: CopilotUIMessage = {
-      id: `copilot-system-${params.runId}`,
-      role: "system",
-      parts: [
-        {
-          type: "text" as const,
-          text: systemPrompt.content,
-        },
-      ],
-    };
-
-    const messagesWithIds = [systemMessage, ...params.messages].map((message, index) => ({
-      ...message,
-      id: message.id ?? `copilot-${params.runId}-${index}`,
-    }));
+    const messagesWithIds = params.messages
+      .filter((m) => m.role !== "system")
+      .map((message, index) => ({
+        ...message,
+        id: message.id ?? `copilot-${params.runId}-${index}`,
+      }));
 
     const normalizedMessages = messagesWithIds
       .map((message) => {
@@ -294,6 +308,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
 
     const result = streamText({
       model,
+      system: systemPrompt.content,
       messages: modelMessages,
       tools: toolset,
       stopWhen: stepCountIs(5),
@@ -303,13 +318,6 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       },
     });
 
-    let usage: LanguageModelUsage | undefined;
-    try {
-      usage = await result.usage;
-    } catch (err) {
-      this.logger.warn(`Failed to resolve usage: ${err}`);
-    }
-
-    return { result, usage };
+    return { result };
   }
 }

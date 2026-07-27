@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { POS_AUTH_TOKENS, POS_IDS, installPosApiMock } from "./helpers";
+import { POS_AUTH_TOKENS, POS_IDS, installPosApiMock } from "./helpers.ts";
 
 const shouldCapture = process.env.POS_CAPTURE_SCREENS === "true";
 const baseURL =

@@ -116,7 +116,7 @@ export function DailyCloseScreen() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 p-6">
+    <div className="mx-auto max-w-4xl space-y-4 px-4 py-5 sm:px-5 sm:py-6 lg:p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">{t("cash.ui.dayClose.title")}</h1>
         <div className="flex gap-2">
@@ -124,11 +124,18 @@ export function DailyCloseScreen() {
             <Link to={`/cash/registers/${id}`}>{t("cash.ui.dayClose.backToRegister")}</Link>
           </Button>
           {isClosed ? (
-            <Button asChild>
-              <Link to={`/cash/registers/${id}/entries`}>
-                {t("cash.ui.dayClose.addCorrectionEntry")}
-              </Link>
-            </Button>
+            <>
+              <Button variant="outline" asChild>
+                <Link to={`/cash/registers/${id}/kassenbericht?day=${dayKey}`}>
+                  {t("cash.ui.dayClose.viewReport")}
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to={`/cash/registers/${id}/entries`}>
+                  {t("cash.ui.dayClose.addCorrectionEntry")}
+                </Link>
+              </Button>
+            </>
           ) : null}
         </div>
       </div>
@@ -162,6 +169,9 @@ export function DailyCloseScreen() {
             <div>
               <p className="text-sm text-muted-foreground">
                 {t("cash.ui.dayClose.countedBalance")}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("cash.ui.dayClose.countedBalanceHelp")}
               </p>
               <p className="text-lg font-semibold">
                 {formatMoney(countedBalance, undefined, registerQuery.data.register.currency)}

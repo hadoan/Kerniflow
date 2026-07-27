@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { assertApiReady } from "../helpers/bootstrap-api";
-import { ensureDirectorySchemaReady, closePrisma } from "../helpers/db";
+import { assertApiReady } from "../helpers/bootstrap-api.ts";
+import { ensureDirectorySchemaReady, closePrisma } from "../helpers/db.ts";
 import {
   cleanupDirectoryFixtureSet,
   createRunTag,
   seedDirectoryFixtureSet,
-} from "../helpers/directory-seed";
-import { listRestaurants } from "../helpers/http";
+} from "../helpers/directory-seed.ts";
+import { listRestaurants } from "../helpers/http.ts";
 
 test.describe("Directory UC-01: list restaurants (public)", () => {
   test.describe.configure({ mode: "serial" });

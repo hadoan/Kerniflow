@@ -10,11 +10,14 @@ import type {
 import type { TransactionContext } from "@corely/kernel";
 import type {
   CashDayCloseEntity,
+  CashDayConfirmationEntity,
   CashDenominationCountEntity,
   CashEntryAttachmentEntity,
   CashEntryEntity,
   CashExportArtifactEntity,
   CashRegisterEntity,
+  CashAssistantWorkspaceEntity,
+  CashAssistantWorkspaceType,
 } from "../../domain/entities";
 
 export const CASH_REGISTER_REPO = Symbol("CASH_REGISTER_REPO");
@@ -22,8 +25,12 @@ export const CASH_ENTRY_REPO = Symbol("CASH_ENTRY_REPO");
 export const CASH_DAY_CLOSE_REPO = Symbol("CASH_DAY_CLOSE_REPO");
 export const CASH_ATTACHMENT_REPO = Symbol("CASH_ATTACHMENT_REPO");
 export const CASH_EXPORT_REPO = Symbol("CASH_EXPORT_REPO");
+export const CASH_CONFIRMATION_REPO = Symbol("CASH_CONFIRMATION_REPO");
+export const CASH_WORKSPACE_REPO = Symbol("CASH_WORKSPACE_REPO");
 export const CASH_DOCUMENTS_PORT = Symbol("CASH_DOCUMENTS_PORT");
 export const CASH_EXPORT_PORT = Symbol("CASH_EXPORT_PORT");
+export const CASH_ENTRY_CONFIRMATION_REPO = Symbol("CASH_ENTRY_CONFIRMATION_REPO");
+export const CASH_WORKSPACE_HANDOFF_REPO = Symbol("CASH_WORKSPACE_HANDOFF_REPO");
 
 export type RegisterListFilters = {
   q?: string;
@@ -309,6 +316,88 @@ export interface DocumentsPort {
   assertDocumentAccessible(tenantId: string, documentId: string): Promise<void>;
 }
 
+export type CreateCashConfirmationRecord = {
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  conversationId: string;
+  preparedByUserId: string;
+  businessDate: string;
+  candidatePayload: any;
+  candidateHash: string;
+  version: number;
+  status: "PENDING" | "CONFIRMED" | "CONSUMED" | "EXPIRED";
+  expiresAt: Date;
+};
+
+export interface CashConfirmationRepoPort {
+  createConfirmation(
+    data: CreateCashConfirmationRecord,
+    tx?: TransactionContext
+  ): Promise<CashDayConfirmationEntity>;
+  findConfirmationById(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<CashDayConfirmationEntity | null>;
+  markConsumed(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
+  markExpired(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
+}
+
+export type CreateWorkspaceRecord = {
+  tenantId: string;
+  workspaceId: string;
+  registerId: string | null;
+  locationId: string | null;
+  type: CashAssistantWorkspaceType;
+  businessDate: Date | null;
+  businessMonth: Date | null;
+  conversationId: string;
+  cashDayId: string | null;
+  createdByUserId: string;
+};
+
+export interface CashWorkspaceRepoPort {
+  createWorkspace(
+    data: CreateWorkspaceRecord,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity>;
+
+  findCanonicalWorkspace(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string | null,
+    type: CashAssistantWorkspaceType,
+    businessDate: Date | null,
+    businessMonth: Date | null,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity | null>;
+
+  findWorkspaceByConversationId(
+    tenantId: string,
+    workspaceId: string,
+    conversationId: string,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity | null>;
+
+  listWorkspaces(
+    tenantId: string,
+    workspaceId: string,
+    tx?: TransactionContext
+  ): Promise<CashAssistantWorkspaceEntity[]>;
+}
+
 export type CashExportPayload = {
   fileName: string;
   contentType: string;
@@ -334,4 +423,72 @@ export type ExportModel = {
 
 export interface ExportPort {
   generate(model: ExportModel): Promise<CashExportPayload>;
+}
+
+export type CreateCashEntryConfirmationRecord = {
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  conversationId: string | null;
+  preparedByUserId: string;
+  businessDate: string;
+  candidatePayload: any;
+  candidateHash: string;
+  version: number;
+  status: "PENDING" | "CONFIRMED" | "CONSUMED" | "EXPIRED";
+  expiresAt: Date;
+};
+
+export interface CashEntryConfirmationRepoPort {
+  createEntryConfirmation(
+    data: CreateCashEntryConfirmationRecord,
+    tx?: TransactionContext
+  ): Promise<any>;
+  findEntryConfirmationById(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<any | null>;
+  markEntryConfirmationConsumed(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
+  markEntryConfirmationExpired(
+    tenantId: string,
+    workspaceId: string,
+    id: string,
+    tx?: TransactionContext
+  ): Promise<void>;
+}
+
+export type CreateCashWorkspaceHandoffRecord = {
+  tenantId: string;
+  locationId: string | null;
+  registerId: string;
+  sourceWorkspaceId: string;
+  targetWorkspaceId: string;
+  sourceConversationId: string;
+  sourceMessageId: string;
+  businessDate: string;
+  movementType: string;
+  amountCents: number;
+  description: string;
+  evidenceRequirement: string | null;
+  candidateHash: string;
+  version: number;
+  confirmationId: string | null;
+  status: "PENDING" | "CONSUMED" | "CANCELLED" | "EXPIRED";
+  expiresAt: Date;
+};
+
+export interface CashWorkspaceHandoffRepoPort {
+  createHandoff(data: CreateCashWorkspaceHandoffRecord, tx?: TransactionContext): Promise<any>;
+  findHandoffById(tenantId: string, id: string, tx?: TransactionContext): Promise<any | null>;
+  getHandoffForUpdate(id: string, tx?: TransactionContext): Promise<any | null>;
+  markHandoffViewed(id: string, userId: string, tx?: TransactionContext): Promise<void>;
+  markHandoffConsumed(id: string, tx?: TransactionContext): Promise<void>;
+  markHandoffCancelled(id: string, tx?: TransactionContext): Promise<void>;
 }

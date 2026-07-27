@@ -1,20 +1,20 @@
 import type { APIRequestContext, Page, TestInfo } from "@playwright/test";
-import { expect, test } from "./fixtures";
-import { selectors } from "../utils/selectors";
+import { expect, test } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 import {
   buildAuthHeaders,
   loginAsSeededUser,
   type AuthContext,
   type SeededTestData,
-} from "./helpers/auth";
-import { HttpClient } from "./helpers/http-client";
-import { idempotencyKey } from "./helpers/idempotency";
+} from "./helpers/auth.ts";
+import { HttpClient } from "./helpers/http-client.ts";
+import { idempotencyKey } from "./helpers/idempotency.ts";
 import {
   buildSurfaceWebUrl,
   forwardedHostForSurface,
   installSurfaceApiForwarding,
   type TestSurface,
-} from "./helpers/surface";
+} from "./helpers/surface.ts";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 

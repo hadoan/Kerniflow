@@ -1,4 +1,4 @@
-import type { ProblemDetails, ValidationErrorItem, isProblemDetails } from "@corely/contracts";
+import type { ValidationErrorItem } from "@corely/contracts";
 import { type HttpError } from "../http/request";
 
 /**

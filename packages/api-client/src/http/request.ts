@@ -9,13 +9,14 @@ import {
 import { createIdempotencyKey } from "../idempotency";
 
 export class HttpError extends Error {
-  constructor(
-    message: string,
-    public status: number | null,
-    public body?: unknown
-  ) {
+  public status: number | null;
+  public body?: unknown;
+
+  constructor(message: string, status: number | null, body?: unknown) {
     super(message);
     this.name = "HttpError";
+    this.status = status;
+    this.body = body;
   }
 }
 

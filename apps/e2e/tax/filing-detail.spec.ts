@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
-import { test, expect } from "../tests/fixtures";
-import type { TestData } from "../utils/testData";
+import { test, expect } from "../tests/fixtures.ts";
+import type { TestData } from "../utils/testData.ts";
 import {
   TAX_FILING_MATRIX,
   type TaxFilingMatrixCase,
@@ -13,7 +13,7 @@ import {
   openMarkPaidDialogFromFiling,
   resolveActiveWorkspaceId,
   seedTaxScenario,
-} from "../tests/helpers/tax-fixtures";
+} from "../tests/helpers/tax-fixtures.ts";
 
 type LoginContext = {
   workspaceId: string;

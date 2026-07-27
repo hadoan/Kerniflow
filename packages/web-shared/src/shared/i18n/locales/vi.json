@@ -108,7 +108,8 @@
       "modalDescription": "Không gian làm việc của bạn hiện sử dụng gói Miễn phí. Dữ liệu lịch sử vẫn khả dụng, nhưng các tính năng xuất dữ liệu, AI và đa địa điểm sẽ bị khóa cho đến khi bạn đăng ký.",
       "modalLater": "Để sau",
       "choosePlan": "Chọn gói"
-    }
+    },
+    "searching": "Đang tìm kiếm..."
   },
   "onboarding": {
     "title": "Thiết lập",
@@ -118,7 +119,8 @@
     "saveAndExit": "Lưu & Thoát",
     "goBack": "Quay lại",
     "skipForNow": "Bỏ qua lúc này",
-    "loading": "Đang tải quá trình thiết lập...",
+    "skip": "Bỏ qua thiết lập",
+    "loading": "Đang tải thiết lập...",
     "aiAssistant": "Trợ lý AI",
     "aiTipTitle": "Trợ lý hỗ trợ",
     "aiHelpTitle": "Bạn cần trợ giúp?",
@@ -551,6 +553,8 @@
       "vatIdOptional": "Mã số thuế (Tùy chọn)",
       "filingFrequency": "Tần suất Kê khai",
       "accountingMethod": "Phương pháp Kế toán",
+      "effectiveFrom": "Áp dụng từ ngày",
+      "effectiveFromHelp": "Chọn ngày bằng hoặc trước các giao dịch tiền mặt mà hồ sơ thuế này cần áp dụng.",
       "taxYearStartMonth": "Tháng Bắt đầu Năm Thuế",
       "localTaxOffice": "Cơ quan Thuế Địa phương",
       "save": "Lưu Hồ sơ Thuế",
@@ -1365,6 +1369,7 @@
       "registerDetail": {
         "newCashEntry": "Bút toán mới",
         "closeDay": "Chốt ngày (Kassensturz)",
+        "kassenbericht": "Kassenbericht",
         "export": "Xuất",
         "edit": "Chỉnh sửa",
         "currentBalance": "Số dư hiện tại",
@@ -1452,6 +1457,7 @@
           "noVat": "Không VAT",
           "taxProfileRequiredTitle": "Cần thiết lập thuế",
           "taxProfileRequiredDescription": "Hãy chọn cách Kassenbuch này xử lý VAT trước khi ghi nhận các giao dịch bán tiền mặt chịu thuế.",
+          "configureTaxSettings": "Cấu hình Thuế & VAT",
           "setupStandardVat": "Dùng VAT chuẩn của Đức",
           "setupSmallBusiness": "Dùng Kleinunternehmer (không VAT)",
           "taxSummary": "Tóm tắt VAT",
@@ -1500,10 +1506,12 @@
         "title": "Chốt ngày (Kassensturz)",
         "backToRegister": "Quay lại quầy thu",
         "addCorrectionEntry": "Thêm bút toán điều chỉnh",
+        "viewReport": "Xem Kassenbericht",
         "closeDayFor": "Chốt ngày cho {{register}}",
         "day": "Ngày",
         "expectedBalance": "Số dư kỳ vọng (Soll)",
-        "countedBalance": "Số dư kiểm đếm (Ist)",
+        "countedBalance": "Tổng tiền mặt kiểm đếm (Ist)",
+        "countedBalanceHelp": "Đếm toàn bộ tiền thuộc cùng quỹ, gồm tiền trong ngăn kéo và tiền đã cất trong két hoặc hộp.",
         "denomination": "Mệnh giá",
         "count": "Số lượng",
         "subtotal": "Thành tiền",
@@ -1515,6 +1523,15 @@
         "submitAndLock": "Gửi và khóa ngày",
         "lockedInfo": "Ngày này đã bị khóa. Chỉ được thêm bút toán điều chỉnh.",
         "loadExistingFailed": "Không thể tải bản chốt ngày hiện có."
+      },
+      "kassenbericht": {
+        "title": "Kassenbericht hằng ngày",
+        "subtitle": "Mẫu Đức có giải thích tiếng Việt để đối chiếu hoặc chép sang sổ giấy.",
+        "back": "Quay lại quầy thu",
+        "download": "Tải PDF",
+        "downloading": "Đang tạo PDF...",
+        "loading": "Đang tải Kassenbericht...",
+        "loadFailed": "Không thể tải Kassenbericht cho ngày này."
       },
       "exports": {
         "title": "Xuất dữ liệu · {{register}}",
@@ -1562,8 +1579,8 @@
           "SALE_CASH": "Bán hàng tiền mặt",
           "REFUND_CASH": "Hoàn tiền mặt",
           "EXPENSE_CASH": "Chi tiền mặt",
-          "OWNER_DEPOSIT": "Chủ nộp tiền",
-          "OWNER_WITHDRAWAL": "Chủ rút tiền",
+          "OWNER_DEPOSIT": "Privateinlage – tiền cá nhân bỏ vào quỹ",
+          "OWNER_WITHDRAWAL": "Privatentnahme – tiền cá nhân lấy từ quỹ",
           "BANK_DEPOSIT": "Nộp tiền vào ngân hàng",
           "BANK_WITHDRAWAL": "Rút tiền từ ngân hàng",
           "CORRECTION": "Điều chỉnh",
@@ -1618,7 +1635,7 @@
   "assistant": {
     "title": "Trợ lý",
     "subtitle": "Hỏi bất cứ điều gì, trích xuất biên lai, tạo hóa đơn hoặc yêu cầu tóm tắt nhanh.",
-    "placeholder": "Hỏi tôi bất cứ điều gì...",
+    "placeholder": "Hỏi bất cứ điều gì, trích xuất biên lai, tạo hóa đơn hoặc yêu cầu tóm tắt nhanh.",
     "emptyStateTitle": "Tôi có thể giúp gì cho bạn?",
     "emptyStateDescription": "Hỏi bất cứ điều gì, trích xuất biên lai, tạo hóa đơn hoặc yêu cầu tóm tắt nhanh.",
     "awaitingInputs": "Đang chờ dữ liệu nhập từ bạn...",
@@ -1668,7 +1685,45 @@
     "issueInvoice": "Phát hành hóa đơn",
     "userRole": "Bạn",
     "assistantRole": "Trợ lý",
-    "systemRole": "Hệ thống"
+    "systemRole": "Hệ thống",
+    "searchAction": "Tìm kiếm",
+    "newChat": "Cuộc trò chuyện mới",
+    "recentChats": "Trò chuyện gần đây",
+    "recentChatsDescription": "Duyệt các cuộc trò chuyện trước đó hoặc bắt đầu một cuộc trò chuyện mới.",
+    "loadingChats": "Đang tải các cuộc trò chuyện...",
+    "noChats": "Chưa có cuộc trò chuyện nào",
+    "noChatsDescription": "Bắt đầu một cuộc trò chuyện và nó sẽ xuất hiện ở đây.",
+    "loadingPreview": "Đang tải bản xem trước...",
+    "loadingMonthlyReport": "Đang tải báo cáo hàng tháng...",
+    "cashConfirmation": {
+      "title": "Bản nháp đã sẵn sàng để xác nhận",
+      "description": "Kiểm tra bản tóm tắt ngày {{date}}, sau đó xác nhận để lưu các giao dịch tiền mặt.",
+      "confirm": "Xác nhận và lưu",
+      "confirming": "Đang xác nhận...",
+      "confirmPrompt": "Tôi xác nhận rõ ràng và cho phép lưu bản nháp ngày tiền mặt này.",
+      "savedTitle": "Đã lưu bản nháp ngày tiền mặt",
+      "savedDescription": "Các giao dịch tiền mặt đã xác nhận được lưu thành công.",
+      "taxProfileRequiredTitle": "Cần cấu hình hồ sơ thuế trước khi lưu",
+      "taxProfileRequiredDescription": "Hãy chọn doanh nghiệp áp dụng VAT tiêu chuẩn của Đức hay chế độ Kleinunternehmer. Ứng dụng không được tự đoán cấu hình thuế này.",
+      "configureTaxSettings": "Cấu hình Thuế & VAT"
+    },
+    "search": {
+      "title": "Tìm kiếm trò chuyện",
+      "placeholder": "Tìm kiếm tin nhắn...",
+      "minLength": "Nhập ít nhất 2 ký tự để tìm kiếm.",
+      "noResults": "Không tìm thấy tin nhắn phù hợp.",
+      "noPreview": "(Không có bản xem trước)"
+    },
+    "groups": {
+      "today": "Hôm nay",
+      "needsAttention": "Cần chú ý",
+      "previousDays": "Những ngày trước",
+      "monthlyReviews": "Đánh giá hàng tháng",
+      "generalQuestions": "Câu hỏi chung",
+      "yesterday": "Hôm qua",
+      "week": "Tuần này",
+      "older": "Cũ hơn"
+    }
   },
   "copilot": {
     "title": "Trợ lý",
@@ -3238,6 +3293,24 @@
     }
   },
   "cashDashboard": {
+    "workspace": {
+      "dailyCash": "Đóng quỹ hàng ngày",
+      "monthlyReview": "Kiểm tra hàng tháng",
+      "generalHelp": "Trợ giúp chung",
+      "generalHelpTitle": "Trợ lý tiền mặt",
+      "cashDayFor": "Ngày tiền mặt",
+      "reviewFor": "Kiểm tra",
+      "register": "Sổ quỹ / Két",
+      "location": "Chi nhánh",
+      "boundRegisterLabel": "Sổ quỹ / Két"
+    },
+    "registerSelector": {
+      "title": "Chọn quỹ / két tiền mặt",
+      "description": "Cuộc trò chuyện này sẽ sử dụng quỹ đã chọn.",
+      "binding": "Đang kết nối quỹ...",
+      "error": "Không thể thiết lập quỹ tiền mặt.",
+      "retry": "Thử lại"
+    },
     "headerTitle": "Bảng điều khiển tiền mặt",
     "headerSubtitle": "Kiểm soát tiền mặt và hóa đơn hàng ngày cho salon.",
     "previewLabel": "Trạng thái mẫu",
@@ -3507,12 +3580,34 @@
       "languages": "Tiếng Đức, Tiếng Anh, Tiếng Việt",
       "lockedTitle": "Trợ lý AI bị khóa trong gói này",
       "lockedDescription": "Nâng cấp lên Pro để mở trợ lý sổ quỹ, giải thích đa ngôn ngữ, và gợi ý xử lý vấn đề.",
-      "lockedBadge": "AI bị khóa"
+      "lockedBadge": "AI bị khóa",
+      "emptyStateActions": {
+        "recordTransactions": {
+          "label": "Ghi lại giao dịch hôm nay",
+          "value": "Tôi muốn ghi lại các giao dịch tiền mặt hôm nay."
+        },
+        "reviewMonth": {
+          "label": "Xem lại báo cáo hàng tháng",
+          "value": "Tôi muốn đánh giá báo cáo tiền mặt của tháng này."
+        },
+        "closeDay": {
+          "label": "Chốt sổ ngày",
+          "value": "Tôi muốn đóng sổ tiền mặt cho ngày hôm nay."
+        },
+        "generalHelp": {
+          "label": "Hỏi một câu hỏi chung",
+          "value": "Tôi có một câu hỏi chung về quản lý tiền mặt."
+        }
+      }
     },
     "severity": {
       "high": "Cao",
       "medium": "Trung bình",
       "low": "Thấp"
+    },
+    "workspace": {
+      "register": "Máy tính tiền",
+      "location": "Vị trí"
     }
   }
 }

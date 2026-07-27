@@ -20,7 +20,7 @@ export const SettingsPage = () => {
       <TaxDetailsDialog open={taxDialogOpen} onOpenChange={setTaxDialogOpen} />
       <ContactDetailsDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
 
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="min-w-0 space-y-5 px-4 py-5 sm:px-5 sm:py-6 lg:space-y-6 lg:p-8">
         <div>
           <h1 className="text-2xl font-semibold">Settings</h1>
           <p className="text-sm text-muted-foreground">
@@ -45,14 +45,18 @@ export const SettingsPage = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Tax defaults</CardTitle>
+              <CardTitle>Tax &amp; VAT</CardTitle>
               <CardDescription>
-                Maintain tax identifiers used across exports and financial workflows.
+                Configure the VAT regime, effective date, filing frequency and tax identifiers for
+                this business.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
+              <Button asChild>
+                <Link to="/settings/tax">Configure tax &amp; VAT</Link>
+              </Button>
               <Button variant="outline" onClick={() => setTaxDialogOpen(true)}>
-                Edit tax info
+                Edit tax IDs
               </Button>
             </CardContent>
           </Card>

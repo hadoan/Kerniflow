@@ -19,6 +19,7 @@ export const CashManagementOnboardingRoute = () => {
       config={cashManagementFeature.CASH_MANAGEMENT_JOURNEY}
       onCompleted={handleCompleted}
       onExit={handleExit}
+      onSkip={handleExit}
     />
   );
 };

@@ -108,7 +108,8 @@
       "modalDescription": "Ihr Arbeitsbereich nutzt nun den kostenlosen Plan. Historische Daten sind weiterhin verfügbar, aber Export-, KI- und Multi-Standort-Funktionen sind gesperrt, bis Sie ein Abonnement abschließen.",
       "modalLater": "Später",
       "choosePlan": "Plan wählen"
-    }
+    },
+    "searching": "Suchen..."
   },
   "onboarding": {
     "title": "Onboarding",
@@ -118,6 +119,7 @@
     "saveAndExit": "Speichern & Beenden",
     "goBack": "Zurück",
     "skipForNow": "Vorerst überspringen",
+    "skip": "Onboarding überspringen",
     "loading": "Onboarding wird geladen...",
     "aiAssistant": "KI-Assistent",
     "aiTipTitle": "Hilfreicher Assistent",
@@ -550,6 +552,8 @@
       "vatIdOptional": "Umsatzsteuer-ID (Optional)",
       "filingFrequency": "Meldezeitraum",
       "accountingMethod": "Gewinnermittlungsart",
+      "effectiveFrom": "Gültig ab",
+      "effectiveFromHelp": "Wählen Sie ein Datum, das am oder vor den Kassenbewegungen liegt, die dieses Steuerprofil abdecken soll.",
       "taxYearStartMonth": "Beginn des Steuerjahres",
       "localTaxOffice": "Zuständiges Finanzamt",
       "save": "Steuerprofil speichern",
@@ -1364,6 +1368,7 @@
       "registerDetail": {
         "newCashEntry": "Neue Buchung",
         "closeDay": "Tag abschließen (Kassensturz)",
+        "kassenbericht": "Kassenbericht",
         "export": "Export",
         "edit": "Bearbeiten",
         "currentBalance": "Aktueller Saldo",
@@ -1451,6 +1456,7 @@
           "noVat": "Keine USt",
           "taxProfileRequiredTitle": "Steuer-Setup erforderlich",
           "taxProfileRequiredDescription": "Legen Sie fest, wie dieses Kassenbuch steuerlich behandelt wird, bevor Sie steuerpflichtige Barverkäufe erfassen.",
+          "configureTaxSettings": "Steuern & USt konfigurieren",
           "setupStandardVat": "Deutsche Standard-USt verwenden",
           "setupSmallBusiness": "Kleinunternehmer verwenden (keine USt)",
           "taxSummary": "USt-Zusammenfassung",
@@ -1499,10 +1505,12 @@
         "title": "Tagesabschluss (Kassensturz)",
         "backToRegister": "Zurück zur Kasse",
         "addCorrectionEntry": "Korrekturbuchung hinzufügen",
+        "viewReport": "Kassenbericht anzeigen",
         "closeDayFor": "Tag abschließen für {{register}}",
         "day": "Tag",
         "expectedBalance": "Soll-Bestand",
-        "countedBalance": "Ist-Bestand",
+        "countedBalance": "Gesamter gezählter Bargeldbestand (Ist)",
+        "countedBalanceHelp": "Zählen Sie das gesamte Bargeld derselben Geschäftskasse, einschließlich Bargeld in Schublade, Tresor oder Geldbox.",
         "denomination": "Stückelung",
         "count": "Anzahl",
         "subtotal": "Zwischensumme",
@@ -1514,6 +1522,15 @@
         "submitAndLock": "Abschließen und Tag sperren",
         "lockedInfo": "Dieser Tag ist gesperrt. Nur Korrekturbuchungen sind erlaubt.",
         "loadExistingFailed": "Vorhandener Tagesabschluss konnte nicht geladen werden."
+      },
+      "kassenbericht": {
+        "title": "Täglicher Kassenbericht",
+        "subtitle": "Druckansicht für den täglichen Kassenbericht.",
+        "back": "Zurück zur Kasse",
+        "download": "PDF herunterladen",
+        "downloading": "PDF wird erstellt...",
+        "loading": "Kassenbericht wird geladen...",
+        "loadFailed": "Der Kassenbericht für diesen Tag konnte nicht geladen werden."
       },
       "exports": {
         "title": "Exporte · {{register}}",
@@ -1561,8 +1578,8 @@
           "SALE_CASH": "Barverkauf",
           "REFUND_CASH": "Barerstattung",
           "EXPENSE_CASH": "Barausgabe",
-          "OWNER_DEPOSIT": "Einlage Inhaber",
-          "OWNER_WITHDRAWAL": "Entnahme Inhaber",
+          "OWNER_DEPOSIT": "Privateinlage",
+          "OWNER_WITHDRAWAL": "Privatentnahme",
           "BANK_DEPOSIT": "Bareinzahlung Bank",
           "BANK_WITHDRAWAL": "Barabhebung Bank",
           "CORRECTION": "Korrektur",
@@ -1617,7 +1634,7 @@
   "assistant": {
     "title": "Assistent",
     "subtitle": "Fragen Sie alles, extrahieren Sie Belege, erstellen Sie Rechnungen oder fordern Sie Zusammenfassungen an.",
-    "placeholder": "Fragen Sie mich alles...",
+    "placeholder": "Alles fragen, Belege extrahieren, Rechnungen entwerfen oder schnelle Zusammenfassungen anfordern.",
     "emptyStateTitle": "Wie kann ich Ihnen helfen?",
     "emptyStateDescription": "Fragen Sie alles, extrahieren Sie Belege, erstellen Sie Rechnungen oder fordern Sie Zusammenfassungen an.",
     "awaitingInputs": "Warte auf Ihre Eingabe...",
@@ -1667,7 +1684,45 @@
     "issueInvoice": "Rechnung ausstellen",
     "userRole": "Sie",
     "assistantRole": "Assistent",
-    "systemRole": "System"
+    "systemRole": "System",
+    "searchAction": "Suchen",
+    "newChat": "Neuer Chat",
+    "recentChats": "Letzte Chats",
+    "recentChatsDescription": "Durchsuchen Sie frühere Unterhaltungen oder beginnen Sie eine neue.",
+    "loadingChats": "Chats werden geladen...",
+    "noChats": "Noch keine Chats",
+    "noChatsDescription": "Beginnen Sie eine Unterhaltung, und sie wird hier angezeigt.",
+    "loadingPreview": "Vorschau wird geladen...",
+    "loadingMonthlyReport": "Monatsbericht wird geladen...",
+    "cashConfirmation": {
+      "title": "Entwurf zur Bestätigung bereit",
+      "description": "Prüfen Sie die Zusammenfassung für den {{date}} und bestätigen Sie anschließend das Speichern der Kassenbucheinträge.",
+      "confirm": "Bestätigen und speichern",
+      "confirming": "Wird bestätigt...",
+      "confirmPrompt": "Ich bestätige ausdrücklich und autorisiere das Speichern dieses Kassen-Tagesentwurfs.",
+      "savedTitle": "Kassen-Tagesentwurf gespeichert",
+      "savedDescription": "Die bestätigten Kassenbewegungen wurden erfolgreich gespeichert.",
+      "taxProfileRequiredTitle": "Steuerprofil vor dem Speichern erforderlich",
+      "taxProfileRequiredDescription": "Wählen Sie, ob das Unternehmen die deutsche Regelbesteuerung oder die Kleinunternehmerregelung verwendet. Die App darf diese Steuereinstellung nicht erraten.",
+      "configureTaxSettings": "Steuern & USt konfigurieren"
+    },
+    "search": {
+      "title": "Chats durchsuchen",
+      "placeholder": "Nachrichten suchen...",
+      "minLength": "Geben Sie mindestens 2 Zeichen ein, um zu suchen.",
+      "noResults": "Keine passenden Nachrichten gefunden.",
+      "noPreview": "(Keine Vorschau)"
+    },
+    "groups": {
+      "today": "Heute",
+      "needsAttention": "Benötigt Aufmerksamkeit",
+      "previousDays": "Vorherige Tage",
+      "monthlyReviews": "Monatliche Überprüfungen",
+      "generalQuestions": "Allgemeine Fragen",
+      "yesterday": "Gestern",
+      "week": "Diese Woche",
+      "older": "Älter"
+    }
   },
   "copilot": {
     "title": "Assistent",
@@ -3226,6 +3281,24 @@
     }
   },
   "cashDashboard": {
+    "workspace": {
+      "dailyCash": "Tagesabschluss",
+      "monthlyReview": "Monatsprüfung",
+      "generalHelp": "Allgemeine Hilfe",
+      "generalHelpTitle": "Kassenassistent",
+      "cashDayFor": "Tagesabschluss",
+      "reviewFor": "Prüfung",
+      "register": "Kassenbuch",
+      "location": "Standort",
+      "boundRegisterLabel": "Kassenbuch"
+    },
+    "registerSelector": {
+      "title": "Wählen Sie ein Kassenbuch",
+      "description": "Dieses Gespräch nutzt das ausgewählte Kassenbuch.",
+      "binding": "Kassenbuch wird zugewiesen...",
+      "error": "Kassenbuch konnte nicht zugewiesen werden.",
+      "retry": "Erneut versuchen"
+    },
     "headerTitle": "Dashboard Kassenkontrolle",
     "headerSubtitle": "Tägliche Kontrolle für Bargeld und Belege im Salon.",
     "previewLabel": "Vorschaustatus",
@@ -3495,12 +3568,34 @@
       "languages": "Deutsch, Englisch, Vietnamesisch",
       "lockedTitle": "KI-Hilfe ist in diesem Tarif gesperrt",
       "lockedDescription": "Upgrade auf Pro, um den Kassenassistenten, mehrsprachige Erklärungen und geführte Prüfung freizuschalten.",
-      "lockedBadge": "KI gesperrt"
+      "lockedBadge": "KI gesperrt",
+      "emptyStateActions": {
+        "recordTransactions": {
+          "label": "Heutige Transaktionen erfassen",
+          "value": "Ich möchte die heutigen Kassentransaktionen erfassen."
+        },
+        "reviewMonth": {
+          "label": "Monatsbericht überprüfen",
+          "value": "Ich möchte den Kassenbericht dieses Monats überprüfen."
+        },
+        "closeDay": {
+          "label": "Kassentag abschließen",
+          "value": "Ich möchte die Kasse für heute abschließen."
+        },
+        "generalHelp": {
+          "label": "Allgemeine Frage stellen",
+          "value": "Ich habe eine allgemeine Frage zur Kassenführung."
+        }
+      }
     },
     "severity": {
       "high": "Hoch",
       "medium": "Mittel",
       "low": "Niedrig"
+    },
+    "workspace": {
+      "register": "Kasse",
+      "location": "Standort"
     }
   }
 }

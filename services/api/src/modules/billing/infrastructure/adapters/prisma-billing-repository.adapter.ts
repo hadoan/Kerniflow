@@ -99,31 +99,26 @@ export class PrismaBillingRepositoryAdapter
     },
     tx?: TransactionContext
   ): Promise<BillingAccountRecord> {
-    const existing = await this.client(tx).billingAccount.findUnique({
-      where: { tenantId: input.tenantId },
-    });
+    const providerVal = input.provider !== undefined ? toProviderEnum(input.provider) : undefined;
 
-    const row = existing
-      ? await this.client(tx).billingAccount.update({
-          where: { tenantId: input.tenantId },
-          data: {
-            ...(input.provider !== undefined ? { provider: toProviderEnum(input.provider) } : {}),
-            ...(input.providerCustomerRef !== undefined
-              ? { providerCustomerRef: input.providerCustomerRef }
-              : {}),
-            ...(input.billingCurrency ? { billingCurrency: input.billingCurrency } : {}),
-            ...(input.email !== undefined ? { email: input.email } : {}),
-          },
-        })
-      : await this.client(tx).billingAccount.create({
-          data: {
-            tenantId: input.tenantId,
-            provider: toProviderEnum(input.provider) ?? null,
-            providerCustomerRef: input.providerCustomerRef ?? null,
-            billingCurrency: input.billingCurrency ?? "EUR",
-            email: input.email ?? null,
-          },
-        });
+    const row = await this.client(tx).billingAccount.upsert({
+      where: { tenantId: input.tenantId },
+      update: {
+        ...(providerVal !== undefined ? { provider: providerVal } : {}),
+        ...(input.providerCustomerRef !== undefined
+          ? { providerCustomerRef: input.providerCustomerRef }
+          : {}),
+        ...(input.billingCurrency ? { billingCurrency: input.billingCurrency } : {}),
+        ...(input.email !== undefined ? { email: input.email } : {}),
+      },
+      create: {
+        tenantId: input.tenantId,
+        provider: providerVal ?? null,
+        providerCustomerRef: input.providerCustomerRef ?? null,
+        billingCurrency: input.billingCurrency ?? "EUR",
+        email: input.email ?? null,
+      },
+    });
 
     return this.mapAccount(row);
   }

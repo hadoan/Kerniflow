@@ -8,7 +8,7 @@ packages:
 catalog:
   "@ai-sdk/anthropic": ^3.0.2
   "@ai-sdk/openai": ^3.0.2
-  "@ai-sdk/react": ^3.0.6
+  "@ai-sdk/react": ^4.0.40
   "@ai-sdk/ui-utils": ^1.2.11
   "@eslint/js": ^9.32.0
   "@nestjs/common": ^11.1.9
@@ -38,7 +38,7 @@ catalog:
   "@types/supertest": ^6.0.3
   "@vitejs/plugin-react-swc": ^3.11.0
   "@vitest/coverage-v8": ^2.1.4
-  ai: ^6.0.6
+  ai: ^7.0.37
   autoprefixer: ^10.4.21
   bcrypt: ^5.1.1
   bullmq: ^5.25.1

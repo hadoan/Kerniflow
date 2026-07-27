@@ -4,11 +4,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { formatInTimeZone } from "date-fns-tz";
 import Stripe from "stripe";
-import { test } from "./fixtures";
-import { apiClient } from "../utils/api";
+import { test } from "./fixtures.ts";
+import { apiClient } from "../utils/api.ts";
 import type { CoachingOfferDto, InvoiceDto } from "@corely/contracts";
-import { signFakeStripeWebhook } from "./helpers/billing-fixtures";
-import { buildAuthHeaders, loginAsSeededUser } from "./helpers/auth";
+import { signFakeStripeWebhook } from "./helpers/billing-fixtures.ts";
+import { buildAuthHeaders, loginAsSeededUser } from "./helpers/auth.ts";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 const SCREENSHOT_STAMP = new Date().toISOString().replace(/[:.]/g, "-");

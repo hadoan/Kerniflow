@@ -1,8 +1,8 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 import type { TaxFilingType } from "@corely/contracts";
-import { selectors } from "../../utils/selectors";
-import { apiClient } from "../../utils/api";
-import type { TestData } from "../../utils/testData";
+import { selectors } from "../../utils/selectors.ts";
+import { apiClient } from "../../utils/api.ts";
+import type { TestData } from "../../utils/testData.ts";
 
 /**
  * Reused helpers/patterns for Tax E2E:

@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@corely/ui";
-import type { CashEntryAttachment, CashEntryType, TaxProfileDto } from "@corely/contracts";
+import type { CashEntryAttachment, CashEntryType } from "@corely/contracts";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
 import { taxApi } from "@corely/web-shared/lib/tax-api";
 import { CrudListPageLayout } from "@corely/web-shared/shared/crud";
@@ -11,7 +11,6 @@ import { cashKeys, invalidateCashRegisterQueries } from "../queries";
 import { uploadBelegDocument } from "../upload-beleg-document";
 import {
   calculateGrossFirstBreakdown,
-  createDefaultGermanTaxProfile,
   deriveDirectionFromType,
   deriveTaxModeFromType,
   entrySources,
@@ -48,6 +47,7 @@ const defaultAttachBelegForm = (): AttachBelegForm => ({
 export function CashEntriesScreen() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<CashEntryFilters>(defaultFilters);
   const [createOpen, setCreateOpen] = useState(false);
@@ -178,17 +178,6 @@ export function CashEntriesScreen() {
       await invalidateCashRegisterQueries(queryClient, id);
       setCreateOpen(false);
       setCreateForm(defaultCreateForm());
-    },
-  });
-
-  const configureTaxProfileMutation = useMutation({
-    mutationFn: async (regime: TaxProfileDto["regime"]) => {
-      await taxApi.upsertProfile(createDefaultGermanTaxProfile(regime));
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["tax-profile"] });
-      await queryClient.invalidateQueries({ queryKey: ["tax-codes"] });
-      await queryClient.invalidateQueries({ queryKey: ["tax-rates"] });
     },
   });
 
@@ -391,9 +380,7 @@ export function CashEntriesScreen() {
         taxCodeOptions={taxCodeOptions}
         taxRelevant={taxRelevant}
         requiresTaxProfileSetup={requiresTaxProfileSetup}
-        isTaxProfileSetupPending={configureTaxProfileMutation.isPending}
-        onUseStandardVat={() => configureTaxProfileMutation.mutate("STANDARD_VAT")}
-        onUseSmallBusiness={() => configureTaxProfileMutation.mutate("SMALL_BUSINESS")}
+        taxSettingsState={{ returnTo: location.pathname }}
         taxCodeRequired={taxCodeRequired}
         taxCodeLabel={taxCodeLabel}
         taxHint={taxHint}

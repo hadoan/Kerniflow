@@ -1,4 +1,4 @@
-import type { DirectoryRestaurantFixture } from "../helpers/db";
+import type { DirectoryRestaurantFixture } from "../helpers/db.ts";
 
 export type DirectoryRestaurantFixtures = {
   activePho: DirectoryRestaurantFixture;

@@ -1,17 +1,17 @@
 import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import { expect } from "@playwright/test";
-import { test } from "../fixtures";
-import { buildAuthHeaders, loginAsSeededUser } from "../helpers/auth";
-import { startBillingTrial } from "../helpers/billing-fixtures";
-import { resetTenantDataForE2e, seedIsolatedTestData } from "../helpers/db-reset";
-import { HttpClient } from "../helpers/http-client";
+import { test } from "../fixtures.ts";
+import { buildAuthHeaders, loginAsSeededUser } from "../helpers/auth.ts";
+import { startBillingTrial } from "../helpers/billing-fixtures.ts";
+import { resetTenantDataForE2e, seedIsolatedTestData } from "../helpers/db-reset.ts";
+import { HttpClient } from "../helpers/http-client.ts";
 import {
   autoAcceptNativeDialogs,
   loginToLivePos,
   openShiftFromGuardAndSubmit,
   selectRegisterByName,
-} from "../pos/helpers";
+} from "../pos/helpers.ts";
 import {
   approveRestaurantApproval,
   closeRestaurantTable,
@@ -44,7 +44,7 @@ import {
   upsertKitchenStation,
   upsertModifierGroup,
   upsertRestaurantTable,
-} from "../helpers/restaurant-fixtures";
+} from "../helpers/restaurant-fixtures.ts";
 
 const prisma = process.env.DATABASE_URL ? createRestaurantPrisma() : null;
 const POS_BROWSER_BASE_URL = process.env.POS_BASE_URL ?? "http://pos.localhost:6080";

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { CreateDirectoryLeadResponseSchema } from "@corely/contracts";
-import { assertApiReady } from "../helpers/bootstrap-api";
-import { runOutboxWorkerTick } from "../helpers/bootstrap-worker";
+import { assertApiReady } from "../helpers/bootstrap-api.ts";
+import { runOutboxWorkerTick } from "../helpers/bootstrap-worker.ts";
 import {
   clearWorkerIdempotencyForEvent,
   closePrisma,
@@ -10,13 +10,13 @@ import {
   findLeadCreatedOutboxEventsByLeadId,
   findOutboxEventById,
   rewindOutboxEventForReplay,
-} from "../helpers/db";
+} from "../helpers/db.ts";
 import {
   cleanupDirectoryFixtureSet,
   createRunTag,
   seedDirectoryFixtureSet,
-} from "../helpers/directory-seed";
-import { API_BASE_URL } from "../helpers/http";
+} from "../helpers/directory-seed.ts";
+import { API_BASE_URL } from "../helpers/http.ts";
 
 test.describe("Directory UC-04: worker handles DirectoryLeadCreated idempotently", () => {
   test.describe.configure({ mode: "serial" });

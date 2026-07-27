@@ -1,17 +1,17 @@
 import { isProblemDetails, type ProblemDetails } from "@corely/contracts";
 import { PrismaClient } from "@prisma/client";
 import { expect } from "@playwright/test";
-import { test } from "../fixtures";
-import { loginAsSeededUser } from "../helpers/auth";
+import { test } from "../fixtures.ts";
+import { loginAsSeededUser } from "../helpers/auth.ts";
 import {
   createCashRegister,
   getCashRegister,
   listCashRegisters,
   updateCashRegister,
-} from "../helpers/cash-management-fixtures";
-import { resetTenantDataForE2e, seedIsolatedTestData } from "../helpers/db-reset";
-import { HttpClient } from "../helpers/http-client";
-import { idempotencyKey } from "../helpers/idempotency";
+} from "../helpers/cash-management-fixtures.ts";
+import { resetTenantDataForE2e, seedIsolatedTestData } from "../helpers/db-reset.ts";
+import { HttpClient } from "../helpers/http-client.ts";
+import { idempotencyKey } from "../helpers/idempotency.ts";
 
 const prisma = process.env.DATABASE_URL ? new PrismaClient() : null;
 

@@ -2,9 +2,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadDotEnv } from "dotenv";
 import type { Page } from "@playwright/test";
-import { expect, test } from "./fixtures";
-import { selectors } from "../utils/selectors";
-import { apiClient } from "../utils/api";
+import { expect, test } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
+import { apiClient } from "../utils/api.ts";
 
 type SeedClassesBillingSendResult = {
   tenantId: string;

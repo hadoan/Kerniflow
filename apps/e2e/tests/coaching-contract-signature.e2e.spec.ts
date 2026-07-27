@@ -3,11 +3,11 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
-import { test } from "./fixtures";
+import { test } from "./fixtures.ts";
 import type { CoachingOfferDto } from "@corely/contracts";
-import { signFakeStripeWebhook } from "./helpers/billing-fixtures";
-import { buildAuthHeaders, loginAsSeededUser } from "./helpers/auth";
-import { apiClient } from "../utils/api";
+import { signFakeStripeWebhook } from "./helpers/billing-fixtures.ts";
+import { buildAuthHeaders, loginAsSeededUser } from "./helpers/auth.ts";
+import { apiClient } from "../utils/api.ts";
 import Stripe from "stripe";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";

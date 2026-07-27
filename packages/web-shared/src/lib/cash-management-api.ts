@@ -16,6 +16,14 @@ import type {
   ReverseCashEntryInput,
   SubmitCashDayCloseInput,
   UpdateCashRegister,
+  CashAssistantWorkspace,
+  CashReportPreviewDto,
+  ResolveCashAssistantWorkspaceInput,
+} from "@corely/contracts";
+import {
+  CashAssistantWorkspaceSchema,
+  ResolveCashAssistantWorkspaceOutputSchema,
+  type CashWorkspaceHandoffDto,
 } from "@corely/contracts";
 import { apiClient } from "./api-client";
 
@@ -119,6 +127,22 @@ export class CashManagementApi {
     );
   }
 
+  async getKassenbericht(
+    registerId: string,
+    dayKey: string
+  ): Promise<{ preview: CashReportPreviewDto }> {
+    return apiClient.get<{ preview: CashReportPreviewDto }>(
+      `/cash-registers/${registerId}/kassenbericht/${dayKey}`,
+      { correlationId: apiClient.generateCorrelationId() }
+    );
+  }
+
+  async downloadKassenberichtPdf(registerId: string, dayKey: string): Promise<Blob> {
+    return apiClient.getBlob(`/cash-registers/${registerId}/kassenbericht/${dayKey}/pdf`, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
+  }
+
   async getDashboard(
     registerId: string,
     params: DashboardRequest = {}
@@ -191,6 +215,87 @@ export class CashManagementApi {
     return apiClient.getBlob(`/documents/${documentId}/download`, {
       correlationId: apiClient.generateCorrelationId(),
     });
+  }
+
+  async listWorkspaces(): Promise<{ items: CashAssistantWorkspace[] }> {
+    const response = await apiClient.get<{ items: unknown[] }>(`/cash-management/workspaces`, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
+    return {
+      items: response.items.map((workspace) => CashAssistantWorkspaceSchema.parse(workspace)),
+    };
+  }
+
+  async resolveWorkspace(
+    input: ResolveCashAssistantWorkspaceInput
+  ): Promise<CashAssistantWorkspace> {
+    const response = await apiClient.post<unknown>(`/cash-management/workspaces/resolve`, input, {
+      idempotencyKey: apiClient.generateIdempotencyKey(),
+      correlationId: apiClient.generateCorrelationId(),
+    });
+    return ResolveCashAssistantWorkspaceOutputSchema.parse(response);
+  }
+
+  async getHandoff(id: string): Promise<CashWorkspaceHandoffDto> {
+    return apiClient.get<CashWorkspaceHandoffDto>(`/cash-management/workspaces/handoff/${id}`, {
+      correlationId: apiClient.generateCorrelationId(),
+    });
+  }
+
+  async confirmHandoff(
+    conversationId: string,
+    handoffId: string,
+    idempotencyKey: string
+  ): Promise<{ entryId: string }> {
+    return apiClient.post<{ entryId: string }>(
+      `/cash-management/workspaces/conversations/${conversationId}/handoffs/${handoffId}/confirm`,
+      {}, // Empty body
+      {
+        headers: { "idempotency-key": idempotencyKey },
+        idempotencyKey, // For apiClient internals
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
+  async confirmCashEntry(
+    registerId: string,
+    confirmationId: string,
+    idempotencyKey: string
+  ): Promise<{ entryId: string }> {
+    return apiClient.post<{ entryId: string }>(
+      `/cash-registers/${registerId}/confirm-entry/${confirmationId}`,
+      {}, // Empty body
+      {
+        headers: { "idempotency-key": idempotencyKey },
+        idempotencyKey,
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
+  async cancelHandoff(conversationId: string, handoffId: string): Promise<{ success: boolean }> {
+    return apiClient.post<{ success: boolean }>(
+      `/cash-management/workspaces/conversations/${conversationId}/handoffs/${handoffId}/cancel`,
+      {},
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
+  async markHandoffViewed(
+    conversationId: string,
+    handoffId: string
+  ): Promise<{ success: boolean }> {
+    return apiClient.post<{ success: boolean }>(
+      `/cash-management/workspaces/conversations/${conversationId}/handoffs/${handoffId}/view`,
+      {},
+      {
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
   }
 }
 

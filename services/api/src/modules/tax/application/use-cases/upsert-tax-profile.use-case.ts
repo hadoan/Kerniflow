@@ -1,7 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { type UpsertTaxProfileInput } from "@corely/contracts";
 import { type TaxProfileEntity } from "../../domain/entities";
-import { TaxProfileRepoPort } from "../../domain/ports";
+import { TaxCodeRepoPort, TaxProfileRepoPort, TaxRateRepoPort } from "../../domain/ports";
+import { ensureDeStandardVatCodes } from "../services/ensure-de-standard-vat-codes";
 import {
   BaseUseCase,
   type Result,
@@ -14,7 +15,11 @@ import {
 @RequireTenant()
 @Injectable()
 export class UpsertTaxProfileUseCase extends BaseUseCase<UpsertTaxProfileInput, TaxProfileEntity> {
-  constructor(private readonly repo: TaxProfileRepoPort) {
+  constructor(
+    private readonly repo: TaxProfileRepoPort,
+    private readonly taxCodeRepo: TaxCodeRepoPort,
+    private readonly taxRateRepo: TaxRateRepoPort
+  ) {
     super({ logger: null as any });
   }
 
@@ -43,6 +48,15 @@ export class UpsertTaxProfileUseCase extends BaseUseCase<UpsertTaxProfileInput, 
       effectiveFrom: new Date(input.effectiveFrom),
       effectiveTo: input.effectiveTo ? new Date(input.effectiveTo) : null,
     });
+
+    if (saved.country === "DE" && saved.regime === "STANDARD_VAT") {
+      await ensureDeStandardVatCodes({
+        tenantId: workspaceId,
+        effectiveFrom: saved.effectiveFrom,
+        taxCodeRepo: this.taxCodeRepo,
+        taxRateRepo: this.taxRateRepo,
+      });
+    }
 
     return ok(saved);
   }

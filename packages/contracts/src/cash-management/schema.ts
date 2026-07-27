@@ -489,4 +489,74 @@ export type ReverseCashEntry = ReverseCashEntryInput;
 export const SubmitDailyCloseSchema = SubmitCashDayCloseInputSchema;
 export type SubmitDailyClose = SubmitCashDayCloseInput;
 
+export const CashAssistantWorkspaceTypeSchema = z.enum([
+  "DAILY_CASH_DAY",
+  "MONTHLY_REVIEW",
+  "GENERAL_HELP",
+]);
+export type CashAssistantWorkspaceType = z.infer<typeof CashAssistantWorkspaceTypeSchema>;
+
+export const CashRegisterSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  location: z.string().nullable().optional(),
+  currency: z.string().optional(),
+});
+export type CashRegisterSummary = z.infer<typeof CashRegisterSummarySchema>;
+
+export const CashAssistantWorkspaceSchema = z.object({
+  id: z.string(),
+  tenantId: z.string(),
+  workspaceId: z.string(),
+  registerId: z.string().nullable().optional(),
+  locationId: z.string().nullable().optional(),
+  type: CashAssistantWorkspaceTypeSchema,
+  businessDate: z.string().nullable().optional(),
+  businessMonth: z.string().nullable().optional(),
+  conversationId: z.string(),
+  cashDayId: z.string().nullable().optional(),
+  createdByUserId: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  register: CashRegisterSummarySchema.nullable().optional(),
+});
+export type CashAssistantWorkspace = z.infer<typeof CashAssistantWorkspaceSchema>;
+
+export const ResolveCashAssistantWorkspaceInputSchema = z.object({
+  type: CashAssistantWorkspaceTypeSchema,
+  conversationId: z.string().optional(),
+  registerId: z.string().optional(),
+  businessDate: z.string().optional(),
+  businessMonth: z.string().optional(),
+  locationId: z.string().optional(),
+});
+export type ResolveCashAssistantWorkspaceInput = z.infer<
+  typeof ResolveCashAssistantWorkspaceInputSchema
+>;
+
+export const ResolveCashAssistantWorkspaceOutputSchema = CashAssistantWorkspaceSchema;
+export type ResolveCashAssistantWorkspaceOutput = z.infer<
+  typeof ResolveCashAssistantWorkspaceOutputSchema
+>;
+
+export const OpenCashDayWorkspaceInputSchema = z.object({
+  tenantId: z.string().optional(),
+  workspaceId: z.string().optional(),
+  registerId: z.string(),
+  businessDate: DayKeySchema,
+  movementType: z.string().min(1),
+  amountCents: z.number().int(),
+  description: z.string().min(1),
+  evidenceRequirement: z.string().optional().nullable(),
+});
+export type OpenCashDayWorkspaceInput = z.infer<typeof OpenCashDayWorkspaceInputSchema>;
+
+export const OpenCashDayWorkspaceOutputSchema = z.object({
+  workspaceId: z.string(),
+  conversationId: z.string(),
+  handoffId: z.string(),
+  confirmationId: z.string(),
+});
+export type OpenCashDayWorkspaceOutput = z.infer<typeof OpenCashDayWorkspaceOutputSchema>;
+
 export { DayKeySchema, MonthKeySchema, DailyCloseStatus };

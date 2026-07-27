@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
-import { test, expect } from "./fixtures";
-import { selectors } from "../utils/selectors";
+import { test, expect } from "./fixtures.ts";
+import { selectors } from "../utils/selectors.ts";
 
 test.use({ timezoneId: "Europe/Berlin" });
 

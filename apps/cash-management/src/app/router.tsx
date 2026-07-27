@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { cashManagementFeature } from "@corely/web-features";
 import { AssistantPage } from "@corely/web-features/modules/assistant";
+import { TaxSettingsPage } from "@corely/web-features/modules/tax";
 import { PaymentMethodsSettings } from "@corely/web-shared/settings";
 import NotFound from "@corely/web-shared/shared/components/NotFound";
 import { CashManagementShell } from "./CashManagementShell";
@@ -43,6 +44,7 @@ export const Router = () => (
             element={<AssistantPage activeModule="cash-management" />}
           />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/settings/tax" element={<TaxSettingsPage />} />
           <Route path="/settings/payment-methods" element={<PaymentMethodsSettings />} />
           {cashManagementFeature.cashManagementRoutes().map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />

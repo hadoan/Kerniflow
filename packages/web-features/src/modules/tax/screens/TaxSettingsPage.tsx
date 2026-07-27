@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
+import { Link, useLocation } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -26,9 +27,28 @@ import {
   type TaxConsultantFormData,
 } from "../schemas/tax-consultant-form.schema";
 
+const toDateInputValue = (value: Date): string => {
+  if (Number.isNaN(value.getTime())) {
+    return "";
+  }
+  return value.toISOString().slice(0, 10);
+};
+
+const getReturnTo = (state: unknown): string | null => {
+  if (!state || typeof state !== "object") {
+    return null;
+  }
+  const returnTo = (state as { returnTo?: unknown }).returnTo;
+  return typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//")
+    ? returnTo
+    : null;
+};
+
 export default function TaxSettingsPage() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const returnTo = getReturnTo(location.state);
 
   // Load tax profile
   const { data: profile, isLoading } = useQuery({
@@ -87,7 +107,10 @@ export default function TaxSettingsPage() {
   });
 
   const onSubmit = (data: TaxProfileFormData) => {
-    saveMutation.mutate(data);
+    saveMutation.mutate({
+      ...data,
+      vatEnabled: data.regime === "STANDARD_VAT",
+    });
   };
 
   const saveConsultant = useMutation({
@@ -143,6 +166,11 @@ export default function TaxSettingsPage() {
         <h1 className="text-3xl font-bold">{t("tax.title")}</h1>
         <p className="text-muted-foreground mt-1">{t("tax.subtitle")}</p>
       </div>
+      {returnTo ? (
+        <Button asChild variant="outline">
+          <Link to={returnTo}>{t("common.goBack")}</Link>
+        </Button>
+      ) : null}
 
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Card>
@@ -155,13 +183,7 @@ export default function TaxSettingsPage() {
                 <p className="font-medium text-foreground">{t("tax.profile.vatEnabled")}</p>
                 <p className="text-sm text-muted-foreground">{t("tax.profile.vatEnabledHelp")}</p>
               </div>
-              <Controller
-                control={form.control}
-                name="vatEnabled"
-                render={({ field }) => (
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
-                )}
-              />
+              <Switch checked={selectedRegime === "STANDARD_VAT"} disabled />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -201,7 +223,12 @@ export default function TaxSettingsPage() {
                   render={({ field }) => (
                     <Select
                       value={field.value}
-                      onValueChange={field.onChange}
+                      onValueChange={(regime) => {
+                        field.onChange(regime);
+                        form.setValue("vatEnabled", regime === "STANDARD_VAT", {
+                          shouldDirty: true,
+                        });
+                      }}
                       defaultValue={field.value}
                     >
                       <SelectTrigger>
@@ -345,6 +372,29 @@ export default function TaxSettingsPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="effectiveFrom">{t("tax.profile.effectiveFrom")}</Label>
+                <Controller
+                  control={form.control}
+                  name="effectiveFrom"
+                  render={({ field }) => (
+                    <Input
+                      id="effectiveFrom"
+                      type="date"
+                      value={toDateInputValue(field.value)}
+                      onChange={(event) => {
+                        const date = event.target.value
+                          ? new Date(`${event.target.value}T00:00:00`)
+                          : field.value;
+                        field.onChange(date);
+                      }}
+                    />
+                  )}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("tax.profile.effectiveFromHelp")}
+                </p>
+              </div>
               <div>
                 <Label htmlFor="taxYearStartMonth">{t("tax.profile.taxYearStartMonth")}</Label>
                 <Controller

@@ -7,3 +7,4 @@ export { CashRegisterNewScreen } from "./screens/CashRegisterNewScreen";
 export { CashRegisterEditScreen } from "./screens/CashRegisterEditScreen";
 export { CashEntriesScreen } from "./screens/CashEntriesScreen";
 export { CashExportsScreen } from "./screens/CashExportsScreen";
+export { KassenberichtScreen } from "./screens/KassenberichtScreen";

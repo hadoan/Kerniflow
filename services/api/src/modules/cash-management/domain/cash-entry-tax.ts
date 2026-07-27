@@ -91,8 +91,8 @@ export const resolveCashEntryTax = async (
     taxRateRepo,
   } = params;
 
-  const requestedMode = input.tax?.mode ?? CashEntryTaxMode.NONE;
-  const taxCodeId = input.tax?.taxCodeId ?? null;
+  let requestedMode = input.tax?.mode ?? CashEntryTaxMode.NONE;
+  let taxCodeId = input.tax?.taxCodeId ?? null;
 
   if (NON_TAXABLE_ENTRY_TYPES.has(entryType)) {
     if (requestedMode !== CashEntryTaxMode.NONE || taxCodeId) {
@@ -114,6 +114,25 @@ export const resolveCashEntryTax = async (
 
   if (requiresOutputVat(entryType) && !profile) {
     throw new Error("CashManagement:TaxProfileRequired");
+  }
+
+  // A tenant that selected the German Standard VAT regime has explicitly
+  // configured the standard 19% VAT treatment. Assistant cash-day drafts do
+  // not carry a tax-code ID, so resolve that configured default here. A user
+  // can still send an explicit reduced/exempt code through the normal entry UI.
+  if (
+    requiresOutputVat(entryType) &&
+    vatExpected &&
+    !taxCodeId &&
+    requestedMode === CashEntryTaxMode.NONE &&
+    profile?.country === "DE" &&
+    profile.regime === "STANDARD_VAT"
+  ) {
+    const standardCode = await taxCodeRepo.findByCode("DE_STD_19", tenantId);
+    if (standardCode?.isActive) {
+      requestedMode = CashEntryTaxMode.OUTPUT_VAT;
+      taxCodeId = standardCode.id;
+    }
   }
 
   if (!taxCodeId || requestedMode === CashEntryTaxMode.NONE) {

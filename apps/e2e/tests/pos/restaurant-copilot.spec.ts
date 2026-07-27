@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-import { bootstrapAuthenticatedPos, selectRegister } from "./helpers";
+import { bootstrapAuthenticatedPos, selectRegister } from "./helpers.ts";
 import {
   installRestaurantPosCopilotMock,
   type RestaurantPosCopilotMock,
-} from "./restaurant-copilot.helpers";
+} from "./restaurant-copilot.helpers.ts";
 
 async function bootstrapRestaurantTable(page: Page): Promise<RestaurantPosCopilotMock> {
   const mock = await installRestaurantPosCopilotMock(page);

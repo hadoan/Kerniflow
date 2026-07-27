@@ -68,7 +68,7 @@ export function CashRegisterEditScreen() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
+    <div className="mx-auto max-w-2xl px-4 py-5 sm:px-5 sm:py-6 lg:p-6">
       <Card>
         <CardHeader>
           <CardTitle>{t("cash.ui.registerForm.editTitle")}</CardTitle>

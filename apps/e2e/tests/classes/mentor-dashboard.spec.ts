@@ -1,5 +1,5 @@
-import { expect, test } from "../fixtures";
-import { selectors } from "../../utils/selectors";
+import { expect, test } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
 import {
   createCohortFromProgramViaApi,
   createPartyViaApi,
@@ -9,7 +9,7 @@ import {
   loginAndGetAuthContext,
   requestAsAuth,
   updateCohortLifecycleViaApi,
-} from "../../helpers/classes/workflow";
+} from "../../helpers/classes/workflow.ts";
 
 test.describe("Classes Cohort Academy v1.1 - Mentor Dashboard", () => {
   test("scenario G: dashboard surfaces upcoming sessions and needs-attention items", async ({

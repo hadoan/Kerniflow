@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { expect, type APIResponse, type Page } from "@playwright/test";
-import type { TestData } from "../../utils/testData";
-import { selectors } from "../../utils/selectors";
+import type { TestData } from "../../utils/testData.ts";
+import { selectors } from "../../utils/selectors.ts";
 
 const API_URL = process.env.API_URL || "http://localhost:3000";
 

@@ -6,6 +6,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { CashEntryType } from "@corely/contracts";
 import {
@@ -61,212 +62,12 @@ export const defaultCreateForm = (): CreateEntryForm => ({
 
 type LabelFn = (value: string) => string;
 
-type TaxCodeOption = {
+import { ReceiptPicker } from "../components/receipt-picker";
+
+export type TaxCodeOption = {
   id: string;
   label: string;
 };
-
-const DOCUMENT_ACCEPT = "image/*,.pdf,application/pdf";
-
-type ReceiptPickerProps = {
-  active: boolean;
-  label: string;
-  inputId: string;
-  file: File | null;
-  setFile: (file: File | null) => void;
-  chooseLabel: string;
-  replaceLabel: string;
-  takePictureLabel: string;
-  noFileLabel: string;
-  cameraTitle: string;
-  cameraDescription: string;
-  captureLabel: string;
-  switchCameraLabel: string;
-  cameraUnavailableLabel: string;
-  cameraPermissionDeniedLabel: string;
-  disabled: boolean;
-};
-
-function ReceiptPicker(props: ReceiptPickerProps) {
-  const { t } = useTranslation();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const [cameraOpen, setCameraOpen] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
-  const {
-    active,
-    label,
-    inputId,
-    file,
-    setFile,
-    chooseLabel,
-    replaceLabel,
-    takePictureLabel,
-    noFileLabel,
-    cameraTitle,
-    cameraDescription,
-    captureLabel,
-    switchCameraLabel,
-    cameraUnavailableLabel,
-    cameraPermissionDeniedLabel,
-    disabled,
-  } = props;
-
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      const stream = streamRef.current;
-      stream.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-  }, []);
-
-  const startCamera = useCallback(async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCameraError(cameraUnavailableLabel);
-      return;
-    }
-    try {
-      stopCamera();
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setCameraError(null);
-    } catch {
-      setCameraError(cameraPermissionDeniedLabel);
-      setCameraOpen(false);
-    }
-  }, [cameraPermissionDeniedLabel, cameraUnavailableLabel, facingMode, stopCamera]);
-
-  useEffect(() => {
-    if (!active) {
-      setCameraError(null);
-      setCameraOpen(false);
-    }
-  }, [active]);
-
-  useEffect(() => {
-    if (cameraOpen) {
-      void startCamera();
-    } else {
-      stopCamera();
-    }
-    return stopCamera;
-  }, [cameraOpen, startCamera, stopCamera]);
-
-  useEffect(() => {
-    if (cameraOpen) {
-      void startCamera();
-    }
-  }, [cameraOpen, facingMode, startCamera]);
-
-  const capturePhoto = () => {
-    const video = videoRef.current;
-    if (!video) {
-      return;
-    }
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const context = canvas.getContext("2d");
-    if (!context) {
-      return;
-    }
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          return;
-        }
-        setFile(new File([blob], `receipt-${Date.now()}.jpg`, { type: "image/jpeg" }));
-        stopCamera();
-        setCameraOpen(false);
-      },
-      "image/jpeg",
-      0.92
-    );
-  };
-
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={inputId}>{label}</Label>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={disabled}
-        >
-          {file ? replaceLabel : chooseLabel}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => setCameraOpen(true)}
-          disabled={disabled}
-        >
-          {takePictureLabel}
-        </Button>
-        <span className="truncate text-sm text-muted-foreground">{file?.name ?? noFileLabel}</span>
-      </div>
-      <input
-        ref={fileInputRef}
-        id={inputId}
-        type="file"
-        accept={DOCUMENT_ACCEPT}
-        className="hidden"
-        onChange={(event) => {
-          const nextFile = event.target.files?.[0] ?? null;
-          setFile(nextFile);
-          event.currentTarget.value = "";
-        }}
-      />
-      {cameraError ? <p className="text-xs text-destructive">{cameraError}</p> : null}
-      {cameraOpen ? (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">{cameraTitle}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-xs text-muted-foreground">{cameraDescription}</p>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full rounded-md bg-black"
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" onClick={capturePhoto} disabled={disabled}>
-                {captureLabel}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setFacingMode((prev) => (prev === "user" ? "environment" : "user"))}
-                disabled={disabled}
-              >
-                {switchCameraLabel}
-              </Button>
-              <Button type="button" variant="ghost" onClick={() => setCameraOpen(false)}>
-                {t("cash.ui.common.cancel")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
-    </div>
-  );
-}
 
 type CreateEntryDialogProps = {
   open: boolean;
@@ -278,9 +79,7 @@ type CreateEntryDialogProps = {
   taxCodeOptions: TaxCodeOption[];
   taxRelevant: boolean;
   requiresTaxProfileSetup: boolean;
-  isTaxProfileSetupPending: boolean;
-  onUseStandardVat: () => void;
-  onUseSmallBusiness: () => void;
+  taxSettingsState?: { returnTo: string };
   taxCodeRequired: boolean;
   taxCodeLabel: string;
   taxHint?: string | null;
@@ -309,9 +108,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
     taxCodeOptions,
     taxRelevant,
     requiresTaxProfileSetup,
-    isTaxProfileSetupPending,
-    onUseStandardVat,
-    onUseSmallBusiness,
+    taxSettingsState,
     taxCodeRequired,
     taxCodeLabel,
     taxHint,
@@ -326,18 +123,18 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[520px]">
-        <DialogHeader>
+      <DialogContent className="h-[100dvh] max-h-[100dvh] gap-0 overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-[520px]">
+        <DialogHeader className="sticky top-0 z-10 border-b bg-background px-4 py-4 pr-14 sm:px-6">
           <DialogTitle>{t("cash.ui.entries.createDialog.title")}</DialogTitle>
           <DialogDescription>{t("cash.ui.entries.createDialog.description")}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 pb-28 sm:px-6 sm:pb-6">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="create-entry-type">{t("cash.ui.entries.createDialog.type")}</Label>
               <select
                 id="create-entry-type"
-                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                className="h-11 w-full rounded-md border bg-background px-3 text-base sm:h-10 sm:text-sm"
                 value={form.type}
                 onChange={(event) =>
                   setForm((prev) => ({
@@ -374,24 +171,11 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
               <AlertTitle>{t("cash.ui.entries.createDialog.taxProfileRequiredTitle")}</AlertTitle>
               <AlertDescription className="space-y-3">
                 <p>{t("cash.ui.entries.createDialog.taxProfileRequiredDescription")}</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onUseStandardVat}
-                    disabled={isPending || isTaxProfileSetupPending}
-                  >
-                    {t("cash.ui.entries.createDialog.setupStandardVat")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={onUseSmallBusiness}
-                    disabled={isPending || isTaxProfileSetupPending}
-                  >
-                    {t("cash.ui.entries.createDialog.setupSmallBusiness")}
-                  </Button>
-                </div>
+                <Button type="button" variant="outline" asChild disabled={isPending}>
+                  <Link to="/settings/tax" state={taxSettingsState}>
+                    {t("cash.ui.entries.createDialog.configureTaxSettings")}
+                  </Link>
+                </Button>
               </AlertDescription>
             </Alert>
           ) : null}
@@ -404,7 +188,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
               </Label>
               <select
                 id="create-entry-tax-code"
-                className="h-9 w-full rounded-md border bg-background px-3 text-sm"
+                className="h-11 w-full rounded-md border bg-background px-3 text-base sm:h-10 sm:text-sm"
                 value={form.taxCodeId}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, taxCodeId: event.target.value }))
@@ -516,11 +300,15 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
             <p className="text-sm text-destructive">{t("cash.ui.entries.createDialog.failed")}</p>
           ) : null}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="sticky bottom-0 z-10 grid grid-cols-2 gap-2 border-t bg-background px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex sm:px-6">
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => onOpenChange(false)}
+          >
             {t("cash.ui.common.cancel")}
           </Button>
-          <Button onClick={onSave} disabled={isPending || !canSave}>
+          <Button className="w-full sm:w-auto" onClick={onSave} disabled={isPending || !canSave}>
             {isPending && form.attachmentFile
               ? t("cash.ui.entries.createDialog.uploading")
               : t("cash.ui.entries.createDialog.save")}

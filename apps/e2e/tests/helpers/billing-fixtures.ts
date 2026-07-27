@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import type { APIResponse } from "@playwright/test";
-import { apiClient } from "../../utils/api";
-import { type HttpClient } from "./http-client";
+import { apiClient } from "../../utils/api.ts";
+import { type HttpClient } from "./http-client.ts";
 
 export type BillingProviderFailureOperation = "checkout" | "portal" | "fetch-subscription";
 export type BillingProductKey = string;

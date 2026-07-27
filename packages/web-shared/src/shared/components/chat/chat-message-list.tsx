@@ -1,7 +1,7 @@
 import { Badge } from "@corely/ui";
 import { cn } from "@corely/web-shared/shared/lib/utils";
 
-import { type MessagePart, isToolPart, renderPart } from "./ChatParts";
+import { type MessagePart, type ToolRenderer, isToolPart, renderPart } from "./ChatParts";
 
 export interface ChatMessage {
   id?: string;
@@ -31,6 +31,9 @@ interface ChatMessageListProps {
   addToolApprovalResponse?: ToolApprovalHandler;
   showWaitingStatus: boolean;
   statusText?: string;
+  toolRenderers?: Record<string, ToolRenderer>;
+  sendPrompt?: (prompt: string) => void;
+  isChatLoading?: boolean;
 }
 
 export function ChatMessageList({
@@ -43,6 +46,9 @@ export function ChatMessageList({
   addToolApprovalResponse,
   showWaitingStatus,
   statusText,
+  toolRenderers,
+  sendPrompt,
+  isChatLoading,
 }: ChatMessageListProps) {
   return (
     <div className="space-y-6">
@@ -89,6 +95,9 @@ export function ChatMessageList({
                   addToolApprovalResponse,
                   submittingToolIds,
                   markSubmitting,
+                  toolRenderers,
+                  sendPrompt,
+                  isChatLoading,
                 });
                 if (!rendered) {
                   return null;

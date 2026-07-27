@@ -1,10 +1,10 @@
 import type { Page } from "@playwright/test";
-import { test, expect } from "../tests/fixtures";
+import { test, expect } from "../tests/fixtures.ts";
 import {
   TAX_FILING_MATRIX,
   filingIdFromUrl,
   loginAsSeededUserUi,
-} from "../tests/helpers/tax-fixtures";
+} from "../tests/helpers/tax-fixtures.ts";
 
 async function selectFilingType(page: Page, type: "vat" | "vat-annual") {
   await page.getByRole("combobox").first().click();

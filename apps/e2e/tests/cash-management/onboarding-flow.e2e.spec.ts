@@ -1,12 +1,12 @@
 import path from "node:path";
-import { test, expect } from "../fixtures";
-import { selectors } from "../../utils/selectors";
-import { loginAsSeededUser } from "../helpers/auth";
+import { test, expect } from "../fixtures.ts";
+import { selectors } from "../../utils/selectors.ts";
+import { loginAsSeededUser } from "../helpers/auth.ts";
 import {
   completeOnboarding,
   getOnboardingProgress,
   primeAuthenticatedSession,
-} from "../helpers/onboarding-helper";
+} from "../helpers/onboarding-helper.ts";
 
 const receiptPath = path.resolve(process.cwd(), "fixtures/receipt-sample.jpg");
 

@@ -1,9 +1,9 @@
-import { test, expect } from "../tests/fixtures";
+import { test, expect } from "../tests/fixtures.ts";
 import {
   loginAsSeededUserUi,
   resolveActiveWorkspaceId,
   seedTaxScenario,
-} from "../tests/helpers/tax-fixtures";
+} from "../tests/helpers/tax-fixtures.ts";
 
 test.describe("Tax Payments", () => {
   test.beforeEach(async ({ page }) => {

@@ -7,8 +7,8 @@ import {
 } from "@corely/contracts";
 import { PrismaClient } from "@prisma/client";
 import { expect } from "@playwright/test";
-import { test } from "../fixtures";
-import { buildAuthHeaders, loginAsSeededUser } from "../helpers/auth";
+import { test } from "../fixtures.ts";
+import { buildAuthHeaders, loginAsSeededUser } from "../helpers/auth.ts";
 import {
   createBillingCheckoutSession,
   createBillingPortalSession,
@@ -24,7 +24,7 @@ import {
   startBillingTrial,
   type BillingPlanCode,
   type BillingUsageMetricState,
-} from "../helpers/billing-fixtures";
+} from "../helpers/billing-fixtures.ts";
 import {
   attachBelegToEntry,
   createCashEntry,
@@ -32,10 +32,10 @@ import {
   exportCashBook,
   submitCashDayClose,
   uploadBase64Document,
-} from "../helpers/cash-management-fixtures";
-import { resetTenantDataForE2e, seedIsolatedTestData } from "../helpers/db-reset";
-import { HttpClient } from "../helpers/http-client";
-import { idempotencyKey } from "../helpers/idempotency";
+} from "../helpers/cash-management-fixtures.ts";
+import { resetTenantDataForE2e, seedIsolatedTestData } from "../helpers/db-reset.ts";
+import { HttpClient } from "../helpers/http-client.ts";
+import { idempotencyKey } from "../helpers/idempotency.ts";
 
 const prisma = process.env.DATABASE_URL ? new PrismaClient() : null;
 const receiptBase64 = Buffer.from("billing e2e receipt", "utf8").toString("base64");

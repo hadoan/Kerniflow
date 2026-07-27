@@ -14,7 +14,12 @@
     "e2e:cash:screens": "CASH_CAPTURE_SCREENS=true playwright test tests/cash-management/cash-management-screenshots.e2e.spec.ts --project=chromium",
     "e2e:ui": "playwright test --ui",
     "e2e:report": "playwright show-report",
-    "e2e:debug": "playwright test --debug"
+    "e2e:debug": "playwright test --debug",
+    "e2e:cash:test": "playwright test --config playwright.cash.config.ts tests/cash-management/specs",
+    "e2e:cash:ui": "playwright test --config playwright.cash.config.ts tests/cash-management/specs --ui",
+    "e2e:cash:debug": "playwright test --config playwright.cash.config.ts tests/cash-management/specs --debug",
+    "e2e:cash:local": "tsx scripts/cash-e2e-runner.ts",
+    "e2e:cash:seed": "node scripts/cash-e2e-seed.js"
   },
   "devDependencies": {
     "@corely/contracts": "workspace:*",

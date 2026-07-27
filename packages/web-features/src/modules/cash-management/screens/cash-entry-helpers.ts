@@ -1,10 +1,4 @@
-import type {
-  CashEntryTaxMode,
-  CashEntryType,
-  TaxProfileDto,
-  TaxRateDto,
-  UpsertTaxProfileInput,
-} from "@corely/contracts";
+import type { CashEntryTaxMode, CashEntryType, TaxProfileDto, TaxRateDto } from "@corely/contracts";
 
 export const entryTypes = [
   "SALE_CASH",
@@ -60,19 +54,6 @@ export const requiresTaxCodeForType = (
 export const requiresTaxProfileForType = (type: CashEntryType): boolean => {
   return type === "SALE_CASH" || type === "REFUND_CASH";
 };
-
-export const createDefaultGermanTaxProfile = (
-  regime: TaxProfileDto["regime"]
-): UpsertTaxProfileInput => ({
-  country: "DE",
-  regime,
-  vatEnabled: regime === "STANDARD_VAT",
-  currency: "EUR",
-  filingFrequency: "MONTHLY",
-  taxYearStartMonth: 1,
-  vatAccountingMethod: "IST",
-  effectiveFrom: new Date().toISOString(),
-});
 
 export const resolveEffectiveRate = (rates: TaxRateDto[] | undefined, at: Date): number | null => {
   if (!rates || rates.length === 0) {

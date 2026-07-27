@@ -110,7 +110,8 @@
       "modalDescription": "Your workspace now uses the Free plan. Historical data is still available, but export, AI, and multi-location features are locked until you subscribe.",
       "modalLater": "Later",
       "choosePlan": "Choose a plan"
-    }
+    },
+    "searching": "Searching..."
   },
   "onboarding": {
     "title": "Onboarding",
@@ -120,6 +121,7 @@
     "saveAndExit": "Save & Exit",
     "goBack": "Go back",
     "skipForNow": "Skip for now",
+    "skip": "Skip Onboarding",
     "loading": "Loading onboarding...",
     "aiAssistant": "AI Assistant",
     "aiTipTitle": "Helpful Assistant",
@@ -567,6 +569,8 @@
       "vatIdOptional": "VAT/Tax ID (Optional)",
       "filingFrequency": "Filing Frequency",
       "accountingMethod": "Accounting Method",
+      "effectiveFrom": "Effective from",
+      "effectiveFromHelp": "Choose a date on or before the cash transactions this tax profile must cover.",
       "taxYearStartMonth": "Tax Year Start Month",
       "localTaxOffice": "Local Tax Office",
       "save": "Save Tax Profile",
@@ -1380,6 +1384,7 @@
       "registerDetail": {
         "newCashEntry": "New cash entry",
         "closeDay": "Close day (Kassensturz)",
+        "kassenbericht": "Kassenbericht",
         "export": "Export",
         "edit": "Edit",
         "currentBalance": "Current balance",
@@ -1467,6 +1472,7 @@
           "noVat": "No VAT",
           "taxProfileRequiredTitle": "Tax setup required",
           "taxProfileRequiredDescription": "Choose how this cashbook should treat VAT before recording taxable cash sales.",
+          "configureTaxSettings": "Configure tax & VAT",
           "setupStandardVat": "Use standard German VAT",
           "setupSmallBusiness": "Use Kleinunternehmer (No VAT)",
           "taxSummary": "VAT summary",
@@ -1515,10 +1521,12 @@
         "title": "Day close (Kassensturz)",
         "backToRegister": "Back to register",
         "addCorrectionEntry": "Add correction entry",
+        "viewReport": "View Kassenbericht",
         "closeDayFor": "Close day for {{register}}",
         "day": "Day",
         "expectedBalance": "Expected balance (Soll)",
-        "countedBalance": "Counted balance (Ist)",
+        "countedBalance": "Total counted cash (Ist)",
+        "countedBalanceHelp": "Count all cash belonging to the same business cash fund, including cash in the drawer, safe, or box.",
         "denomination": "Denomination",
         "count": "Count",
         "subtotal": "Subtotal",
@@ -1530,6 +1538,15 @@
         "submitAndLock": "Submit and lock day",
         "lockedInfo": "This day is locked. Use correction entries only.",
         "loadExistingFailed": "Failed to load existing day close."
+      },
+      "kassenbericht": {
+        "title": "Daily Kassenbericht",
+        "subtitle": "German paper-form layout with plain-language explanations for checking or copying by hand.",
+        "back": "Back to register",
+        "download": "Download PDF",
+        "downloading": "Generating PDF...",
+        "loading": "Loading Kassenbericht...",
+        "loadFailed": "Could not load the Kassenbericht for this day."
       },
       "exports": {
         "title": "Exports · {{register}}",
@@ -1577,8 +1594,8 @@
           "SALE_CASH": "Cash sale",
           "REFUND_CASH": "Cash refund",
           "EXPENSE_CASH": "Cash expense",
-          "OWNER_DEPOSIT": "Owner deposit",
-          "OWNER_WITHDRAWAL": "Owner withdrawal",
+          "OWNER_DEPOSIT": "Private deposit",
+          "OWNER_WITHDRAWAL": "Private withdrawal",
           "BANK_DEPOSIT": "Bank deposit",
           "BANK_WITHDRAWAL": "Bank withdrawal",
           "CORRECTION": "Correction",
@@ -1636,7 +1653,7 @@
   "assistant": {
     "title": "Assistant",
     "subtitle": "Ask anything, extract receipts, generate invoices, or request quick summaries.",
-    "placeholder": "Ask anything...",
+    "placeholder": "Ask anything, extract receipts, draft invoices, or request quick summaries.",
     "emptyStateTitle": "How can I help you?",
     "emptyStateDescription": "Ask anything, extract receipts, generate invoices, or request quick summaries.",
     "awaitingInputs": "Awaiting your input...",
@@ -1686,7 +1703,45 @@
     "issueInvoice": "Issue invoice",
     "userRole": "You",
     "assistantRole": "Assistant",
-    "systemRole": "System"
+    "systemRole": "System",
+    "searchAction": "Search",
+    "newChat": "New chat",
+    "recentChats": "Recent chats",
+    "recentChatsDescription": "Browse previous conversations or start a new one.",
+    "loadingChats": "Loading chats...",
+    "noChats": "No chats yet",
+    "noChatsDescription": "Start a conversation and it will appear here.",
+    "loadingPreview": "Loading preview...",
+    "loadingMonthlyReport": "Loading monthly report...",
+    "cashConfirmation": {
+      "title": "Draft ready for confirmation",
+      "description": "Review the summary for {{date}}, then confirm to save the cash entries.",
+      "confirm": "Confirm and save",
+      "confirming": "Confirming...",
+      "confirmPrompt": "I explicitly confirm and authorize saving this cash-day draft.",
+      "savedTitle": "Cash-day draft saved",
+      "savedDescription": "The confirmed cash movements were saved successfully.",
+      "taxProfileRequiredTitle": "Tax profile required before saving",
+      "taxProfileRequiredDescription": "Choose whether the business uses standard German VAT or the Kleinunternehmer scheme. The app must not guess this tax setting.",
+      "configureTaxSettings": "Configure tax & VAT"
+    },
+    "search": {
+      "title": "Search chats",
+      "placeholder": "Search messages...",
+      "minLength": "Type at least 2 characters to search.",
+      "noResults": "No matching messages found.",
+      "noPreview": "(No preview)"
+    },
+    "groups": {
+      "today": "Today",
+      "needsAttention": "Needs attention",
+      "previousDays": "Previous days",
+      "monthlyReviews": "Monthly reviews",
+      "generalQuestions": "General questions",
+      "yesterday": "Yesterday",
+      "week": "This week",
+      "older": "Older"
+    }
   },
   "copilot": {
     "title": "Assistant",
@@ -3279,6 +3334,24 @@
     }
   },
   "cashDashboard": {
+    "workspace": {
+      "dailyCash": "Daily Cash",
+      "monthlyReview": "Monthly Review",
+      "generalHelp": "General Help",
+      "generalHelpTitle": "Cash Assistant",
+      "cashDayFor": "Cash Day",
+      "reviewFor": "Review",
+      "register": "Register",
+      "location": "Location",
+      "boundRegisterLabel": "Cash register"
+    },
+    "registerSelector": {
+      "title": "Choose a cash register",
+      "description": "This conversation will use the selected register.",
+      "binding": "Selecting register...",
+      "error": "Could not set the cash register.",
+      "retry": "Try again"
+    },
     "headerTitle": "Cash control dashboard",
     "headerSubtitle": "Daily cash and receipt control for the salon floor.",
     "previewLabel": "Preview state",
@@ -3548,12 +3621,34 @@
       "languages": "German, English, Vietnamese",
       "lockedTitle": "AI help is locked on this plan",
       "lockedDescription": "Upgrade to Pro to unlock the cash assistant, multilingual explanations, and guided issue review.",
-      "lockedBadge": "AI locked"
+      "lockedBadge": "AI locked",
+      "emptyStateActions": {
+        "recordTransactions": {
+          "label": "Record today's transactions",
+          "value": "I want to record today's cash transactions."
+        },
+        "reviewMonth": {
+          "label": "Review monthly report",
+          "value": "I want to review this month's cash report."
+        },
+        "closeDay": {
+          "label": "Close the cash day",
+          "value": "I want to close the cash register for today."
+        },
+        "generalHelp": {
+          "label": "Ask a general question",
+          "value": "I have a general question about cash management."
+        }
+      }
     },
     "severity": {
       "high": "High",
       "medium": "Medium",
       "low": "Low"
+    },
+    "workspace": {
+      "register": "Register",
+      "location": "Location"
     }
   }
 }

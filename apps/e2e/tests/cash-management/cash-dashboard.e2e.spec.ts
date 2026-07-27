@@ -1,15 +1,15 @@
 import { CashRegisterSchema, type CashRegister } from "@corely/contracts";
 import { expect, type Page } from "@playwright/test";
-import { test } from "../fixtures";
-import { loginAsSeededUser } from "../helpers/auth";
+import { test } from "../fixtures.ts";
+import { loginAsSeededUser } from "../helpers/auth.ts";
 import {
   attachBelegToEntry,
   createCashEntry,
   submitCashDayClose,
   uploadBase64Document,
-} from "../helpers/cash-management-fixtures";
-import { HttpClient } from "../helpers/http-client";
-import { idempotencyKey } from "../helpers/idempotency";
+} from "../helpers/cash-management-fixtures.ts";
+import { HttpClient } from "../helpers/http-client.ts";
+import { idempotencyKey } from "../helpers/idempotency.ts";
 
 const receiptBase64 = Buffer.from("receipt for salon purchase", "utf8").toString("base64");
 
