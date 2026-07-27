@@ -44,7 +44,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["src/**/*.{spec,test}.ts"],
+    include: ["src/**/*.{spec,test}.ts", "src/**/*.e2e-spec.ts"],
     // Do not exclude *.int.test.ts so integration workspace can reuse this config
     exclude: ["**/node_modules/**", "**/dist/**"],
     setupFiles: ["./src/test/setup.ts"],

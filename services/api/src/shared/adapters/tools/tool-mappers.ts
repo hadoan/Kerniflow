@@ -10,12 +10,25 @@ export type ToolMapperFailure = {
 export type ToolMapperSuccess<T extends Record<string, unknown>> = { ok: true } & T;
 
 export const mapToolResult = <T extends Record<string, unknown>>(
-  result: Result<T, UseCaseError>
+  result: Result<T, UseCaseError> | undefined | null
 ): ToolMapperSuccess<T> | ToolMapperFailure => {
-  if (isErr(result)) {
-    const error = result.error;
-    return { ok: false, code: error.code, message: error.message, details: error.details };
+  if (!result) {
+    return {
+      ok: false,
+      code: "INTERNAL_ERROR",
+      message: "Unexpected undefined result from use case",
+    };
   }
 
-  return { ok: true, ...result.value };
+  if (isErr(result)) {
+    const error = result.error;
+    return {
+      ok: false,
+      code: error.code ?? "UNKNOWN_ERROR",
+      message: error.message,
+      details: error.details,
+    };
+  }
+
+  return { ok: true, ...result.value } as ToolMapperSuccess<T>;
 };

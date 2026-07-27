@@ -345,8 +345,11 @@ const isToolFailure = (value: unknown): value is ToolFailure =>
   "message" in value;
 
 const unwrapResult = <T extends Record<string, unknown>>(
-  result: Result<T, UseCaseError>
+  result: Result<T, UseCaseError> | undefined | null
 ): T | ToolFailure => {
+  if (!result) {
+    return failure("INTERNAL_ERROR", "Unexpected undefined result from use case");
+  }
   if (isErr(result)) {
     return failure(
       result.error.code ?? "UNKNOWN_ERROR",
