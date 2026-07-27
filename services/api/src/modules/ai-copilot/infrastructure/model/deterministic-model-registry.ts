@@ -128,7 +128,9 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
                 }
               }
             }
-            if (latestConfirmationId) {break;}
+            if (latestConfirmationId) {
+              break;
+            }
           }
         }
 

@@ -192,9 +192,7 @@ try {
   });
   console.log("👀 Watching @corely/prompts build output for changes...\n");
 } catch (error) {
-  console.warn(
-    `[dev] Could not watch @corely/prompts build output: ${error?.message ?? error}`
-  );
+  console.warn(`[dev] Could not watch @corely/prompts build output: ${error?.message ?? error}`);
 }
 
 process.on("SIGINT", async () => {

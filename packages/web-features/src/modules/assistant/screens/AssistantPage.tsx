@@ -193,7 +193,9 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
 
   const confirmHandoffMutation = useMutation({
     mutationFn: async () => {
-      if (!handoffQuery.data || !threadId) {return;}
+      if (!handoffQuery.data || !threadId) {
+        return;
+      }
       if (!idempotencyKeyRef.current) {
         idempotencyKeyRef.current = crypto.randomUUID();
       }
@@ -219,7 +221,9 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
 
   const cancelHandoffMutation = useMutation({
     mutationFn: async () => {
-      if (!handoffQuery.data || !threadId) {return;}
+      if (!handoffQuery.data || !threadId) {
+        return;
+      }
       return cashManagementApi.cancelHandoff(threadId, handoffQuery.data.id);
     },
     onSuccess: () => {

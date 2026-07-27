@@ -21,7 +21,9 @@ export async function createKassenberichtPdf(preview: {
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
 
   const format = (cents: number) => {
-    if (cents === 0) {return "0,00";}
+    if (cents === 0) {
+      return "0,00";
+    }
     return (cents / 100).toFixed(2).replace(".", ",");
   };
 
@@ -83,8 +85,12 @@ export async function createKassenberichtPdf(preview: {
     const f = isBold ? bold : font;
     const textW = f.widthOfTextAtSize(text, size);
     let tx = xPos + 5;
-    if (align === "center") {tx = xPos + (w - textW) / 2;}
-    if (align === "right") {tx = xPos + w - textW - 5;}
+    if (align === "center") {
+      tx = xPos + (w - textW) / 2;
+    }
+    if (align === "right") {
+      tx = xPos + w - textW - 5;
+    }
     page.drawText(text, { x: tx, y: yPos - 15, size, font: f });
   };
 

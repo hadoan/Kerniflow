@@ -182,7 +182,9 @@ export class CashAssistantWorkspaceController {
       },
       { tenantId, workspaceId, userId }
     );
-    if (isErr(result)) {throw result.error;}
+    if (isErr(result)) {
+      throw result.error;
+    }
     return result.value;
   }
 
