@@ -5,6 +5,8 @@ import {
   ValidationError,
   ok,
   err,
+  isOk,
+  isErr,
   UseCaseContext,
   UnitOfWork,
 } from "@corely/kernel";
@@ -71,8 +73,8 @@ describe("ConfirmHandoffUseCase", () => {
       mockCtx
     );
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
+    expect(isOk(result)).toBe(true);
+    if (isOk(result)) {
       expect(result.value.entryId).toBe("entry-1");
     }
     expect(handoffRepo.markHandoffConsumed).toHaveBeenCalledWith("handoff-1", "mock-tx");
@@ -85,8 +87,8 @@ describe("ConfirmHandoffUseCase", () => {
       { handoffId: "handoff-1", expectedConversationId: "conv-1", idempotencyKey: "key-1" },
       mockCtx
     );
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) expect(result.error).toBeInstanceOf(NotFoundError);
+    expect(isErr(result)).toBe(true);
+    if (isErr(result)) expect(result.error).toBeInstanceOf(NotFoundError);
   });
 
   it("should fail if handoff is from wrong tenant", async () => {
@@ -95,8 +97,8 @@ describe("ConfirmHandoffUseCase", () => {
       { handoffId: "handoff-1", expectedConversationId: "conv-1", idempotencyKey: "key-1" },
       mockCtx
     );
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) expect(result.error).toBeInstanceOf(NotFoundError);
+    expect(isErr(result)).toBe(true);
+    if (isErr(result)) expect(result.error).toBeInstanceOf(NotFoundError);
   });
 
   it("should fail if handoff is from wrong workspace", async () => {
@@ -108,8 +110,8 @@ describe("ConfirmHandoffUseCase", () => {
       { handoffId: "handoff-1", expectedConversationId: "conv-1", idempotencyKey: "key-1" },
       mockCtx
     );
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) expect(result.error).toBeInstanceOf(ValidationError);
+    expect(isErr(result)).toBe(true);
+    if (isErr(result)) expect(result.error).toBeInstanceOf(ValidationError);
   });
 
   it("should fail if handoff is already consumed", async () => {
@@ -118,8 +120,8 @@ describe("ConfirmHandoffUseCase", () => {
       { handoffId: "handoff-1", expectedConversationId: "conv-1", idempotencyKey: "key-1" },
       mockCtx
     );
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) expect(result.error).toBeInstanceOf(ValidationError);
+    expect(isErr(result)).toBe(true);
+    if (isErr(result)) expect(result.error).toBeInstanceOf(ValidationError);
   });
 
   it("should fail if handoff is expired", async () => {
@@ -131,8 +133,8 @@ describe("ConfirmHandoffUseCase", () => {
       { handoffId: "handoff-1", expectedConversationId: "conv-1", idempotencyKey: "key-1" },
       mockCtx
     );
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) expect(result.error).toBeInstanceOf(ValidationError);
+    expect(isErr(result)).toBe(true);
+    if (isErr(result)) expect(result.error).toBeInstanceOf(ValidationError);
   });
 
   it("should fail if confirmCashEntryUseCase fails and rollback", async () => {
@@ -147,7 +149,7 @@ describe("ConfirmHandoffUseCase", () => {
       mockCtx
     );
 
-    expect(result.isErr()).toBe(true);
+    expect(isErr(result)).toBe(true);
     expect(handoffRepo.markHandoffConsumed).not.toHaveBeenCalled();
   });
 });
