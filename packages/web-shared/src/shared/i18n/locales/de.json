@@ -3618,5 +3618,13 @@
       "register": "Kasse",
       "location": "Standort"
     }
+  },
+  "cashAssistant": {
+    "kassenbericht": {
+      "title": "Kassenbericht",
+      "open": "Kassenbericht öffnen",
+      "openForDay": "Kassenbericht vom {{day}} öffnen",
+      "invalidLink": "Der Link zum Kassenbericht konnte nicht erstellt werden."
+    }
   }
 }

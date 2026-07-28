@@ -3630,5 +3630,13 @@
       "register": "Máy tính tiền",
       "location": "Vị trí"
     }
+  },
+  "cashAssistant": {
+    "kassenbericht": {
+      "title": "Kassenbericht",
+      "open": "Mở Kassenbericht",
+      "openForDay": "Mở Kassenbericht ngày {{day}}",
+      "invalidLink": "Không thể tạo liên kết đến Kassenbericht."
+    }
   }
 }
