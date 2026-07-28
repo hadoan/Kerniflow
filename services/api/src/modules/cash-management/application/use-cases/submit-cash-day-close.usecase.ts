@@ -133,12 +133,23 @@ export class SubmitCashDayCloseUseCase extends BaseUseCase<
 
     const note = input.note ?? input.notes ?? null;
 
-    if (input.mode === "COUNTED") {
+    const hasCounted =
+      input.countedClosingCashCents !== undefined ||
+      input.countedBalance !== undefined ||
+      input.countedBalanceCents !== undefined ||
+      input.denominationCounts.length > 0;
+    const effectiveMode = input.mode ?? (hasCounted ? "COUNTED" : "SKIPPED");
+
+    if (effectiveMode === "COUNTED") {
       const countedFromLines = input.denominationCounts.reduce(
         (total, line) => total + line.subtotal,
         0
       );
-      countedBalance = input.countedClosingCashCents ?? input.countedBalance ?? input.countedBalanceCents ?? countedFromLines;
+      countedBalance =
+        input.countedClosingCashCents ??
+        input.countedBalance ??
+        input.countedBalanceCents ??
+        countedFromLines;
 
       if (countedBalance < 0) {
         throw new ValidationError("Counted closing cash cannot be negative.", { countedBalance });
@@ -183,7 +194,7 @@ export class SubmitCashDayCloseUseCase extends BaseUseCase<
           expectedBalanceCents: expectedBalance,
           countedBalanceCents: countedBalance,
           differenceCents: difference,
-          verificationStatus: verificationStatus,
+          verificationStatus,
           note,
           submittedAt: new Date(),
           submittedByUserId: ctx.userId ?? "system",

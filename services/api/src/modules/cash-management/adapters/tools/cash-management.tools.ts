@@ -392,9 +392,10 @@ const withWorkspaceContext =
   ): NonNullable<DomainToolPort["execute"]> =>
   async (params) => {
     try {
-      let workspaceCtx: CashAssistantExecutionContext | null = null;
+      let workspaceCtx: CashAssistantExecutionContext | null =
+        (params as { workspaceCtx?: CashAssistantExecutionContext | null }).workspaceCtx ?? null;
 
-      if (params.tenantId && params.workspaceId && params.runId) {
+      if (!workspaceCtx && params.tenantId && params.workspaceId && params.runId) {
         try {
           const ws = await deps.workspaceRepo.findWorkspaceByConversationId(
             params.tenantId,

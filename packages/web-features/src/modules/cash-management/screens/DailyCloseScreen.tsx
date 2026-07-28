@@ -77,13 +77,16 @@ export function DailyCloseScreen() {
         mode,
         countedClosingCashCents: mode === "COUNTED" ? countedBalance! : undefined,
         note: note.trim() || undefined,
-        denominationCounts: mode === "COUNTED" ? denominations
-          .map((denomination) => ({
-            denomination,
-            count: counts[denomination] ?? 0,
-            subtotal: denomination * (counts[denomination] ?? 0),
-          }))
-          .filter((line) => line.count > 0) : [],
+        denominationCounts:
+          mode === "COUNTED"
+            ? denominations
+                .map((denomination) => ({
+                  denomination,
+                  count: counts[denomination] ?? 0,
+                  subtotal: denomination * (counts[denomination] ?? 0),
+                }))
+                .filter((line) => line.count > 0)
+            : [],
       }),
     onSuccess: async () => {
       if (!id) {
@@ -143,6 +146,12 @@ export function DailyCloseScreen() {
         </div>
       </div>
 
+      {isClosed && (
+        <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+          {t("cash.ui.dayClose.lockedInfo", "This day is locked. Use correction entries only.")}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
@@ -173,7 +182,9 @@ export function DailyCloseScreen() {
               </div>
               <div className="flex flex-wrap gap-4 mt-6">
                 <Button onClick={() => setIsCounting(true)}>Count cash</Button>
-                <Button variant="outline" onClick={handleSkip} disabled={submitMutation.isPending}>Skip physical count</Button>
+                <Button variant="outline" onClick={handleSkip} disabled={submitMutation.isPending}>
+                  Skip physical count
+                </Button>
               </div>
             </div>
           )}
@@ -193,7 +204,9 @@ export function DailyCloseScreen() {
                     {formatMoney(countedBalance!, undefined, registerQuery.data.register.currency)}
                   </p>
                 </div>
-                <div className={`p-4 border rounded-lg ${difference === 0 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+                <div
+                  className={`p-4 border rounded-lg ${difference === 0 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}
+                >
                   <p className="text-sm opacity-80">Difference</p>
                   <p className="text-xl font-semibold mt-1">
                     {formatMoney(difference!, undefined, registerQuery.data.register.currency)}
@@ -205,7 +218,9 @@ export function DailyCloseScreen() {
                 <table className="min-w-full text-sm">
                   <thead className="bg-muted/30 text-left">
                     <tr>
-                      <th className="px-4 py-2 font-medium">{t("cash.ui.dayClose.denomination")}</th>
+                      <th className="px-4 py-2 font-medium">
+                        {t("cash.ui.dayClose.denomination")}
+                      </th>
                       <th className="px-4 py-2 font-medium">{t("cash.ui.dayClose.count")}</th>
                       <th className="px-4 py-2 font-medium text-right">
                         {t("cash.ui.dayClose.subtotal")}
@@ -219,7 +234,11 @@ export function DailyCloseScreen() {
                       return (
                         <tr key={denomination} className="border-t">
                           <td className="px-4 py-2">
-                            {formatMoney(denomination, undefined, registerQuery.data.register.currency)}
+                            {formatMoney(
+                              denomination,
+                              undefined,
+                              registerQuery.data.register.currency
+                            )}
                           </td>
                           <td className="px-4 py-2">
                             <Input
@@ -263,7 +282,9 @@ export function DailyCloseScreen() {
                 >
                   Confirm Count
                 </Button>
-                <Button variant="ghost" onClick={() => setIsCounting(false)}>Cancel</Button>
+                <Button variant="ghost" onClick={() => setIsCounting(false)}>
+                  Cancel
+                </Button>
               </div>
             </div>
           )}
@@ -273,12 +294,20 @@ export function DailyCloseScreen() {
               {verificationStatus === "NOT_COUNTED" ? (
                 <div className="p-4 rounded-lg bg-blue-50 text-blue-800 flex flex-col gap-2">
                   <p className="font-medium text-base">Day calculated</p>
-                  <p className="text-sm">Physical cash was not counted. The report uses the expected ledger balance.</p>
-                  
+                  <p className="text-sm">
+                    Physical cash was not counted. The report uses the expected ledger balance.
+                  </p>
+
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs opacity-80">Expected closing cash</p>
-                      <p className="text-lg font-semibold">{formatMoney(expectedBalance, undefined, registerQuery.data.register.currency)}</p>
+                      <p className="text-lg font-semibold">
+                        {formatMoney(
+                          expectedBalance,
+                          undefined,
+                          registerQuery.data.register.currency
+                        )}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs opacity-80">Physical count</p>
@@ -290,30 +319,58 @@ export function DailyCloseScreen() {
                     </div>
                     <div>
                       <p className="text-xs opacity-80">Tageslosung</p>
-                      <p className="text-lg font-semibold">{formatMoney(cashSalesCents, undefined, registerQuery.data.register.currency)}</p>
+                      <p className="text-lg font-semibold">
+                        {formatMoney(
+                          cashSalesCents,
+                          undefined,
+                          registerQuery.data.register.currency
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="p-4 border rounded-lg">
                   <p className="font-medium flex items-center gap-2 mb-4">
-                    {cashDifference === 0 ? <CheckCircle2 className="text-green-600 h-5 w-5" /> : <AlertTriangle className="text-amber-600 h-5 w-5" />}
+                    {cashDifference === 0 ? (
+                      <CheckCircle2 className="text-green-600 h-5 w-5" />
+                    ) : (
+                      <AlertTriangle className="text-amber-600 h-5 w-5" />
+                    )}
                     {cashDifference === 0 ? "Count Matched" : "Count Difference"}
                   </p>
-                  
+
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Expected</p>
-                      <p className="text-lg font-semibold">{formatMoney(expectedBalance, undefined, registerQuery.data.register.currency)}</p>
+                      <p className="text-lg font-semibold">
+                        {formatMoney(
+                          expectedBalance,
+                          undefined,
+                          registerQuery.data.register.currency
+                        )}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Counted</p>
-                      <p className="text-lg font-semibold">{formatMoney(countedClosingCash!, undefined, registerQuery.data.register.currency)}</p>
+                      <p className="text-lg font-semibold">
+                        {formatMoney(
+                          countedClosingCash!,
+                          undefined,
+                          registerQuery.data.register.currency
+                        )}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Difference</p>
-                      <p className={`text-lg font-semibold ${cashDifference === 0 ? 'text-green-600' : 'text-amber-600'}`}>
-                        {formatMoney(cashDifference!, undefined, registerQuery.data.register.currency)}
+                      <p
+                        className={`text-lg font-semibold ${cashDifference === 0 ? "text-green-600" : "text-amber-600"}`}
+                      >
+                        {formatMoney(
+                          cashDifference!,
+                          undefined,
+                          registerQuery.data.register.currency
+                        )}
                       </p>
                     </div>
                   </div>
@@ -325,7 +382,6 @@ export function DailyCloseScreen() {
           {submitMutation.isError ? (
             <p className="text-sm text-destructive mt-4">{t("cash.ui.dayClose.submitFailed")}</p>
           ) : null}
-
         </CardContent>
       </Card>
     </div>

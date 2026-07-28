@@ -84,11 +84,12 @@ describe("GetCashReportPreviewQueryUseCase", () => {
     if (!isErr(result)) {
       const { preview } = result.value;
       expect(preview.previousClosingCashCents).toBe(12000); // from first entry's before-balance: 7000 - (-5000) = 12000
-      expect(preview.actualClosingCashCents).toBe(20000);
+      expect(preview.countedClosingCashCents).toBe(20000);
+      expect(preview.effectiveClosingCashCents).toBe(20000);
       expect(preview.businessExpensesCents).toBe(5000);
       // calculatedCashSalesCents = 20000 + 5000 - 12000 = 13000
       expect(preview.calculatedCashSalesCents).toBe(13000);
-      expect(preview.status).toBe("NEEDS_REVIEW"); // Missing receipts
+      expect(preview.status).toBe("VERIFIED"); // counted cash present, missing receipts are a warning only
     }
   });
 });
