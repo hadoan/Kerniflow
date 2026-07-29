@@ -272,6 +272,8 @@ export const SubmitCashDayCloseInputSchema = z
     registerId: z.string(),
     dayKey: DayKeySchema.optional(),
     businessDate: DayKeySchema.optional(),
+    mode: z.enum(["COUNTED", "SKIPPED"]).optional().default("COUNTED"),
+    countedClosingCashCents: z.number().int().optional(),
     countedBalance: z.number().int().optional(),
     countedBalanceCents: z.number().int().optional(),
     denominationCounts: z.array(CashDenominationCountSchema).default([]),
@@ -288,14 +290,18 @@ export const SubmitCashDayCloseInputSchema = z
       });
     }
 
-    const hasCounted =
-      value.countedBalance !== undefined || value.countedBalanceCents !== undefined;
-    if (!hasCounted && value.denominationCounts.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "counted balance or denominationCounts is required",
-        path: ["countedBalance"],
-      });
+    if (value.mode === "COUNTED") {
+      const hasCounted =
+        value.countedClosingCashCents !== undefined ||
+        value.countedBalance !== undefined ||
+        value.countedBalanceCents !== undefined;
+      if (!hasCounted && value.denominationCounts.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "counted balance or denominationCounts is required in COUNTED mode",
+          path: ["countedClosingCashCents"],
+        });
+      }
     }
   });
 export type SubmitCashDayCloseInput = z.infer<typeof SubmitCashDayCloseInputSchema>;

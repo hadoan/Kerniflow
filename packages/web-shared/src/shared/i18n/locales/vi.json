@@ -1522,7 +1522,20 @@
         "submitFailed": "Không thể gửi chốt ngày.",
         "submitAndLock": "Gửi và khóa ngày",
         "lockedInfo": "Ngày này đã bị khóa. Chỉ được thêm bút toán điều chỉnh.",
-        "loadExistingFailed": "Không thể tải bản chốt ngày hiện có."
+        "loadExistingFailed": "Không thể tải bản chốt ngày hiện có.",
+        "expected": "Kỳ vọng",
+        "counted": "Đã kiểm đếm",
+        "confirmClose": "Xác nhận chốt ngày",
+        "countByDenomination": "Đếm theo mệnh giá",
+        "dayCalculatedTitle": "Ngày đã tính toán",
+        "dayCalculatedDesc": "Không thực hiện kiểm đếm tiền mặt thực tế. Báo cáo sử dụng số dư kỳ vọng từ sổ cái.",
+        "expectedClosingCash": "Tiền mặt tồn quỹ kỳ vọng",
+        "physicalCount": "Kiểm đếm thực tế",
+        "notPerformed": "Không thực hiện",
+        "notAvailable": "Không có dữ liệu",
+        "tageslosung": "Doanh thu tiền mặt trong ngày (Tageslosung)",
+        "countMatched": "Kiểm đếm khớp",
+        "countDifference": "Có chênh lệch kiểm đếm"
       },
       "kassenbericht": {
         "title": "Kassenbericht hằng ngày",
@@ -1531,7 +1544,28 @@
         "download": "Tải PDF",
         "downloading": "Đang tạo PDF...",
         "loading": "Đang tải Kassenbericht...",
-        "loadFailed": "Không thể tải Kassenbericht cho ngày này."
+        "loadFailed": "Không thể tải Kassenbericht cho ngày này.",
+        "explanations": {
+          "date": "Ngày",
+          "number": "Số",
+          "currency": "Tiền tệ",
+          "closingCash": "Tiền mặt tồn quỹ cuối ngày",
+          "bookNote": "Ghi chú sổ sách",
+          "outflows": "Các khoản chi trong ngày",
+          "taxAmount": "Thuế GTGT",
+          "netGrossAmount": "Số tiền Netto/Brutto",
+          "purchases": "1. Mua hàng và chi phí mua hàng",
+          "expenses": "2. Chi phí kinh doanh",
+          "withdrawals": "3. Rút tiền cá nhân",
+          "otherOutflows": "4. Chi phí khác (VD: Nộp tiền vào NH)",
+          "total": "Tổng cộng",
+          "previousClosingCash": "trừ đi Tiền mặt tồn quỹ đầu ngày",
+          "cashReceived": "= Tổng thu tiền mặt",
+          "otherIncome": "trừ đi Các khoản thu khác",
+          "cashSales": "= Doanh thu tiền mặt trong ngày",
+          "customerCount": "Số lượng khách",
+          "signature": "Chữ ký"
+        }
       },
       "exports": {
         "title": "Xuất dữ liệu · {{register}}",
@@ -3608,6 +3642,14 @@
     "workspace": {
       "register": "Máy tính tiền",
       "location": "Vị trí"
+    }
+  },
+  "cashAssistant": {
+    "kassenbericht": {
+      "title": "Kassenbericht",
+      "open": "Mở Kassenbericht",
+      "openForDay": "Mở Kassenbericht ngày {{day}}",
+      "invalidLink": "Không thể tạo liên kết đến Kassenbericht."
     }
   }
 }

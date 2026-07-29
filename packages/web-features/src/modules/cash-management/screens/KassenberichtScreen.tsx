@@ -3,10 +3,10 @@ import { ArrowLeft, Download } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, Button } from "@corely/ui";
+import { Card, CardContent, Button, Input } from "@corely/ui";
 import { type CashReportPreviewDto } from "@corely/contracts";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
-import { formatMoney } from "@corely/web-shared/shared/lib/formatters";
+
 
 function formatNumber(amountCents: number) {
   if (amountCents === 0) {
@@ -19,13 +19,15 @@ function formatNumber(amountCents: number) {
 }
 
 function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
+  const { t } = useTranslation();
   const otherOutflows = report.bankDepositsCents + report.otherCashOutflowsCents;
   const totalOutflows =
     report.goodsPurchasesCents +
     report.businessExpensesCents +
     report.privateWithdrawalsCents +
     otherOutflows;
-  const closingCash = report.actualClosingCashCents ?? 0;
+
+  const closingCash = report.effectiveClosingCashCents;
   const cashReceived = closingCash + totalOutflows - report.previousClosingCashCents;
   const otherIncome =
     report.privateDepositsCents +
@@ -50,6 +52,11 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             <h1 className="text-2xl font-bold text-black">Kassenbericht</h1>
             <div className="ml-2 text-sm">
               Datum{" "}
+              {t("cash.ui.kassenbericht.explanations.date") && (
+                <span className="text-xs text-muted-foreground">
+                  ({t("cash.ui.kassenbericht.explanations.date")})
+                </span>
+              )}{" "}
               <span
                 className="inline-block border-b border-black text-center text-lg"
                 style={{ width: "120px" }}
@@ -59,11 +66,23 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             </div>
             <div className="ml-2 text-sm">
               Nr.{" "}
+              {t("cash.ui.kassenbericht.explanations.number") && (
+                <span className="text-xs text-muted-foreground">
+                  ({t("cash.ui.kassenbericht.explanations.number")})
+                </span>
+              )}{" "}
               <span className="inline-block border-b border-black" style={{ width: "60px" }}></span>
             </div>
           </div>
           <div className="text-right text-sm leading-tight">
-            <div>Währung</div>
+            <div>
+              Währung{" "}
+              {t("cash.ui.kassenbericht.explanations.currency") && (
+                <span className="text-xs text-muted-foreground">
+                  ({t("cash.ui.kassenbericht.explanations.currency")})
+                </span>
+              )}
+            </div>
             <div className="font-bold">EUR</div>
           </div>
         </div>
@@ -81,6 +100,11 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             <tr>
               <td colSpan={3} className="border border-black p-2 font-bold">
                 Kassenbestand bei Geschäftsschluss
+                {t("cash.ui.kassenbericht.explanations.closingCash") && (
+                  <div className="text-xs font-normal text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.closingCash")}
+                  </div>
+                )}
               </td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
                 {formatNumber(closingCash)}
@@ -89,27 +113,56 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
                 Buch-
                 <br />
                 vermerk
+                {t("cash.ui.kassenbericht.explanations.bookNote") && (
+                  <div className="text-[9px] font-normal text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.bookNote")}
+                  </div>
+                )}
               </td>
             </tr>
 
             <tr>
-              <td className="border border-black p-2 font-bold">Ausgaben im Laufe des Tages</td>
+              <td className="border border-black p-2 font-bold">
+                Ausgaben im Laufe des Tages
+                {t("cash.ui.kassenbericht.explanations.outflows") && (
+                  <div className="text-xs font-normal text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.outflows")}
+                  </div>
+                )}
+              </td>
               <td className="border border-black p-1 text-center text-xs">%</td>
               <td className="border border-black p-1 text-center text-xs leading-tight">
                 Vorsteuer
                 <br />
                 Betrag
+                {t("cash.ui.kassenbericht.explanations.taxAmount") && (
+                  <div className="text-[9px] font-normal text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.taxAmount")}
+                  </div>
+                )}
               </td>
               <td className="border border-black p-1 text-center text-xs leading-tight">
                 Netto-/Brutto-
                 <br />
                 Betrag
+                {t("cash.ui.kassenbericht.explanations.netGrossAmount") && (
+                  <div className="text-[9px] font-normal text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.netGrossAmount")}
+                  </div>
+                )}
               </td>
               <td className="border-b border-r border-black"></td>
             </tr>
 
             <tr>
-              <td className="border border-black p-2">1. Wareneinkäufe und Warennebenkosten</td>
+              <td className="border border-black p-2">
+                1. Wareneinkäufe und Warennebenkosten
+                {t("cash.ui.kassenbericht.explanations.purchases") && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.purchases")}
+                  </div>
+                )}
+              </td>
               <td className="border border-black"></td>
               <td className="border border-black"></td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
@@ -129,7 +182,14 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             ))}
 
             <tr>
-              <td className="border border-black p-2">2. Geschäftsausgaben</td>
+              <td className="border border-black p-2">
+                2. Geschäftsausgaben
+                {t("cash.ui.kassenbericht.explanations.expenses") && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.expenses")}
+                  </div>
+                )}
+              </td>
               <td className="border border-black"></td>
               <td className="border border-black"></td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
@@ -149,7 +209,14 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             ))}
 
             <tr>
-              <td className="border border-black p-2">3. Privatentnahmen</td>
+              <td className="border border-black p-2">
+                3. Privatentnahmen
+                {t("cash.ui.kassenbericht.explanations.withdrawals") && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.withdrawals")}
+                  </div>
+                )}
+              </td>
               <td className="border border-black"></td>
               <td className="border border-black"></td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
@@ -163,6 +230,11 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             <tr>
               <td className="border border-black p-2">
                 4. Sonstige Ausgaben (z.B. Bankeinzahlungen)
+                {t("cash.ui.kassenbericht.explanations.otherOutflows") && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.otherOutflows")}
+                  </div>
+                )}
               </td>
               <td className="border border-black"></td>
               <td className="border border-black"></td>
@@ -185,6 +257,11 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             <tr>
               <td colSpan={3} className="border border-black p-2 text-right text-sm">
                 Summe
+                {t("cash.ui.kassenbericht.explanations.total") && (
+                  <span className="ml-2 text-xs text-muted-foreground font-normal">
+                    ({t("cash.ui.kassenbericht.explanations.total")})
+                  </span>
+                )}
               </td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
                 {formatNumber(totalOutflows)}
@@ -195,6 +272,11 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             <tr>
               <td colSpan={3} className="border border-black p-2 text-sm">
                 abzüglich Kassenendbestand des Vortages
+                {t("cash.ui.kassenbericht.explanations.previousClosingCash") && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.previousClosingCash")}
+                  </div>
+                )}
               </td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
                 {formatNumber(report.previousClosingCashCents)}
@@ -205,6 +287,11 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             <tr>
               <td colSpan={3} className="border border-black p-2 text-sm font-bold">
                 = Kasseneingang
+                {t("cash.ui.kassenbericht.explanations.cashReceived") && (
+                  <div className="text-xs font-normal text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.cashReceived")}
+                  </div>
+                )}
               </td>
               <td className="border border-black p-2 text-right text-lg font-bold tabular-nums">
                 {formatNumber(cashReceived)}
@@ -213,7 +300,14 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             </tr>
 
             <tr>
-              <td className="border border-black p-2 text-sm">abzüglich sonstige Einnahmen</td>
+              <td className="border border-black p-2 text-sm">
+                abzüglich sonstige Einnahmen
+                {t("cash.ui.kassenbericht.explanations.otherIncome") && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.otherIncome")}
+                  </div>
+                )}
+              </td>
               <td className="border border-black"></td>
               <td className="border border-black"></td>
               <td className="border border-black p-2 text-right text-lg tabular-nums">
@@ -225,6 +319,11 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             <tr>
               <td colSpan={3} className="border border-black p-2 text-sm font-bold">
                 = Bareinnahmen (Tageslosung)
+                {t("cash.ui.kassenbericht.explanations.cashSales") && (
+                  <div className="text-xs font-normal text-muted-foreground mt-0.5">
+                    {t("cash.ui.kassenbericht.explanations.cashSales")}
+                  </div>
+                )}
               </td>
               <td className="border border-black p-2 text-right text-lg font-bold tabular-nums">
                 {formatNumber(report.calculatedCashSalesCents)}
@@ -237,7 +336,14 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
         {/* Footer */}
         <div className="mt-8 flex justify-between text-sm">
           <div className="flex items-end">
-            <span>Kundenzahl</span>
+            <div>
+              Kundenzahl
+              {t("cash.ui.kassenbericht.explanations.customerCount") && (
+                <div className="text-xs text-muted-foreground leading-none mt-1">
+                  {t("cash.ui.kassenbericht.explanations.customerCount")}
+                </div>
+              )}
+            </div>
             <span
               className="ml-2 inline-block border-b border-black text-center text-xl"
               style={{ width: "100px" }}
@@ -246,7 +352,14 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
             </span>
           </div>
           <div className="flex items-end">
-            <span>Unterschrift</span>
+            <div>
+              Unterschrift
+              {t("cash.ui.kassenbericht.explanations.signature") && (
+                <div className="text-xs text-muted-foreground leading-none mt-1">
+                  {t("cash.ui.kassenbericht.explanations.signature")}
+                </div>
+              )}
+            </div>
             <span
               className="ml-2 inline-block border-b border-black"
               style={{ width: "250px" }}
@@ -261,7 +374,7 @@ function KassenberichtPaper({ report }: { report: CashReportPreviewDto }) {
 export function KassenberichtScreen() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dayKey = searchParams.get("day") ?? new Date().toISOString().slice(0, 10);
   const [isDownloading, setIsDownloading] = useState(false);
   const reportQuery = useQuery({
@@ -306,7 +419,27 @@ export function KassenberichtScreen() {
           <h1 className="text-2xl font-semibold">{t("cash.ui.kassenbericht.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("cash.ui.kassenbericht.subtitle")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            type="date"
+            value={dayKey}
+            max={new Date().toISOString().slice(0, 10)}
+            onChange={(e) => {
+              setSearchParams(
+                (prev) => {
+                  const params = new URLSearchParams(prev);
+                  if (e.target.value) {
+                    params.set("day", e.target.value);
+                  } else {
+                    params.delete("day");
+                  }
+                  return params;
+                },
+                { replace: true }
+              );
+            }}
+            className="w-auto h-9"
+          />
           <Button variant="outline" asChild>
             <Link to={`/cash/registers/${id}`}>
               <ArrowLeft className="mr-2 h-4 w-4" />

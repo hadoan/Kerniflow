@@ -17,6 +17,8 @@ import {
   PrepareCashEntryConfirmationInputSchema,
   ConfirmCashEntryInputSchema,
   OpenCashDayWorkspaceInputSchema,
+  viewKassenberichtInputSchema,
+  viewKassenberichtOutputSchema,
   type CashRegister,
 } from "@corely/contracts";
 import { isErr, type Result, type UseCaseError } from "@corely/kernel";
@@ -390,9 +392,10 @@ const withWorkspaceContext =
   ): NonNullable<DomainToolPort["execute"]> =>
   async (params) => {
     try {
-      let workspaceCtx: CashAssistantExecutionContext | null = null;
+      let workspaceCtx: CashAssistantExecutionContext | null =
+        (params as { workspaceCtx?: CashAssistantExecutionContext | null }).workspaceCtx ?? null;
 
-      if (params.tenantId && params.workspaceId && params.runId) {
+      if (!workspaceCtx && params.tenantId && params.workspaceId && params.runId) {
         try {
           const ws = await deps.workspaceRepo.findWorkspaceByConversationId(
             params.tenantId,
@@ -2095,6 +2098,82 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
             getCtx(toolCtx)
           )
         );
+      }
+    ),
+  },
+  {
+    name: "view_kassenbericht",
+    description:
+      "Render a link to a daily Kassenbericht for the cash register associated with the current Cash Assistant workspace. Use this when the user asks to view, open, or navigate to a Kassenbericht. This tool does not create, change, close, or recalculate a Kassenbericht.",
+    kind: "server",
+    inputSchema: viewKassenberichtInputSchema,
+    execute: withWorkspaceContext(
+      deps,
+      ["GENERAL_HELP", "DAILY_CASH_DAY", "MONTHLY_REVIEW"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = viewKassenberichtInputSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+
+        const toolCtx = toCashToolCtx({
+          tenantId,
+          workspaceId,
+          userId,
+          toolCallId,
+          runId,
+          workspaceCtx,
+        });
+
+        const register = await resolveRegister(deps, toolCtx);
+        if (isToolFailure(register)) {
+          return {
+            ok: false,
+            error: {
+              code: "CashManagement:RegisterContextRequired",
+              message: "No cash register is associated with this conversation.",
+            },
+          };
+        }
+
+        let day = parsed.data.day;
+        if (!day) {
+          console.log("DEBUG: workspaceCtx =", workspaceCtx);
+          if (workspaceCtx?.businessDate) {
+            day = toDayKey(
+              typeof workspaceCtx.businessDate === "string"
+                ? workspaceCtx.businessDate
+                : workspaceCtx.businessDate.toISOString()
+            );
+          } else {
+            // "3. Today’s local date in the tenant or workspace timezone. 4. Use Europe/Berlin only as a controlled fallback when no configured timezone exists."
+            const tz = "Europe/Berlin";
+            const formatter = new Intl.DateTimeFormat("en-CA", {
+              timeZone: tz,
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            });
+            day = formatter.format(new Date());
+          }
+        }
+
+        const result = {
+          type: "cash.view-kassenbericht" as const,
+          version: 1 as const,
+          registerId: register.id,
+          day,
+        };
+
+        const validatedResult = viewKassenberichtOutputSchema.safeParse(result);
+        if (!validatedResult.success) {
+          return validationError(validatedResult.error.flatten());
+        }
+
+        return {
+          ok: true,
+          result: validatedResult.data,
+        };
       }
     ),
   },

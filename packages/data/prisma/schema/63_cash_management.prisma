@@ -95,8 +95,9 @@ model CashDayClose {
   dayKey               String
   status               String    @default("DRAFT")
   expectedBalanceCents Int
-  countedBalanceCents  Int
-  differenceCents      Int
+  countedBalanceCents  Int?
+  differenceCents      Int?
+  verificationStatus   String    @default("NOT_COUNTED") // "NOT_COUNTED", "COUNTED_MATCH", "COUNTED_DIFFERENCE"
   note                 String?
   submittedAt          DateTime? @db.Timestamptz(6)
   submittedByUserId    String?
@@ -343,5 +344,28 @@ model CashEntryConfirmation {
   @@index([tenantId, workspaceId, registerId])
   @@index([status, expiresAt])
   @@map("cash_entry_confirmations")
+  @@schema("accounting")
+}
+
+model CashLocationTransfer {
+  id              String   @id @default(cuid())
+  tenantId        String
+  workspaceId     String
+  cashFundId      String
+  fromLocationId  String
+  toLocationId    String
+  amountCents     Int
+  occurredAt      DateTime @default(now()) @db.Timestamptz(6)
+  businessDate    String
+  createdByUserId String
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, workspaceId, cashFundId, businessDate])
+  @@map("cash_location_transfers")
   @@schema("accounting")
 }

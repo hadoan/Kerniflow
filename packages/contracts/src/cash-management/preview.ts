@@ -43,7 +43,12 @@ export type CashReportPreviewDto = {
   };
 
   previousClosingCashCents: number;
-  actualClosingCashCents?: number;
+
+  expectedClosingCashCents: number;
+  countedClosingCashCents: number | null;
+  effectiveClosingCashCents: number;
+  cashDifferenceCents: number | null;
+  verificationStatus: "NOT_COUNTED" | "COUNTED_MATCH" | "COUNTED_DIFFERENCE";
 
   goodsPurchasesCents: number;
   businessExpensesCents: number;

@@ -80,6 +80,7 @@ model Workspace {
   cashEntryConfirmations  CashEntryConfirmation[]
   cashHandoffsSourced     CashWorkspaceHandoff[]   @relation("HandoffSource")
   cashHandoffsTargeted    CashWorkspaceHandoff[]   @relation("HandoffTarget")
+  cashLocationTransfers   CashLocationTransfer[]
 
   @@unique([tenantId, name])
   @@index([tenantId])

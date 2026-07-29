@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { DayKeySchema } from "./schema";
+import { DayKeySchema, CashEntryTypeSchema } from "./schema";
 
 export const CashDayConfirmationMovementSchema = z.object({
-  type: z.string().min(1),
+  type: CashEntryTypeSchema,
   amountCents: z.number().int(),
   description: z.string().optional(),
 });
@@ -50,7 +50,7 @@ export const PrepareCashEntryConfirmationInputSchema = z.object({
   workspaceId: z.string().optional(),
   registerId: z.string(),
   businessDate: DayKeySchema,
-  movementType: z.string().min(1),
+  movementType: CashEntryTypeSchema,
   amountCents: z.number().int(),
   description: z.string().min(1),
   evidenceRequirement: z.string().optional().nullable(),

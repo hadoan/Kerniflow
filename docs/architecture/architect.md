@@ -17,6 +17,7 @@ Corely is an **AI-native modular ERP** delivered as a modular monolith. The repo
 - **Web (`apps/web`, Vite + React):** Admin/backoffice UI. Uses TanStack Query with backoff from `@corely/api-client`, workspace + auth providers, and an offline provider backed by `@corely/offline-web` (IndexedDB cache + outbox; transport is still a placeholder).
 - **Public Web (`apps/public-web`, Next.js App Router):** Public-facing UI for portfolios, rentals, blog, and CMS pages. Uses the public API surface under `/public/*` and is deployed as a server-rendered app (no SPA rewrite required).
 - **POS (`apps/pos`, Expo + React Native):** Offline-first shell wired to `@corely/offline-core`, `@corely/offline-rn`, and `@corely/pos-core`.
+- **Corely Cash (`apps/cash-management`, Vite + React):** Dedicated admin app for cash-management workflows (registers, entries, day close, cashbook exports). Uses shared packages `@corely/web-shared` and `@corely/web-features`.
 - **API (`services/api`, NestJS 11):** Modules for identity, accounting, sales, purchasing, inventory, approvals, engagements, workflows, AI copilot, etc. Global env validation via `@corely/config`, Prisma-powered `DataModule`, and trace-ID middleware.
 - **Background runtime (`services/api/src/modules/background`, NestJS 11):** API-hosted internal execution path for outbox processing, scheduled runners, and workflow queue handlers. Cloud Scheduler and Cloud Tasks target internal API endpoints instead of a separate service.
 - **Mock server (`services/mock-server` dist):** Lightweight UI-first backend with latency/idempotency simulation.
@@ -25,7 +26,7 @@ Corely is an **AI-native modular ERP** delivered as a modular monolith. The repo
 
 ## Monorepo layout (selected)
 
-- **apps/**: `web`, `pos`, `e2e`
+- **apps/**: `web`, `pos`, `cash-management`, `e2e`
 - **services/**: `api`, `mock-server`
 - **packages/**:
   - `contracts`: shared schemas/enums/events/tool cards (accounting, CRM, expenses, invoices, inventory, pos, purchasing, sales, tax, workflows, AI contexts, queues)
@@ -66,6 +67,14 @@ Corely is an **AI-native modular ERP** delivered as a modular monolith. The repo
 
 - Expo Router entrypoint with dependencies on `@corely/offline-core`, `@corely/offline-rn`, `@corely/pos-core`, `@corely/api-client`, and `@corely/auth-client`.
 - Uses SQLite + SecureStore via offline packages for queued commands and sync once transport endpoints are wired.
+
+---
+
+## Corely Cash (Cash Management)
+
+- Dedicated Vite + React application (`apps/cash-management`) focused exclusively on cash-management workflows (registers, entries, day close, cashbook exports).
+- Shares the same API and authentication environment as the main web app (`apps/web`).
+- Composes UI and business logic from shared packages: `@corely/web-shared` (providers, layout, infrastructure) and `@corely/web-features` (routes and screens).
 
 ---
 

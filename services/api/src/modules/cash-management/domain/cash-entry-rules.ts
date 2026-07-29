@@ -87,6 +87,10 @@ export const normalizeCashEntryInput = (
     type = inferTypeFromDirection(direction);
   }
 
+  if (!Object.values(CashEntryType).includes(type)) {
+    throw new Error(`CashManagement:InvalidEntryType:${type}`);
+  }
+
   return {
     description: input.description,
     amountCents,

@@ -1,17 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { format } from "date-fns";
-import { ChevronDown, Loader2, Plus, Search, Sparkles, Menu } from "lucide-react";
-import {
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@corely/ui";
+import { Loader2, Plus, Search, Sparkles, Menu } from "lucide-react";
+import { Button, Sheet, SheetContent, SheetTrigger, useToast } from "@corely/ui";
 import {
   listCopilotThreads,
   searchCopilotThreads,
@@ -20,54 +11,39 @@ import {
   type CopilotThreadSearchResult,
 } from "@corely/web-shared/lib/copilot-api";
 import { Chat } from "@corely/web-shared/shared/components/Chat";
-import { cn } from "@corely/web-shared/shared/lib/utils";
 import { useTranslation } from "react-i18next";
-import { useToast } from "@corely/ui";
 import { billingApi } from "@corely/web-shared/lib/billing-api";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
 import {
   CashManagementBillingFeatureKeys,
   CashManagementProductKey,
-  type CashAssistantWorkspace,
   type CashRegister,
-  type CashReportPreviewDto,
-  type MonthlyCashReportDto,
 } from "@corely/contracts";
 import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assistant-suggestions";
-import { CashReportPreview } from "../../cash-management/components/cash-report-preview";
-import { MonthlyCashReportPreview } from "../../cash-management/components/monthly-cash-report-preview";
-import { CashClarificationRenderer } from "../components/CashClarificationRenderer";
-import { CashDayConfirmationRenderer } from "../components/CashDayConfirmationRenderer";
-import { CashDayConfirmationResultRenderer } from "../components/CashDayConfirmationResultRenderer";
-import { CashEntryConfirmationRenderer } from "../components/CashEntryConfirmationRenderer";
-import { CashEntryConfirmationResultRenderer } from "../components/CashEntryConfirmationResultRenderer";
-import { OpenCashDayWorkspaceRenderer } from "../components/OpenCashDayWorkspaceRenderer";
 import { CashHandoffConfirmationCard } from "../components/CashHandoffConfirmationCard";
-import {
-  type ThreadGroupKey,
-  type ThreadGroup,
-  THREAD_LIST_QUERY_KEY,
-  getThreadGroupLabels,
-  getChronologicalGroupKey,
-} from "./assistant-utils";
+import { type ThreadGroupKey, THREAD_LIST_QUERY_KEY } from "./assistant-utils";
 import { CashAssistantEmptyState } from "../../cash-management/components/cash-assistant-empty-state";
 import { CashConversationContextHeader } from "../../cash-management/components/cash-conversation-context-header";
 import { CashAssistantRegisterSelector } from "../../cash-management/components/cash-assistant-register-selector";
 import { AssistantSearchDialog } from "../components/AssistantSearchDialog";
+import { useAssistantRegisterBinding } from "./use-assistant-register-binding";
+import { useAssistantHandoffs } from "./use-assistant-handoffs";
+import { useAssistantToolRenderers } from "./use-assistant-tool-renderers";
+import { useGroupedThreads } from "./use-grouped-threads";
+import { AssistantSidebar } from "./AssistantSidebar";
 
 interface AssistantPageProps {
   activeModule?: string;
 }
 
-type RegisterBindingRequest = {
-  registerId: string;
-  conversationId?: string;
+const getErrorMessage = (e: unknown): string | undefined => {
+  if (e instanceof Error) return e.message;
+  if (typeof e === "string") return e;
+  return undefined;
 };
 
-const getErrorMessage = (error: unknown): string | undefined =>
-  error instanceof Error ? error.message : undefined;
-
 export default function AssistantPage({ activeModule = "assistant" }: AssistantPageProps) {
+  const toolRenderers = useAssistantToolRenderers();
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -76,16 +52,29 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const focusedMessageId = searchParams.get("m");
   const handoffId = searchParams.get("handoffId");
   const queryClient = useQueryClient();
+  const { handoffQuery, confirmHandoffMutation, cancelHandoffMutation } = useAssistantHandoffs(
+    threadId,
+    handoffId,
+    searchParams,
+    setSearchParams
+  );
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [hasUserMessages, setHasUserMessages] = useState(false);
-  const [registerBindingError, setRegisterBindingError] = useState<string | null>(null);
-  const [lastBindingRequest, setLastBindingRequest] = useState<RegisterBindingRequest | null>(null);
-  const lastAutoBindingKeyRef = useRef<string | null>(null);
+
   const previousThreadIdRef = useRef<string | undefined>(threadId);
+  const {
+    registerBindingError,
+    setRegisterBindingError,
+    lastBindingRequest,
+    setLastBindingRequest,
+    lastAutoBindingKeyRef,
+    resolveWorkspaceMutation,
+    bindRegister,
+  } = useAssistantRegisterBinding(activeModule, threadId, t, toast, getErrorMessage);
   const [openGroups, setOpenGroups] = useState<Record<ThreadGroupKey, boolean>>({
     today: true,
     needsAttention: true,
@@ -138,119 +127,11 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     enabled: activeModule === "cash-management",
   });
 
-  const resolveWorkspaceMutation = useMutation({
-    mutationFn: (params: RegisterBindingRequest) =>
-      cashManagementApi.resolveWorkspace({
-        type: "GENERAL_HELP",
-        registerId: params.registerId,
-        conversationId: params.conversationId,
-      }),
-    onMutate: () => {
-      setRegisterBindingError(null);
-    },
-    onSuccess: (ws) => {
-      setRegisterBindingError(null);
-      queryClient.setQueryData<{ items: CashAssistantWorkspace[] }>(
-        ["cash-workspaces"],
-        (current) => ({
-          items: [
-            ...(current?.items ?? []).filter(
-              (workspace) => workspace.conversationId !== ws.conversationId
-            ),
-            ws,
-          ],
-        })
-      );
-      void queryClient.invalidateQueries({ queryKey: THREAD_LIST_QUERY_KEY });
-      if (ws.conversationId && ws.conversationId !== threadId) {
-        navigate(`/assistant/t/${ws.conversationId}`);
-      }
-    },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      setRegisterBindingError(message ?? t("cashDashboard.registerSelector.error"));
-      toast({
-        title: t("cashDashboard.registerSelector.error", "Could not set the cash register."),
-        description: message,
-        variant: "destructive",
-      });
-    },
-  });
-
   const threadQuery = useQuery({
     queryKey: ["assistant", "thread", threadId],
     queryFn: async () => getCopilotThread(threadId || ""),
     enabled: Boolean(threadId),
   });
-
-  const handoffQuery = useQuery({
-    queryKey: ["cash-management", "handoff", handoffId],
-    queryFn: () => cashManagementApi.getHandoff(handoffId!),
-    enabled: Boolean(handoffId),
-  });
-
-  const idempotencyKeyRef = useRef<string | null>(null);
-
-  const confirmHandoffMutation = useMutation({
-    mutationFn: async () => {
-      if (!handoffQuery.data || !threadId) {
-        return;
-      }
-      if (!idempotencyKeyRef.current) {
-        idempotencyKeyRef.current = crypto.randomUUID();
-      }
-      return cashManagementApi.confirmHandoff(
-        threadId,
-        handoffQuery.data.id,
-        idempotencyKeyRef.current
-      );
-    },
-    onSuccess: () => {
-      // Clear the handoffId from the URL and update data
-      idempotencyKeyRef.current = null; // Clear on success
-      const nextParams = new URLSearchParams(searchParams);
-      nextParams.delete("handoffId");
-      setSearchParams(nextParams, { replace: true });
-      void handoffQuery.refetch();
-    },
-    onError: (error) => {
-      // Do not clear idempotency key on failure so it can be retried safely
-      console.error("Failed to confirm handoff", error);
-    },
-  });
-
-  const cancelHandoffMutation = useMutation({
-    mutationFn: async () => {
-      if (!handoffQuery.data || !threadId) {
-        return;
-      }
-      return cashManagementApi.cancelHandoff(threadId, handoffQuery.data.id);
-    },
-    onSuccess: () => {
-      const nextParams = new URLSearchParams(searchParams);
-      nextParams.delete("handoffId");
-      setSearchParams(nextParams, { replace: true });
-      void handoffQuery.refetch();
-    },
-  });
-
-  const markedViewedRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    const handoff = handoffQuery.data;
-    if (
-      handoff &&
-      threadId &&
-      handoff.status === "PENDING" &&
-      !handoff.viewedAt &&
-      markedViewedRef.current !== handoff.id
-    ) {
-      markedViewedRef.current = handoff.id;
-      void cashManagementApi.markHandoffViewed(threadId, handoff.id).catch(() => {
-        markedViewedRef.current = null;
-      });
-    }
-  }, [handoffQuery.data, threadId]);
 
   const billingProductKey =
     activeModule === "cash-management" ? CashManagementProductKey : undefined;
@@ -300,15 +181,6 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const autoBindingKey = soleRegister ? `${threadId ?? "new"}:${soleRegister.id}` : null;
   const shouldAutoBind = Boolean(needsRegisterBinding && soleRegister && autoBindingKey);
 
-  const bindRegister = useCallback(
-    (request: RegisterBindingRequest) => {
-      setLastBindingRequest(request);
-      setRegisterBindingError(null);
-      resolveWorkspaceMutation.mutate(request);
-    },
-    [resolveWorkspaceMutation.mutate]
-  );
-
   useEffect(() => {
     if (previousThreadIdRef.current !== threadId) {
       previousThreadIdRef.current = threadId;
@@ -340,78 +212,6 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     soleRegister,
     threadId,
   ]);
-
-  const groupedThreads = useMemo<ThreadGroup[]>(() => {
-    const groups: Record<ThreadGroupKey, ThreadGroup["items"]> = {
-      today: [],
-      needsAttention: [],
-      previousDays: [],
-      monthlyReviews: [],
-      generalQuestions: [],
-      yesterday: [],
-      week: [],
-      older: [],
-    };
-
-    const isCashModule = activeModule === "cash-management";
-    const workspaces = workspacesQuery.data?.items ?? [];
-    const workspaceMap = new Map(
-      workspaces.map((workspace) => [workspace.conversationId, workspace])
-    );
-
-    for (const item of threadsQuery.data?.items ?? []) {
-      if (
-        typeof item.id !== "string" ||
-        typeof item.title !== "string" ||
-        typeof item.lastMessageAt !== "string"
-      ) {
-        continue;
-      }
-
-      let key: ThreadGroupKey = getChronologicalGroupKey(item.lastMessageAt);
-
-      if (isCashModule) {
-        const workspace = workspaceMap.get(item.id);
-        if (workspace) {
-          if (workspace.type === "DAILY_CASH_DAY") {
-            if (new Date(workspace.businessDate).toDateString() === new Date().toDateString()) {
-              key = "today";
-            } else {
-              key = "previousDays";
-            }
-          } else if (workspace.type === "MONTHLY_REVIEW") {
-            key = "monthlyReviews";
-          } else if (workspace.type === "GENERAL_HELP") {
-            key = "generalQuestions";
-          }
-        }
-      }
-
-      groups[key].push({
-        id: item.id,
-        title: item.title,
-        lastMessageAt: item.lastMessageAt,
-      });
-    }
-
-    if (isCashModule && groups.generalQuestions.length > 5) {
-      groups.generalQuestions = groups.generalQuestions.slice(0, 5);
-    }
-
-    const order: ThreadGroupKey[] = isCashModule
-      ? ["today", "needsAttention", "previousDays", "monthlyReviews", "generalQuestions"]
-      : ["today", "yesterday", "week", "older"];
-
-    const groupLabels = getThreadGroupLabels(t);
-
-    return order
-      .map((key) => ({
-        key,
-        label: groupLabels[key],
-        items: groups[key],
-      }))
-      .filter((group) => group.items.length > 0);
-  }, [threadsQuery.data?.items, activeModule, workspacesQuery.data?.items, t]);
 
   const activeThreadTitle = threadQuery.data?.thread.title ?? t("assistant.title");
 
@@ -511,98 +311,25 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     lastAutoBindingKeyRef.current = null;
   };
 
+  const groupedThreads = useGroupedThreads(
+    threadsQuery.data?.threads ?? [],
+    workspacesQuery.data?.items ?? [],
+    isCashModule,
+    t
+  );
+
   const sidebarContent = (
-    <>
-      <div className="border-b border-border px-6 py-4 lg:px-8">
-        <div className="text-sm font-semibold text-foreground">
-          {t("assistant.recentChats", "Recent chats")}
-        </div>
-        <div className="mt-1 text-xs text-muted-foreground">
-          {t(
-            "assistant.recentChatsDescription",
-            "Browse previous conversations or start a new one."
-          )}
-        </div>
-      </div>
-
-      <div className="border-b border-border px-6 py-4 lg:px-8">
-        <Button
-          className="w-full"
-          onClick={handleNewChat}
-          disabled={
-            (isCashModule ? resolveWorkspaceMutation.isPending : createThreadMutation.isPending) ||
-            !hasUserMessages
-          }
-        >
-          {createThreadMutation.isPending || resolveWorkspaceMutation.isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="mr-2 h-4 w-4" />
-          )}
-          {t("assistant.newChat", "New chat")}
-        </Button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-6 py-4 lg:px-8">
-        {threadsQuery.isLoading ? (
-          <div className="py-2 text-sm text-muted-foreground">
-            {t("assistant.loadingChats", "Loading chats...")}
-          </div>
-        ) : null}
-
-        {!threadsQuery.isLoading && groupedThreads.length === 0 ? (
-          <div className="space-y-1 py-2">
-            <div className="text-sm font-medium text-foreground">
-              {t("assistant.noChats", "No chats yet")}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {t("assistant.noChatsDescription", "Start a conversation and it will appear here.")}
-            </div>
-          </div>
-        ) : null}
-
-        {groupedThreads.map((group) => (
-          <Collapsible
-            key={group.key}
-            open={openGroups[group.key]}
-            onOpenChange={(open) => {
-              setOpenGroups((current) => ({
-                ...current,
-                [group.key]: open,
-              }));
-            }}
-          >
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg py-2 text-left text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground hover:text-foreground">
-              {group.label}
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform",
-                  openGroups[group.key] ? "" : "-rotate-90"
-                )}
-              />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-1 pb-2">
-              {group.items.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => openThread(item.id)}
-                  className={cn(
-                    "flex w-full flex-col rounded-lg px-3 py-2 text-left transition-colors",
-                    threadId === item.id ? "bg-accent/10" : "hover:bg-muted/60"
-                  )}
-                >
-                  <span className="truncate text-sm font-medium text-foreground">{item.title}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(item.lastMessageAt), "p")}
-                  </span>
-                </button>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-        ))}
-      </div>
-    </>
+    <AssistantSidebar
+      threadsQuery={threadsQuery}
+      groupedThreads={groupedThreads}
+      openGroups={openGroups}
+      setOpenGroups={setOpenGroups}
+      handleNewChat={handleNewChat}
+      isCreating={createThreadMutation.isPending}
+      hasUserMessages={hasUserMessages}
+      threadId={threadId}
+      openThread={openThread}
+    />
   );
 
   return (
@@ -758,56 +485,7 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
                           )
                         : undefined
                     }
-                    toolRenderers={{
-                      get_cash_report_preview: (props) => {
-                        if (
-                          !props.output ||
-                          typeof props.output !== "object" ||
-                          !("business" in props.output)
-                        ) {
-                          return (
-                            <div className="p-4 border rounded bg-muted/30">
-                              {t("assistant.loadingPreview", "Loading preview...")}
-                            </div>
-                          );
-                        }
-                        return <CashReportPreview report={props.output as CashReportPreviewDto} />;
-                      },
-                      get_monthly_cash_report: (props) => {
-                        if (
-                          !props.output ||
-                          typeof props.output !== "object" ||
-                          !("totals" in props.output)
-                        ) {
-                          return (
-                            <div className="p-4 border rounded bg-muted/30">
-                              {t("assistant.loadingMonthlyReport", "Loading monthly report...")}
-                            </div>
-                          );
-                        }
-                        return (
-                          <MonthlyCashReportPreview report={props.output as MonthlyCashReportDto} />
-                        );
-                      },
-                      request_cash_clarification: (props) => (
-                        <CashClarificationRenderer {...props} />
-                      ),
-                      prepare_cash_day_confirmation: (props) => (
-                        <CashDayConfirmationRenderer {...props} />
-                      ),
-                      confirm_cash_day_draft: (props) => (
-                        <CashDayConfirmationResultRenderer {...props} />
-                      ),
-                      prepare_cash_entry_confirmation: (props) => (
-                        <CashEntryConfirmationRenderer {...props} />
-                      ),
-                      confirm_cash_entry: (props) => (
-                        <CashEntryConfirmationResultRenderer {...props} />
-                      ),
-                      open_cash_day_workspace: (props) => (
-                        <OpenCashDayWorkspaceRenderer {...props} />
-                      ),
-                    }}
+                    toolRenderers={toolRenderers}
                   />
                 </div>
               )}

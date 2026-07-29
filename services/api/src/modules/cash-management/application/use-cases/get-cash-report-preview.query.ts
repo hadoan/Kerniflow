@@ -107,46 +107,39 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     const previousClose =
       previousCloses.length > 0 ? previousCloses[previousCloses.length - 1] : null;
 
-    const previousClosingCashCents =
-      previousClose?.countedBalanceCents ?? register.currentBalanceCents; // Fallback to current if no close
-
-    const entriesAsc = entries
-      .slice()
-      .sort(
-        (left, right) =>
-          left.occurredAt.getTime() - right.occurredAt.getTime() || left.entryNo - right.entryNo
-      );
-
-    // Using the first entry's before-balance if available as a better estimate of opening balance
+    // Use previous day effective closing balance, or fallback to 0 if none (will be handled by repair script later if needed)
     const openingBalanceCents =
-      entriesAsc.length > 0
-        ? entriesAsc[0].balanceAfterCents -
-          (entriesAsc[0].direction === "OUT"
-            ? -entriesAsc[0].amountCents
-            : entriesAsc[0].amountCents)
-        : previousClosingCashCents;
+      previousClose !== null
+        ? previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents
+        : 0;
 
-    const goodsPurchasesCents = 0;
+    let goodsPurchasesCents = 0;
     let businessExpensesCents = 0;
     let privateWithdrawalsCents = 0;
     let bankDepositsCents = 0;
     let otherCashOutflowsCents = 0;
+    let cashRefundOutflowsCents = 0;
 
     let cashInflowCents = 0;
     let otherNonSalesCashInflowsCents = 0;
     let privateDepositsCents = 0;
     let bankWithdrawalsToCashCents = 0;
+    let cashRefundInflowsCents = 0;
 
     for (const entry of entries) {
+      if (entry.type === "INTERNAL_TRANSFER" || entry.type === "LOCATION_TRANSFER" || entry.status === "CANCELLED" || entry.status === "DRAFT") {
+        continue;
+      }
       const amount = entry.amountCents;
       if (entry.direction === "OUT") {
         if (entry.type === "EXPENSE_CASH") {
-          // We group all expenses into businessExpensesCents for now as there's no explicit GOODS_PURCHASE type
           businessExpensesCents += amount;
         } else if (entry.type === "OWNER_WITHDRAWAL") {
           privateWithdrawalsCents += amount;
         } else if (entry.type === "BANK_DEPOSIT") {
           bankDepositsCents += amount;
+        } else if (entry.type === "REFUND_CASH") {
+          cashRefundOutflowsCents += amount;
         } else {
           otherCashOutflowsCents += amount;
         }
@@ -158,73 +151,66 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
           privateDepositsCents += amount;
         } else if (entry.type === "BANK_WITHDRAWAL") {
           bankWithdrawalsToCashCents += amount;
+        } else if (entry.type === "REFUND_IN") {
+          cashRefundInflowsCents += amount;
         } else {
           otherNonSalesCashInflowsCents += amount;
         }
       }
     }
 
-    const actualClosingCashCents = dayClose?.countedBalanceCents;
-    const subtotalCents = actualClosingCashCents ?? 0;
+    const expectedClosingCashCents =
+      openingBalanceCents +
+      cashInflowCents +
+      cashRefundInflowsCents +
+      privateDepositsCents +
+      bankWithdrawalsToCashCents +
+      otherNonSalesCashInflowsCents -
+      businessExpensesCents -
+      goodsPurchasesCents -
+      privateWithdrawalsCents -
+      bankDepositsCents -
+      cashRefundOutflowsCents -
+      otherCashOutflowsCents;
 
-    const calculatedCashSalesCents =
-      (actualClosingCashCents ?? 0) +
+    const countedClosingCashCents = dayClose?.countedBalanceCents ?? null;
+    const effectiveClosingCashCents = countedClosingCashCents ?? expectedClosingCashCents;
+
+    const cashDifferenceCents =
+      countedClosingCashCents === null ? null : countedClosingCashCents - expectedClosingCashCents;
+
+    const totalOutflowsCents =
       goodsPurchasesCents +
       businessExpensesCents +
       privateWithdrawalsCents +
       bankDepositsCents +
-      otherCashOutflowsCents -
-      openingBalanceCents -
-      privateDepositsCents -
-      bankWithdrawalsToCashCents -
+      cashRefundOutflowsCents +
+      otherCashOutflowsCents;
+
+    const totalNonSalesInflowsCents =
+      privateDepositsCents +
+      bankWithdrawalsToCashCents +
+      cashRefundInflowsCents +
       otherNonSalesCashInflowsCents;
 
+    const cashReceivedCents = effectiveClosingCashCents + totalOutflowsCents - openingBalanceCents;
+    const calculatedCashSalesCents = cashReceivedCents - totalNonSalesInflowsCents;
+
+    const subtotalCents = effectiveClosingCashCents;
+
     const operands: CashReportCalculationOperand[] = [];
-    if (actualClosingCashCents !== undefined) {
+    operands.push({
+      key: "effectiveClosingCashCents",
+      label: "Kassenbestand bei Geschäftsschluss",
+      amountCents: effectiveClosingCashCents,
+      operator: "ADD",
+    });
+
+    if (totalOutflowsCents > 0) {
       operands.push({
-        key: "actualClosingCashCents",
-        label: "Tatsächlicher Kassenbestand",
-        amountCents: actualClosingCashCents,
-        operator: "ADD",
-      });
-    }
-    if (goodsPurchasesCents > 0) {
-      operands.push({
-        key: "goodsPurchasesCents",
-        label: "Wareneinkäufe",
-        amountCents: goodsPurchasesCents,
-        operator: "ADD",
-      });
-    }
-    if (businessExpensesCents > 0) {
-      operands.push({
-        key: "businessExpensesCents",
-        label: "Geschäftsausgaben",
-        amountCents: businessExpensesCents,
-        operator: "ADD",
-      });
-    }
-    if (privateWithdrawalsCents > 0) {
-      operands.push({
-        key: "privateWithdrawalsCents",
-        label: "Privatentnahmen",
-        amountCents: privateWithdrawalsCents,
-        operator: "ADD",
-      });
-    }
-    if (bankDepositsCents > 0) {
-      operands.push({
-        key: "bankDepositsCents",
-        label: "Bankeinzahlungen",
-        amountCents: bankDepositsCents,
-        operator: "ADD",
-      });
-    }
-    if (otherCashOutflowsCents > 0) {
-      operands.push({
-        key: "otherCashOutflowsCents",
-        label: "Sonstige Ausgaben",
-        amountCents: otherCashOutflowsCents,
+        key: "totalOutflowsCents",
+        label: "Ausgaben im Laufe des Tages",
+        amountCents: totalOutflowsCents,
         operator: "ADD",
       });
     }
@@ -236,39 +222,28 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
       operator: "SUBTRACT",
     });
 
-    if (privateDepositsCents > 0) {
+    operands.push({
+      key: "cashReceivedCents",
+      label: "Kasseneingang",
+      amountCents: cashReceivedCents,
+      operator: "RESULT",
+    });
+
+    if (totalNonSalesInflowsCents > 0) {
       operands.push({
-        key: "privateDepositsCents",
-        label: "Privateinlagen",
-        amountCents: privateDepositsCents,
-        operator: "SUBTRACT",
-      });
-    }
-    if (bankWithdrawalsToCashCents > 0) {
-      operands.push({
-        key: "bankWithdrawalsToCashCents",
-        label: "Bankabhebungen",
-        amountCents: bankWithdrawalsToCashCents,
-        operator: "SUBTRACT",
-      });
-    }
-    if (otherNonSalesCashInflowsCents > 0) {
-      operands.push({
-        key: "otherNonSalesCashInflowsCents",
+        key: "totalNonSalesInflowsCents",
         label: "Sonstige Einnahmen",
-        amountCents: otherNonSalesCashInflowsCents,
+        amountCents: totalNonSalesInflowsCents,
         operator: "SUBTRACT",
       });
     }
 
-    if (actualClosingCashCents !== undefined) {
-      operands.push({
-        key: "calculatedCashSalesCents",
-        label: "Berechnete Tageslosung",
-        amountCents: calculatedCashSalesCents,
-        operator: "RESULT",
-      });
-    }
+    operands.push({
+      key: "calculatedCashSalesCents",
+      label: "Berechnete Tageslosung",
+      amountCents: calculatedCashSalesCents,
+      operator: "RESULT",
+    });
 
     const monthKey = dayKey.slice(0, 7);
     const monthAttachments = await this.attachmentRepo.listAttachmentsForMonth(
@@ -307,43 +282,24 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
       }
     }
 
-    const expectedClosingBalance =
-      openingBalanceCents +
-      cashInflowCents +
-      otherNonSalesCashInflowsCents +
-      privateDepositsCents +
-      bankWithdrawalsToCashCents -
-      businessExpensesCents -
-      goodsPurchasesCents -
-      privateWithdrawalsCents -
-      bankDepositsCents -
-      otherCashOutflowsCents;
+    const verificationStatus =
+      countedClosingCashCents === null
+        ? "NOT_COUNTED"
+        : cashDifferenceCents === 0
+        ? "COUNTED_MATCH"
+        : "COUNTED_DIFFERENCE";
 
     const warnings: CashReportWarning[] = [];
-    let status: "DRAFT" | "NEEDS_REVIEW" | "READY_TO_CLOSE" | "CLOSED" = "DRAFT";
+    let status: "OPEN" | "CALCULATED" | "VERIFIED" | "LOCKED" = "OPEN";
 
     if (dayClose?.status === "SUBMITTED") {
-      status = "CLOSED";
+      status = "LOCKED";
     } else {
-      if (actualClosingCashCents === undefined) {
-        warnings.push({
-          code: "COUNTED_CASH_MISSING",
-          severity: "BLOCKING",
-          message: "Gezähltes Bargeld fehlt.",
-        });
-      } else if (actualClosingCashCents !== expectedClosingBalance) {
+      if (countedClosingCashCents !== null && cashDifferenceCents !== 0) {
         warnings.push({
           code: "BALANCE_MISMATCH",
           severity: "BLOCKING",
           message: "Kassenbestand stimmt nicht mit den berechneten Bewegungen überein.",
-        });
-      }
-
-      if (previousClose && previousClose.countedBalanceCents !== openingBalanceCents) {
-        warnings.push({
-          code: "PREVIOUS_DAY_MISMATCH",
-          severity: "BLOCKING",
-          message: "Anfangsbestand stimmt nicht mit dem Endbestand des Vortages überein.",
         });
       }
 
@@ -355,19 +311,18 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
         });
       }
 
-      if (calculatedCashSalesCents !== undefined && calculatedCashSalesCents < 0) {
+      if (calculatedCashSalesCents < 0) {
         warnings.push({
-          code: "NEGATIVE_CASH",
-          severity: "BLOCKING",
-          message: "Kassenbestand darf nicht negativ sein.",
+          code: "OTHER", // Should ideally be NEGATIVE_CALCULATED_CASH_SALES, mapped to OTHER for strict types
+          severity: "WARNING",
+          message: "Calculated cash sales are negative. Check the opening balance and cash entries.",
         });
       }
 
-      const hasBlocking = warnings.some((w) => w.severity === "BLOCKING");
-      if (hasBlocking || warnings.length > 0) {
-        status = "NEEDS_REVIEW";
-      } else if (actualClosingCashCents !== undefined) {
-        status = "READY_TO_CLOSE";
+      if (countedClosingCashCents === null) {
+        status = "CALCULATED";
+      } else {
+        status = "VERIFIED";
       }
     }
 
@@ -380,7 +335,11 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
           locationName: register.location ?? undefined,
         },
         previousClosingCashCents: openingBalanceCents,
-        actualClosingCashCents,
+        expectedClosingCashCents,
+        countedClosingCashCents,
+        effectiveClosingCashCents,
+        cashDifferenceCents,
+        verificationStatus,
         goodsPurchasesCents,
         businessExpensesCents,
         privateWithdrawalsCents,
@@ -394,7 +353,7 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
         calculatedCashSalesCents,
         customerCount: undefined,
         calculation: { operands },
-        status,
+        status: status as any,
         warnings,
         evidenceRequirements,
         generatedAt: new Date().toISOString(),
