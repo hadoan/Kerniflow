@@ -1,17 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { format } from "date-fns";
-import { ChevronDown, Loader2, Plus, Search, Sparkles, Menu } from "lucide-react";
-import {
-  Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@corely/ui";
+import { Loader2, Plus, Search, Sparkles, Menu } from "lucide-react";
+import { Button, Sheet, SheetContent, SheetTrigger, useToast } from "@corely/ui";
 import {
   listCopilotThreads,
   searchCopilotThreads,
@@ -20,48 +11,33 @@ import {
   type CopilotThreadSearchResult,
 } from "@corely/web-shared/lib/copilot-api";
 import { Chat } from "@corely/web-shared/shared/components/Chat";
-import { cn } from "@corely/web-shared/shared/lib/utils";
 import { useTranslation } from "react-i18next";
-import { useToast } from "@corely/ui";
 import { billingApi } from "@corely/web-shared/lib/billing-api";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
 import {
   CashManagementBillingFeatureKeys,
   CashManagementProductKey,
-  type CashAssistantWorkspace,
   type CashRegister,
-  type CashReportPreviewDto,
-  type MonthlyCashReportDto,
 } from "@corely/contracts";
 import { getAssistantCapabilityGroups, getAssistantSuggestions } from "./assistant-suggestions";
-import { CashReportPreview } from "../../cash-management/components/cash-report-preview";
-import { MonthlyCashReportPreview } from "../../cash-management/components/monthly-cash-report-preview";
-import { CashClarificationRenderer } from "../components/CashClarificationRenderer";
-import { CashDayConfirmationRenderer } from "../components/CashDayConfirmationRenderer";
-import { CashDayConfirmationResultRenderer } from "../components/CashDayConfirmationResultRenderer";
-import { CashEntryConfirmationRenderer } from "../components/CashEntryConfirmationRenderer";
-import { CashEntryConfirmationResultRenderer } from "../components/CashEntryConfirmationResultRenderer";
-import { OpenCashDayWorkspaceRenderer } from "../components/OpenCashDayWorkspaceRenderer";
 import { CashHandoffConfirmationCard } from "../components/CashHandoffConfirmationCard";
-import {
-  type ThreadGroupKey,
-  type ThreadGroup,
-  THREAD_LIST_QUERY_KEY,
-  getThreadGroupLabels,
-  getChronologicalGroupKey,
-} from "./assistant-utils";
+import { type ThreadGroupKey, THREAD_LIST_QUERY_KEY } from "./assistant-utils";
 import { CashAssistantEmptyState } from "../../cash-management/components/cash-assistant-empty-state";
 import { CashConversationContextHeader } from "../../cash-management/components/cash-conversation-context-header";
 import { CashAssistantRegisterSelector } from "../../cash-management/components/cash-assistant-register-selector";
 import { AssistantSearchDialog } from "../components/AssistantSearchDialog";
-
 import { useAssistantRegisterBinding } from "./use-assistant-register-binding";
+import { useAssistantHandoffs } from "./use-assistant-handoffs";
+import { useAssistantToolRenderers } from "./use-assistant-tool-renderers";
+import { useGroupedThreads } from "./use-grouped-threads";
+import { AssistantSidebar } from "./AssistantSidebar";
 import { getErrorMessage } from "@corely/web-shared/shared/lib/utils";
 interface AssistantPageProps {
   activeModule?: string;
 }
 
 export default function AssistantPage({ activeModule = "assistant" }: AssistantPageProps) {
+  const toolRenderers = useAssistantToolRenderers();
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -70,6 +46,12 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
   const focusedMessageId = searchParams.get("m");
   const handoffId = searchParams.get("handoffId");
   const queryClient = useQueryClient();
+  const { handoffQuery, confirmHandoffMutation, cancelHandoffMutation } = useAssistantHandoffs(
+    threadId,
+    handoffId,
+    searchParams,
+    setSearchParams
+  );
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -322,6 +304,27 @@ export default function AssistantPage({ activeModule = "assistant" }: AssistantP
     }
     lastAutoBindingKeyRef.current = null;
   };
+
+  const groupedThreads = useGroupedThreads(
+    threadsQuery.data?.threads ?? [],
+    workspacesQuery.data?.items ?? [],
+    isCashModule,
+    t
+  );
+
+  const sidebarContent = (
+    <AssistantSidebar
+      threadsQuery={threadsQuery}
+      groupedThreads={groupedThreads}
+      openGroups={openGroups}
+      setOpenGroups={setOpenGroups}
+      handleNewChat={handleNewChat}
+      isCreating={createThreadMutation.isPending}
+      hasUserMessages={hasUserMessages}
+      threadId={threadId}
+      openThread={openThread}
+    />
+  );
 
   return (
     <div

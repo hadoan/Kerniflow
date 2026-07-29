@@ -170,6 +170,7 @@ describe("cash-management tools", () => {
 
   describe("view_kassenbericht", () => {
     it("returns explicit day when provided", async () => {
+      getRegisterExecute.mockResolvedValue(ok({ register }));
       const tools = buildCashManagementTools(deps);
       const tool = tools.find((t) => t.name === "view_kassenbericht")!;
       const result = await tool.execute({
@@ -199,6 +200,7 @@ describe("cash-management tools", () => {
     });
 
     it("uses businessDate from DAILY_CASH_DAY workspace if no explicit day provided", async () => {
+      getRegisterExecute.mockResolvedValue(ok({ register }));
       findWorkspaceByConversationId.mockResolvedValue({
         type: "DAILY_CASH_DAY",
         registerId: "reg-1",
