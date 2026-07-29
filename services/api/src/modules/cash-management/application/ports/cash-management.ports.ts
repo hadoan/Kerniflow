@@ -185,6 +185,21 @@ export interface CashEntryRepoPort {
     dayCloseId: string,
     tx?: TransactionContext
   ): Promise<void>;
+  sumCashEntryDelta(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    fromDayKeyExclusive: string | null,
+    toDayKeyExclusive: string,
+    tx?: TransactionContext
+  ): Promise<number>;
+  listUnclosedDayKeysBefore(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string,
+    tx?: TransactionContext
+  ): Promise<string[]>;
 }
 
 export type UpsertDayCloseRecord = {
@@ -231,6 +246,13 @@ export interface CashDayCloseRepoPort {
     registerId: string,
     month: string
   ): Promise<CashDayCloseEntity[]>;
+  getLatestFinalizedCloseBefore(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string,
+    tx?: TransactionContext
+  ): Promise<CashDayCloseEntity | null>;
 }
 
 export interface CashAttachmentRepoPort {

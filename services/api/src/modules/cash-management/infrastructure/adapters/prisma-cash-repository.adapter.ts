@@ -1113,4 +1113,99 @@ export class PrismaCashRepository
       data: { status: "EXPIRED" },
     });
   }
+
+  async getLatestFinalizedCloseBefore(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string,
+    tx?: TransactionContext
+  ): Promise<CashDayCloseEntity | null> {
+    const row = await this.client(tx).cashDayClose.findFirst({
+      where: {
+        tenantId,
+        workspaceId,
+        registerId,
+        dayKey: { lt: dayKey },
+        status: "SUBMITTED",
+      },
+      orderBy: { dayKey: "desc" },
+    });
+    return row ? this.mapDayClose(row) : null;
+  }
+
+  async sumCashEntryDelta(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    fromDayKeyExclusive: string | null,
+    toDayKeyExclusive: string,
+    tx?: TransactionContext
+  ): Promise<number> {
+    const where: any = {
+      tenantId,
+      workspaceId,
+      registerId,
+      dayKey: {
+        lt: toDayKeyExclusive,
+        ...(fromDayKeyExclusive ? { gt: fromDayKeyExclusive } : {}),
+      },
+      entryType: { notIn: ["INTERNAL_TRANSFER", "LOCATION_TRANSFER"] },
+    };
+
+    const entries = await this.client(tx).cashEntry.findMany({
+      where,
+      select: { direction: true, amountCents: true, entryType: true },
+    });
+
+    let total = 0;
+    for (const entry of entries) {
+      if (entry.direction === "IN") {
+        total += entry.amountCents;
+      } else if (entry.direction === "OUT") {
+        total -= entry.amountCents;
+      }
+    }
+
+    return total;
+  }
+
+  async listUnclosedDayKeysBefore(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string,
+    tx?: TransactionContext
+  ): Promise<string[]> {
+    const entryDays = await this.client(tx).cashEntry.findMany({
+      where: {
+        tenantId,
+        workspaceId,
+        registerId,
+        dayKey: { lt: dayKey },
+      },
+      distinct: ["dayKey"],
+      select: { dayKey: true },
+    });
+
+    if (entryDays.length === 0) {
+      return [];
+    }
+
+    const dayKeys = entryDays.map((e) => e.dayKey);
+
+    const closedDays = await this.client(tx).cashDayClose.findMany({
+      where: {
+        tenantId,
+        workspaceId,
+        registerId,
+        dayKey: { in: dayKeys },
+        status: "SUBMITTED",
+      },
+      select: { dayKey: true },
+    });
+
+    const closedSet = new Set(closedDays.map((c) => c.dayKey));
+    return dayKeys.filter((d) => !closedSet.has(d)).sort();
+  }
 }

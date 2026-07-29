@@ -150,6 +150,15 @@ export function DailyCloseScreen() {
         </div>
       )}
 
+      {previewRecord?.openingBalanceResolution?.isProvisional && (
+        <div className="rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-blue-800">
+          {t("cash.ui.dayClose.provisionalWarning", {
+            days: previewRecord.openingBalanceResolution.unclosedPriorDayKeys.join(", "),
+            defaultValue: `The opening balance includes entries from unclosed prior days (${previewRecord.openingBalanceResolution.unclosedPriorDayKeys.join(", ")}). Close prior days before finalizing this day.`,
+          })}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">

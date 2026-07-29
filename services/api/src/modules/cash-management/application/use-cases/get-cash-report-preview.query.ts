@@ -5,6 +5,7 @@ import {
   type CashReportWarning,
   type CashReportEvidenceRequirement,
   type CashReportCalculationOperand,
+  type OpeningBalanceResolution,
 } from "@corely/contracts";
 import {
   BaseUseCase,
@@ -87,31 +88,46 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
 
     const dayKey = toDayKey(input.businessDate);
 
-    const [entries, dayClose, previousDayCloseResult] = await Promise.all([
+    const [entries, dayClose, latestFinalizedClose, unclosedPriorDayKeys] = await Promise.all([
       this.entryRepo.listEntries(tenantId, workspaceId, {
         registerId: register.id,
         dayKeyFrom: dayKey,
         dayKeyTo: dayKey,
       }),
       this.dayCloseRepo.findDayCloseByRegisterAndDay(tenantId, workspaceId, register.id, dayKey),
-      this.dayCloseRepo.listDayCloses(tenantId, workspaceId, { registerId: register.id }),
+      this.dayCloseRepo.getLatestFinalizedCloseBefore(tenantId, workspaceId, register.id, dayKey),
+      this.entryRepo.listUnclosedDayKeysBefore(tenantId, workspaceId, register.id, dayKey),
     ]);
 
-    // Find the previous day close
-    const allClosesAsc = previousDayCloseResult
-      .slice()
-      .sort((a, b) => a.dayKey.localeCompare(b.dayKey));
-    const previousCloses = allClosesAsc.filter(
-      (c) => c.dayKey < dayKey && c.status === "SUBMITTED"
-    );
-    const previousClose =
-      previousCloses.length > 0 ? previousCloses[previousCloses.length - 1] : null;
+    const baselineBalanceCents = latestFinalizedClose
+      ? latestFinalizedClose.countedBalanceCents ?? latestFinalizedClose.expectedBalanceCents
+      : 0;
 
-    // Use previous day effective closing balance, or fallback to 0 if none (will be handled by repair script later if needed)
-    const openingBalanceCents =
-      previousClose !== null
-        ? previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents
-        : 0;
+    const unclosedLedgerDeltaCents = await this.entryRepo.sumCashEntryDelta(
+      tenantId,
+      workspaceId,
+      register.id,
+      latestFinalizedClose ? latestFinalizedClose.dayKey : null,
+      dayKey
+    );
+
+    const openingBalanceCents = baselineBalanceCents + unclosedLedgerDeltaCents;
+
+    const isProvisional = unclosedPriorDayKeys.length > 0;
+    const openingBalanceResolution: OpeningBalanceResolution = {
+      amountCents: openingBalanceCents,
+      source: latestFinalizedClose
+        ? isProvisional
+          ? "PROJECTED_FROM_LEDGER"
+          : "PREVIOUS_FINALIZED_CLOSE"
+        : isProvisional
+        ? "PROJECTED_FROM_LEDGER"
+        : "REGISTER_INITIAL_BALANCE",
+      baselineDayKey: latestFinalizedClose?.dayKey ?? null,
+      projectedThroughDayKey: isProvisional ? dayKey : null,
+      isProvisional,
+      unclosedPriorDayKeys,
+    };
 
     let goodsPurchasesCents = 0;
     let businessExpensesCents = 0;
@@ -319,6 +335,14 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
         });
       }
 
+      if (isProvisional) {
+        warnings.push({
+          code: "PREVIOUS_DAY_MISMATCH",
+          severity: "INFO",
+          message: `The opening balance includes entries from unclosed prior days. Close ${unclosedPriorDayKeys.join(", ")} before finalizing this day.`,
+        });
+      }
+
       if (countedClosingCashCents === null) {
         status = "CALCULATED";
       } else {
@@ -335,6 +359,7 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
           locationName: register.location ?? undefined,
         },
         previousClosingCashCents: openingBalanceCents,
+        openingBalanceResolution,
         expectedClosingCashCents,
         countedClosingCashCents,
         effectiveClosingCashCents,

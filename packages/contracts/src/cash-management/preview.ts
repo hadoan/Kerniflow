@@ -33,6 +33,18 @@ export type CashReportCalculationOperand = {
   operator: "ADD" | "SUBTRACT" | "RESULT";
 };
 
+export type OpeningBalanceResolution = {
+  amountCents: number;
+  source:
+    | "PREVIOUS_FINALIZED_CLOSE"
+    | "PROJECTED_FROM_LEDGER"
+    | "REGISTER_INITIAL_BALANCE";
+  baselineDayKey: string | null;
+  projectedThroughDayKey: string | null;
+  isProvisional: boolean;
+  unclosedPriorDayKeys: string[];
+};
+
 export type CashReportPreviewDto = {
   businessDate: string;
   reportNumber?: string;
@@ -43,6 +55,7 @@ export type CashReportPreviewDto = {
   };
 
   previousClosingCashCents: number;
+  openingBalanceResolution?: OpeningBalanceResolution;
 
   expectedClosingCashCents: number;
   countedClosingCashCents: number | null;
