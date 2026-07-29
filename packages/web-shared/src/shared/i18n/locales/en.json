@@ -1537,7 +1537,20 @@
         "submitFailed": "Failed to submit day close.",
         "submitAndLock": "Submit and lock day",
         "lockedInfo": "This day is locked. Use correction entries only.",
-        "loadExistingFailed": "Failed to load existing day close."
+        "loadExistingFailed": "Failed to load existing day close.",
+        "expected": "Expected",
+        "counted": "Counted",
+        "confirmClose": "Confirm Close",
+        "countByDenomination": "Count by denomination",
+        "dayCalculatedTitle": "Day calculated",
+        "dayCalculatedDesc": "Physical cash was not counted. The report uses the expected ledger balance.",
+        "expectedClosingCash": "Expected closing cash",
+        "physicalCount": "Physical count",
+        "notPerformed": "Not performed",
+        "notAvailable": "Not available",
+        "tageslosung": "Daily cash revenue (Tageslosung)",
+        "countMatched": "Count Matched",
+        "countDifference": "Count Difference"
       },
       "kassenbericht": {
         "title": "Daily Kassenbericht",

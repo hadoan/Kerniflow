@@ -181,7 +181,7 @@ export function DailyCloseScreen() {
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="p-4 border rounded-lg bg-muted/20">
                   <p className="text-sm text-muted-foreground">
-                    {t("cash.ui.dayClose.expected", "Expected")}
+                    {t("cash.ui.dayClose.expected")}
                   </p>
                   <p className="text-xl font-semibold mt-1">
                     {formatMoney(expectedBalance, undefined, currency)}
@@ -190,7 +190,7 @@ export function DailyCloseScreen() {
 
                 <div className="p-4 border rounded-lg bg-muted/20 space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    {t("cash.ui.dayClose.counted", "Counted")}
+                    {t("cash.ui.dayClose.counted")}
                   </p>
                   <Input
                     id="counted-input"
@@ -214,7 +214,7 @@ export function DailyCloseScreen() {
                       : "bg-amber-50 border-amber-200 text-amber-700"
                   }`}
                 >
-                  <p className="text-sm opacity-80">{t("cash.ui.dayClose.difference", "Difference")}</p>
+                  <p className="text-sm opacity-80">{t("cash.ui.dayClose.difference")}</p>
                   <p className="text-xl font-semibold mt-1">
                     {formatMoney(difference, undefined, currency)}
                   </p>
@@ -242,7 +242,7 @@ export function DailyCloseScreen() {
                   className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
                 >
                   <span>
-                    {t("cash.ui.dayClose.countByDenomination", "Count by denomination")}
+                    {t("cash.ui.dayClose.countByDenomination")}
                     {denominationTotal > 0 && (
                       <span className="ml-2 text-foreground font-semibold">
                         ({formatMoney(denominationTotal, undefined, currency)})
@@ -304,7 +304,7 @@ export function DailyCloseScreen() {
                   onClick={handleConfirm}
                   disabled={submitMutation.isPending || (difference !== 0 && !note.trim())}
                 >
-                  {t("cash.ui.dayClose.confirmClose", "Confirm Close")}
+                  {t("cash.ui.dayClose.confirmClose")}
                 </Button>
               </div>
 
@@ -319,27 +319,27 @@ export function DailyCloseScreen() {
             <div className="space-y-6 mt-6">
               {verificationStatus === "NOT_COUNTED" ? (
                 <div className="p-4 rounded-lg bg-blue-50 text-blue-800 flex flex-col gap-2">
-                  <p className="font-medium text-base">Day calculated</p>
+                  <p className="font-medium text-base">{t("cash.ui.dayClose.dayCalculatedTitle")}</p>
                   <p className="text-sm">
-                    Physical cash was not counted. The report uses the expected ledger balance.
+                    {t("cash.ui.dayClose.dayCalculatedDesc")}
                   </p>
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs opacity-80">Expected closing cash</p>
+                      <p className="text-xs opacity-80">{t("cash.ui.dayClose.expectedClosingCash")}</p>
                       <p className="text-lg font-semibold">
                         {formatMoney(expectedBalance, undefined, currency)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs opacity-80">Physical count</p>
-                      <p className="text-lg font-semibold">Not performed</p>
+                      <p className="text-xs opacity-80">{t("cash.ui.dayClose.physicalCount")}</p>
+                      <p className="text-lg font-semibold">{t("cash.ui.dayClose.notPerformed")}</p>
                     </div>
                     <div>
-                      <p className="text-xs opacity-80">Difference</p>
-                      <p className="text-lg font-semibold">Not available</p>
+                      <p className="text-xs opacity-80">{t("cash.ui.dayClose.difference")}</p>
+                      <p className="text-lg font-semibold">{t("cash.ui.dayClose.notAvailable")}</p>
                     </div>
                     <div>
-                      <p className="text-xs opacity-80">Tageslosung</p>
+                      <p className="text-xs opacity-80">{t("cash.ui.dayClose.tageslosung")}</p>
                       <p className="text-lg font-semibold">
                         {formatMoney(cashSalesCents, undefined, currency)}
                       </p>
@@ -354,23 +354,23 @@ export function DailyCloseScreen() {
                     ) : (
                       <AlertTriangle className="text-amber-600 h-5 w-5" />
                     )}
-                    {cashDifference === 0 ? "Count Matched" : "Count Difference"}
+                    {cashDifference === 0 ? t("cash.ui.dayClose.countMatched") : t("cash.ui.dayClose.countDifference")}
                   </p>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Expected</p>
+                      <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.expected")}</p>
                       <p className="text-lg font-semibold">
                         {formatMoney(expectedBalance, undefined, currency)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Counted</p>
+                      <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.counted")}</p>
                       <p className="text-lg font-semibold">
                         {formatMoney(countedClosingCash!, undefined, currency)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Difference</p>
+                      <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.difference")}</p>
                       <p
                         className={`text-lg font-semibold ${
                           cashDifference === 0 ? "text-green-600" : "text-amber-600"

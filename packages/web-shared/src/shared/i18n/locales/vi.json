@@ -1522,7 +1522,20 @@
         "submitFailed": "Không thể gửi chốt ngày.",
         "submitAndLock": "Gửi và khóa ngày",
         "lockedInfo": "Ngày này đã bị khóa. Chỉ được thêm bút toán điều chỉnh.",
-        "loadExistingFailed": "Không thể tải bản chốt ngày hiện có."
+        "loadExistingFailed": "Không thể tải bản chốt ngày hiện có.",
+        "expected": "Kỳ vọng",
+        "counted": "Đã kiểm đếm",
+        "confirmClose": "Xác nhận chốt ngày",
+        "countByDenomination": "Đếm theo mệnh giá",
+        "dayCalculatedTitle": "Ngày đã tính toán",
+        "dayCalculatedDesc": "Không thực hiện kiểm đếm tiền mặt thực tế. Báo cáo sử dụng số dư kỳ vọng từ sổ cái.",
+        "expectedClosingCash": "Tiền mặt tồn quỹ kỳ vọng",
+        "physicalCount": "Kiểm đếm thực tế",
+        "notPerformed": "Không thực hiện",
+        "notAvailable": "Không có dữ liệu",
+        "tageslosung": "Doanh thu tiền mặt trong ngày (Tageslosung)",
+        "countMatched": "Kiểm đếm khớp",
+        "countDifference": "Có chênh lệch kiểm đếm"
       },
       "kassenbericht": {
         "title": "Kassenbericht hằng ngày",

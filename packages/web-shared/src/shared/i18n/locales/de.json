@@ -1521,7 +1521,20 @@
         "submitFailed": "Tagesabschluss konnte nicht übermittelt werden.",
         "submitAndLock": "Abschließen und Tag sperren",
         "lockedInfo": "Dieser Tag ist gesperrt. Nur Korrekturbuchungen sind erlaubt.",
-        "loadExistingFailed": "Vorhandener Tagesabschluss konnte nicht geladen werden."
+        "loadExistingFailed": "Vorhandener Tagesabschluss konnte nicht geladen werden.",
+        "expected": "Soll",
+        "counted": "Ist",
+        "confirmClose": "Abschluss bestätigen",
+        "countByDenomination": "Nach Stückelung zählen",
+        "dayCalculatedTitle": "Tag berechnet",
+        "dayCalculatedDesc": "Keine körperliche Zählung durchgeführt. Der Bericht verwendet den erwarteten Buchungssaldo.",
+        "expectedClosingCash": "Soll-Kassenbestand",
+        "physicalCount": "Körperliche Zählung",
+        "notPerformed": "Nicht durchgeführt",
+        "notAvailable": "Nicht verfügbar",
+        "tageslosung": "Tageslosung",
+        "countMatched": "Zählung stimmtüberein",
+        "countDifference": "Zähldifferenz"
       },
       "kassenbericht": {
         "title": "Täglicher Kassenbericht",
