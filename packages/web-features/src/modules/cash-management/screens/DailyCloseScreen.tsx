@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams, useParams } from "react-router-dom";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -20,14 +20,6 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const denominations = [50000, 20000, 10000, 5000, 2000, 1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
 
-const getErrorStatus = (error: unknown): number | null => {
-  if (typeof error !== "object" || error === null || !("status" in error)) {
-    return null;
-  }
-  const status = (error as { status?: unknown }).status;
-  return typeof status === "number" ? status : null;
-};
-
 export function DailyCloseScreen() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -37,7 +29,8 @@ export function DailyCloseScreen() {
   const dayKey = searchParams.get("day") ?? new Date().toISOString().slice(0, 10);
   const [note, setNote] = useState("");
   const [counts, setCounts] = useState<Record<number, number>>({});
-  const [isCounting, setIsCounting] = useState(false);
+  const [countedInput, setCountedInput] = useState<string>("");
+  const [showDenominations, setShowDenominations] = useState(false);
 
   const registerQuery = useQuery({
     queryKey: id ? cashKeys.registers.detail(id) : ["cash-registers", "missing-id"],
@@ -60,46 +53,59 @@ export function DailyCloseScreen() {
   const cashDifference = previewRecord?.cashDifferenceCents;
   const verificationStatus = previewRecord?.verificationStatus;
   const cashSalesCents = previewRecord?.calculatedCashSalesCents ?? 0;
+  const currency = registerQuery.data?.register?.currency ?? "EUR";
 
-  const countedFromLines = useMemo(() => {
-    return denominations.reduce(
-      (sum, denomination) => sum + denomination * (counts[denomination] ?? 0),
-      0
-    );
-  }, [counts]);
+  // Pre-fill with expected balance once loaded
+  useEffect(() => {
+    if (previewRecord && countedInput === "") {
+      setCountedInput((expectedBalance / 100).toFixed(2));
+    }
+  }, [previewRecord]);
 
-  const countedBalance = isCounting ? countedFromLines : null;
-  const difference = isCounting ? countedBalance! - expectedBalance : null;
+  // Denomination totals (cents)
+  const denominationTotal = useMemo(
+    () => denominations.reduce((sum, d) => sum + d * (counts[d] ?? 0), 0),
+    [counts]
+  );
+
+  // Sync denomination table → input field
+  const handleDenominationChange = (denomination: number, value: number) => {
+    const next = { ...counts, [denomination]: Math.max(0, value) };
+    setCounts(next);
+    const total = denominations.reduce((sum, d) => sum + d * (next[d] ?? 0), 0);
+    setCountedInput((total / 100).toFixed(2));
+  };
+
+  // Parsed counted balance in cents
+  const countedBalanceCents = useMemo(() => {
+    const parsed = parseFloat(countedInput.replace(",", "."));
+    return isNaN(parsed) ? 0 : Math.round(parsed * 100);
+  }, [countedInput]);
+
+  const difference = countedBalanceCents - expectedBalance;
 
   const submitMutation = useMutation({
-    mutationFn: (mode: "COUNTED" | "SKIPPED") =>
+    mutationFn: () =>
       cashManagementApi.submitDayClose(id as string, dayKey, {
-        mode,
-        countedClosingCashCents: mode === "COUNTED" ? countedBalance! : undefined,
+        mode: "COUNTED",
+        countedClosingCashCents: countedBalanceCents,
         note: note.trim() || undefined,
-        denominationCounts:
-          mode === "COUNTED"
-            ? denominations
-                .map((denomination) => ({
-                  denomination,
-                  count: counts[denomination] ?? 0,
-                  subtotal: denomination * (counts[denomination] ?? 0),
-                }))
-                .filter((line) => line.count > 0)
-            : [],
+        denominationCounts: denominations
+          .map((d) => ({ denomination: d, count: counts[d] ?? 0, subtotal: d * (counts[d] ?? 0) }))
+          .filter((l) => l.count > 0),
       }),
     onSuccess: async () => {
-      if (!id) {
-        return;
-      }
+      if (!id) return;
       await invalidateCashRegisterQueries(queryClient, id);
       await queryClient.invalidateQueries({ queryKey: cashKeys.dayCloses.detail(id, dayKey) });
     },
   });
 
-  if (!id) {
-    return null;
-  }
+  const handleConfirm = () => {
+    submitMutation.mutate();
+  };
+
+  if (!id) return null;
 
   if (registerQuery.isLoading || previewQuery.isLoading) {
     return (
@@ -112,14 +118,6 @@ export function DailyCloseScreen() {
       <div className="p-6 text-sm text-destructive">{t("cash.ui.common.registerNotFound")}</div>
     );
   }
-
-  const handleSkip = () => {
-    submitMutation.mutate("SKIPPED");
-  };
-
-  const handleCount = () => {
-    submitMutation.mutate("COUNTED");
-  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-4 px-4 py-5 sm:px-5 sm:py-6 lg:p-6">
@@ -167,128 +165,156 @@ export function DailyCloseScreen() {
                 type="date"
                 value={dayKey}
                 disabled={isClosed}
-                onChange={(event) => setSearchParams({ day: event.target.value })}
+                onChange={(e) => {
+                  setCountedInput("");
+                  setCounts({});
+                  setSearchParams({ day: e.target.value });
+                }}
               />
             </div>
           </div>
 
-          {status === "OPEN" && !isCounting && (
-            <div className="space-y-4 mt-6">
-              <div className="p-4 border rounded-lg bg-muted/20">
-                <p className="text-sm text-muted-foreground">Expected business cash</p>
-                <p className="text-2xl font-semibold mt-1">
-                  {formatMoney(expectedBalance, undefined, registerQuery.data.register.currency)}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-4 mt-6">
-                <Button onClick={() => setIsCounting(true)}>Count cash</Button>
-                <Button variant="outline" onClick={handleSkip} disabled={submitMutation.isPending}>
-                  Skip physical count
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {status === "OPEN" && isCounting && (
-            <div className="space-y-4 mt-6 animate-in fade-in slide-in-from-bottom-4">
+          {/* ── OPEN: Kassensturz entry form ── */}
+          {status === "OPEN" && (
+            <div className="space-y-5 mt-6 animate-in fade-in slide-in-from-bottom-2">
+              {/* Expected / Counted / Difference summary */}
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="p-4 border rounded-lg bg-muted/20">
-                  <p className="text-sm text-muted-foreground">Expected</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("cash.ui.dayClose.expected", "Expected")}
+                  </p>
                   <p className="text-xl font-semibold mt-1">
-                    {formatMoney(expectedBalance, undefined, registerQuery.data.register.currency)}
+                    {formatMoney(expectedBalance, undefined, currency)}
                   </p>
                 </div>
-                <div className="p-4 border rounded-lg bg-muted/20">
-                  <p className="text-sm text-muted-foreground">Counted</p>
-                  <p className="text-xl font-semibold mt-1">
-                    {formatMoney(countedBalance!, undefined, registerQuery.data.register.currency)}
+
+                <div className="p-4 border rounded-lg bg-muted/20 space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {t("cash.ui.dayClose.counted", "Counted")}
                   </p>
+                  <Input
+                    id="counted-input"
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    value={countedInput}
+                    onChange={(e) => {
+                      setCountedInput(e.target.value);
+                      // Clear denomination counts when user edits directly
+                      setCounts({});
+                    }}
+                    className="text-xl font-semibold h-9"
+                  />
                 </div>
+
                 <div
-                  className={`p-4 border rounded-lg ${difference === 0 ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}
+                  className={`p-4 border rounded-lg transition-colors ${
+                    difference === 0
+                      ? "bg-green-50 border-green-200 text-green-700"
+                      : "bg-amber-50 border-amber-200 text-amber-700"
+                  }`}
                 >
-                  <p className="text-sm opacity-80">Difference</p>
+                  <p className="text-sm opacity-80">{t("cash.ui.dayClose.difference", "Difference")}</p>
                   <p className="text-xl font-semibold mt-1">
-                    {formatMoney(difference!, undefined, registerQuery.data.register.currency)}
+                    {formatMoney(difference, undefined, currency)}
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-md border">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-muted/30 text-left">
-                    <tr>
-                      <th className="px-4 py-2 font-medium">
-                        {t("cash.ui.dayClose.denomination")}
-                      </th>
-                      <th className="px-4 py-2 font-medium">{t("cash.ui.dayClose.count")}</th>
-                      <th className="px-4 py-2 font-medium text-right">
-                        {t("cash.ui.dayClose.subtotal")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {denominations.map((denomination) => {
-                      const count = counts[denomination] ?? 0;
-                      const subtotal = denomination * count;
-                      return (
-                        <tr key={denomination} className="border-t">
-                          <td className="px-4 py-2">
-                            {formatMoney(
-                              denomination,
-                              undefined,
-                              registerQuery.data.register.currency
-                            )}
-                          </td>
-                          <td className="px-4 py-2">
-                            <Input
-                              type="number"
-                              min={0}
-                              value={String(count)}
-                              onChange={(event) =>
-                                setCounts((prev) => ({
-                                  ...prev,
-                                  [denomination]: Math.max(0, Number(event.target.value || 0)),
-                                }))
-                              }
-                            />
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {formatMoney(subtotal, undefined, registerQuery.data.register.currency)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
+              {/* Note — only when there is a difference */}
               {difference !== 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 animate-in fade-in">
                   <Label htmlFor="difference-note">{t("cash.ui.dayClose.note")}</Label>
                   <Textarea
                     id="difference-note"
                     value={note}
-                    onChange={(event) => setNote(event.target.value)}
+                    onChange={(e) => setNote(e.target.value)}
                     placeholder={t("cash.ui.dayClose.notePlaceholder")}
                   />
                 </div>
               )}
 
+              {/* Denomination table (optional) */}
+              <div className="border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowDenominations((v) => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+                >
+                  <span>
+                    {t("cash.ui.dayClose.countByDenomination", "Count by denomination")}
+                    {denominationTotal > 0 && (
+                      <span className="ml-2 text-foreground font-semibold">
+                        ({formatMoney(denominationTotal, undefined, currency)})
+                      </span>
+                    )}
+                  </span>
+                  {showDenominations ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </button>
+
+                {showDenominations && (
+                  <table className="min-w-full text-sm border-t animate-in fade-in slide-in-from-top-2">
+                    <thead className="bg-muted/30 text-left">
+                      <tr>
+                        <th className="px-4 py-2 font-medium">
+                          {t("cash.ui.dayClose.denomination")}
+                        </th>
+                        <th className="px-4 py-2 font-medium">{t("cash.ui.dayClose.count")}</th>
+                        <th className="px-4 py-2 font-medium text-right">
+                          {t("cash.ui.dayClose.subtotal")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {denominations.map((denomination) => {
+                        const count = counts[denomination] ?? 0;
+                        return (
+                          <tr key={denomination} className="border-t">
+                            <td className="px-4 py-2">
+                              {formatMoney(denomination, undefined, currency)}
+                            </td>
+                            <td className="px-4 py-2">
+                              <Input
+                                type="number"
+                                min={0}
+                                value={String(count)}
+                                onChange={(e) =>
+                                  handleDenominationChange(denomination, Number(e.target.value || 0))
+                                }
+                              />
+                            </td>
+                            <td className="px-4 py-2 text-right">
+                              {formatMoney(denomination * count, undefined, currency)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              {/* Actions */}
               <div className="flex gap-4">
                 <Button
-                  onClick={handleCount}
+                  onClick={handleConfirm}
                   disabled={submitMutation.isPending || (difference !== 0 && !note.trim())}
                 >
-                  Confirm Count
-                </Button>
-                <Button variant="ghost" onClick={() => setIsCounting(false)}>
-                  Cancel
+                  {t("cash.ui.dayClose.confirmClose", "Confirm Close")}
                 </Button>
               </div>
+
+              {submitMutation.isError && (
+                <p className="text-sm text-destructive">{t("cash.ui.dayClose.submitFailed")}</p>
+              )}
             </div>
           )}
 
+          {/* ── CLOSED / CALCULATED: summary display ── */}
           {status !== "OPEN" && (
             <div className="space-y-6 mt-6">
               {verificationStatus === "NOT_COUNTED" ? (
@@ -297,16 +323,11 @@ export function DailyCloseScreen() {
                   <p className="text-sm">
                     Physical cash was not counted. The report uses the expected ledger balance.
                   </p>
-
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs opacity-80">Expected closing cash</p>
                       <p className="text-lg font-semibold">
-                        {formatMoney(
-                          expectedBalance,
-                          undefined,
-                          registerQuery.data.register.currency
-                        )}
+                        {formatMoney(expectedBalance, undefined, currency)}
                       </p>
                     </div>
                     <div>
@@ -320,11 +341,7 @@ export function DailyCloseScreen() {
                     <div>
                       <p className="text-xs opacity-80">Tageslosung</p>
                       <p className="text-lg font-semibold">
-                        {formatMoney(
-                          cashSalesCents,
-                          undefined,
-                          registerQuery.data.register.currency
-                        )}
+                        {formatMoney(cashSalesCents, undefined, currency)}
                       </p>
                     </div>
                   </div>
@@ -339,38 +356,27 @@ export function DailyCloseScreen() {
                     )}
                     {cashDifference === 0 ? "Count Matched" : "Count Difference"}
                   </p>
-
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Expected</p>
                       <p className="text-lg font-semibold">
-                        {formatMoney(
-                          expectedBalance,
-                          undefined,
-                          registerQuery.data.register.currency
-                        )}
+                        {formatMoney(expectedBalance, undefined, currency)}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Counted</p>
                       <p className="text-lg font-semibold">
-                        {formatMoney(
-                          countedClosingCash!,
-                          undefined,
-                          registerQuery.data.register.currency
-                        )}
+                        {formatMoney(countedClosingCash!, undefined, currency)}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Difference</p>
                       <p
-                        className={`text-lg font-semibold ${cashDifference === 0 ? "text-green-600" : "text-amber-600"}`}
+                        className={`text-lg font-semibold ${
+                          cashDifference === 0 ? "text-green-600" : "text-amber-600"
+                        }`}
                       >
-                        {formatMoney(
-                          cashDifference!,
-                          undefined,
-                          registerQuery.data.register.currency
-                        )}
+                        {formatMoney(cashDifference!, undefined, currency)}
                       </p>
                     </div>
                   </div>
@@ -378,10 +384,6 @@ export function DailyCloseScreen() {
               )}
             </div>
           )}
-
-          {submitMutation.isError ? (
-            <p className="text-sm text-destructive mt-4">{t("cash.ui.dayClose.submitFailed")}</p>
-          ) : null}
         </CardContent>
       </Card>
     </div>
