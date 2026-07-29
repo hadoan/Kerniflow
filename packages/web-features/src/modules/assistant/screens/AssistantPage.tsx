@@ -31,10 +31,16 @@ import { useAssistantHandoffs } from "./use-assistant-handoffs";
 import { useAssistantToolRenderers } from "./use-assistant-tool-renderers";
 import { useGroupedThreads } from "./use-grouped-threads";
 import { AssistantSidebar } from "./AssistantSidebar";
-import { getErrorMessage } from "@corely/web-shared/shared/lib/utils";
+
 interface AssistantPageProps {
   activeModule?: string;
 }
+
+const getErrorMessage = (e: unknown): string | undefined => {
+  if (e instanceof Error) return e.message;
+  if (typeof e === "string") return e;
+  return undefined;
+};
 
 export default function AssistantPage({ activeModule = "assistant" }: AssistantPageProps) {
   const toolRenderers = useAssistantToolRenderers();
