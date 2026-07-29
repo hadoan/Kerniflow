@@ -120,21 +120,6 @@ export class SubmitCashDayCloseUseCase extends BaseUseCase<
       );
     }
 
-    const unclosedPriorDayKeys = await this.entryRepo.listUnclosedDayKeysBefore(
-      tenantId,
-      workspaceId,
-      register.id,
-      dayKey
-    );
-
-    if (unclosedPriorDayKeys.length > 0) {
-      throw new ValidationError(
-        `Cannot close day ${dayKey} because prior days are not closed: ${unclosedPriorDayKeys.join(", ")}`,
-        { unclosedPriorDayKeys },
-        "CashManagement:PriorDayNotClosed"
-      );
-    }
-
     const expectedBalance = await this.entryRepo.getExpectedBalanceAtDay(
       tenantId,
       workspaceId,
