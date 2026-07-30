@@ -121,7 +121,12 @@ const RegisterScopedSchema = z.object({});
 const CreateCashEntryToolInputSchema = RegisterScopedSchema.extend({
   description: z.string().min(1),
   amountCents: z.number().int().positive(),
-  type: z.nativeEnum(CashEntryType).optional(),
+  type: z
+    .nativeEnum(CashEntryType)
+    .optional()
+    .describe(
+      "The type of cash movement. CRITICAL: Use 'SALE_CASH' for sales. NEVER use 'IN' or 'OUT' as they break reporting."
+    ),
   direction: z.nativeEnum(CashEntryDirection).optional(),
   source: z.string().min(1).optional(),
   paymentMethod: z.string().min(1).optional(),
@@ -139,7 +144,12 @@ const UpdateCashEntryToolInputSchema = z
     reason: z.string().min(1),
     description: z.string().min(1).optional(),
     amountCents: z.number().int().positive().optional(),
-    type: z.nativeEnum(CashEntryType).optional(),
+    type: z
+      .nativeEnum(CashEntryType)
+      .optional()
+      .describe(
+        "The type of cash movement. CRITICAL: Use 'SALE_CASH' for sales. NEVER use 'IN' or 'OUT' as they break reporting."
+      ),
     direction: z.nativeEnum(CashEntryDirection).optional(),
     source: z.string().min(1).optional(),
     paymentMethod: z.string().min(1).optional(),
@@ -171,7 +181,12 @@ const UpdateCashEntryToolInputSchema = z
 const ListCashEntriesToolInputSchema = RegisterScopedSchema.extend({
   dayKeyFrom: localDateSchema.optional(),
   dayKeyTo: localDateSchema.optional(),
-  type: z.nativeEnum(CashEntryType).optional(),
+  type: z
+    .nativeEnum(CashEntryType)
+    .optional()
+    .describe(
+      "The type of cash movement to filter by."
+    ),
   source: z.string().min(1).optional(),
   paymentMethod: z.string().min(1).optional(),
   q: z.string().min(1).optional(),

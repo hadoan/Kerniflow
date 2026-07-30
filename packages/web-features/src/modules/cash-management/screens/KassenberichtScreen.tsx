@@ -7,7 +7,6 @@ import { Card, CardContent, Button, Input } from "@corely/ui";
 import { type CashReportPreviewDto } from "@corely/contracts";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
 
-
 function formatNumber(amountCents: number) {
   if (amountCents === 0) {
     return "0,00";
