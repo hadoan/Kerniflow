@@ -56,22 +56,6 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
     const stream = new ReadableStream({
       async start(controller) {
         const lastMessage = options.prompt?.[options.prompt.length - 1];
-        if (lastMessage && lastMessage.role === "tool") {
-          console.log(`[DeterministicLanguageModelV1] Received tool result loop, returning stop`);
-          await new Promise((r) => setTimeout(r, 500));
-          controller.enqueue({
-            type: "finish",
-            finishReason: "stop",
-            usage: {
-              promptTokens: 10,
-              completionTokens: 10,
-              inputTokens: { total: 10 },
-              outputTokens: { total: 10 },
-            },
-          });
-          controller.close();
-          return;
-        }
 
         console.log(
           `[DeterministicLanguageModelV1] Executing step ${currentStep} of scenario ${scenario?.id}`

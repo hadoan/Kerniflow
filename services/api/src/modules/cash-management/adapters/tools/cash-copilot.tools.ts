@@ -148,6 +148,31 @@ export const request_cash_clarificationTool = (deps: CashToolDeps): DomainToolPo
     inputSchema: RequestCashClarificationInputSchema,
   });
 
+export const analyze_cash_movementTool = (deps: CashToolDeps): DomainToolPort => ({
+    name: "analyze_cash_movement",
+    description: "Analyze a cash movement to determine the next operational action.",
+    descriptions: cashManagementToolDescriptions.analyze_cash_movement,
+    kind: "server",
+    inputSchema: CashMovementExtractionSchema,
+    execute: withWorkspaceContext(
+      deps,
+      ["DAILY_CASH_DAY"],
+      async ({ tenantId, workspaceId, userId, input, toolCallId, runId, workspaceCtx }) => {
+        const parsed = CashMovementExtractionSchema.safeParse(input);
+        if (!parsed.success) {
+          return validationError(parsed.error.flatten());
+        }
+
+        const result = await deps.resolveNextAction.execute(
+          { extraction: parsed.data },
+          getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
+        );
+
+        return unwrapResult(result);
+      }
+    ),
+  });
+
 export const open_cash_day_workspaceTool = (deps: CashToolDeps): DomainToolPort => ({
     name: "open_cash_day_workspace",
     description: "Handoff to the DAILY_CASH_DAY workspace from a general workspace context.",

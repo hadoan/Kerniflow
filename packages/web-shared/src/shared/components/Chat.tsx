@@ -409,7 +409,7 @@ export function Chat({
       }
       setStreamEventStarted(false);
       setToolRequestPending(true);
-      await Promise.resolve(addToolResult(params));
+      await Promise.resolve(addToolResult({ toolCallId: params.toolCallId, result: params.output }));
       onConversationUpdated?.();
     },
     [addToolResult, onConversationUpdated]

@@ -10,6 +10,7 @@ import { CashEntryConfirmationRenderer } from "../components/CashEntryConfirmati
 import { CashEntryConfirmationResultRenderer } from "../components/CashEntryConfirmationResultRenderer";
 import { OpenCashDayWorkspaceRenderer } from "../components/OpenCashDayWorkspaceRenderer";
 import { ViewKassenberichtRenderer } from "../../cash-management/components/assistant/ViewKassenberichtRenderer";
+import { AnalyzeCashMovementRenderer } from "../components/AnalyzeCashMovementRenderer";
 
 export const useAssistantToolRenderers = () => {
   const { t } = useTranslation();
@@ -42,5 +43,6 @@ export const useAssistantToolRenderers = () => {
     prepare_cash_entry_confirmation: (props: any) => <CashEntryConfirmationRenderer {...props} />,
     confirm_cash_entry: (props: any) => <CashEntryConfirmationResultRenderer {...props} />,
     open_cash_day_workspace: (props: any) => <OpenCashDayWorkspaceRenderer {...props} />,
+    analyze_cash_movement: (props: any) => <AnalyzeCashMovementRenderer {...props} />,
   };
 };

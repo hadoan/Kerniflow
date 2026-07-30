@@ -150,8 +150,9 @@ async function run() {
     }
 
     console.log("Running Playwright tests...");
+    const testArgs = process.argv.slice(2).length > 0 ? process.argv.slice(2) : ["tests/cash-management/specs"];
     try {
-      await runCommand("playwright", ["test", "--config", "playwright.cash.config.ts", "tests/cash-management/specs", ...process.argv.slice(2)], {
+      await runCommand("playwright", ["test", "--config", "playwright.cash.config.ts", ...testArgs], {
         CASH_BASE_URL: process.env.E2E_BASE_URL || "http://localhost:3100",
         DATABASE_URL: dbUrl,
         API_URL: process.env.E2E_API_URL || "http://127.0.0.1:3101",

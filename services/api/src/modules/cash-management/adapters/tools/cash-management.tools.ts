@@ -33,6 +33,7 @@ import {
 
 import {
   request_cash_clarificationTool,
+  analyze_cash_movementTool,
   open_cash_day_workspaceTool,
   get_action_requiredTool,
 } from "./cash-copilot.tools";
@@ -58,6 +59,7 @@ export const buildCashManagementTools = (deps: CashToolDeps): DomainToolPort[] =
   get_monthly_cash_reportTool(deps),
   view_kassenberichtTool(deps),
   request_cash_clarificationTool(deps),
+  analyze_cash_movementTool(deps),
   open_cash_day_workspaceTool(deps),
   get_action_requiredTool(deps),
   explain_cashbook_termTool(deps),

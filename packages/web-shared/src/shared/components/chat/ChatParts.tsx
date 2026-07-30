@@ -108,6 +108,7 @@ export const renderPart = (
   }
 
   if (isToolPart(part)) {
+    console.log("ChatParts received tool part:", part);
     const inv = part.toolInvocation;
     const toolName =
       part.toolName ??

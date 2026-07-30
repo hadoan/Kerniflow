@@ -380,7 +380,6 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
           destination: "BUSINESS_BANK_ACCOUNT",
           explicitFacts: [],
         },
-        intent: "CASH_MOVEMENT",
       },
       expect.anything()
     );

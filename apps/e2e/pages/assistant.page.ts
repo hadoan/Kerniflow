@@ -39,7 +39,7 @@ export class CashAssistantPage {
 
   async sendMessage(message: string, waitForDone = true) {
     await this.chatInput.fill(message);
-    await this.chatInput.press("Enter");
+    await this.chatSubmitButton.click();
     if (waitForDone) {
       await this.waitForResponse();
     }

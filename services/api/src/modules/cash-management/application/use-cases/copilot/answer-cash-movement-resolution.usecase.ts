@@ -58,6 +58,25 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
         return err(new UseCaseError("CONFLICT", "Version mismatch", { resolutionId }));
       }
 
+      // 1. Optimistic Concurrency Control: Ensure no other request has processed this resolution
+      const updateResult = await tx.cashMovementResolution.updateMany({
+        where: {
+          id: resolutionId,
+          version: expectedVersion,
+          status: "PENDING",
+        },
+        data: {
+          status: "CONSUMED",
+          consumedAt: new Date(),
+          answerJson: answer,
+          version: { increment: 1 },
+        },
+      });
+
+      if (updateResult.count === 0) {
+        return err(new UseCaseError("CONFLICT", "Resolution was modified concurrently", { resolutionId }));
+      }
+
       // Merge the answer into the original extraction
       const originalExtraction = resolution.extractionJson as any as CashMovementExtraction;
 
@@ -138,16 +157,8 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
           break;
       }
 
-      // Mark the current resolution as CONSUMED
-      await tx.cashMovementResolution.update({
-        where: { id: resolutionId },
-        data: {
-          status: "CONSUMED",
-          consumedAt: new Date(),
-          answerJson: answer,
-          version: { increment: 1 },
-        },
-      });
+      // The resolution is already marked as CONSUMED via updateMany at the beginning of the transaction.
+      // We don't need to update it again here.
 
       return ok({ uiResult });
     });
