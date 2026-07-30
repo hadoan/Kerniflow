@@ -2,6 +2,7 @@ import React from "react";
 import { type ToolRendererProps } from "@corely/web-shared/shared/components/chat/ChatParts";
 import { Button } from "@corely/ui";
 import { useTranslation } from "react-i18next";
+import { CASH_CLARIFICATION_CONTENT } from "@corely/contracts";
 
 export const AnalyzeCashMovementRenderer: React.FC<ToolRendererProps> = ({
   state,
@@ -24,22 +25,33 @@ export const AnalyzeCashMovementRenderer: React.FC<ToolRendererProps> = ({
   }
 
   if (!result || !result.resolution) {
-    return <span className="text-xs text-muted-foreground">Analyzing cash movement...</span>;
+    return <span className="text-xs text-muted-foreground">{t("assistant.analyzingCashMovement", "Analyzing cash movement...")}</span>;
   }
 
   if (result.resolution.kind === "REQUEST_CLARIFICATION") {
     const isSubmitting = toolCallId ? submittingToolIds?.has(toolCallId) : false;
-    const choices = result.resolution.choices || [];
+    const clarificationType = result.resolution.clarificationType;
+    
+    let choices = result.resolution.choices || [];
+    if (choices.length === 0 && clarificationType) {
+      const content = CASH_CLARIFICATION_CONTENT[clarificationType as keyof typeof CASH_CLARIFICATION_CONTENT];
+      if (content) {
+        choices = content.choices;
+      }
+    }
     
     // We get the current locale from i18n
     const locale = i18n.language || "en";
     
+    const contentInfo = clarificationType ? CASH_CLARIFICATION_CONTENT[clarificationType as keyof typeof CASH_CLARIFICATION_CONTENT] : null;
+    const questionText = contentInfo?.question[locale as "en" | "de" | "vi"] 
+      || contentInfo?.question.en 
+      || t("assistant.clarificationNeeded", "Please clarify");
+    
     return (
       <div className="flex flex-col gap-2 pt-1">
         <p className="text-sm font-medium text-foreground">
-          {result.resolution.clarificationType === "MONEY_SOURCE" 
-             ? t("assistant.moneySourceClarification", "Where did the money come from?")
-             : t("assistant.clarificationNeeded", "Please clarify")}
+          {questionText}
         </p>
         <div className="flex flex-col gap-2 mt-2">
           {choices.map((choice: any) => (

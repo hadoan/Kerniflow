@@ -7,6 +7,7 @@ import {
 } from "@corely/contracts";
 import { Button, Card, CardContent } from "@corely/ui";
 import { type ToolRendererProps } from "@corely/web-shared/shared/components/chat/ChatParts";
+import { useTranslation } from "react-i18next";
 
 export const CashClarificationRenderer: React.FC<ToolRendererProps> = ({
   state,
@@ -17,6 +18,7 @@ export const CashClarificationRenderer: React.FC<ToolRendererProps> = ({
   submittingToolIds,
   markSubmitting,
 }) => {
+  const { t } = useTranslation();
   const reqOutput = output as RequestCashClarificationOutput | undefined;
 
   if (state === "output-available" || reqOutput?.choiceId) {
@@ -29,7 +31,7 @@ export const CashClarificationRenderer: React.FC<ToolRendererProps> = ({
 
   const reqInput = input as RequestCashClarificationInput | undefined;
   if (!reqInput?.clarificationType) {
-    return <span className="text-xs text-muted-foreground">Loading clarification...</span>;
+    return <span className="text-xs text-muted-foreground">{t("assistant.loadingClarification", "Loading clarification...")}</span>;
   }
 
   const content = CASH_CLARIFICATION_CONTENT[reqInput.clarificationType];
