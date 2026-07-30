@@ -54,44 +54,13 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
         resolution: {
           kind: "REQUEST_CLARIFICATION",
           clarificationType: "MONEY_SOURCE",
-          choices: [
-            {
-              id: "STILL_IN_CURRENT_FUND",
-              label: {
-                en: "Still belongs to current register balance",
-                de: "Gehört noch zum aktuellen Kassenbestand",
-                vi: "Vẫn thuộc số dư quỹ hiện tại",
-              },
-            },
-            {
-              id: "ALREADY_RECORDED_OUT",
-              label: {
-                en: "Already recorded as taken out",
-                de: "Wurde bereits als Entnahme gebucht",
-                vi: "Đã ghi lấy ra khỏi Kasse",
-              },
-            },
-            {
-              id: "OTHER_REGISTER",
-              label: {
-                en: "Belongs to another register/safe",
-                de: "Gehört zu einer anderen Kasse/Tresor",
-                vi: "Thuộc một Kasse hoặc két tiền khác",
-              },
-            },
-            {
-              id: "PRIVATE_FUNDS",
-              label: { en: "Private money", de: "Privates Geld", vi: "Tiền cá nhân" },
-            },
-            {
-              id: "OTHER_BANK_ACCOUNT",
-              label: {
-                en: "Transfer from another bank account",
-                de: "Überweisung von einem anderen Bankkonto",
-                vi: "Chuyển từ một tài khoản ngân hàng khác",
-              },
-            },
-            { id: "NOT_SURE", label: { en: "Not sure", de: "Nicht sicher", vi: "Không chắc" } },
+          allowedChoiceValues: [
+            "STILL_IN_CURRENT_FUND",
+            "ALREADY_RECORDED_OUT",
+            "OTHER_REGISTER",
+            "PRIVATE_FUNDS",
+            "OTHER_BANK_ACCOUNT",
+            "NOT_SURE"
           ],
         },
       });
@@ -111,7 +80,11 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
     // Rule 4: Payment Method Clarification (only if sales mentioned and no method provided)
     if (mentionedAsSales && !customerPaymentMethod) {
       return ok({
-        resolution: { kind: "REQUEST_CLARIFICATION", clarificationType: "PAYMENT_METHOD" },
+        resolution: { 
+          kind: "REQUEST_CLARIFICATION", 
+          clarificationType: "PAYMENT_METHOD",
+          allowedChoiceValues: ["CASH", "CARD", "MIXED"] 
+        },
       });
     }
 
@@ -142,10 +115,27 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
     let resolution: CashMovementResolution = {
       kind: "REQUEST_CLARIFICATION",
       clarificationType: "MONEY_DESTINATION",
+      allowedChoiceValues: [
+        "PRIVATE_WITHDRAWAL",
+        "BUSINESS_BANK_DEPOSIT",
+        "GOODS_PURCHASE",
+        "STILL_IN_DRAWER",
+        "OTHER"
+      ]
     };
 
     if (dType === "UNKNOWN" && sType === "CURRENT_REGISTER") {
-      resolution = { kind: "REQUEST_CLARIFICATION", clarificationType: "MONEY_DESTINATION" };
+      resolution = { 
+        kind: "REQUEST_CLARIFICATION", 
+        clarificationType: "MONEY_DESTINATION",
+        allowedChoiceValues: [
+          "PRIVATE_WITHDRAWAL",
+          "BUSINESS_BANK_DEPOSIT",
+          "GOODS_PURCHASE",
+          "STILL_IN_DRAWER",
+          "OTHER"
+        ]
+      };
     }
 
     // Process the final decision (some returns above bypassed persistence for NOT_A_CASHBOOK_ENTRY or PREPARE_ENTRY)

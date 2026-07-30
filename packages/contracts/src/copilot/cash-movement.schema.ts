@@ -43,7 +43,7 @@ export type CashMovementResolution =
   | {
       kind: "REQUEST_CLARIFICATION";
       clarificationType: typeof CashClarificationType[keyof typeof CashClarificationType];
-      choices?: any[]; // Replaced below with precise types if needed, using simple array for internal
+      allowedChoiceValues?: string[];
     }
   | {
       kind: "PREPARE_ENTRY";

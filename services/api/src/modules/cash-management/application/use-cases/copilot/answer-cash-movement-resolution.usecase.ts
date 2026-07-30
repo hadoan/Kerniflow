@@ -119,9 +119,9 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
               type: nextResolution.clarificationType,
               question: "Bitte klären Sie diese Information (TODO: Localization)",
               choices:
-                nextResolution.choices?.map((c: any) => ({
-                  value: c.id,
-                  label: c.label?.de || c.label?.en || c.id,
+                nextResolution.allowedChoiceValues?.map((value: string) => ({
+                  value,
+                  label: value,
                 })) || [],
             },
           };

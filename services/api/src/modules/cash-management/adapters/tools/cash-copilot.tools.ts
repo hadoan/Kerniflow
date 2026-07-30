@@ -164,7 +164,7 @@ export const analyze_cash_movementTool = (deps: CashToolDeps): DomainToolPort =>
         }
 
         const result = await deps.resolveNextAction.execute(
-          { extraction: parsed.data },
+          { extraction: parsed.data, intent: "CASH_MOVEMENT" },
           getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
         );
 

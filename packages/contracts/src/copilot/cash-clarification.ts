@@ -349,6 +349,8 @@ export const CASH_CLARIFICATION_CONTENT: Record<
 
 export const RequestCashClarificationInputSchema = z.object({
   resolutionId: z.string().uuid().optional(), // allow optional for legacy compat if needed, or strictly uuid
+  clarificationType: z.nativeEnum(CashClarificationType).optional(),
+  allowedChoiceValues: z.array(z.string()).optional(),
   answer: z.string().optional(),
 });
 

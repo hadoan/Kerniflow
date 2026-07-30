@@ -1,10 +1,10 @@
 import React from "react";
 import {
-  CASH_CLARIFICATION_CONTENT,
   type RequestCashClarificationInput,
   type RequestCashClarificationOutput,
   type CashClarificationChoiceId,
 } from "@corely/contracts";
+import { resolveCashClarificationContent } from "../utils/resolve-cash-clarification-content";
 import { Button, Card, CardContent } from "@corely/ui";
 import { type ToolRendererProps } from "@corely/web-shared/shared/components/chat/ChatParts";
 import { useTranslation } from "react-i18next";
@@ -18,7 +18,7 @@ export const CashClarificationRenderer: React.FC<ToolRendererProps> = ({
   submittingToolIds,
   markSubmitting,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const reqOutput = output as RequestCashClarificationOutput | undefined;
 
   if (state === "output-available" || reqOutput?.choiceId) {
@@ -34,17 +34,13 @@ export const CashClarificationRenderer: React.FC<ToolRendererProps> = ({
     return <span className="text-xs text-muted-foreground">{t("assistant.loadingClarification", "Loading clarification...")}</span>;
   }
 
-  const content = CASH_CLARIFICATION_CONTENT[reqInput.clarificationType];
-  if (!content) {
-    return <span className="text-xs text-muted-foreground">Unknown clarification topic</span>;
-  }
-
-  const locale = (reqInput.locale ?? "en") as "en" | "de" | "vi";
-  const questionText = content.question[locale] ?? content.question.en;
-  const choices = content.choices.map((c) => ({
-    id: c.id,
-    label: c.label[locale] ?? c.label.en,
-  }));
+  const locale = (i18n.language ?? "en") as "en" | "de" | "vi";
+  
+  const { question: questionText, choices } = resolveCashClarificationContent({
+    type: reqInput.clarificationType,
+    allowedChoiceValues: reqInput.allowedChoiceValues || [],
+    locale,
+  });
 
   const isSubmitting = toolCallId ? submittingToolIds?.has(toolCallId) : false;
 
@@ -85,7 +81,7 @@ export const CashClarificationRenderer: React.FC<ToolRendererProps> = ({
               variant="outline"
               disabled={isSubmitting}
               className="text-xs hover:bg-accent hover:text-accent-foreground transition-colors"
-              onClick={() => handleSelectChoice(c.id, c.label)}
+              onClick={() => handleSelectChoice(c.id as CashClarificationChoiceId, c.label)}
             >
               {c.label}
             </Button>
