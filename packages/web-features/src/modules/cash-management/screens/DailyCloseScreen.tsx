@@ -96,7 +96,9 @@ export function DailyCloseScreen() {
           .filter((l) => l.count > 0),
       }),
     onSuccess: async () => {
-      if (!id) {return;}
+      if (!id) {
+        return;
+      }
       await invalidateCashRegisterQueries(queryClient, id);
       await queryClient.invalidateQueries({ queryKey: cashKeys.dayCloses.detail(id, dayKey) });
       navigate(`/cash/registers/${id}/kassenbericht?day=${dayKey}`);
@@ -107,7 +109,9 @@ export function DailyCloseScreen() {
     submitMutation.mutate();
   };
 
-  if (!id) {return null;}
+  if (!id) {
+    return null;
+  }
 
   if (registerQuery.isLoading || previewQuery.isLoading) {
     return (

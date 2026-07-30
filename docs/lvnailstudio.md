@@ -12,3 +12,10 @@ Ngày 23.07 e có bỏ privateinlage là 30€ để thối tiền khách
 [26.07.26, 13:54:07] Van Nails Thii: Ngày 24 và 25 vẫn để lại trong máy Kasse 30 a à
 [26.07.26, 13:54:15] Ha: Số tiền rút ra là để cho quán, em ko dùng để chỉ tiêu cá nhân
 [26.07.26, 13:54:17] Van Nails Thii: E ko rút ra 30 từ ngày 23.7
+
+Phải theo dõi hai số khác nhau
+Ngày Kassensturz trong ngăn kéo Tiền cất riêng của quán Tổng tiền mặt của quán
+22.07 0,00 € 129,60 € 129,60 €
+23.07 30,00 € 224,00 € 254,00 €
+24.07 30,00 € 301,60 € 331,60 €
+25.07 30,00 € 402,00 € 432,00 €

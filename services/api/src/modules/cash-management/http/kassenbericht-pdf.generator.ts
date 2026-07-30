@@ -9,7 +9,9 @@ export async function createKassenberichtPdf(preview: CashReportPreviewDto): Pro
 
   // German number format — same as formatNumber() in KassenberichtScreen
   const format = (cents: number) => {
-    if (cents === 0) {return "0,00";}
+    if (cents === 0) {
+      return "0,00";
+    }
     return new Intl.NumberFormat("de-DE", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -81,8 +83,12 @@ export async function createKassenberichtPdf(preview: CashReportPreviewDto): Pro
     const f = isBold ? bold : font;
     const textW = f.widthOfTextAtSize(text, size);
     let tx = xPos + 5;
-    if (align === "center") {tx = xPos + (w - textW) / 2;}
-    if (align === "right") {tx = xPos + w - textW - 5;}
+    if (align === "center") {
+      tx = xPos + (w - textW) / 2;
+    }
+    if (align === "right") {
+      tx = xPos + w - textW - 5;
+    }
     page.drawText(text, { x: tx, y: yPos - 15, size, font: f });
   };
 
@@ -188,7 +194,9 @@ export async function createKassenberichtPdf(preview: CashReportPreviewDto): Pro
   y -= 40;
   page.drawText("Kundenzahl", { x: 40, y, size: 10, font });
   const countStr = preview.customerCount ? String(preview.customerCount) : "";
-  if (countStr) {page.drawText(countStr, { x: 125, y: y + 2, size: 14, font });}
+  if (countStr) {
+    page.drawText(countStr, { x: 125, y: y + 2, size: 14, font });
+  }
   page.drawLine({ start: { x: 105, y: y - 2 }, end: { x: 185, y: y - 2 }, thickness: 1 });
 
   page.drawText("Unterschrift", { x: 300, y, size: 10, font });

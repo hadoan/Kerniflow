@@ -47,7 +47,9 @@ function buildDateRange(from: string, to: string): string[] {
   while (cur <= to) {
     result.push(cur);
     cur = nextDay(cur);
-    if (result.length > 365) {break;} // safety cap
+    if (result.length > 365) {
+      break;
+    } // safety cap
   }
   return result;
 }
