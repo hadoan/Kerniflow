@@ -31,6 +31,11 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
   public readonly provider = "deterministic-provider";
   public readonly modelId = "deterministic-model";
   public readonly defaultObjectGenerationMode = "json";
+  
+  get supportsImageUrls() { return false; }
+  get supportsStructuredOutputs() { return true; }
+  get supportsToolCalls() { return true; }
+  get supportedUrls(): any { return {}; }
 
   constructor(private readonly tenantId: string) {}
 

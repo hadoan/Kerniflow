@@ -21,5 +21,5 @@ export interface LanguageModelPort {
     surfaceId?: SurfaceId;
     verticalId?: PosVerticalId | null;
     observability: ObservabilitySpanRef;
-  }): Promise<{ result: StreamTextResult<any, any> }>;
+  }): Promise<{ result: StreamTextResult<any, any, any>; usage?: any }>;
 }

@@ -15,11 +15,10 @@ import {
  * No execute handler is provided so the client must respond via addToolResult.
  */
 export const buildCollectInputsTool = (description: string) =>
-  tool<CollectInputsToolInput, CollectInputsToolOutput>({
+  (tool as any)({
     description,
-    inputSchema: CollectInputsToolInputSchema,
-    outputSchema: CollectInputsToolOutputSchema,
-    toModelOutput: ({ output }) => {
+    parameters: CollectInputsToolInputSchema,
+    toModelOutput: ({ output }: any) => {
       const lines: string[] = [];
       if (output?.meta?.cancelled) {
         lines.push("User cancelled input collection.");
@@ -44,11 +43,10 @@ export const buildCollectInputsTool = (description: string) =>
  * No execute handler is provided so the client must respond via addToolResult with choiceId.
  */
 export const buildRequestCashClarificationTool = (description: string) =>
-  tool<RequestCashClarificationInput, RequestCashClarificationOutput>({
+  (tool as any)({
     description,
-    inputSchema: RequestCashClarificationInputSchema,
-    outputSchema: RequestCashClarificationOutputSchema,
-    toModelOutput: ({ output }) => {
+    parameters: RequestCashClarificationInputSchema,
+    toModelOutput: ({ output }: any) => {
       const lines: string[] = [];
       lines.push("User responded to cash clarification.");
       lines.push(`Clarification ID: ${output?.clarificationId}`);

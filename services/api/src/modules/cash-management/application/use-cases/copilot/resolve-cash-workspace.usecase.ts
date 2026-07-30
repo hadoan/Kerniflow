@@ -154,7 +154,7 @@ export class ResolveCashWorkspaceUseCase extends BaseUseCase<
     const targetConversationId = conversationId ?? nanoid();
     try {
       return await this.unitOfWork.withinTransaction(async (tx) => {
-        const pTx = tx as Prisma.TransactionClient;
+        const pTx = tx as unknown as Prisma.TransactionClient;
 
         if (!conversationId) {
           await pTx.agentRun.create({

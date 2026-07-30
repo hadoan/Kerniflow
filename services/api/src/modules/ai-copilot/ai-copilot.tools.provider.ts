@@ -60,6 +60,7 @@ import {
   CASH_WORKSPACE_REPO,
   type CashWorkspaceRepoPort,
 } from "../cash-management/application/ports/cash-management.ports";
+import { ResolveCashMovementNextActionUseCase } from "../cash-management/application/use-cases/copilot/resolve-cash-movement-next-action.usecase";
 
 import { buildInvoiceTools } from "../invoices/adapters/tools/invoice.tools";
 import { buildInvoiceWorkflowTools } from "./infrastructure/tools/invoice-workflow.tools";
@@ -120,6 +121,7 @@ export const copilotToolsProvider: Provider = {
     confirmEntry: ConfirmCashEntryUseCase,
     openCashDayWorkspace: OpenCashDayWorkspaceUseCase,
     getMonthlyReport: GetMonthlyCashReportQueryUseCase,
+    resolveNextAction: ResolveCashMovementNextActionUseCase,
     createIncomeTaxDraft: CreateIncomeTaxDraftUseCase,
     getIncomeTaxDraft: GetIncomeTaxDraftUseCase,
     generateIncomeTaxDraftEur: GenerateIncomeTaxDraftEurUseCase,
@@ -206,6 +208,7 @@ export const copilotToolsProvider: Provider = {
           getMonthlyReport,
           documentsApp,
           workspaceRepo: cashWorkspaceRepo,
+          resolveNextAction,
         })
       ),
       ...withAppId(
@@ -268,6 +271,7 @@ export const copilotToolsProvider: Provider = {
     ConfirmCashEntryUseCase,
     OpenCashDayWorkspaceUseCase,
     GetMonthlyCashReportQueryUseCase,
+    ResolveCashMovementNextActionUseCase,
     CreateIncomeTaxDraftUseCase,
     GetIncomeTaxDraftUseCase,
     GenerateIncomeTaxDraftEurUseCase,

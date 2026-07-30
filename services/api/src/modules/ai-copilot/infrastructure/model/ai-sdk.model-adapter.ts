@@ -99,7 +99,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     surfaceId?: SurfaceId;
     verticalId?: PosVerticalId | null;
     observability: ObservabilitySpanRef;
-  }): Promise<{ result: StreamTextResult<any, any>; usage?: LanguageModelUsage }> {
+  }): Promise<{ result: StreamTextResult<any, any, any>; usage?: LanguageModelUsage }> {
     const toolTenantId = params.toolTenantId ?? params.tenantId;
     const aiTools = buildAiTools(params.tools, {
       toolExecutions: this.toolExecutions,

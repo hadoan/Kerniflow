@@ -112,6 +112,7 @@ export * from "./platform";
 export * from "./copilot/collect-inputs.schema";
 export * from "./copilot/chat.schema";
 export * from "./copilot/chat-history.schema";
+export * from "./copilot/cash-movement.schema";
 export * from "./copilot/cash-clarification";
 export * from "./cash-management";
 export * from "./booking";

@@ -106,4 +106,9 @@ export const cashManagementToolDescriptions = {
     de: "Übergabe an den DAILY_CASH_DAY-Arbeitsbereich aus einem allgemeinen Arbeitsbereichskontext.",
     vi: "Chuyển giao sang không gian làm việc DAILY_CASH_DAY từ ngữ cảnh chung.",
   },
+  analyze_cash_movement: {
+    en: "Extract factual details of a user's cash movement request and ask the domain application to deterministically resolve the next action.",
+    de: "Faktische Details der Kassenbewegungsanfrage des Benutzers extrahieren und die Fachanwendung bitten, deterministisch die nächste Aktion zu bestimmen.",
+    vi: "Trích xuất chi tiết thực tế của yêu cầu giao dịch sổ quỹ từ người dùng và để ứng dụng cốt lõi phân tích hành động tiếp theo một cách chắc chắn.",
+  },
 } satisfies Record<string, LocalizedToolText>;

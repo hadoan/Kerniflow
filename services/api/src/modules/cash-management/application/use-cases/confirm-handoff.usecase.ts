@@ -10,7 +10,7 @@ import {
   UseCaseError,
   isErr,
 } from "@corely/kernel";
-import type { UnitOfWork } from "@corely/kernel";
+import type { UnitOfWorkPort } from "@corely/kernel";
 import {
   CASH_ENTRY_CONFIRMATION_REPO,
   CASH_WORKSPACE_HANDOFF_REPO,
@@ -37,9 +37,9 @@ export class ConfirmHandoffUseCase extends BaseUseCase<ConfirmHandoffInput, { en
     @Inject(CASH_ENTRY_CONFIRMATION_REPO)
     private readonly confirmationRepo: CashEntryConfirmationRepoPort,
     private readonly confirmCashEntryUseCase: ConfirmCashEntryUseCase,
-    @Inject(UNIT_OF_WORK) private readonly uow: UnitOfWork
+    @Inject(UNIT_OF_WORK) uow: UnitOfWorkPort
   ) {
-    super({ logger: undefined });
+    super({ logger: undefined, uow });
   }
 
   protected async handle(
@@ -98,7 +98,7 @@ export class ConfirmHandoffUseCase extends BaseUseCase<ConfirmHandoffInput, { en
           idempotencyKey: input.idempotencyKey,
         },
         // We pass the context with the tx to ensure it shares the transaction
-        { ...ctx, tx }
+        { ...ctx, tx } as any
       );
 
       if (isErr(result)) {

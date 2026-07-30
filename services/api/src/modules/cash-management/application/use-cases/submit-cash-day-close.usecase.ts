@@ -194,7 +194,6 @@ export class SubmitCashDayCloseUseCase extends BaseUseCase<
           expectedBalanceCents: expectedBalance,
           countedBalanceCents: countedBalance,
           differenceCents: difference,
-          verificationStatus,
           note,
           submittedAt: new Date(),
           submittedByUserId: ctx.userId ?? "system",

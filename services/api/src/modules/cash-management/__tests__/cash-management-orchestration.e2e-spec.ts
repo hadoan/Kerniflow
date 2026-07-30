@@ -347,4 +347,52 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
     expect(response.report.discrepancyDayCount).toBe(1);
     expect(response.report.days[0].discrepancyCents).toBe(5000);
   });
+
+  it("13. Maps analyze_cash_movement domain result to UI cards correctly", async () => {
+    const analyzeTool = getTool("analyze_cash_movement");
+    expect(analyzeTool).toBeDefined();
+
+    deps.resolveNextAction = {
+      execute: vi.fn().mockResolvedValue({
+        ok: true,
+        value: {
+          resolutionId: "res-123",
+          resolution: {
+            kind: "REQUEST_CLARIFICATION",
+            clarificationType: "MONEY_SOURCE",
+            choices: [{ id: "PRIVATE_FUNDS", label: { de: "Privates Geld" } }],
+          },
+        },
+      }),
+    };
+
+    const response = await analyzeTool.execute({
+      input: { amountCents: 1000, source: "UNKNOWN", destination: "BUSINESS_BANK_ACCOUNT" },
+      tenantId: "t-1",
+      userId: "u-1",
+    });
+
+    expect(deps.resolveNextAction.execute).toHaveBeenCalledWith(
+      {
+        extraction: {
+          amountCents: 1000,
+          source: "UNKNOWN",
+          destination: "BUSINESS_BANK_ACCOUNT",
+          explicitFacts: [],
+        },
+        intent: "CASH_MOVEMENT",
+      },
+      expect.anything()
+    );
+
+    expect(response).toMatchObject({
+      ok: true,
+      kind: "REQUEST_CLARIFICATION",
+      resolutionId: "res-123",
+      clarification: {
+        type: "MONEY_SOURCE",
+        choices: [{ value: "PRIVATE_FUNDS", label: "Privates Geld" }],
+      },
+    });
+  });
 });

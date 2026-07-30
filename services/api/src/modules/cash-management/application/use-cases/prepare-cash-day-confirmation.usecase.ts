@@ -143,9 +143,7 @@ export class PrepareCashDayConfirmationUseCase extends BaseUseCase<
       }
     }
 
-    basePreview.actualClosingCashCents = input.actualClosingCashCents;
-    basePreview.status = "READY_TO_CLOSE";
-
+    basePreview.countedClosingCashCents = input.actualClosingCashCents;
     const confirmationDto: CashDayConfirmationDto = {
       id: row.id,
       tenantId: row.tenantId,

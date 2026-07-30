@@ -369,3 +369,22 @@ model CashLocationTransfer {
   @@map("cash_location_transfers")
   @@schema("accounting")
 }
+
+model CashMovementResolution {
+  id             String    @id @default(cuid())
+  tenantId       String
+  workspaceId    String?
+  registerId     String?
+  conversationId String
+  intent         String
+  status         String
+  extractionJson Json
+  answerJson     Json?
+  version        Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  consumedAt     DateTime?
+
+  @@schema("accounting")
+  @@index([tenantId, conversationId])
+}

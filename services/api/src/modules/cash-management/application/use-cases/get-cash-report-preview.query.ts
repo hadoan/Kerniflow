@@ -127,14 +127,8 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     let cashRefundInflowsCents = 0;
 
     for (const entry of entries) {
-      if (
-        entry.type === "INTERNAL_TRANSFER" ||
-        entry.type === "LOCATION_TRANSFER" ||
-        entry.status === "CANCELLED" ||
-        entry.status === "DRAFT"
-      ) {
-        continue;
-      }
+      // If there are specific types to skip, add them here.
+      // E.g., if there are transfers that don't affect cash flow in the same way, skip them.
       const amount = entry.amountCents;
       if (entry.direction === "OUT") {
         if (entry.type === "EXPENSE_CASH") {
@@ -156,8 +150,6 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
           privateDepositsCents += amount;
         } else if (entry.type === "BANK_WITHDRAWAL") {
           bankWithdrawalsToCashCents += amount;
-        } else if (entry.type === "REFUND_IN") {
-          cashRefundInflowsCents += amount;
         } else {
           otherNonSalesCashInflowsCents += amount;
         }

@@ -92,6 +92,6 @@ export class ConfirmCashEntryUseCase extends BaseUseCase<
       input.confirmationId
     );
 
-    return ok({ entryId: result.value.id });
+    return ok({ entryId: result.value.entry.id });
   }
 }

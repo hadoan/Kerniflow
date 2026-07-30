@@ -17,19 +17,25 @@ import { isErr, NotFoundError, RequireTenant, ValidationError } from "@corely/ke
 import {
   ResolveCashAssistantWorkspaceInputSchema,
   CashWorkspaceHandoffDto,
+  AnswerCashMovementResolutionInputSchema,
 } from "@corely/contracts";
 import { ConfirmHandoffUseCase } from "../../../application/use-cases/confirm-handoff.usecase";
+import { OpenCashDayWorkspaceUseCase } from "../../../application/use-cases/copilot/open-cash-day-workspace.usecase";
+import { AnswerCashMovementResolutionUseCase } from "../../../application/use-cases/copilot/answer-cash-movement-resolution.usecase";
 import { PrismaService } from "@corely/data";
 
 @Controller("cash-management/workspaces")
 @UseGuards(AuthGuard)
 export class CashAssistantWorkspaceController {
   constructor(
-    private readonly resolveWorkspaceUseCase: ResolveCashWorkspaceUseCase,
     @Inject(CASH_WORKSPACE_REPO) private readonly workspaceRepo: CashWorkspaceRepoPort,
-    @Inject(CASH_WORKSPACE_HANDOFF_REPO) private readonly handoffRepo: CashWorkspaceHandoffRepoPort,
-    private readonly prisma: PrismaService,
-    private readonly confirmHandoffUseCase: ConfirmHandoffUseCase
+    @Inject(CASH_WORKSPACE_HANDOFF_REPO)
+    private readonly handoffRepo: CashWorkspaceHandoffRepoPort,
+    private readonly resolveWorkspaceUseCase: ResolveCashWorkspaceUseCase,
+    private readonly confirmHandoffUseCase: ConfirmHandoffUseCase,
+    private readonly openCashDayWorkspaceUseCase: OpenCashDayWorkspaceUseCase,
+    private readonly answerCashMovementResolutionUseCase: AnswerCashMovementResolutionUseCase,
+    private readonly prisma: PrismaService
   ) {}
 
   @Get()
@@ -234,5 +240,36 @@ export class CashAssistantWorkspaceController {
     }
     await this.handoffRepo.markHandoffViewed(handoffId, userId);
     return { success: true };
+  }
+
+  @Post("conversations/:conversationId/resolutions/:resolutionId/answer")
+  async answerResolution(
+    @CurrentTenantId() tenantId: string,
+    @CurrentWorkspaceId() workspaceId: string,
+    @CurrentUserId() userId: string,
+    @Param("conversationId") conversationId: string,
+    @Param("resolutionId") resolutionId: string,
+    @Body() body: { expectedVersion: number; answer: any }
+  ) {
+    if (!body.answer || typeof body.expectedVersion !== "number") {
+      throw new ValidationError(
+        "Invalid payload. Expected 'answer' object and 'expectedVersion' number."
+      );
+    }
+
+    const result = await this.answerCashMovementResolutionUseCase.execute(
+      {
+        resolutionId,
+        expectedVersion: body.expectedVersion,
+        answer: body.answer,
+      },
+      { tenantId, workspaceId, userId }
+    );
+
+    if (isErr(result)) {
+      throw result.error;
+    }
+
+    return result.value;
   }
 }

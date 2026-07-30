@@ -38,11 +38,7 @@ async function main() {
       // Filter entries for this day
       const dayEntries = register.entries.filter(
         (e) =>
-          e.dayKey === dayClose.dayKey &&
-          e.status !== "CANCELLED" &&
-          e.status !== "DRAFT" &&
-          e.type !== "INTERNAL_TRANSFER" &&
-          e.type !== "LOCATION_TRANSFER"
+          e.dayKey === dayClose.dayKey
       );
 
       let inflows = 0;

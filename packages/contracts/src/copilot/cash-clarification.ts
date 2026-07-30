@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const CashClarificationType = {
   MONEY_DESTINATION: "MONEY_DESTINATION",
+  MONEY_SOURCE: "MONEY_SOURCE",
   CASH_FUND_SCOPE: "CASH_FUND_SCOPE",
   ACCOUNT_OWNERSHIP: "ACCOUNT_OWNERSHIP",
   PURCHASE_PURPOSE: "PURCHASE_PURPOSE",
@@ -21,6 +22,14 @@ export const CashClarificationChoiceId = {
   GOODS_PURCHASE: "GOODS_PURCHASE",
   STILL_IN_DRAWER: "STILL_IN_DRAWER",
   OTHER: "OTHER",
+
+  // MONEY_SOURCE
+  STILL_IN_CURRENT_FUND: "STILL_IN_CURRENT_FUND",
+  ALREADY_RECORDED_OUT: "ALREADY_RECORDED_OUT",
+  OTHER_REGISTER: "OTHER_REGISTER",
+  PRIVATE_FUNDS: "PRIVATE_FUNDS",
+  OTHER_BANK_ACCOUNT: "OTHER_BANK_ACCOUNT",
+  NOT_SURE: "NOT_SURE",
 
   // CASH_FUND_SCOPE
   SAME_BUSINESS_CASH_FUND: "SAME_BUSINESS_CASH_FUND",
@@ -109,6 +118,59 @@ export const CASH_CLARIFICATION_CONTENT: Record<
       {
         id: "OTHER",
         label: { en: "Other", de: "Sonstiges", vi: "Khác" },
+      },
+    ],
+  },
+  MONEY_SOURCE: {
+    question: {
+      en: "Where did this money come from?",
+      de: "Woher stammt dieses Geld?",
+      vi: "Số tiền này được lấy từ đâu?",
+    },
+    choices: [
+      {
+        id: "STILL_IN_CURRENT_FUND",
+        label: {
+          en: "Still belongs to current register balance",
+          de: "Gehört noch zum aktuellen Kassenbestand",
+          vi: "Vẫn thuộc số dư quỹ hiện tại",
+        },
+      },
+      {
+        id: "ALREADY_RECORDED_OUT",
+        label: {
+          en: "Already recorded as taken out",
+          de: "Wurde bereits als Entnahme gebucht",
+          vi: "Đã ghi lấy ra khỏi Kasse",
+        },
+      },
+      {
+        id: "OTHER_REGISTER",
+        label: {
+          en: "Belongs to another register/safe",
+          de: "Gehört zu einer anderen Kasse/Tresor",
+          vi: "Thuộc một Kasse hoặc két tiền khác",
+        },
+      },
+      {
+        id: "PRIVATE_FUNDS",
+        label: {
+          en: "Private money",
+          de: "Privates Geld",
+          vi: "Tiền cá nhân",
+        },
+      },
+      {
+        id: "OTHER_BANK_ACCOUNT",
+        label: {
+          en: "Transfer from another bank account",
+          de: "Überweisung von einem anderen Bankkonto",
+          vi: "Chuyển từ một tài khoản ngân hàng khác",
+        },
+      },
+      {
+        id: "NOT_SURE",
+        label: { en: "Not sure", de: "Nicht sicher", vi: "Không chắc" },
       },
     ],
   },
@@ -286,10 +348,8 @@ export const CASH_CLARIFICATION_CONTENT: Record<
 };
 
 export const RequestCashClarificationInputSchema = z.object({
-  clarificationType: z.nativeEnum(CashClarificationType),
-  amountCents: z.number().int().positive().optional(),
-  locale: z.enum(["en", "de", "vi"]).default("en"),
-  context: z.record(z.string(), z.any()).optional(),
+  resolutionId: z.string().uuid().optional(), // allow optional for legacy compat if needed, or strictly uuid
+  answer: z.string().optional(),
 });
 
 export type RequestCashClarificationInput = z.infer<typeof RequestCashClarificationInputSchema>;
@@ -301,3 +361,11 @@ export const RequestCashClarificationOutputSchema = z.object({
 });
 
 export type RequestCashClarificationOutput = z.infer<typeof RequestCashClarificationOutputSchema>;
+
+export const AnswerCashMovementResolutionInputSchema = z.object({
+  resolutionId: z.string(),
+  choiceId: z.nativeEnum(CashClarificationChoiceId).optional(),
+  answerText: z.string().optional(),
+});
+
+export type AnswerCashMovementResolutionInput = z.infer<typeof AnswerCashMovementResolutionInputSchema>;
