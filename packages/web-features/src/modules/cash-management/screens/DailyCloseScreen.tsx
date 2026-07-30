@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams, useParams } from "react-router-dom";
+import { Link, useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -25,6 +25,7 @@ export function DailyCloseScreen() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const dayKey = searchParams.get("day") ?? new Date().toISOString().slice(0, 10);
   const [note, setNote] = useState("");
@@ -95,9 +96,10 @@ export function DailyCloseScreen() {
           .filter((l) => l.count > 0),
       }),
     onSuccess: async () => {
-      if (!id) return;
+      if (!id) {return;}
       await invalidateCashRegisterQueries(queryClient, id);
       await queryClient.invalidateQueries({ queryKey: cashKeys.dayCloses.detail(id, dayKey) });
+      navigate(`/cash/registers/${id}/kassenbericht?day=${dayKey}`);
     },
   });
 
@@ -105,7 +107,7 @@ export function DailyCloseScreen() {
     submitMutation.mutate();
   };
 
-  if (!id) return null;
+  if (!id) {return null;}
 
   if (registerQuery.isLoading || previewQuery.isLoading) {
     return (
@@ -174,24 +176,20 @@ export function DailyCloseScreen() {
             </div>
           </div>
 
-          {/* ── OPEN: Kassensturz entry form ── */}
-          {status === "OPEN" && (
+          {/* ── OPEN or CALCULATED: Kassensturz entry form ── */}
+          {(status === "OPEN" || status === "CALCULATED") && (
             <div className="space-y-5 mt-6 animate-in fade-in slide-in-from-bottom-2">
               {/* Expected / Counted / Difference summary */}
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="p-4 border rounded-lg bg-muted/20">
-                  <p className="text-sm text-muted-foreground">
-                    {t("cash.ui.dayClose.expected")}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.expected")}</p>
                   <p className="text-xl font-semibold mt-1">
                     {formatMoney(expectedBalance, undefined, currency)}
                   </p>
                 </div>
 
                 <div className="p-4 border rounded-lg bg-muted/20 space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    {t("cash.ui.dayClose.counted")}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.counted")}</p>
                   <Input
                     id="counted-input"
                     type="number"
@@ -283,7 +281,10 @@ export function DailyCloseScreen() {
                                 min={0}
                                 value={String(count)}
                                 onChange={(e) =>
-                                  handleDenominationChange(denomination, Number(e.target.value || 0))
+                                  handleDenominationChange(
+                                    denomination,
+                                    Number(e.target.value || 0)
+                                  )
                                 }
                               />
                             </td>
@@ -314,18 +315,20 @@ export function DailyCloseScreen() {
             </div>
           )}
 
-          {/* ── CLOSED / CALCULATED: summary display ── */}
-          {status !== "OPEN" && (
+          {/* ── LOCKED: summary display only ── */}
+          {status === "LOCKED" && (
             <div className="space-y-6 mt-6">
               {verificationStatus === "NOT_COUNTED" ? (
                 <div className="p-4 rounded-lg bg-blue-50 text-blue-800 flex flex-col gap-2">
-                  <p className="font-medium text-base">{t("cash.ui.dayClose.dayCalculatedTitle")}</p>
-                  <p className="text-sm">
-                    {t("cash.ui.dayClose.dayCalculatedDesc")}
+                  <p className="font-medium text-base">
+                    {t("cash.ui.dayClose.dayCalculatedTitle")}
                   </p>
+                  <p className="text-sm">{t("cash.ui.dayClose.dayCalculatedDesc")}</p>
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs opacity-80">{t("cash.ui.dayClose.expectedClosingCash")}</p>
+                      <p className="text-xs opacity-80">
+                        {t("cash.ui.dayClose.expectedClosingCash")}
+                      </p>
                       <p className="text-lg font-semibold">
                         {formatMoney(expectedBalance, undefined, currency)}
                       </p>
@@ -354,23 +357,31 @@ export function DailyCloseScreen() {
                     ) : (
                       <AlertTriangle className="text-amber-600 h-5 w-5" />
                     )}
-                    {cashDifference === 0 ? t("cash.ui.dayClose.countMatched") : t("cash.ui.dayClose.countDifference")}
+                    {cashDifference === 0
+                      ? t("cash.ui.dayClose.countMatched")
+                      : t("cash.ui.dayClose.countDifference")}
                   </p>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.expected")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("cash.ui.dayClose.expected")}
+                      </p>
                       <p className="text-lg font-semibold">
                         {formatMoney(expectedBalance, undefined, currency)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.counted")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("cash.ui.dayClose.counted")}
+                      </p>
                       <p className="text-lg font-semibold">
                         {formatMoney(countedClosingCash!, undefined, currency)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">{t("cash.ui.dayClose.difference")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("cash.ui.dayClose.difference")}
+                      </p>
                       <p
                         className={`text-lg font-semibold ${
                           cashDifference === 0 ? "text-green-600" : "text-amber-600"

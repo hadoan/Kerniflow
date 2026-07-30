@@ -1393,7 +1393,8 @@
         "tabs": {
           "overview": "Overview",
           "entriesPreview": "Entries preview",
-          "activityAudit": "Activity / Audit"
+          "activityAudit": "Activity / Audit",
+          "unclosedDays": "Unclosed days"
         },
         "registerId": "Register ID",
         "negativeBalancePolicy": "Negative balance policy",
@@ -1403,7 +1404,19 @@
         "openFullEntries": "Open full entries list",
         "activityPrefix": "Audit logs and exported",
         "auditPack": "audit packs",
-        "activitySuffix": "appear here once available."
+        "activitySuffix": "appear here once available.",
+        "unclosedDaysModal": {
+          "title": "Unclosed days",
+          "description": "Before viewing the Kassenbericht, all previous days must be closed. The earliest unclosed day is:",
+          "cancel": "Cancel",
+          "goClose": "Go to day close",
+          "viewLastKassenbericht": "View last Kassenbericht"
+        },
+        "unclosedDays": {
+          "draft": "Draft",
+          "open": "Not closed",
+          "close": "Close now →"
+        }
       },
       "registerForm": {
         "newTitle": "Create cash register",
@@ -3369,15 +3382,8 @@
   },
   "cashDashboard": {
     "workspace": {
-      "dailyCash": "Daily Cash",
-      "monthlyReview": "Monthly Review",
-      "generalHelp": "General Help",
-      "generalHelpTitle": "Cash Assistant",
-      "cashDayFor": "Cash Day",
-      "reviewFor": "Review",
       "register": "Register",
-      "location": "Location",
-      "boundRegisterLabel": "Cash register"
+      "location": "Location"
     },
     "registerSelector": {
       "title": "Choose a cash register",
@@ -3679,10 +3685,6 @@
       "high": "High",
       "medium": "Medium",
       "low": "Low"
-    },
-    "workspace": {
-      "register": "Register",
-      "location": "Location"
     }
   },
   "cashAssistant": {

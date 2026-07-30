@@ -1378,7 +1378,8 @@
         "tabs": {
           "overview": "Tổng quan",
           "entriesPreview": "Xem nhanh bút toán",
-          "activityAudit": "Hoạt động / Kiểm toán"
+          "activityAudit": "Hoạt động / Kiểm toán",
+          "unclosedDays": "Các ngày chưa chốt"
         },
         "registerId": "ID quầy thu",
         "negativeBalancePolicy": "Chính sách số dư âm",
@@ -1388,7 +1389,19 @@
         "openFullEntries": "Mở danh sách bút toán đầy đủ",
         "activityPrefix": "Nhật ký kiểm toán và các",
         "auditPack": "gói kiểm toán",
-        "activitySuffix": "sẽ hiển thị ở đây khi có dữ liệu."
+        "activitySuffix": "sẽ hiển thị ở đây khi có dữ liệu.",
+        "unclosedDaysModal": {
+          "title": "Các ngày chưa chốt",
+          "description": "Trước khi xem Kassenbericht, tất cả các ngày trước đó phải được chốt. Ngày chưa chốt sớm nhất là:",
+          "cancel": "Hủy",
+          "goClose": "Đến chốt ngày",
+          "viewLastKassenbericht": "Xem Kassenbericht ngày cuối"
+        },
+        "unclosedDays": {
+          "draft": "Nháp",
+          "open": "Chưa chốt",
+          "close": "Chốt ngay →"
+        }
       },
       "registerForm": {
         "newTitle": "Tạo quầy thu",
@@ -3328,15 +3341,8 @@
   },
   "cashDashboard": {
     "workspace": {
-      "dailyCash": "Đóng quỹ hàng ngày",
-      "monthlyReview": "Kiểm tra hàng tháng",
-      "generalHelp": "Trợ giúp chung",
-      "generalHelpTitle": "Trợ lý tiền mặt",
-      "cashDayFor": "Ngày tiền mặt",
-      "reviewFor": "Kiểm tra",
-      "register": "Sổ quỹ / Két",
-      "location": "Chi nhánh",
-      "boundRegisterLabel": "Sổ quỹ / Két"
+      "register": "Máy tính tiền",
+      "location": "Vị trí"
     },
     "registerSelector": {
       "title": "Chọn quỹ / két tiền mặt",
@@ -3638,10 +3644,6 @@
       "high": "Cao",
       "medium": "Trung bình",
       "low": "Thấp"
-    },
-    "workspace": {
-      "register": "Máy tính tiền",
-      "location": "Vị trí"
     }
   },
   "cashAssistant": {

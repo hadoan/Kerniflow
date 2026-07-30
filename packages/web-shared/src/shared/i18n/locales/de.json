@@ -1377,7 +1377,8 @@
         "tabs": {
           "overview": "Übersicht",
           "entriesPreview": "Buchungsvorschau",
-          "activityAudit": "Aktivität / Audit"
+          "activityAudit": "Aktivität / Audit",
+          "unclosedDays": "Offene Tage"
         },
         "registerId": "Kassen-ID",
         "negativeBalancePolicy": "Richtlinie für negativen Saldo",
@@ -1387,7 +1388,19 @@
         "openFullEntries": "Vollständige Buchungsliste öffnen",
         "activityPrefix": "Audit-Logs und exportierte",
         "auditPack": "Audit-Pakete",
-        "activitySuffix": "werden hier angezeigt, sobald verfügbar."
+        "activitySuffix": "werden hier angezeigt, sobald verfügbar.",
+        "unclosedDaysModal": {
+          "title": "Offene Tagesabschlüsse",
+          "description": "Vor dem Kassenbericht müssen alle vorherigen Tage abgeschlossen werden. Der früheste offene Tag ist:",
+          "cancel": "Abbrechen",
+          "goClose": "Zum Tagesabschluss",
+          "viewLastKassenbericht": "Letzten Kassenbericht anzeigen"
+        },
+        "unclosedDays": {
+          "draft": "Entwurf",
+          "open": "Nicht abgeschlossen",
+          "close": "Jetzt abschließen →"
+        }
       },
       "registerForm": {
         "newTitle": "Kasse erstellen",
@@ -3316,15 +3329,8 @@
   },
   "cashDashboard": {
     "workspace": {
-      "dailyCash": "Tagesabschluss",
-      "monthlyReview": "Monatsprüfung",
-      "generalHelp": "Allgemeine Hilfe",
-      "generalHelpTitle": "Kassenassistent",
-      "cashDayFor": "Tagesabschluss",
-      "reviewFor": "Prüfung",
-      "register": "Kassenbuch",
-      "location": "Standort",
-      "boundRegisterLabel": "Kassenbuch"
+      "register": "Kasse",
+      "location": "Standort"
     },
     "registerSelector": {
       "title": "Wählen Sie ein Kassenbuch",
@@ -3626,10 +3632,6 @@
       "high": "Hoch",
       "medium": "Mittel",
       "low": "Niedrig"
-    },
-    "workspace": {
-      "register": "Kasse",
-      "location": "Standort"
     }
   },
   "cashAssistant": {
