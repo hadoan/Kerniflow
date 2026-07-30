@@ -181,12 +181,7 @@ const UpdateCashEntryToolInputSchema = z
 const ListCashEntriesToolInputSchema = RegisterScopedSchema.extend({
   dayKeyFrom: localDateSchema.optional(),
   dayKeyTo: localDateSchema.optional(),
-  type: z
-    .nativeEnum(CashEntryType)
-    .optional()
-    .describe(
-      "The type of cash movement to filter by."
-    ),
+  type: z.nativeEnum(CashEntryType).optional().describe("The type of cash movement to filter by."),
   source: z.string().min(1).optional(),
   paymentMethod: z.string().min(1).optional(),
   q: z.string().min(1).optional(),

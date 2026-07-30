@@ -2,7 +2,9 @@ import { z } from "zod";
 import { DayKeySchema, CashEntryTypeSchema } from "./schema";
 
 export const CashDayConfirmationMovementSchema = z.object({
-  type: CashEntryTypeSchema.describe("The type of cash movement. CRITICAL: Use 'SALE_CASH' for sales. NEVER use 'IN' or 'OUT' as they break reporting."),
+  type: CashEntryTypeSchema.describe(
+    "The type of cash movement. CRITICAL: Use 'SALE_CASH' for sales. NEVER use 'IN' or 'OUT' as they break reporting."
+  ),
   amountCents: z.number().int(),
   description: z.string().optional(),
 });
@@ -50,7 +52,9 @@ export const PrepareCashEntryConfirmationInputSchema = z.object({
   workspaceId: z.string().optional(),
   registerId: z.string(),
   businessDate: DayKeySchema,
-  movementType: CashEntryTypeSchema.describe("The type of cash movement. CRITICAL: Use 'SALE_CASH' for sales. NEVER use 'IN' or 'OUT' as they break reporting."),
+  movementType: CashEntryTypeSchema.describe(
+    "The type of cash movement. CRITICAL: Use 'SALE_CASH' for sales. NEVER use 'IN' or 'OUT' as they break reporting."
+  ),
   amountCents: z.number().int(),
   description: z.string().min(1),
   evidenceRequirement: z.string().optional().nullable(),

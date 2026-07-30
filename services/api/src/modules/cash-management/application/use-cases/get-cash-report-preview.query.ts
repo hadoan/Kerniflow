@@ -110,10 +110,10 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     // Use previous day effective closing balance, or fallback to 0 if none (will be handled by repair script later if needed)
     const openingBalanceCents =
       previousClose !== null
-        ? previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents
+        ? (previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents)
         : 0;
 
-    let goodsPurchasesCents = 0;
+    const goodsPurchasesCents = 0;
     let businessExpensesCents = 0;
     let privateWithdrawalsCents = 0;
     let bankDepositsCents = 0;
@@ -127,7 +127,12 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     let cashRefundInflowsCents = 0;
 
     for (const entry of entries) {
-      if (entry.type === "INTERNAL_TRANSFER" || entry.type === "LOCATION_TRANSFER" || entry.status === "CANCELLED" || entry.status === "DRAFT") {
+      if (
+        entry.type === "INTERNAL_TRANSFER" ||
+        entry.type === "LOCATION_TRANSFER" ||
+        entry.status === "CANCELLED" ||
+        entry.status === "DRAFT"
+      ) {
         continue;
       }
       const amount = entry.amountCents;
@@ -286,8 +291,8 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
       countedClosingCashCents === null
         ? "NOT_COUNTED"
         : cashDifferenceCents === 0
-        ? "COUNTED_MATCH"
-        : "COUNTED_DIFFERENCE";
+          ? "COUNTED_MATCH"
+          : "COUNTED_DIFFERENCE";
 
     const warnings: CashReportWarning[] = [];
     let status: "OPEN" | "CALCULATED" | "VERIFIED" | "LOCKED" = "OPEN";
@@ -315,7 +320,8 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
         warnings.push({
           code: "OTHER", // Should ideally be NEGATIVE_CALCULATED_CASH_SALES, mapped to OTHER for strict types
           severity: "WARNING",
-          message: "Calculated cash sales are negative. Check the opening balance and cash entries.",
+          message:
+            "Calculated cash sales are negative. Check the opening balance and cash entries.",
         });
       }
 

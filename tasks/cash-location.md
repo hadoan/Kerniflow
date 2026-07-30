@@ -4,20 +4,20 @@
 
 Extend the existing Cash Management module so that one logical `CashRegister` can contain multiple physical cash locations, such as:
 
-* Cash drawer
-* Business safe
-* Cash bag
-* Other storage location
+- Cash drawer
+- Business safe
+- Cash bag
+- Other storage location
 
 A transfer between locations must change the physical distribution of cash without changing:
 
-* the register’s total balance
-* revenue
-* expenses
-* owner deposits or withdrawals
-* bank balances
-* VAT
-* the Kassenbericht result
+- the register’s total balance
+- revenue
+- expenses
+- owner deposits or withdrawals
+- bank balances
+- VAT
+- the Kassenbericht result
 
 The primary business model must become:
 
@@ -96,7 +96,7 @@ Update its domain description:
 The existing:
 
 ```ts
-CashRegister.currentBalanceCents
+CashRegister.currentBalanceCents;
 ```
 
 continues to represent the total cash owned by that register across all active cash locations.
@@ -112,11 +112,7 @@ Add `CashLocation` to represent physical custody.
 Add a domain entity and Prisma model similar to:
 
 ```ts
-type CashLocationType =
-  | "DRAWER"
-  | "SAFE"
-  | "CASH_BAG"
-  | "OTHER";
+type CashLocationType = "DRAWER" | "SAFE" | "CASH_BAG" | "OTHER";
 
 type CashLocation = {
   id: string;
@@ -139,16 +135,16 @@ type CashLocation = {
 
 Required invariants:
 
-* A location belongs to exactly one register.
-* The register and location must belong to the same tenant and workspace.
-* Every register must have exactly one active default location.
-* New registers automatically receive a default `DRAWER` location.
-* Location names must be unique within a register.
-* A location with a non-zero balance cannot be archived.
-* The default location cannot be archived until another active default is assigned.
-* Location balances use integer cents only.
-* Location balances must not become negative when negative balances are disallowed.
-* Do not automatically classify locations based on names such as `"Safe"` or `"Kasse"`.
+- A location belongs to exactly one register.
+- The register and location must belong to the same tenant and workspace.
+- Every register must have exactly one active default location.
+- New registers automatically receive a default `DRAWER` location.
+- Location names must be unique within a register.
+- A location with a non-zero balance cannot be archived.
+- The default location cannot be archived until another active default is assigned.
+- Location balances use integer cents only.
+- Location balances must not become negative when negative balances are disallowed.
+- Do not automatically classify locations based on names such as `"Safe"` or `"Kasse"`.
 
 Suggested unique constraints and indexes:
 
@@ -167,7 +163,7 @@ Use the project’s current ID, normalization, timestamp, and optimistic-concurr
 Add a location reference to `CashEntry`:
 
 ```ts
-cashLocationId: string
+cashLocationId: string;
 ```
 
 A normal cash entry affects both:
@@ -206,9 +202,9 @@ Use an expand-and-contract migration:
 5. Update API clients and use cases.
 6. Make `cashLocationId` required after backfill.
 7. Keep a temporary compatibility path in request schemas if required:
+   - when an older client omits `cashLocationId`, resolve the register’s default location
+   - always return the resolved location in responses
 
-   * when an older client omits `cashLocationId`, resolve the register’s default location
-   * always return the resolved location in responses
 8. Remove compatibility behavior only after all active clients have migrated.
 
 For existing registers named `"Safe"`, do not automatically merge or convert them. They may represent real independent cashbooks. Preserve them and document that conversion into a location requires an explicit future migration workflow.
@@ -220,11 +216,7 @@ For existing registers named `"Safe"`, do not automatically merge or convert the
 Add a separate immutable aggregate or domain entity:
 
 ```ts
-type CashLocationTransferReason =
-  | "SAFE_DROP"
-  | "CHANGE_FLOAT"
-  | "REORGANIZATION"
-  | "OTHER";
+type CashLocationTransferReason = "SAFE_DROP" | "CHANGE_FLOAT" | "REORGANIZATION" | "OTHER";
 
 type CashLocationTransfer = {
   id: string;
@@ -254,11 +246,11 @@ Do not represent a location transfer as two ordinary `CashEntry` records.
 
 Doing so would pollute:
 
-* Kassenbericht calculations
-* cash income and expense totals
-* DATEV exports
-* tax reports
-* monthly cashbook summaries
+- Kassenbericht calculations
+- cash income and expense totals
+- DATEV exports
+- tax reports
+- monthly cashbook summaries
 
 A location transfer belongs in a dedicated transfer ledger.
 
@@ -266,18 +258,18 @@ A location transfer belongs in a dedicated transfer ledger.
 
 A transfer must satisfy all of the following:
 
-* Amount is greater than zero.
-* Source and destination differ.
-* Source and destination belong to the same register.
-* Source and destination belong to the same tenant and workspace.
-* Both locations are active.
-* The source location has sufficient cash when negative balances are disallowed.
-* The transfer does not change `CashRegister.currentBalanceCents`.
-* The source location decreases by the amount.
-* The destination location increases by the amount.
-* No tax code, VAT amount, income category, or expense category is attached.
-* Confirmed transfers are immutable.
-* Incorrect transfers are reversed, never edited or deleted.
+- Amount is greater than zero.
+- Source and destination differ.
+- Source and destination belong to the same register.
+- Source and destination belong to the same tenant and workspace.
+- Both locations are active.
+- The source location has sufficient cash when negative balances are disallowed.
+- The transfer does not change `CashRegister.currentBalanceCents`.
+- The source location decreases by the amount.
+- The destination location increases by the amount.
+- No tax code, VAT amount, income category, or expense category is attached.
+- Confirmed transfers are immutable.
+- Incorrect transfers are reversed, never edited or deleted.
 
 Transfer effect:
 
@@ -323,13 +315,13 @@ Use the repository’s established row-locking approach.
 
 The implementation must be safe against:
 
-* duplicate requests
-* retries
-* two concurrent transfers from the same source
-* concurrent entry creation and location transfer
-* concurrent day-close submission
-* cross-tenant IDs
-* stale frontend balances
+- duplicate requests
+- retries
+- two concurrent transfers from the same source
+- concurrent entry creation and location transfer
+- concurrent day-close submission
+- cross-tenant IDs
+- stale frontend balances
 
 Every write endpoint must use the existing idempotency mechanism. Repeating the same idempotency key must return the original deterministic result without applying the transfer twice.
 
@@ -430,9 +422,9 @@ Safe → Drawer
 
 is an internal location transfer, not:
 
-* `OPENING_FLOAT`
-* `OWNER_DEPOSIT`
-* `BANK_WITHDRAWAL`
+- `OPENING_FLOAT`
+- `OWNER_DEPOSIT`
+- `BANK_WITHDRAWAL`
 
 ```text
 Personal wallet → Drawer
@@ -477,13 +469,13 @@ A transfer can be reversed only once.
 
 A reversal must:
 
-* use the same register
-* swap source and destination
-* use the same amount
-* preserve the original business date unless post-close correction rules require the current correction date
-* include a correction reason
-* pass all balance validations
-* produce audit and outbox records
+- use the same register
+- swap source and destination
+- use the same amount
+- preserve the original business date unless post-close correction rules require the current correction date
+- include a correction reason
+- pass all balance validations
+- produce audit and outbox records
 
 After a day is closed, follow the same post-close correction rules as cash entries. Do not silently alter a closed day.
 
@@ -572,13 +564,13 @@ Denomination counting remains optional unless existing business rules require it
 
 If the existing day-close process creates `CLOSING_ADJUSTMENT` entries:
 
-* require explicit user confirmation
-* create location-specific adjustment entries
-* create one adjustment for each non-zero location difference
-* use no VAT
-* link adjustments to the day close
-* ensure the sum of location adjustments equals the register-level difference
-* ensure the next day starts from the counted balances
+- require explicit user confirmation
+- create location-specific adjustment entries
+- create one adjustment for each non-zero location difference
+- use no VAT
+- link adjustments to the day close
+- ensure the sum of location adjustments equals the register-level difference
+- ensure the next day starts from the counted balances
 
 If the existing implementation only records a difference without changing balances, preserve that policy and extend it by location. Do not introduce silent automatic adjustments.
 
@@ -602,23 +594,23 @@ Counted cash in any other location
 
 Internal transfers must be excluded from:
 
-* cash revenue
-* cash expenses
-* private deposits
-* private withdrawals
-* bank deposits
-* bank withdrawals
-* VAT totals
-* DATEV accounting lines
-* Kassenbericht inflow/outflow arithmetic
+- cash revenue
+- cash expenses
+- private deposits
+- private withdrawals
+- bank deposits
+- bank withdrawals
+- VAT totals
+- DATEV accounting lines
+- Kassenbericht inflow/outflow arithmetic
 
 Internal transfers may appear in:
 
-* audit packs
-* operational transfer reports
-* location ledgers
-* day-close reconciliation detail
-* user activity timelines
+- audit packs
+- operational transfer reports
+- location ledgers
+- day-close reconciliation detail
+- user activity timelines
 
 Example:
 
@@ -651,8 +643,8 @@ Internal transfers must not appear as income or expenses.
 
 Provide either:
 
-* a separate `"Internal cash transfers"` section, or
-* a separate transfer CSV in the audit pack
+- a separate `"Internal cash transfers"` section, or
+- a separate transfer CSV in the audit pack
 
 Fields should include:
 
@@ -769,15 +761,15 @@ Extend existing entry and day-close endpoints to accept location data.
 
 Write endpoints must enforce:
 
-* authentication
-* authorization
-* tenant scope
-* workspace scope
-* idempotency
-* trace ID
-* validation
-* audit
-* outbox
+- authentication
+- authorization
+- tenant scope
+- workspace scope
+- idempotency
+- trace ID
+- validation
+- audit
+- outbox
 
 Suggested stable error codes:
 
@@ -807,27 +799,27 @@ Suggested policy:
 
 ## Employee
 
-* view cash locations
-* view cash position
-* propose a transfer
-* record a transfer within configured limits
-* enter day-close counts
+- view cash locations
+- view cash position
+- propose a transfer
+- record a transfer within configured limits
+- enter day-close counts
 
 ## Manager
 
-* create and update locations
-* approve transfers over a threshold
-* reverse transfers
-* submit day close
-* acknowledge differences
+- create and update locations
+- approve transfers over a threshold
+- reverse transfers
+- submit day close
+- acknowledge differences
 
 ## Owner/Admin
 
-* archive locations
-* change default location
-* configure approval thresholds
-* manage multiple registers
-* export audit data
+- archive locations
+- change default location
+- configure approval thresholds
+- manage multiple registers
+- export audit data
 
 Use existing RBAC or ABAC infrastructure rather than building a new permission system.
 
@@ -908,15 +900,15 @@ Locations are a breakdown, not separate accounting registers.
 
 When a register has only its default drawer:
 
-* show the normal simple register interface
-* do not force the user to understand locations
-* offer `"Add a safe or another cash location"` under settings
+- show the normal simple register interface
+- do not force the user to understand locations
+- offer `"Add a safe or another cash location"` under settings
 
 When a register has multiple locations:
 
-* show the location breakdown
-* show a `"Move cash"` action
-* count all locations during day close
+- show the location breakdown
+- show a `"Move cash"` action
+- count all locations during day close
 
 ## Move cash flow
 
@@ -1044,12 +1036,12 @@ Difference €0.00
 
 On smaller screens:
 
-* one location card per section
-* large numeric input
-* numeric keyboard
-* sticky total and confirm action
-* no wide tables
-* clear warning for uncounted locations
+- one location card per section
+- large numeric input
+- numeric keyboard
+- sticky total and confirm action
+- no wide tables
+- clear warning for uncounted locations
 
 ---
 
@@ -1159,13 +1151,13 @@ Do not write before explicit confirmation.
 
 Log:
 
-* model proposal
-* tool arguments
-* confidence
-* clarification answers
-* confirmation
-* execution result
-* dismissal or cancellation
+- model proposal
+- tool arguments
+- confidence
+- clarification answers
+- confirmation
+- execution result
+- dismissal or cancellation
 
 Suggested assistant explanation:
 
@@ -1237,12 +1229,12 @@ RegisterCashPosition
 
 It should efficiently return:
 
-* total register balance
-* location balances
-* expected balance by location
-* latest location transfers
-* current open day status
-* unresolved difference warnings
+- total register balance
+- location balances
+- expected balance by location
+- latest location transfers
+- current open day status
+- unresolved difference warnings
 
 Do not calculate dashboard aggregates through repeated N+1 queries.
 
@@ -1256,38 +1248,38 @@ Use indexes or a dedicated query adapter following existing reporting patterns.
 
 Cover:
 
-* creating a default drawer
-* rejecting duplicate location names
-* rejecting archive with non-zero balance
-* changing the default location
-* transfer between valid locations
-* register total remains unchanged
-* source decreases
-* destination increases
-* same-location transfer rejected
-* zero amount rejected
-* negative amount rejected
-* insufficient source balance rejected
-* different-register transfer rejected
-* cross-tenant transfer rejected
-* inactive location rejected
-* reversal creates opposite transfer
-* second reversal rejected
-* register/location sum invariant
+- creating a default drawer
+- rejecting duplicate location names
+- rejecting archive with non-zero balance
+- changing the default location
+- transfer between valid locations
+- register total remains unchanged
+- source decreases
+- destination increases
+- same-location transfer rejected
+- zero amount rejected
+- negative amount rejected
+- insufficient source balance rejected
+- different-register transfer rejected
+- cross-tenant transfer rejected
+- inactive location rejected
+- reversal creates opposite transfer
+- second reversal rejected
+- register/location sum invariant
 
 ## Use-case tests
 
 Cover:
 
-* Unit of Work is used
-* repository locks are obtained
-* idempotency prevents duplicate transfers
-* audit event is written
-* outbox event is written
-* domain errors map correctly
-* closed-day restrictions are respected
-* post-close correction behavior is explicit
-* old clients default to the register’s default location
+- Unit of Work is used
+- repository locks are obtained
+- idempotency prevents duplicate transfers
+- audit event is written
+- outbox event is written
+- domain errors map correctly
+- closed-day restrictions are respected
+- post-close correction behavior is explicit
+- old clients default to the register’s default location
 
 ## Repository integration tests
 
@@ -1295,16 +1287,16 @@ Run against PostgreSQL.
 
 Cover:
 
-* migration backfill
-* tenant isolation
-* workspace isolation
-* row locking
-* concurrent transfers from one source
-* concurrent cash entry and transfer
-* deterministic lock ordering
-* uniqueness constraints
-* location balance updates
-* rollback on any failure
+- migration backfill
+- tenant isolation
+- workspace isolation
+- row locking
+- concurrent transfers from one source
+- concurrent cash entry and transfer
+- deterministic lock ordering
+- uniqueness constraints
+- location balance updates
+- rollback on any failure
 
 Concurrency test:
 
@@ -1325,41 +1317,41 @@ No location becomes negative.
 
 Cover:
 
-* request validation
-* response DTOs
-* idempotency headers
-* authorization
-* Problem Details responses
-* trace IDs
-* pagination for transfer history
+- request validation
+- response DTOs
+- idempotency headers
+- authorization
+- Problem Details responses
+- trace IDs
+- pagination for transfer history
 
 ## Frontend tests
 
 Cover:
 
-* register total and location breakdown
-* adding a safe
-* transfer preview
-* transfer confirmation
-* mobile layout
-* stale-balance error handling
-* day-close count by location
-* uncounted-location warning
-* i18n for DE, EN, and VI
+- register total and location breakdown
+- adding a safe
+- transfer preview
+- transfer confirmation
+- mobile layout
+- stale-balance error handling
+- day-close count by location
+- uncounted-location warning
+- i18n for DE, EN, and VI
 
 ## Assistant tests
 
 Cover:
 
-* ambiguous withdrawal causes clarification
-* no write before explicit confirmation
-* `"business safe"` produces location transfer
-* `"personal use"` produces owner withdrawal
-* `"bank"` produces bank deposit
-* `"€30 came from safe"` does not create owner deposit
-* duplicate confirmation remains idempotent
-* cancellation makes no write
-* tool execution is audited
+- ambiguous withdrawal causes clarification
+- no write before explicit confirmation
+- `"business safe"` produces location transfer
+- `"personal use"` produces owner withdrawal
+- `"bank"` produces bank deposit
+- `"€30 came from safe"` does not create owner deposit
+- duplicate confirmation remains idempotent
+- cancellation makes no write
+- tool execution is audited
 
 ---
 
@@ -1483,11 +1475,11 @@ Bar Register
 
 Each has:
 
-* its own default drawer
-* its own entries
-* its own current balance
-* its own day close
-* its own Kassenbericht
+- its own default drawer
+- its own entries
+- its own current balance
+- its own day close
+- its own Kassenbericht
 
 A transfer across different registers must not use `CashLocationTransfer`.
 
@@ -1499,17 +1491,17 @@ Reject it with a register mismatch error until a dedicated register-to-register 
 
 Do not implement the following in this change:
 
-* TSE checkout processing
-* DSFinV-K POS transaction generation
-* customer payment capture
-* POS sale finalization
-* multi-cashier shift management
-* automatic merging of existing registers
-* register-to-register transfer accounting
-* bank statement matching
-* enterprise cash-deposit bag workflows
-* silent AI mutations
-* destructive edits to confirmed entries or transfers
+- TSE checkout processing
+- DSFinV-K POS transaction generation
+- customer payment capture
+- POS sale finalization
+- multi-cashier shift management
+- automatic merging of existing registers
+- register-to-register transfer accounting
+- bank statement matching
+- enterprise cash-deposit bag workflows
+- silent AI mutations
+- destructive edits to confirmed entries or transfers
 
 Corely Cash remains a cashbook and guided cash-management product, not a full POS implementation.
 
@@ -1580,17 +1572,17 @@ After implementation, provide:
 
 1. Summary of the domain change.
 2. List of changed files grouped by:
+   - contracts
+   - database
+   - domain
+   - application
+   - infrastructure
+   - HTTP
+   - AI tools
+   - frontend
+   - tests
+   - documentation
 
-   * contracts
-   * database
-   * domain
-   * application
-   * infrastructure
-   * HTTP
-   * AI tools
-   * frontend
-   * tests
-   * documentation
 3. Migration and backward-compatibility explanation.
 4. API changes.
 5. Screens and user flows added.
@@ -1599,11 +1591,10 @@ After implementation, provide:
 8. Exact command results.
 9. Remaining risks or follow-up work.
 10. Confirmation that:
-
-    * drawer-to-safe transfers do not alter register total
-    * internal transfers do not enter Kassenbericht income/expense calculations
-    * existing entries were assigned to a default location
-    * AI performs no write before confirmation
-    * tenant and workspace isolation are covered by tests
+    - drawer-to-safe transfers do not alter register total
+    - internal transfers do not enter Kassenbericht income/expense calculations
+    - existing entries were assigned to a default location
+    - AI performs no write before confirmation
+    - tenant and workspace isolation are covered by tests
 
 Do not stop after producing a plan. Implement the feature end to end.
