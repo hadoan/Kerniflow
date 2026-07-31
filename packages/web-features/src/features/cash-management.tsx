@@ -11,6 +11,7 @@ import {
   CashRegistersScreen,
   DailyCloseScreen,
   KassenberichtScreen,
+  KassenabrechnungScreen,
 } from "../modules/cash-management";
 export { CASH_MANAGEMENT_JOURNEY } from "../modules/cash-management/journeys/cash-management-journey";
 import type { FeatureNavItem, FeatureRoute } from "@corely/web-features/types";
@@ -40,6 +41,10 @@ export const cashManagementRoutes = (): FeatureRoute[] => [
   {
     path: "/cash/registers/:id/kassenbericht",
     element: withPermission("cash.read", <KassenberichtScreen />),
+  },
+  {
+    path: "/cash/registers/:id/kassenabrechnung",
+    element: withPermission("cash.read", <KassenabrechnungScreen />),
   },
   {
     path: "/cash/registers/:id/exports",

@@ -20,6 +20,7 @@ import {
   CreateCashRegisterSchema,
   ExportCashBookInputSchema,
   GetCashDashboardQuerySchema,
+  GetCashReconciliationReportQuerySchema,
   ListCashDayClosesQuerySchema,
   ListCashEntriesQuerySchema,
   ListCashRegistersQuerySchema,
@@ -51,6 +52,7 @@ import { ListCashDayClosesQueryUseCase } from "../application/use-cases/list-cas
 import { GetCashExportArtifactQueryUseCase } from "../application/use-cases/get-cash-export-artifact.query";
 import { GetCashDashboardQueryUseCase } from "../application/use-cases/get-cash-dashboard.query";
 import { GetCashReportPreviewQueryUseCase } from "../application/use-cases/get-cash-report-preview.query";
+import { GetCashReconciliationReportQueryUseCase } from "../application/use-cases/get-cash-reconciliation-report.query";
 import { ConfirmCashEntryUseCase } from "../application/use-cases/confirm-cash-entry.usecase";
 import { createKassenberichtPdf } from "./kassenbericht-pdf.generator";
 
@@ -75,6 +77,7 @@ export class CashManagementController {
     private readonly getExportArtifactQuery: GetCashExportArtifactQueryUseCase,
     private readonly getCashDashboardQuery: GetCashDashboardQueryUseCase,
     private readonly getCashReportPreviewQuery: GetCashReportPreviewQueryUseCase,
+    private readonly getCashReconciliationReportQuery: GetCashReconciliationReportQueryUseCase,
     private readonly confirmCashEntryUseCase: ConfirmCashEntryUseCase
   ) {}
 
@@ -232,6 +235,18 @@ export class CashManagementController {
       buildUseCaseContext(req)
     );
     return mapResultToHttp(result);
+  }
+
+  @Get("cash-registers/:id/kassenabrechnung")
+  async getKassenabrechnung(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Query() query: Record<string, unknown>
+  ) {
+    const input = GetCashReconciliationReportQuerySchema.parse({ ...query, registerId });
+    return mapResultToHttp(
+      await this.getCashReconciliationReportQuery.execute(input, buildUseCaseContext(req))
+    );
   }
 
   @Get("cash-registers/:id/kassenbericht/:dayKey/pdf")

@@ -158,6 +158,9 @@ export function CashRegisterDetailScreen() {
           >
             {t("cash.ui.registerDetail.kassenbericht")}
           </Button>
+          <Button variant="outline" asChild className="w-full sm:w-auto">
+            <Link to={`/cash/registers/${id}/kassenabrechnung`}>Kassenabrechnung</Link>
+          </Button>
           {canExportCash ? (
             <Button variant="outline" asChild className="w-full sm:w-auto">
               <Link to={`/cash/registers/${id}/exports`}>{t("cash.ui.registerDetail.export")}</Link>
