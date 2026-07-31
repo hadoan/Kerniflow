@@ -31,11 +31,15 @@ export const CashClarificationRenderer: React.FC<ToolRendererProps> = ({
 
   const reqInput = input as RequestCashClarificationInput | undefined;
   if (!reqInput?.clarificationType) {
-    return <span className="text-xs text-muted-foreground">{t("assistant.loadingClarification", "Loading clarification...")}</span>;
+    return (
+      <span className="text-xs text-muted-foreground">
+        {t("assistant.loadingClarification", "Loading clarification...")}
+      </span>
+    );
   }
 
   const locale = (i18n.language ?? "en") as "en" | "de" | "vi";
-  
+
   const { question: questionText, choices } = resolveCashClarificationContent({
     type: reqInput.clarificationType,
     allowedChoiceValues: reqInput.allowedChoiceValues || [],

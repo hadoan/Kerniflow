@@ -36,10 +36,7 @@ async function main() {
       const openingBalanceCents = previousEffectiveClosing;
 
       // Filter entries for this day
-      const dayEntries = register.entries.filter(
-        (e) =>
-          e.dayKey === dayClose.dayKey
-      );
+      const dayEntries = register.entries.filter((e) => e.dayKey === dayClose.dayKey);
 
       let inflows = 0;
       let outflows = 0;

@@ -372,15 +372,17 @@ export const AttachReceiptToolInputSchema = z
     }
   });
 
-export const CountedCashToolInputSchema = CountedCashToolInputBaseSchema.superRefine((value, ctx) => {
-  if (value.countedBalanceCents === undefined && value.denominationCounts.length === 0) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "countedBalanceCents or denominationCounts is required",
-      path: ["countedBalanceCents"],
-    });
+export const CountedCashToolInputSchema = CountedCashToolInputBaseSchema.superRefine(
+  (value, ctx) => {
+    if (value.countedBalanceCents === undefined && value.denominationCounts.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "countedBalanceCents or denominationCounts is required",
+        path: ["countedBalanceCents"],
+      });
+    }
   }
-});
+);
 
 export const CloseCashDayToolInputSchema = CountedCashToolInputBaseSchema.partial({
   countedBalanceCents: true,
@@ -434,14 +436,7 @@ export const GetCashReportPreviewToolInputSchema = RegisterScopedSchema.extend({
   businessDate: localDateSchema.optional(),
 });
 
-export {
-  validationError,
-  mapToolResult,
-  buildToolCtx,
-  isErr,
-  ok,
-  err
-};
+export { validationError, mapToolResult, buildToolCtx, isErr, ok, err };
 
 export {
   ExportCashBookFormatSchema,
@@ -457,6 +452,5 @@ export {
   CashMovementExtractionSchema,
   type AnalyzeCashMovementResult,
 } from "@corely/contracts";
-
 
 export * from "./cash-tools.helpers";
