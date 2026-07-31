@@ -21,6 +21,7 @@ import {
   ExportCashBookInputSchema,
   GetCashDashboardQuerySchema,
   GetCashReconciliationReportQuerySchema,
+  TranslateCashReconciliationDescriptionsInputSchema,
   ListCashDayClosesQuerySchema,
   ListCashEntriesQuerySchema,
   ListCashRegistersQuerySchema,
@@ -53,6 +54,7 @@ import { GetCashExportArtifactQueryUseCase } from "../application/use-cases/get-
 import { GetCashDashboardQueryUseCase } from "../application/use-cases/get-cash-dashboard.query";
 import { GetCashReportPreviewQueryUseCase } from "../application/use-cases/get-cash-report-preview.query";
 import { GetCashReconciliationReportQueryUseCase } from "../application/use-cases/get-cash-reconciliation-report.query";
+import { CashDescriptionTranslationService } from "../application/services/cash-description-translation.service";
 import { ConfirmCashEntryUseCase } from "../application/use-cases/confirm-cash-entry.usecase";
 import { createKassenberichtPdf } from "./kassenbericht-pdf.generator";
 
@@ -78,6 +80,7 @@ export class CashManagementController {
     private readonly getCashDashboardQuery: GetCashDashboardQueryUseCase,
     private readonly getCashReportPreviewQuery: GetCashReportPreviewQueryUseCase,
     private readonly getCashReconciliationReportQuery: GetCashReconciliationReportQueryUseCase,
+    private readonly cashDescriptionTranslation: CashDescriptionTranslationService,
     private readonly confirmCashEntryUseCase: ConfirmCashEntryUseCase
   ) {}
 
@@ -247,6 +250,29 @@ export class CashManagementController {
     return mapResultToHttp(
       await this.getCashReconciliationReportQuery.execute(input, buildUseCaseContext(req))
     );
+  }
+
+  @Post("cash-registers/:id/kassenabrechnung/translate")
+  async translateKassenabrechnung(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Body() body: unknown
+  ) {
+    const period = TranslateCashReconciliationDescriptionsInputSchema.parse(body);
+    const ctx = buildUseCaseContext(req);
+    const { report } = mapResultToHttp(
+      await this.getCashReconciliationReportQuery.execute({ registerId, ...period }, ctx)
+    );
+    const translations = await this.cashDescriptionTranslation.translateToGerman(
+      ctx.tenantId!,
+      report.rows.map((row) => row.description)
+    );
+    return {
+      translations: report.rows.reduce<Record<string, string>>((output, row) => {
+        output[row.id] = translations.get(row.description) ?? row.description;
+        return output;
+      }, {}),
+    };
   }
 
   @Get("cash-registers/:id/kassenbericht/:dayKey/pdf")

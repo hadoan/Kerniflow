@@ -117,13 +117,24 @@ export class ReverseCashEntryUseCase extends BaseUseCase<
       );
     }
 
-    const dayKey = input.dayKey ?? original.dayKey;
+    // A reversal is a new, immutable correction. It must be recorded on the
+    // current business day rather than silently changing a historical cash day.
+    const occurredAt = new Date();
+    const dayKey = occurredAt.toISOString().slice(0, 10);
     const dayClose = await this.dayCloseRepo.findDayCloseByRegisterAndDay(
       tenantId,
       workspaceId,
       original.registerId,
       dayKey
     );
+
+    if (dayClose?.status === "SUBMITTED" || dayClose?.status === "LOCKED") {
+      throw new ValidationError(
+        `Day ${dayKey} is already closed`,
+        { dayKey, dayCloseId: dayClose.id },
+        "CashManagement:DayAlreadyClosed"
+      );
+    }
 
     const direction = reverseDirection(original.direction);
     const nextBalance = CashBalanceCalculator.applyDelta(register.currentBalanceCents, {
@@ -142,8 +153,6 @@ export class ReverseCashEntryUseCase extends BaseUseCase<
         "CashManagement:NegativeBalance"
       );
     }
-
-    const occurredAt = input.occurredAt ? new Date(input.occurredAt) : new Date();
 
     const reversal = await this.unitOfWork.withinTransaction(async (tx) => {
       const entryNo = await this.entryRepo.nextEntryNo(tenantId, workspaceId, register.id, tx);
@@ -176,7 +185,7 @@ export class ReverseCashEntryUseCase extends BaseUseCase<
           sourceDocumentKind: original.sourceDocumentKind,
           referenceId: original.referenceId,
           reversalOfEntryId: original.id,
-          lockedByDayCloseId: dayClose?.id ?? null,
+          lockedByDayCloseId: null,
           createdByUserId: ctx.userId ?? "system",
         },
         tx

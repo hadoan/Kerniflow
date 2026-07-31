@@ -18,6 +18,14 @@ export const GetCashReconciliationReportQuerySchema = z
 export type GetCashReconciliationReportQuery = z.infer<
   typeof GetCashReconciliationReportQuerySchema
 >;
+export const TranslateCashReconciliationDescriptionsInputSchema = z
+  .object({ fromDate: LocalDateSchema, toDate: LocalDateSchema })
+  .refine((value) => value.fromDate <= value.toDate, {
+    message: "fromDate must not be after toDate",
+  });
+export type TranslateCashReconciliationDescriptionsInput = z.infer<
+  typeof TranslateCashReconciliationDescriptionsInputSchema
+>;
 
 export const CashReconciliationReportDtoSchema = z.object({
   register: z.object({ id: z.string(), name: z.string(), currency: z.string() }),

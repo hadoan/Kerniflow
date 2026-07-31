@@ -310,6 +310,8 @@ const baseEntry: CashEntryEntity = {
 
 describe("cash-management use cases", () => {
   it("reversal creates a new entry and marks original as reversed", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-31T10:00:00.000Z"));
     const entries: CashEntryEntity[] = [{ ...baseEntry }];
     let registerBalance = 10000;
 
@@ -385,7 +387,11 @@ describe("cash-management use cases", () => {
     expect(entries[0].reversedByEntryId).toBe("entry-reversal-1");
     expect(entries[1].direction).toBe(CashEntryDirection.OUT);
     expect(entries[1].reversalOfEntryId).toBe("entry-1");
+    expect(entries[1].dayKey).toBe("2026-07-31");
+    expect(entries[1].occurredAt).toEqual(new Date("2026-07-31T10:00:00.000Z"));
+    expect(entries[1].lockedByDayCloseId).toBeNull();
     expect(registerBalance).toBe(7500);
+    vi.useRealTimers();
   });
 
   it("day close with difference creates closing adjustment entry", async () => {

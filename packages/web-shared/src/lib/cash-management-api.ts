@@ -149,6 +149,21 @@ export class CashManagementApi {
     );
   }
 
+  async translateKassenabrechnung(
+    registerId: string,
+    fromDate: string,
+    toDate: string
+  ): Promise<{ translations: Record<string, string> }> {
+    return apiClient.post(
+      `/cash-registers/${registerId}/kassenabrechnung/translate`,
+      { fromDate, toDate },
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
   async downloadKassenberichtPdf(registerId: string, dayKey: string): Promise<Blob> {
     return apiClient.getBlob(`/cash-registers/${registerId}/kassenbericht/${dayKey}/pdf`, {
       correlationId: apiClient.generateCorrelationId(),

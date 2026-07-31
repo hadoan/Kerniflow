@@ -49,6 +49,7 @@ import { ConfirmCashEntryUseCase } from "./application/use-cases/confirm-cash-en
 import { AddEntryUseCase } from "./application/use-cases/add-entry.usecase";
 import { GetMonthlyCashReportQueryUseCase } from "./application/use-cases/get-monthly-cash-report.query";
 import { GetCashReconciliationReportQueryUseCase } from "./application/use-cases/get-cash-reconciliation-report.query";
+import { CashDescriptionTranslationService } from "./application/services/cash-description-translation.service";
 import { ResolveCashWorkspaceUseCase } from "./application/use-cases/copilot/resolve-cash-workspace.usecase";
 import { OpenCashDayWorkspaceUseCase } from "./application/use-cases/copilot/open-cash-day-workspace.usecase";
 import { ResolveCashMovementNextActionUseCase } from "./application/use-cases/copilot/resolve-cash-movement-next-action.usecase";
@@ -108,6 +109,7 @@ import { ConfirmHandoffUseCase } from "./application/use-cases/confirm-handoff.u
     AddEntryUseCase,
     GetMonthlyCashReportQueryUseCase,
     GetCashReconciliationReportQueryUseCase,
+    CashDescriptionTranslationService,
     ResolveCashWorkspaceUseCase,
     OpenCashDayWorkspaceUseCase,
     ResolveCashMovementNextActionUseCase,
