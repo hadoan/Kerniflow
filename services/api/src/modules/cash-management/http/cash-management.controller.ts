@@ -164,7 +164,7 @@ export class CashManagementController {
     const idempotencyKey = resolveIdempotencyKey(req);
 
     if (!idempotencyKey) {
-      throw new ValidationError("Idempotency key is required");
+      throw new BadRequestException("Idempotency key is required");
     }
 
     const result = await this.confirmCashEntryUseCase.execute(

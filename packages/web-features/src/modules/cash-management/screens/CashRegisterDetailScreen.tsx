@@ -145,21 +145,19 @@ export function CashRegisterDetailScreen() {
               </Link>
             </Button>
           ) : null}
-          {lastClosed ? (
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                if (hasUnclosedDays) {
-                  setShowUnclosedModal(true);
-                } else {
-                  navigate(`/cash/registers/${id}/kassenbericht?day=${lastClosed.dayKey}`);
-                }
-              }}
-            >
-              {t("cash.ui.registerDetail.kassenbericht")}
-            </Button>
-          ) : null}
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => {
+              if (hasUnclosedDays) {
+                setShowUnclosedModal(true);
+              } else if (lastClosed) {
+                navigate(`/cash/registers/${id}/kassenbericht?day=${lastClosed.dayKey}`);
+              }
+            }}
+          >
+            {t("cash.ui.registerDetail.kassenbericht")}
+          </Button>
           {canExportCash ? (
             <Button variant="outline" asChild className="w-full sm:w-auto">
               <Link to={`/cash/registers/${id}/exports`}>{t("cash.ui.registerDetail.export")}</Link>

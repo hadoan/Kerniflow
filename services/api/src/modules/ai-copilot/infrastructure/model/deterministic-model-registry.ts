@@ -32,6 +32,19 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
   public readonly modelId = "deterministic-model";
   public readonly defaultObjectGenerationMode = "json";
 
+  get supportsImageUrls() {
+    return false;
+  }
+  get supportsStructuredOutputs() {
+    return true;
+  }
+  get supportsToolCalls() {
+    return true;
+  }
+  get supportedUrls(): any {
+    return {};
+  }
+
   constructor(private readonly tenantId: string) {}
 
   async doGenerate(): Promise<any> {
@@ -51,22 +64,6 @@ export class DeterministicLanguageModelV1 implements LanguageModelV2 {
     const stream = new ReadableStream({
       async start(controller) {
         const lastMessage = options.prompt?.[options.prompt.length - 1];
-        if (lastMessage && lastMessage.role === "tool") {
-          console.log(`[DeterministicLanguageModelV1] Received tool result loop, returning stop`);
-          await new Promise((r) => setTimeout(r, 500));
-          controller.enqueue({
-            type: "finish",
-            finishReason: "stop",
-            usage: {
-              promptTokens: 10,
-              completionTokens: 10,
-              inputTokens: { total: 10 },
-              outputTokens: { total: 10 },
-            },
-          });
-          controller.close();
-          return;
-        }
 
         console.log(
           `[DeterministicLanguageModelV1] Executing step ${currentStep} of scenario ${scenario?.id}`

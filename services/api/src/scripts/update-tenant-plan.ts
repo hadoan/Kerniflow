@@ -25,8 +25,6 @@ async function main() {
         data: {
           id: "ba-" + Date.now(),
           tenantId,
-          email,
-          countryCode: "US",
         },
       });
     }

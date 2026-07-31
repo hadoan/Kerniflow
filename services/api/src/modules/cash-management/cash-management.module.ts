@@ -50,6 +50,8 @@ import { AddEntryUseCase } from "./application/use-cases/add-entry.usecase";
 import { GetMonthlyCashReportQueryUseCase } from "./application/use-cases/get-monthly-cash-report.query";
 import { ResolveCashWorkspaceUseCase } from "./application/use-cases/copilot/resolve-cash-workspace.usecase";
 import { OpenCashDayWorkspaceUseCase } from "./application/use-cases/copilot/open-cash-day-workspace.usecase";
+import { ResolveCashMovementNextActionUseCase } from "./application/use-cases/copilot/resolve-cash-movement-next-action.usecase";
+import { AnswerCashMovementResolutionUseCase } from "./application/use-cases/copilot/answer-cash-movement-resolution.usecase";
 import { CashAssistantWorkspaceController } from "./adapters/http/copilot/cash-assistant-workspace.controller";
 
 import { ConfirmHandoffUseCase } from "./application/use-cases/confirm-handoff.usecase";
@@ -106,6 +108,8 @@ import { ConfirmHandoffUseCase } from "./application/use-cases/confirm-handoff.u
     GetMonthlyCashReportQueryUseCase,
     ResolveCashWorkspaceUseCase,
     OpenCashDayWorkspaceUseCase,
+    ResolveCashMovementNextActionUseCase,
+    AnswerCashMovementResolutionUseCase,
   ],
   exports: [
     ListCashRegistersQueryUseCase,
@@ -131,6 +135,8 @@ import { ConfirmHandoffUseCase } from "./application/use-cases/confirm-handoff.u
     PrepareCashEntryConfirmationUseCase,
     ConfirmCashEntryUseCase,
     OpenCashDayWorkspaceUseCase,
+    ResolveCashMovementNextActionUseCase,
+    AnswerCashMovementResolutionUseCase,
   ],
 })
 export class CashManagementModule {}

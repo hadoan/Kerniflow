@@ -41,6 +41,12 @@ const receiptRequiredTypes = new Set<string>([
 const toDayKey = (value?: string): string =>
   value ? value.slice(0, 10) : new Date().toISOString().slice(0, 10);
 
+const previousDayKey = (dayKey: string): string => {
+  const date = new Date(`${dayKey}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return date.toISOString().slice(0, 10);
+};
+
 @RequireTenant()
 @Injectable()
 export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
@@ -87,15 +93,22 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
 
     const dayKey = toDayKey(input.businessDate);
 
-    const [entries, dayClose, previousDayCloseResult] = await Promise.all([
-      this.entryRepo.listEntries(tenantId, workspaceId, {
-        registerId: register.id,
-        dayKeyFrom: dayKey,
-        dayKeyTo: dayKey,
-      }),
-      this.dayCloseRepo.findDayCloseByRegisterAndDay(tenantId, workspaceId, register.id, dayKey),
-      this.dayCloseRepo.listDayCloses(tenantId, workspaceId, { registerId: register.id }),
-    ]);
+    const [entries, dayClose, previousDayCloseResult, ledgerOpeningBalanceCents] =
+      await Promise.all([
+        this.entryRepo.listEntries(tenantId, workspaceId, {
+          registerId: register.id,
+          dayKeyFrom: dayKey,
+          dayKeyTo: dayKey,
+        }),
+        this.dayCloseRepo.findDayCloseByRegisterAndDay(tenantId, workspaceId, register.id, dayKey),
+        this.dayCloseRepo.listDayCloses(tenantId, workspaceId, { registerId: register.id }),
+        this.entryRepo.getExpectedBalanceAtDay(
+          tenantId,
+          workspaceId,
+          register.id,
+          previousDayKey(dayKey)
+        ),
+      ]);
 
     // Find the previous day close
     const allClosesAsc = previousDayCloseResult
@@ -107,13 +120,15 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     const previousClose =
       previousCloses.length > 0 ? previousCloses[previousCloses.length - 1] : null;
 
-    // Use previous day effective closing balance, or fallback to 0 if none (will be handled by repair script later if needed)
+    // Before the first submitted close, derive the opening balance from the ledger.
+    // Falling back to zero makes the preview disagree with the submit use case for
+    // registers that already have entries from earlier days.
     const openingBalanceCents =
       previousClose !== null
-        ? previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents
-        : 0;
+        ? (previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents)
+        : ledgerOpeningBalanceCents;
 
-    let goodsPurchasesCents = 0;
+    const goodsPurchasesCents = 0;
     let businessExpensesCents = 0;
     let privateWithdrawalsCents = 0;
     let bankDepositsCents = 0;
@@ -124,12 +139,11 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     let otherNonSalesCashInflowsCents = 0;
     let privateDepositsCents = 0;
     let bankWithdrawalsToCashCents = 0;
-    let cashRefundInflowsCents = 0;
+    const cashRefundInflowsCents = 0;
 
     for (const entry of entries) {
-      if (entry.type === "INTERNAL_TRANSFER" || entry.type === "LOCATION_TRANSFER" || entry.status === "CANCELLED" || entry.status === "DRAFT") {
-        continue;
-      }
+      // If there are specific types to skip, add them here.
+      // E.g., if there are transfers that don't affect cash flow in the same way, skip them.
       const amount = entry.amountCents;
       if (entry.direction === "OUT") {
         if (entry.type === "EXPENSE_CASH") {
@@ -151,8 +165,6 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
           privateDepositsCents += amount;
         } else if (entry.type === "BANK_WITHDRAWAL") {
           bankWithdrawalsToCashCents += amount;
-        } else if (entry.type === "REFUND_IN") {
-          cashRefundInflowsCents += amount;
         } else {
           otherNonSalesCashInflowsCents += amount;
         }
@@ -286,8 +298,8 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
       countedClosingCashCents === null
         ? "NOT_COUNTED"
         : cashDifferenceCents === 0
-        ? "COUNTED_MATCH"
-        : "COUNTED_DIFFERENCE";
+          ? "COUNTED_MATCH"
+          : "COUNTED_DIFFERENCE";
 
     const warnings: CashReportWarning[] = [];
     let status: "OPEN" | "CALCULATED" | "VERIFIED" | "LOCKED" = "OPEN";
@@ -315,7 +327,8 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
         warnings.push({
           code: "OTHER", // Should ideally be NEGATIVE_CALCULATED_CASH_SALES, mapped to OTHER for strict types
           severity: "WARNING",
-          message: "Calculated cash sales are negative. Check the opening balance and cash entries.",
+          message:
+            "Calculated cash sales are negative. Check the opening balance and cash entries.",
         });
       }
 

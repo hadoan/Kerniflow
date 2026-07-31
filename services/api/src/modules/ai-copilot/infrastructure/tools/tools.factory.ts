@@ -1,5 +1,5 @@
 import { Logger } from "@nestjs/common";
-import { tool, type Tool, type ToolCallOptions } from "ai";
+import { tool, type Tool } from "ai";
 import { SpanStatusCode } from "@opentelemetry/api";
 import type {
   DomainToolPort,
@@ -26,6 +26,7 @@ export function buildAiTools(
     activeAppId?: string;
     runId: string;
     userId: string;
+    latestUserMessage?: string;
     observability: ObservabilityPort;
     parentSpan: ObservabilitySpanRef;
   }
@@ -37,13 +38,12 @@ export function buildAiTools(
       candidate.kind === "server" && typeof candidate.execute === "function"
   );
 
-  const entries = serverTools.map<[string, Tool<unknown, unknown>]>((t) => [
+  const entries = serverTools.map<[string, Tool<any, any>]>((t) => [
     t.name,
-    tool({
+    (tool as any)({
       description: resolveToolDescription(t.description, t.descriptions, deps.locale),
-      inputSchema: t.inputSchema,
-      needsApproval: t.needsApproval,
-      execute: async (input: unknown, options: ToolCallOptions) => {
+      parameters: t.inputSchema,
+      execute: async (input: any, options: { toolCallId: string; messages?: any[] }) => {
         const { toolCallId } = options;
 
         await deps.toolExecutions.create({
@@ -81,6 +81,7 @@ export function buildAiTools(
             toolCallId,
             runId: deps.runId,
             messages: options.messages,
+            latestUserMessage: deps.latestUserMessage,
           });
           await deps.toolExecutions.complete(deps.tenantId, deps.runId, toolCallId, {
             status: "completed",
@@ -138,7 +139,7 @@ export function buildAiTools(
     }),
   ]);
 
-  return Object.fromEntries(entries);
+  return Object.fromEntries(entries) as any;
 }
 
 export const resolveToolLocale = (locale?: string): ToolLocale => {

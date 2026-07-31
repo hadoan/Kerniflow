@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import React, { useContext, useEffect, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   authClient,
@@ -7,23 +7,10 @@ import {
   type SignInData,
   type AuthResponse,
 } from "./auth-client";
+import { AuthContext, type AuthContextValue } from "./auth-context";
 import { setActiveWorkspaceId } from "@corely/web-shared/shared/workspaces/workspace-store";
 import { setPublicWorkspaceSlug } from "@corely/web-shared/shared/public-workspace";
 import { clearClientLocalData } from "./clear-local-data";
-
-interface AuthContextType {
-  user: CurrentUserResponse | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  signup: (data: SignUpData) => Promise<AuthResponse>;
-  signin: (data: SignInData) => Promise<AuthResponse>;
-  logout: () => Promise<void>;
-  switchTenant: (tenantId: string | null) => Promise<AuthResponse>;
-  refresh: () => Promise<void>;
-  error: string | null;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export interface AuthProviderProps {
   children: ReactNode;
@@ -154,7 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const value: AuthContextType = {
+  const value: AuthContextValue = {
     user,
     isLoading,
     isAuthenticated: !!user,
@@ -172,7 +159,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 /**
  * useAuth hook
  */
-export const useAuth = (): AuthContextType => {
+export const useAuth = (): AuthContextValue => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within AuthProvider");

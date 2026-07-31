@@ -1,5 +1,3 @@
-[dotenv@17.2.3] injecting env (59) from ../../.env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
-[dotenv@17.2.3] injecting env (0) from ../../.env.dev -- tip: ⚙️  override existing env vars with { override: true }
 -- AlterTable
 ALTER TABLE "accounting"."cash_day_closes" ADD COLUMN     "verificationStatus" TEXT NOT NULL DEFAULT 'NOT_COUNTED',
 ALTER COLUMN "countedBalanceCents" DROP NOT NULL,

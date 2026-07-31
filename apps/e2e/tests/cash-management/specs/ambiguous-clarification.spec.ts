@@ -38,7 +38,7 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
     await assistant.sendMessage("Hôm nay em rút hết 129,60 € ra.");
 
     // Assert question and quick-choice buttons render
-    await expect(assistant.page.getByText("Em lấy tiền ra để làm gì?")).toBeVisible();
+    await expect(assistant.page.getByText("Em lấy tiền ra để làm gì?").first()).toBeVisible();
     await expect(assistant.page.getByRole("button", { name: "Dùng cá nhân" })).toBeVisible();
     await expect(
       assistant.page.getByRole("button", { name: "Nộp vào tài khoản ngân hàng của tiệm" })
@@ -89,7 +89,7 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
 
     await assistant.sendMessage("Em nộp 400 € vào tài khoản.");
 
-    await expect(assistant.page.getByText("Anh/chị nộp vào tài khoản nào?")).toBeVisible();
+    await expect(assistant.page.getByText("Anh/chị nộp vào tài khoản nào?").first()).toBeVisible();
     await expect(
       assistant.page.getByRole("button", { name: "Tài khoản ngân hàng của tiệm" })
     ).toBeVisible();
@@ -123,7 +123,7 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
 
     await assistant.sendMessage("Em mua đồ 50 €.");
 
-    await expect(assistant.page.getByText("Khoản mua/chi phí này thuộc loại nào?")).toBeVisible();
+    await expect(assistant.page.getByText("Khoản mua/chi phí này thuộc loại nào?").first()).toBeVisible();
     await expect(
       assistant.page.getByRole("button", { name: "Mua hàng hóa / nguyên liệu cho tiệm" })
     ).toBeVisible();
@@ -156,7 +156,7 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
     await assistant.sendMessage("Nếu em lấy 100 € về dùng cá nhân thì ghi thế nào?");
 
     await expect(
-      assistant.page.getByText("Đây là giao dịch thực hay câu hỏi giả định?")
+      assistant.page.getByText("Đây là giao dịch thực hay câu hỏi giả định?").first()
     ).toBeVisible();
     await expect(
       assistant.page.getByRole("button", { name: "Giả định — chỉ để hiểu thôi" })
@@ -214,7 +214,7 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
 
     await assistant.page.getByRole("button", { name: "Dùng cá nhân" }).click();
     await expect(
-      assistant.page.getByText("Sau khi lấy tiền ra, em đếm thực tế trong ngăn kéo còn bao nhiêu?")
+      assistant.page.getByText("Sau khi lấy tiền ra, em đếm thực tế trong ngăn kéo còn bao nhiêu?").first()
     ).toBeVisible();
 
     // Verify still no entries in DB
@@ -250,6 +250,9 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
             },
           ],
         },
+        {
+          assistantText: "Mời bạn kiểm tra.",
+        }
       ],
     });
 
@@ -274,6 +277,9 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
             },
           ],
         },
+        {
+          assistantText: "Hoàn tất.",
+        }
       ],
     });
 
