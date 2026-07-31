@@ -4,6 +4,167 @@
 @tailwind components;
 @tailwind utilities;
 
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .cash-reconciliation-report,
+  .cash-reconciliation-report * {
+    visibility: visible;
+  }
+  .cash-reconciliation-report {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .cash-reconciliation-report thead {
+    display: table-header-group;
+  }
+  .cash-reconciliation-report tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+.cash-form {
+  width: min(100%, 210mm);
+  min-height: 297mm;
+  padding: 12mm;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8px;
+}
+.cash-form-header {
+  border-bottom: 1px solid #111;
+  padding-bottom: 4mm;
+}
+.cash-form-header h1 {
+  margin: 0 0 5mm;
+  font-size: 16px;
+  font-weight: 700;
+}
+.cash-form-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr 1fr;
+  gap: 3mm;
+}
+.cash-form-fields span {
+  border-bottom: 1px solid #999;
+  padding-bottom: 1mm;
+}
+.cash-form-fields b {
+  display: block;
+  font-size: 9px;
+  font-weight: 500;
+}
+.cash-form-table {
+  width: 100%;
+  margin-top: 4mm;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.cash-form-table th,
+.cash-form-table td {
+  border: 1px solid #777;
+  padding: 1mm;
+  vertical-align: middle;
+}
+.cash-form-table th {
+  font-size: 7px;
+  font-weight: 500;
+  line-height: 1.1;
+  text-align: center;
+}
+.cash-form-table th:nth-child(1) {
+  width: 7%;
+}
+.cash-form-table th:nth-child(2) {
+  width: 10%;
+}
+.cash-form-table th:nth-child(3) {
+  width: 48%;
+}
+.cash-form-table th:nth-child(4),
+.cash-form-table th:nth-child(5) {
+  width: 12%;
+}
+.cash-form-table th:nth-child(6) {
+  width: 13%;
+}
+.cash-form-table tbody td:nth-child(1),
+.cash-form-table tbody td:nth-child(2) {
+  text-align: center;
+}
+.cash-form-table tbody td:nth-child(4),
+.cash-form-table tbody td:nth-child(5),
+.cash-form-table tbody td:nth-child(6) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cash-form-table tbody tr {
+  height: 7mm;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cash-form-table .cash-form-carry {
+  height: 8mm;
+  font-weight: 700;
+}
+.cash-form-table .cash-form-carry td:first-child {
+  text-align: left;
+}
+.cash-form-total {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 0;
+  border: 1px solid #777;
+  border-top: 0;
+}
+.cash-form-total div {
+  display: flex;
+  justify-content: space-between;
+  gap: 4mm;
+  min-height: 7mm;
+  padding: 1.5mm;
+  border-bottom: 1px solid #777;
+}
+.cash-form-total div:nth-child(odd) {
+  border-right: 1px solid #777;
+}
+.cash-form-total div:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+.cash-form-total b {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cash-form-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 5mm;
+  margin-top: 14mm;
+  font-size: 7px;
+}
+.cash-form-footer span {
+  border-top: 1px solid #555;
+  padding-top: 1mm;
+}
+@media print {
+  .cash-form {
+    width: 186mm;
+    min-height: 273mm;
+    padding: 0;
+  }
+  .cash-form-table thead {
+    display: table-header-group;
+  }
+}
+
 @layer base {
   html {
     overflow-x: hidden;

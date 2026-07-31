@@ -18,6 +18,7 @@ import type {
   UpdateCashRegister,
   CashAssistantWorkspace,
   CashReportPreviewDto,
+  CashReconciliationReportDto,
   ResolveCashAssistantWorkspaceInput,
 } from "@corely/contracts";
 import {
@@ -133,6 +134,17 @@ export class CashManagementApi {
   ): Promise<{ preview: CashReportPreviewDto }> {
     return apiClient.get<{ preview: CashReportPreviewDto }>(
       `/cash-registers/${registerId}/kassenbericht/${dayKey}`,
+      { correlationId: apiClient.generateCorrelationId() }
+    );
+  }
+
+  async getKassenabrechnung(
+    registerId: string,
+    fromDate: string,
+    toDate: string
+  ): Promise<{ report: CashReconciliationReportDto }> {
+    return apiClient.get<{ report: CashReconciliationReportDto }>(
+      `/cash-registers/${registerId}/kassenabrechnung${toQueryString({ fromDate, toDate })}`,
       { correlationId: apiClient.generateCorrelationId() }
     );
   }
