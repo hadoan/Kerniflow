@@ -25,5 +25,6 @@ export interface DomainToolPort {
     toolCallId?: string;
     runId?: string;
     messages?: ModelMessage[];
+    latestUserMessage?: string;
   }) => Promise<unknown>;
 }

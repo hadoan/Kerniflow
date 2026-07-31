@@ -101,6 +101,10 @@ export class AiSdkModelAdapter implements LanguageModelPort {
     observability: ObservabilitySpanRef;
   }): Promise<{ result: StreamTextResult<any, any, any>; usage?: LanguageModelUsage }> {
     const toolTenantId = params.toolTenantId ?? params.tenantId;
+    const latestUserMessage = [...params.messages]
+      .reverse()
+      .find((message) => message.role === "user")
+      ?.parts.find((part) => part.type === "text")?.text;
     const aiTools = buildAiTools(params.tools, {
       toolExecutions: this.toolExecutions,
       audit: this.audit,
@@ -111,6 +115,7 @@ export class AiSdkModelAdapter implements LanguageModelPort {
       activeAppId: params.activeAppId,
       runId: params.runId,
       userId: params.userId,
+      latestUserMessage,
       observability: this.observability,
       parentSpan: params.observability,
     });

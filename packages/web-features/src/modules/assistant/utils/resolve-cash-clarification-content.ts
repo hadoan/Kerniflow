@@ -1,7 +1,4 @@
-import {
-  CASH_CLARIFICATION_CONTENT,
-  CashClarificationType,
-} from "@corely/contracts";
+import { CASH_CLARIFICATION_CONTENT, type CashClarificationType } from "@corely/contracts";
 
 type SupportedLocale = "en" | "de" | "vi";
 
@@ -17,6 +14,7 @@ export function resolveCashClarificationContent(params: {
   type: string;
   allowedChoiceValues: string[];
   locale: string;
+  amountCents?: number;
 }): ResolvedCashClarificationContent {
   const definition = CASH_CLARIFICATION_CONTENT[params.type as CashClarificationType];
   const safeLocale = (params.locale as SupportedLocale) || "en";
@@ -32,10 +30,18 @@ export function resolveCashClarificationContent(params: {
   }
 
   // Find the translation for the question
-  const question =
+  const questionTemplate =
     definition.question[safeLocale as "en" | "de" | "vi"] ??
     definition.question.en ??
     "Please clarify";
+  const question = params.amountCents
+    ? questionTemplate.replace(
+        "{{amount}}",
+        new Intl.NumberFormat(safeLocale, { style: "currency", currency: "EUR" }).format(
+          params.amountCents / 100
+        )
+      )
+    : questionTemplate.replace("{{amount}}", "");
 
   // Map choices based on the server's allowedChoiceValues
   const choices = params.allowedChoiceValues.map((value) => {

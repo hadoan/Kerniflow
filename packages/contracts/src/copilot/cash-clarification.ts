@@ -123,9 +123,9 @@ export const CASH_CLARIFICATION_CONTENT: Record<
   },
   MONEY_SOURCE: {
     question: {
-      en: "Where did this money come from?",
-      de: "Woher stammt dieses Geld?",
-      vi: "Số tiền này được lấy từ đâu?",
+      en: "Where did the {{amount}} deposited into the business bank account come from?",
+      de: "Woher stammen die {{amount}}, die auf das Geschäftskonto eingezahlt wurden?",
+      vi: "Số tiền {{amount}} nộp vào tài khoản doanh nghiệp đến từ đâu?",
     },
     choices: [
       {
@@ -370,4 +370,6 @@ export const AnswerCashMovementResolutionInputSchema = z.object({
   answerText: z.string().optional(),
 });
 
-export type AnswerCashMovementResolutionInput = z.infer<typeof AnswerCashMovementResolutionInputSchema>;
+export type AnswerCashMovementResolutionInput = z.infer<
+  typeof AnswerCashMovementResolutionInputSchema
+>;

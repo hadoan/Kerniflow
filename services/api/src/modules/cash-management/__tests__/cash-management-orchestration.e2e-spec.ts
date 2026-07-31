@@ -360,7 +360,7 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
           resolution: {
             kind: "REQUEST_CLARIFICATION",
             clarificationType: "MONEY_SOURCE",
-            choices: [{ id: "PRIVATE_FUNDS", label: { de: "Privates Geld" } }],
+            allowedChoiceValues: ["PRIVATE_FUNDS"],
           },
         },
       }),
@@ -380,17 +380,18 @@ describe("Cash Management Orchestration (e2e-spec)", () => {
           destination: "BUSINESS_BANK_ACCOUNT",
           explicitFacts: [],
         },
+        intent: "CASH_MOVEMENT",
       },
       expect.anything()
     );
 
     expect(response).toMatchObject({
       ok: true,
-      kind: "REQUEST_CLARIFICATION",
       resolutionId: "res-123",
-      clarification: {
-        type: "MONEY_SOURCE",
-        choices: [{ value: "PRIVATE_FUNDS", label: "Privates Geld" }],
+      resolution: {
+        kind: "REQUEST_CLARIFICATION",
+        clarificationType: "MONEY_SOURCE",
+        allowedChoiceValues: ["PRIVATE_FUNDS"],
       },
     });
   });

@@ -4,6 +4,29 @@ import { PrismaService } from "@corely/data";
 import { ResolveCashMovementNextActionUseCase } from "./resolve-cash-movement-next-action.usecase";
 import { AnalyzeCashMovementResult, CashMovementExtraction } from "@corely/contracts";
 
+const sourceChoices: Record<string, CashMovementExtraction["source"]> = {
+  STILL_IN_CURRENT_FUND: "CURRENT_REGISTER",
+  ALREADY_RECORDED_OUT: "BUSINESS_CASH_UNKNOWN_LOCATION",
+  OTHER_REGISTER: "OTHER_CASH_REGISTER",
+  PRIVATE_FUNDS: "PRIVATE_CASH",
+  OTHER_BANK_ACCOUNT: "BUSINESS_BANK_ACCOUNT",
+  NOT_SURE: "UNKNOWN",
+};
+
+const destinationChoices: Record<string, CashMovementExtraction["destination"]> = {
+  PRIVATE_WITHDRAWAL: "PRIVATE_USE",
+  BUSINESS_BANK_DEPOSIT: "BUSINESS_BANK_ACCOUNT",
+  GOODS_PURCHASE: "BUSINESS_EXPENSE",
+  STILL_IN_DRAWER: "CURRENT_REGISTER",
+  OTHER: "UNKNOWN",
+};
+
+const paymentMethodChoices: Record<string, CashMovementExtraction["customerPaymentMethod"]> = {
+  CASH: "CASH",
+  CARD: "CARD",
+  MIXED: "MIXED",
+};
+
 export type AnswerCashMovementResolutionCommand = {
   resolutionId: string;
   expectedVersion: number;
@@ -74,23 +97,34 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
       });
 
       if (updateResult.count === 0) {
-        return err(new UseCaseError("CONFLICT", "Resolution was modified concurrently", { resolutionId }));
+        return err(
+          new UseCaseError("CONFLICT", "Resolution was modified concurrently", { resolutionId })
+        );
       }
 
       // Merge the answer into the original extraction
       const originalExtraction = resolution.extractionJson as any as CashMovementExtraction;
 
-      let updatedExtraction = { ...originalExtraction };
+      const updatedExtraction = { ...originalExtraction };
 
-      // the UI typically sends `{ source: "BUSINESS_SAFE" }` or similar for clarification
+      const choiceId = typeof answer.choiceId === "string" ? answer.choiceId : undefined;
+
+      // Accept explicit facts for backwards compatibility, while mapping the server-defined
+      // choice values supplied by the clarification card.
       if (answer.source) {
         updatedExtraction.source = answer.source as any;
+      } else if (choiceId && sourceChoices[choiceId]) {
+        updatedExtraction.source = sourceChoices[choiceId];
       }
       if (answer.destination) {
         updatedExtraction.destination = answer.destination as any;
+      } else if (choiceId && destinationChoices[choiceId]) {
+        updatedExtraction.destination = destinationChoices[choiceId];
       }
       if (answer.paymentMethod) {
         updatedExtraction.customerPaymentMethod = answer.paymentMethod as any;
+      } else if (choiceId && paymentMethodChoices[choiceId]) {
+        updatedExtraction.customerPaymentMethod = paymentMethodChoices[choiceId];
       }
 
       // Run the resolver again with the new extraction

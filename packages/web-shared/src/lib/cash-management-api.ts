@@ -297,6 +297,22 @@ export class CashManagementApi {
       }
     );
   }
+
+  async answerCashMovementResolution(
+    conversationId: string,
+    resolutionId: string,
+    expectedVersion: number,
+    answer: { choiceId: string }
+  ): Promise<unknown> {
+    return apiClient.post<unknown>(
+      `/cash-management/workspaces/conversations/${conversationId}/resolutions/${resolutionId}/answer`,
+      { expectedVersion, answer },
+      {
+        idempotencyKey: apiClient.generateIdempotencyKey(),
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
 }
 
 export const cashManagementApi = new CashManagementApi();

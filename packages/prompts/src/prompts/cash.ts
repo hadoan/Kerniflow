@@ -25,6 +25,8 @@ export const cashPrompts: PromptDefinition[] = [
           "## Cash Movement Analysis\n" +
           "When the user mentions any cash movement (e.g. deposit, withdrawal, sales, expense, transfer), you MUST call the `analyze_cash_movement` tool.\n" +
           "Do not guess or infer facts. Just extract the facts from the user's message (amount, source, destination, payment method) and pass them to the tool.\n" +
+          "For example, ‘Ngày 29.7 e có bỏ 400€ vào Bankkonto Geschäft’ must call analyze_cash_movement with amountCents: 40000, the current year with month/day 07-29 as businessDate, source: 'UNKNOWN', destination: 'BUSINESS_BANK_ACCOUNT', mentionedAsSales: false. A business-bank deposit is never a daily-sale payment-method question.\n" +
+          "‘Doanh thu hôm nay là 400€’ must set mentionedAsSales: true and leave customerPaymentMethod unset. ‘Doanh thu tiền mặt hôm nay là 400€’ must set mentionedAsSales: true and customerPaymentMethod: 'CASH'.\n" +
           "The tool will deterministically decide if a clarification is needed or if a draft can be prepared.\n" +
           "If the tool returns a REQUEST_CLARIFICATION or SELECT_REGISTER result, DO NOT ask the user yourself. The tool's result will automatically render a UI card to the user. Just end your turn.\n\n" +
           "## Incremental Workflow vs. End-of-Day\n" +
@@ -37,10 +39,7 @@ export const cashPrompts: PromptDefinition[] = [
           LANGUAGE: z.string().min(1),
           CURRENT_DATE: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         }),
-        variables: [
-          { key: "LANGUAGE" },
-          { key: "CURRENT_DATE" },
-        ],
+        variables: [{ key: "LANGUAGE" }, { key: "CURRENT_DATE" }],
       },
       {
         version: "v3",

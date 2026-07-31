@@ -37,17 +37,17 @@ interface AssistantPageProps {
 }
 
 const getErrorMessage = (e: unknown): string | undefined => {
-  if (e instanceof Error) return e.message;
-  if (typeof e === "string") return e;
+  if (e instanceof Error) {return e.message;}
+  if (typeof e === "string") {return e;}
   return undefined;
 };
 
 export default function AssistantPage({ activeModule = "assistant" }: AssistantPageProps) {
-  const toolRenderers = useAssistantToolRenderers();
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { threadId } = useParams<{ threadId?: string }>();
+  const toolRenderers = useAssistantToolRenderers(threadId);
   const [searchParams, setSearchParams] = useSearchParams();
   const focusedMessageId = searchParams.get("m");
   const handoffId = searchParams.get("handoffId");

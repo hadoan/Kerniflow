@@ -13,6 +13,7 @@ import { createId } from "@paralleldrive/cuid2";
 export type ResolveCashMovementNextActionCommand = {
   extraction: CashMovementExtraction;
   intent: string;
+  conversationId?: string;
 };
 
 @Injectable()
@@ -50,8 +51,8 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
 
     // Rule 2: Bank Deposit source clarification
     if (dType === "BUSINESS_BANK_ACCOUNT" && sType === "UNKNOWN") {
-      return ok({
-        resolution: {
+      return this.persistAndReturn(
+        {
           kind: "REQUEST_CLARIFICATION",
           clarificationType: "MONEY_SOURCE",
           allowedChoiceValues: [
@@ -60,10 +61,12 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
             "OTHER_REGISTER",
             "PRIVATE_FUNDS",
             "OTHER_BANK_ACCOUNT",
-            "NOT_SURE"
+            "NOT_SURE",
           ],
         },
-      });
+        input,
+        ctx
+      );
     }
 
     // Rule 3: Known cash location to bank
@@ -74,18 +77,20 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
     }
 
     if (dType === "BUSINESS_BANK_ACCOUNT" && sType === "OTHER_CASH_REGISTER") {
-      return ok({ resolution: { kind: "SELECT_CASH_REGISTER" } });
+      return this.persistAndReturn({ kind: "SELECT_CASH_REGISTER" }, input, ctx);
     }
 
     // Rule 4: Payment Method Clarification (only if sales mentioned and no method provided)
     if (mentionedAsSales && !customerPaymentMethod) {
-      return ok({
-        resolution: { 
-          kind: "REQUEST_CLARIFICATION", 
+      return this.persistAndReturn(
+        {
+          kind: "REQUEST_CLARIFICATION",
           clarificationType: "PAYMENT_METHOD",
-          allowedChoiceValues: ["CASH", "CARD", "MIXED"] 
+          allowedChoiceValues: ["CASH", "CARD", "MIXED"],
         },
-      });
+        input,
+        ctx
+      );
     }
 
     // Rule 5: Non-cash sales (Card / Bank Transfer)
@@ -120,21 +125,21 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
         "BUSINESS_BANK_DEPOSIT",
         "GOODS_PURCHASE",
         "STILL_IN_DRAWER",
-        "OTHER"
-      ]
+        "OTHER",
+      ],
     };
 
     if (dType === "UNKNOWN" && sType === "CURRENT_REGISTER") {
-      resolution = { 
-        kind: "REQUEST_CLARIFICATION", 
+      resolution = {
+        kind: "REQUEST_CLARIFICATION",
         clarificationType: "MONEY_DESTINATION",
         allowedChoiceValues: [
           "PRIVATE_WITHDRAWAL",
           "BUSINESS_BANK_DEPOSIT",
           "GOODS_PURCHASE",
           "STILL_IN_DRAWER",
-          "OTHER"
-        ]
+          "OTHER",
+        ],
       };
     }
 
@@ -157,7 +162,7 @@ export class ResolveCashMovementNextActionUseCase extends BaseUseCase<
         id: resolutionId,
         tenantId: ctx.tenantId,
         workspaceId: ctx.workspaceId || "UNKNOWN",
-        conversationId: ctx.workspaceId || "UNKNOWN", // typically workspace is conversation
+        conversationId: input.conversationId ?? ctx.workspaceId ?? "UNKNOWN",
         intent: input.intent || "UNKNOWN",
         extractionJson: input.extraction as any,
         status: "PENDING",

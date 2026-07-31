@@ -26,6 +26,7 @@ export function buildAiTools(
     activeAppId?: string;
     runId: string;
     userId: string;
+    latestUserMessage?: string;
     observability: ObservabilityPort;
     parentSpan: ObservabilitySpanRef;
   }
@@ -80,6 +81,7 @@ export function buildAiTools(
             toolCallId,
             runId: deps.runId,
             messages: options.messages,
+            latestUserMessage: deps.latestUserMessage,
           });
           await deps.toolExecutions.complete(deps.tenantId, deps.runId, toolCallId, {
             status: "completed",
