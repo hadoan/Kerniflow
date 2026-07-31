@@ -174,6 +174,14 @@ export function CashRegisterDetailScreen() {
         </div>
       </div>
 
+      {canManageCash ? (
+        <Button asChild className="h-14 w-full text-base font-semibold sm:text-lg lg:max-w-xl">
+          <Link to={`/cash/registers/${id}/entries`}>
+            {t("cash.ui.registerDetail.openFullEntries")}
+          </Link>
+        </Button>
+      ) : null}
+
       {/* Unclosed days warning modal */}
       <Dialog open={showUnclosedModal} onOpenChange={setShowUnclosedModal}>
         <DialogContent>

@@ -69,12 +69,18 @@ export class GetCashReconciliationReportQueryUseCase extends BaseUseCase<
       }),
     ]);
     const orderedAll = [...allEntries].sort(
-      (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime() || a.entryNo - b.entryNo
+      (a, b) =>
+        a.dayKey.localeCompare(b.dayKey) ||
+        a.occurredAt.getTime() - b.occurredAt.getTime() ||
+        a.entryNo - b.entryNo
     );
     const opening =
       orderedAll.filter((entry) => entry.dayKey < input.fromDate).at(-1)?.balanceAfterCents ?? 0;
     const ordered = [...periodEntries].sort(
-      (a, b) => a.occurredAt.getTime() - b.occurredAt.getTime() || a.entryNo - b.entryNo
+      (a, b) =>
+        a.dayKey.localeCompare(b.dayKey) ||
+        a.occurredAt.getTime() - b.occurredAt.getTime() ||
+        a.entryNo - b.entryNo
     );
     const totalIncomeCents = ordered
       .filter((entry) => entry.direction === "IN")
