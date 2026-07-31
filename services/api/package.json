@@ -55,6 +55,7 @@
     "date-fns": "catalog:",
     "dotenv": "catalog:",
     "express": "5.1.0",
+    "google-auth-library": "^10.5.0",
     "jsonwebtoken": "catalog:",
     "nanoid": "catalog:",
     "neverthrow": "catalog:",

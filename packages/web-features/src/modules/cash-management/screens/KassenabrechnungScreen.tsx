@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Printer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
@@ -23,6 +23,7 @@ export function KassenabrechnungScreen() {
   const defaults = currentMonth();
   const [from, setFrom] = useState(params.get("from") ?? defaults.from);
   const [to, setTo] = useState(params.get("to") ?? defaults.to);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
   const selectedFrom = params.get("from") ?? defaults.from;
   const selectedTo = params.get("to") ?? defaults.to;
   useEffect(() => {
@@ -34,6 +35,10 @@ export function KassenabrechnungScreen() {
     queryKey: ["cash-kassenabrechnung", id, selectedFrom, selectedTo],
     queryFn: () => cashManagementApi.getKassenabrechnung(id!, selectedFrom, selectedTo),
     enabled: Boolean(id) && selectedFrom <= selectedTo,
+  });
+  const translate = useMutation({
+    mutationFn: () => cashManagementApi.translateKassenabrechnung(id!, selectedFrom, selectedTo),
+    onSuccess: ({ translations: result }) => setTranslations(result),
   });
   const apply = () => {
     if (from <= to) {
@@ -92,6 +97,13 @@ export function KassenabrechnungScreen() {
           </Button>
           <Button onClick={apply} disabled={from > to}>
             Bericht erstellen
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => translate.mutate()}
+            disabled={!data || translate.isPending}
+          >
+            {translate.isPending ? "Übersetze…" : "Vietnamesisch → Deutsch"}
           </Button>
         </CardContent>
       </Card>
@@ -164,7 +176,7 @@ export function KassenabrechnungScreen() {
                 <tr key={row.id}>
                   <td>{row.dayKey.slice(8)}</td>
                   <td>{row.receiptNumber ?? row.entryNo}</td>
-                  <td>{row.description}</td>
+                  <td>{translations[row.id] ?? row.description}</td>
                   <td>
                     {row.direction === "IN" ? money(row.amountCents, data.register.currency) : ""}
                   </td>
