@@ -118,9 +118,16 @@ const startNode = async () => {
     ? [`--inspect=0.0.0.0:${debugPort}`, "dist/main.js"]
     : ["dist/main.js"];
 
+  const childEnv = { ...process.env };
+  if ("NO_COLOR" in childEnv) {
+    delete childEnv.FORCE_COLOR;
+  } else {
+    childEnv.FORCE_COLOR = "1";
+  }
+
   nodeProcess = spawn("node", nodeArgs, {
     stdio: "inherit",
-    env: { ...process.env, FORCE_COLOR: "1" },
+    env: childEnv,
   });
 };
 

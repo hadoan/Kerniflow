@@ -92,4 +92,25 @@ describe("GetCashReportPreviewQueryUseCase", () => {
       expect(preview.status).toBe("VERIFIED"); // counted cash present, missing receipts are a warning only
     }
   });
+
+  it("uses the ledger balance as opening balance before the first submitted close", async () => {
+    registerRepo.findRegisterById.mockResolvedValue({
+      id: "reg-1",
+      name: "Main Register",
+      currentBalanceCents: 5440,
+    } as CashRegister);
+    dayCloseRepo.listDayCloses.mockResolvedValue([]);
+    dayCloseRepo.findDayCloseByRegisterAndDay.mockResolvedValue(null);
+    entryRepo.getExpectedBalanceAtDay.mockResolvedValue(5440);
+    entryRepo.listEntries.mockResolvedValue([]);
+    attachmentRepo.listAttachmentsForMonth.mockResolvedValue([]);
+
+    const result = await useCase.execute({ registerId: "reg-1", businessDate: "2026-07-30" }, ctx);
+
+    expect(isErr(result)).toBe(false);
+    if (!isErr(result)) {
+      expect(result.value.preview.previousClosingCashCents).toBe(5440);
+      expect(result.value.preview.expectedClosingCashCents).toBe(5440);
+    }
+  });
 });

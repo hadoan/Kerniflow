@@ -133,7 +133,7 @@ export const CASH_CLARIFICATION_CONTENT: Record<
         label: {
           en: "Still belongs to current register balance",
           de: "Gehört noch zum aktuellen Kassenbestand",
-          vi: "Vẫn thuộc số dư quỹ hiện tại",
+          vi: "Tiền mặt từ Kasse hiện tại",
         },
       },
       {
@@ -149,7 +149,7 @@ export const CASH_CLARIFICATION_CONTENT: Record<
         label: {
           en: "Belongs to another register/safe",
           de: "Gehört zu einer anderen Kasse/Tresor",
-          vi: "Thuộc một Kasse hoặc két tiền khác",
+          vi: "Tiền mặt từ két của tiệm",
         },
       },
       {
@@ -170,7 +170,7 @@ export const CASH_CLARIFICATION_CONTENT: Record<
       },
       {
         id: "NOT_SURE",
-        label: { en: "Not sure", de: "Nicht sicher", vi: "Không chắc" },
+        label: { en: "Other", de: "Sonstiges", vi: "Khác" },
       },
     ],
   },

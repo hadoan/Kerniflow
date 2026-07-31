@@ -102,11 +102,22 @@ export const CashClarificationCardSchema = z.object({
 });
 
 export const CashEntryConfirmationCardSchema = z.object({
+  id: z.string().optional(),
+  registerId: z.string().optional(),
+  status: z.enum(["PENDING", "CONFIRMED", "CONSUMED", "EXPIRED"]).optional(),
   entryType: z.string(),
   direction: z.string(),
   amountCents: z.number().int().positive().optional(),
   businessDate: z.string().optional(),
   description: z.string(),
+  candidatePayload: z
+    .object({
+      movementType: z.string(),
+      amountCents: z.number().int(),
+      description: z.string(),
+      direction: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const CashRegisterSelectorCardSchema = z.object({

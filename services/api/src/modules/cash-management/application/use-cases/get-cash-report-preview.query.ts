@@ -41,6 +41,12 @@ const receiptRequiredTypes = new Set<string>([
 const toDayKey = (value?: string): string =>
   value ? value.slice(0, 10) : new Date().toISOString().slice(0, 10);
 
+const previousDayKey = (dayKey: string): string => {
+  const date = new Date(`${dayKey}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return date.toISOString().slice(0, 10);
+};
+
 @RequireTenant()
 @Injectable()
 export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
@@ -87,15 +93,22 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
 
     const dayKey = toDayKey(input.businessDate);
 
-    const [entries, dayClose, previousDayCloseResult] = await Promise.all([
-      this.entryRepo.listEntries(tenantId, workspaceId, {
-        registerId: register.id,
-        dayKeyFrom: dayKey,
-        dayKeyTo: dayKey,
-      }),
-      this.dayCloseRepo.findDayCloseByRegisterAndDay(tenantId, workspaceId, register.id, dayKey),
-      this.dayCloseRepo.listDayCloses(tenantId, workspaceId, { registerId: register.id }),
-    ]);
+    const [entries, dayClose, previousDayCloseResult, ledgerOpeningBalanceCents] =
+      await Promise.all([
+        this.entryRepo.listEntries(tenantId, workspaceId, {
+          registerId: register.id,
+          dayKeyFrom: dayKey,
+          dayKeyTo: dayKey,
+        }),
+        this.dayCloseRepo.findDayCloseByRegisterAndDay(tenantId, workspaceId, register.id, dayKey),
+        this.dayCloseRepo.listDayCloses(tenantId, workspaceId, { registerId: register.id }),
+        this.entryRepo.getExpectedBalanceAtDay(
+          tenantId,
+          workspaceId,
+          register.id,
+          previousDayKey(dayKey)
+        ),
+      ]);
 
     // Find the previous day close
     const allClosesAsc = previousDayCloseResult
@@ -107,11 +120,13 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     const previousClose =
       previousCloses.length > 0 ? previousCloses[previousCloses.length - 1] : null;
 
-    // Use previous day effective closing balance, or fallback to 0 if none (will be handled by repair script later if needed)
+    // Before the first submitted close, derive the opening balance from the ledger.
+    // Falling back to zero makes the preview disagree with the submit use case for
+    // registers that already have entries from earlier days.
     const openingBalanceCents =
       previousClose !== null
         ? (previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents)
-        : 0;
+        : ledgerOpeningBalanceCents;
 
     const goodsPurchasesCents = 0;
     let businessExpensesCents = 0;
@@ -124,7 +139,7 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     let otherNonSalesCashInflowsCents = 0;
     let privateDepositsCents = 0;
     let bankWithdrawalsToCashCents = 0;
-    let cashRefundInflowsCents = 0;
+    const cashRefundInflowsCents = 0;
 
     for (const entry of entries) {
       // If there are specific types to skip, add them here.

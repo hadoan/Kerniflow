@@ -63,23 +63,31 @@ export const enrichCashMovementExtraction = (
   }
 
   const normalized = normalize(text);
-  const amountMatch = normalized.match(/(\d[\d.,\s]*)\s*(?:€|eur)\b/);
-  const dateMatch = normalized.match(/\b(\d{1,2})[./](\d{1,2})[./](\d{4})\b/);
+  const amountMatch = normalized.match(/(\d[\d.,\s]*)\s*(?:€|eur)(?:\s|$)/);
+  const fullDateMatch = normalized.match(/\b(\d{1,2})[./](\d{1,2})[./](\d{4})\b/);
+  const shortDateMatch = normalized.match(/\b(\d{1,2})[./](\d{1,2})(?![./]\d)\b/);
   const mentionedAsSales = /\b(doanh thu|doan thu|revenue|umsatz|sales)\b/.test(normalized);
   const explicitCash = /\b(tien mat|cash|bar)\b/.test(normalized);
+  const businessBankDestination =
+    /\b(bankkonto\s+geschaft|geschaftskonto|business\s+bank\s+account|tai\s+khoan\s+(?:ngan\s+hang\s+)?doanh\s+nghiep)\b/.test(
+      normalized
+    );
+  const parsedBusinessDate = fullDateMatch
+    ? `${fullDateMatch[3]}-${fullDateMatch[2].padStart(2, "0")}-${fullDateMatch[1].padStart(2, "0")}`
+    : shortDateMatch
+      ? `${new Date().getUTCFullYear()}-${shortDateMatch[2].padStart(2, "0")}-${shortDateMatch[1].padStart(2, "0")}`
+      : undefined;
 
   return {
     ...extraction,
     amountCents:
       extraction.amountCents ?? (amountMatch ? parseAmountCents(amountMatch[1]) : undefined),
-    businessDate:
-      extraction.businessDate ??
-      (dateMatch
-        ? `${dateMatch[3]}-${dateMatch[2].padStart(2, "0")}-${dateMatch[1].padStart(2, "0")}`
-        : undefined),
+    businessDate: extraction.businessDate ?? parsedBusinessDate,
+    destination:
+      extraction.destination ?? (businessBankDestination ? "BUSINESS_BANK_ACCOUNT" : undefined),
     // A literal sales phrase is an explicit user fact and therefore takes precedence
     // over an empty-model default of `false`.
-    mentionedAsSales: mentionedAsSales || extraction.mentionedAsSales,
+    mentionedAsSales: mentionedAsSales ? true : (extraction.mentionedAsSales ?? false),
     customerPaymentMethod:
       extraction.customerPaymentMethod ?? (mentionedAsSales && explicitCash ? "CASH" : undefined),
   };

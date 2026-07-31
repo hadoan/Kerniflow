@@ -210,7 +210,8 @@ export const analyze_cash_movementTool = (deps: CashToolDeps): DomainToolPort =>
         getCtx({ tenantId, workspaceId, userId, toolCallId, runId })
       );
 
-      return mapToolResult(result);
+      const mapped = mapToolResult(result);
+      return mapped.ok ? { ...mapped, extraction } : mapped;
     }
   ),
 });

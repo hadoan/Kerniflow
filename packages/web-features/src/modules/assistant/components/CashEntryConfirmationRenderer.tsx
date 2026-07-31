@@ -18,6 +18,7 @@ type PendingEntryConfirmationOutput = {
       movementType: string;
       amountCents: number;
       description: string;
+      direction?: string;
     };
   };
 };
@@ -97,6 +98,13 @@ export const CashEntryConfirmationRenderer: React.FC<ToolRendererProps> = ({ sta
             <p className="text-sm font-medium text-foreground">{displayLabel}</p>
             <p className="text-xs text-muted-foreground">
               {payload.description} ({amountStr})
+            </p>
+            <p className="text-xs text-muted-foreground">Entry type: {payload.movementType}</p>
+            {payload.direction ? (
+              <p className="text-xs text-muted-foreground">Direction: {payload.direction}</p>
+            ) : null}
+            <p className="text-xs text-muted-foreground">
+              Date: {output.confirmation.businessDate}
             </p>
           </div>
         </div>

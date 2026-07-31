@@ -71,12 +71,11 @@ export class ConfirmCashEntryUseCase extends BaseUseCase<
     const result = await this.addEntryUseCase.execute(
       {
         registerId: input.registerId,
-        direction: payload.amountCents >= 0 ? "IN" : "OUT",
         type: payload.movementType,
         source: "COPILOT", // Handled by LLM
         description: payload.description,
         amountCents: Math.abs(payload.amountCents),
-        businessDate: payload.businessDate,
+        businessDate: confirmation.businessDate,
         idempotencyKey: input.idempotencyKey,
       },
       ctx

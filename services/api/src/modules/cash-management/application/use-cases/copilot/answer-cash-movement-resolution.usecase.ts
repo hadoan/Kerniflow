@@ -1,7 +1,20 @@
 import { Injectable } from "@nestjs/common";
-import { BaseUseCase, UseCaseContext, ok, err, isErr, Result, UseCaseError } from "@corely/kernel";
+import {
+  BaseUseCase,
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+  UseCaseContext,
+  ok,
+  err,
+  isErr,
+  Result,
+  UseCaseError,
+} from "@corely/kernel";
 import { PrismaService } from "@corely/data";
 import { ResolveCashMovementNextActionUseCase } from "./resolve-cash-movement-next-action.usecase";
+import { PrepareCashEntryConfirmationUseCase } from "../prepare-cash-entry-confirmation.usecase";
 import { AnalyzeCashMovementResult, CashMovementExtraction } from "@corely/contracts";
 
 const sourceChoices: Record<string, CashMovementExtraction["source"]> = {
@@ -40,7 +53,8 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
 > {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly resolveNextAction: ResolveCashMovementNextActionUseCase
+    private readonly resolveNextAction: ResolveCashMovementNextActionUseCase,
+    private readonly prepareEntryConfirmation: PrepareCashEntryConfirmationUseCase
   ) {
     super({ logger: undefined });
   }
@@ -58,15 +72,11 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
       });
 
       if (!resolution) {
-        return err(
-          new UseCaseError("NOT_FOUND", "Resolution not found", {
-            resolutionId,
-          })
-        );
+        return err(new NotFoundError("Resolution not found", { resolutionId }));
       }
 
       if (resolution.tenantId !== ctx.tenantId) {
-        return err(new UseCaseError("UNAUTHORIZED", "Not authorized", { resolutionId }));
+        return err(new UnauthorizedError("Not authorized", { resolutionId }));
       }
 
       // Idempotency: if it was already answered, just return the computed next state based on the same answer
@@ -74,11 +84,11 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
       // The user feedback said: "When the same answer is submitted twice: Return the already-produced result... Or 409 Conflict if different"
       // Since we didn't store the final UI Result in DB, let's just do a basic 409 if status is not PENDING
       if (resolution.status !== "PENDING") {
-        return err(new UseCaseError("CONFLICT", "Resolution already processed", { resolutionId }));
+        return err(new ConflictError("Resolution already processed", { resolutionId }));
       }
 
       if (resolution.version !== expectedVersion) {
-        return err(new UseCaseError("CONFLICT", "Version mismatch", { resolutionId }));
+        return err(new ConflictError("Version mismatch", { resolutionId }));
       }
 
       // 1. Optimistic Concurrency Control: Ensure no other request has processed this resolution
@@ -97,9 +107,7 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
       });
 
       if (updateResult.count === 0) {
-        return err(
-          new UseCaseError("CONFLICT", "Resolution was modified concurrently", { resolutionId })
-        );
+        return err(new ConflictError("Resolution was modified concurrently", { resolutionId }));
       }
 
       // Merge the answer into the original extraction
@@ -161,18 +169,60 @@ export class AnswerCashMovementResolutionUseCase extends BaseUseCase<
           };
           break;
 
-        case "PREPARE_ENTRY":
+        case "PREPARE_ENTRY": {
+          if (!updatedExtraction.amountCents || !updatedExtraction.businessDate) {
+            return err(
+              new ValidationError("Amount and business date are required to prepare the entry")
+            );
+          }
+
+          const cashWorkspace = await tx.cashAssistantWorkspace.findUnique({
+            where: { conversationId: resolution.conversationId },
+            select: { tenantId: true, workspaceId: true, registerId: true },
+          });
+          if (
+            !cashWorkspace ||
+            cashWorkspace.tenantId !== ctx.tenantId ||
+            cashWorkspace.workspaceId !== ctx.workspaceId ||
+            !cashWorkspace.registerId
+          ) {
+            return err(new ValidationError("Cash register context is required"));
+          }
+
+          const prepared = await this.prepareEntryConfirmation.execute(
+            {
+              registerId: cashWorkspace.registerId,
+              businessDate: updatedExtraction.businessDate,
+              movementType: nextResolution.entryType,
+              amountCents: updatedExtraction.amountCents,
+              description: "Bank deposit",
+              evidenceRequirement: null,
+            },
+            { ...ctx, correlationId: resolution.conversationId }
+          );
+          if (isErr(prepared)) {
+            return err(prepared.error);
+          }
+
           uiResult = {
             kind: "PREPARE_ENTRY_CONFIRMATION",
             confirmation: {
+              id: prepared.value.confirmation.id,
+              registerId: prepared.value.confirmation.registerId,
+              status: prepared.value.confirmation.status,
               entryType: nextResolution.entryType,
               direction: nextResolution.direction,
               amountCents: updatedExtraction.amountCents,
               businessDate: updatedExtraction.businessDate,
               description: "Geplanter Kassenbucheintrag",
+              candidatePayload: {
+                ...prepared.value.confirmation.candidatePayload,
+                direction: nextResolution.direction,
+              },
             },
           };
           break;
+        }
 
         case "NOT_A_CASHBOOK_ENTRY":
           uiResult = {
