@@ -101,6 +101,15 @@
               {
                 "group": "Dùng Corely",
                 "pages": ["vi/platform/navigation", "vi/platform/modules"]
+              },
+              {
+                "group": "Quản lý tiền mặt",
+                "pages": [
+                  "vi/cash-management/cash-sale",
+                  "vi/cash-management/bank-deposit",
+                  "vi/cash-management/owner-deposit",
+                  "vi/cash-management/monthly-report"
+                ]
               }
             ]
           },

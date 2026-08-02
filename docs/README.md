@@ -103,6 +103,11 @@ General developer guides and references.
 - [POS Vertical Packs](./guides/POS_VERTICAL_PACKS.md)
 - [Vercel Surface Proxy](./guides/VERCEL_SURFACE_PROXY.md)
 - [Security Guide](./guides/SECURITY.md)
+- [Ghi doanh thu tiền mặt](./guides/GHI_DOANH_THU_TIEN_MAT.md)
+- [Nộp tiền mặt vào ngân hàng](./guides/NOP_TIEN_MAT_VAO_NGAN_HANG.md)
+- [Bỏ tiền cá nhân vào quầy làm tiền thối (Privateinlage)](./guides/PRIVATEINLAGE_TIEN_THOI.md)
+- [Tạo Kassenabrechnung tháng 7 và dịch sang tiếng Đức](./guides/KASSENABRECHNUNG_THANG_7.md)
+- [PDF hướng dẫn quản lý tiền mặt trên điện thoại](./guides/huong-dan-quan-ly-tien-mat-mobile.pdf)
 - [Import Style](./import-style.md)
 - [Legacy Implementation Summary](./guides/ROOT_IMPLEMENTATION_SUMMARY.md)
 
