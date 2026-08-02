@@ -79,7 +79,9 @@ export class ConfirmCashEntryUseCase extends BaseUseCase<
         description: payload.description,
         amountCents: Math.abs(payload.amountCents),
         businessDate: confirmation.businessDate,
-        idempotencyKey: input.idempotencyKey,
+        // A confirmation represents one immutable decision. Its id, rather
+        // than a caller-provided request key, is the durable idempotency key.
+        idempotencyKey: `cash-entry-confirmation:${input.confirmationId}`,
       },
       ctx
     );
