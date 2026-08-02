@@ -16,4 +16,4 @@ CREATE UNIQUE INDEX "cash_entries_one_active_daily_z_report_per_day"
     AND "reversedByEntryId" IS NULL;
 
 ALTER TABLE "accounting"."cash_entry_confirmations"
-  ADD COLUMN "consumedEntryId" TEXT;
+  ADD COLUMN IF NOT EXISTS "consumedEntryId" TEXT;
