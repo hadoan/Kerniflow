@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@corely/ui";
 import type { CashEntryAttachment, CashEntryType } from "@corely/contracts";
 import { cashManagementApi } from "@corely/web-shared/lib/cash-management-api";
+import { apiClient } from "@corely/web-shared/lib/api-client";
 import { taxApi } from "@corely/web-shared/lib/tax-api";
 import { CrudListPageLayout } from "@corely/web-shared/shared/crud";
 import { cashKeys, invalidateCashRegisterQueries } from "../queries";
@@ -23,6 +24,7 @@ import {
 } from "./cash-entry-helpers";
 import { CashEntriesFilters, type CashEntryFilters } from "./cash-entries-filters";
 import { CashEntriesTable } from "./cash-entries-table";
+import { getClosedDayConflict } from "./closed-day-conflict";
 import {
   AttachBelegDialog,
   type AttachBelegForm,
@@ -31,6 +33,7 @@ import {
   type CreateEntryForm,
   ReverseEntryDialog,
 } from "./cash-entries-dialogs";
+import { ClosedDayCorrectionDialog, type ClosedDayConflict } from "./closed-day-correction-dialog";
 
 const defaultFilters: CashEntryFilters = {
   dayKeyFrom: "",
@@ -40,9 +43,7 @@ const defaultFilters: CashEntryFilters = {
   q: "",
 };
 
-const defaultAttachBelegForm = (): AttachBelegForm => ({
-  attachmentFile: null,
-});
+const defaultAttachBelegForm = (): AttachBelegForm => ({ attachmentFile: null });
 
 export function CashEntriesScreen() {
   const { t } = useTranslation();
@@ -52,6 +53,14 @@ export function CashEntriesScreen() {
   const [filters, setFilters] = useState<CashEntryFilters>(defaultFilters);
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateEntryForm>(defaultCreateForm);
+  const createIdempotencyKey = useRef<string | null>(null);
+  const [closedDayConflict, setClosedDayConflict] = useState<ClosedDayConflict | null>(null);
+  const [correctionOpen, setCorrectionOpen] = useState(false);
+  const [correctionReason, setCorrectionReason] = useState("");
+  const [cashIsInRegister, setCashIsInRegister] = useState(false);
+  const [correctionType, setCorrectionType] = useState<
+    "MISSING_ENTRY" | "REVERSE_ENTRY" | "REPLACE_ENTRY" | "BALANCE_EXPLANATION"
+  >("MISSING_ENTRY");
   const [reverseTargetId, setReverseTargetId] = useState<string | null>(null);
   const [reverseReason, setReverseReason] = useState("");
   const [belegEntryId, setBelegEntryId] = useState<string | null>(null);
@@ -132,7 +141,9 @@ export function CashEntriesScreen() {
   }, [attachmentQueries, entries]);
 
   const createMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({
+      allowPossibleDuplicate = false,
+    }: { allowPossibleDuplicate?: boolean } = {}) => {
       if (!id) {
         throw new Error("Missing register id");
       }
@@ -147,6 +158,11 @@ export function CashEntriesScreen() {
         type: createForm.type,
         direction: deriveDirectionFromType(createForm.type),
         source: "MANUAL",
+        dailyZReport: createForm.dailyZReport,
+        allowPossibleDuplicate,
+        idempotencyKey:
+          createIdempotencyKey.current ??
+          (createIdempotencyKey.current = apiClient.generateIdempotencyKey()),
         description: createForm.description.trim(),
         grossAmountCents,
         occurredAt,
@@ -177,6 +193,58 @@ export function CashEntriesScreen() {
       }
       await invalidateCashRegisterQueries(queryClient, id);
       setCreateOpen(false);
+      setCreateForm(defaultCreateForm());
+      createIdempotencyKey.current = null;
+    },
+    onError: (error) => {
+      const conflict = getClosedDayConflict(error);
+      if (conflict) {
+        setClosedDayConflict(conflict);
+        setCreateOpen(false);
+        setCorrectionReason("");
+        setCashIsInRegister(false);
+        setCorrectionType("MISSING_ENTRY");
+        setCorrectionOpen(true);
+      }
+    },
+  });
+
+  const correctionMutation = useMutation({
+    mutationFn: async () => {
+      if (!id || !closedDayConflict) {
+        throw new Error("Missing closed-day correction context");
+      }
+      const uploadedDocumentId = createForm.attachmentFile
+        ? await uploadBelegDocument(createForm.attachmentFile)
+        : null;
+      const occurredAt = createForm.occurredAt
+        ? new Date(createForm.occurredAt).toISOString()
+        : `${closedDayConflict.dayKey}T12:00:00.000Z`;
+      await cashManagementApi.createClosedDayCorrection(id, closedDayConflict.dayKey, {
+        correctionType,
+        occurredAt,
+        reason: correctionReason.trim(),
+        entry: {
+          type: createForm.type,
+          description: createForm.description.trim(),
+          grossAmountCents: Math.round(Number(createForm.grossAmountInput) * 100),
+          tax: isTaxRelevantType(createForm.type)
+            ? {
+                mode: createForm.taxCodeId ? deriveTaxModeFromType(createForm.type) : "NONE",
+                taxCodeId: createForm.taxCodeId || undefined,
+              }
+            : { mode: "NONE" },
+        },
+        attachmentIds: uploadedDocumentId ? [uploadedDocumentId] : [],
+      });
+    },
+    onSuccess: async () => {
+      if (!id) {
+        return;
+      }
+      await invalidateCashRegisterQueries(queryClient, id);
+      setCorrectionOpen(false);
+      setClosedDayConflict(null);
       setCreateForm(defaultCreateForm());
     },
   });
@@ -319,6 +387,7 @@ export function CashEntriesScreen() {
         primaryAction={
           <Button
             onClick={() => {
+              createIdempotencyKey.current = apiClient.generateIdempotencyKey();
               setCreateForm(defaultCreateForm());
               setCreateOpen(true);
             }}
@@ -372,7 +441,10 @@ export function CashEntriesScreen() {
 
       <CreateEntryDialog
         open={createOpen}
-        onOpenChange={setCreateOpen}
+        onOpenChange={(open) => {
+          setCreateOpen(open);
+          if (!open && !createMutation.isPending) createIdempotencyKey.current = null;
+        }}
         form={createForm}
         setForm={setCreateForm}
         entryTypes={entryTypes}
@@ -390,7 +462,28 @@ export function CashEntriesScreen() {
         isPending={createMutation.isPending}
         isError={createMutation.isError}
         canSave={canSaveCreateEntry}
-        onSave={() => createMutation.mutate()}
+        onSave={() => createMutation.mutate({})}
+      />
+
+      <ClosedDayCorrectionDialog
+        open={correctionOpen}
+        onOpenChange={(open) => {
+          setCorrectionOpen(open);
+          if (!open) {
+            setClosedDayConflict(null);
+          }
+        }}
+        conflict={closedDayConflict}
+        reason={correctionReason}
+        setReason={setCorrectionReason}
+        correctionType={correctionType}
+        setCorrectionType={setCorrectionType}
+        registerCurrency={register.currency}
+        cashIsInRegister={cashIsInRegister}
+        setCashIsInRegister={setCashIsInRegister}
+        isPending={correctionMutation.isPending}
+        isError={correctionMutation.isError}
+        onConfirm={() => correctionMutation.mutate()}
       />
 
       <ReverseEntryDialog

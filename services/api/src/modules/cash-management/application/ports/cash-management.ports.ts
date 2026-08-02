@@ -14,11 +14,16 @@ import type {
   CashDenominationCountEntity,
   CashEntryAttachmentEntity,
   CashEntryEntity,
+  CashDayCloseRevisionEntity,
   CashExportArtifactEntity,
   CashRegisterEntity,
   CashAssistantWorkspaceEntity,
   CashAssistantWorkspaceType,
 } from "../../domain/entities";
+export type {
+  CashWorkspaceHandoffRepoPort,
+  CreateCashWorkspaceHandoffRecord,
+} from "./cash-workspace-handoff.port";
 
 export const CASH_REGISTER_REPO = Symbol("CASH_REGISTER_REPO");
 export const CASH_ENTRY_REPO = Symbol("CASH_ENTRY_REPO");
@@ -129,6 +134,7 @@ export type CreateEntryRecord = {
   referenceId: string | null;
   reversalOfEntryId: string | null;
   lockedByDayCloseId: string | null;
+  idempotencyKey?: string | null;
   createdByUserId: string;
 };
 
@@ -155,6 +161,32 @@ export interface CashEntryRepoPort {
     tenantId: string,
     workspaceId: string,
     entryId: string,
+    tx?: TransactionContext
+  ): Promise<CashEntryEntity | null>;
+  findActivePossibleDuplicate(
+    tenantId: string,
+    workspaceId: string,
+    input: {
+      registerId: string;
+      dayKey: string;
+      type: CashEntryType;
+      direction: CashEntryDirection;
+      amountCents: number;
+      source: CashEntrySource;
+    },
+    tx?: TransactionContext
+  ): Promise<CashEntryEntity | null>;
+  findActiveDailyZReport(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string,
+    tx?: TransactionContext
+  ): Promise<CashEntryEntity | null>;
+  findEntryByIdempotencyKey(
+    tenantId: string,
+    workspaceId: string,
+    idempotencyKey: string,
     tx?: TransactionContext
   ): Promise<CashEntryEntity | null>;
   setReversedByEntryId(
@@ -186,6 +218,20 @@ export interface CashEntryRepoPort {
     tx?: TransactionContext
   ): Promise<void>;
 }
+
+export type CreateCashDayCloseRevisionRecord = {
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  dayCloseId: string;
+  correctionEntryId: string;
+  correctionType: string;
+  reason: string;
+  occurredAt: Date;
+  createdByUserId: string;
+  originalSnapshot: object;
+  correctedSnapshot: object;
+};
 
 export type UpsertDayCloseRecord = {
   id?: string;
@@ -231,6 +277,23 @@ export interface CashDayCloseRepoPort {
     registerId: string,
     month: string
   ): Promise<CashDayCloseEntity[]>;
+  createRevision(
+    data: CreateCashDayCloseRevisionRecord,
+    tx?: TransactionContext
+  ): Promise<CashDayCloseRevisionEntity>;
+  createReviewRequirements(
+    tenantId: string,
+    workspaceId: string,
+    revisionId: string,
+    affectedDayCloseIds: string[],
+    tx?: TransactionContext
+  ): Promise<void>;
+  listRevisions(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string
+  ): Promise<CashDayCloseRevisionEntity[]>;
 }
 
 export interface CashAttachmentRepoPort {
@@ -454,6 +517,7 @@ export interface CashEntryConfirmationRepoPort {
     tenantId: string,
     workspaceId: string,
     id: string,
+    entryId: string,
     tx?: TransactionContext
   ): Promise<void>;
   markEntryConfirmationExpired(
@@ -462,33 +526,4 @@ export interface CashEntryConfirmationRepoPort {
     id: string,
     tx?: TransactionContext
   ): Promise<void>;
-}
-
-export type CreateCashWorkspaceHandoffRecord = {
-  tenantId: string;
-  locationId: string | null;
-  registerId: string;
-  sourceWorkspaceId: string;
-  targetWorkspaceId: string;
-  sourceConversationId: string;
-  sourceMessageId: string;
-  businessDate: string;
-  movementType: string;
-  amountCents: number;
-  description: string;
-  evidenceRequirement: string | null;
-  candidateHash: string;
-  version: number;
-  confirmationId: string | null;
-  status: "PENDING" | "CONSUMED" | "CANCELLED" | "EXPIRED";
-  expiresAt: Date;
-};
-
-export interface CashWorkspaceHandoffRepoPort {
-  createHandoff(data: CreateCashWorkspaceHandoffRecord, tx?: TransactionContext): Promise<any>;
-  findHandoffById(tenantId: string, id: string, tx?: TransactionContext): Promise<any | null>;
-  getHandoffForUpdate(id: string, tx?: TransactionContext): Promise<any | null>;
-  markHandoffViewed(id: string, userId: string, tx?: TransactionContext): Promise<void>;
-  markHandoffConsumed(id: string, tx?: TransactionContext): Promise<void>;
-  markHandoffCancelled(id: string, tx?: TransactionContext): Promise<void>;
 }

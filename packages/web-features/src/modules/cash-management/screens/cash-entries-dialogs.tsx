@@ -36,6 +36,7 @@ export type CreateEntryForm = {
   taxCodeId: string;
   description: string;
   documentReference: string;
+  dailyZReport: boolean;
   occurredAt: string;
   attachmentFile: File | null;
 };
@@ -56,6 +57,7 @@ export const defaultCreateForm = (): CreateEntryForm => ({
   taxCodeId: "",
   description: "",
   documentReference: "",
+  dailyZReport: false,
   occurredAt: getCurrentDateTimeInputValue(),
   attachmentFile: null,
 });
@@ -216,6 +218,18 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
               }
             />
           </div>
+          {form.type === "SALE_CASH" ? (
+            <label className="flex gap-2 rounded-md border p-3 text-sm">
+              <input
+                type="checkbox"
+                checked={form.dailyZReport}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, dailyZReport: event.target.checked }))
+                }
+              />
+              <span>Đây là tổng doanh thu Z-Bon của ngày này</span>
+            </label>
+          ) : null}
           <div className="space-y-1">
             <Label htmlFor="create-entry-document-reference">
               {t("cash.ui.entries.createDialog.documentReference")}
@@ -312,6 +326,104 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
             {isPending && form.attachmentFile
               ? t("cash.ui.entries.createDialog.uploading")
               : t("cash.ui.entries.createDialog.save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type ClosedDayCorrectionDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  conflict: ClosedDayConflict | null;
+  reason: string;
+  setReason: (reason: string) => void;
+  correctionType: "MISSING_ENTRY" | "REVERSE_ENTRY" | "REPLACE_ENTRY" | "BALANCE_EXPLANATION";
+  setCorrectionType: (
+    type: "MISSING_ENTRY" | "REVERSE_ENTRY" | "REPLACE_ENTRY" | "BALANCE_EXPLANATION"
+  ) => void;
+  registerCurrency: string;
+  cashIsInRegister: boolean;
+  setCashIsInRegister: (value: boolean) => void;
+  isPending: boolean;
+  isError: boolean;
+  onConfirm: () => void;
+};
+
+export function ClosedDayCorrectionDialog(props: ClosedDayCorrectionDialogProps) {
+  const {
+    open,
+    onOpenChange,
+    conflict,
+    reason,
+    setReason,
+    correctionType,
+    setCorrectionType,
+    registerCurrency,
+    cashIsInRegister,
+    setCashIsInRegister,
+    isPending,
+    isError,
+    onConfirm,
+  } = props;
+  const day = conflict?.dayKey
+    ? new Date(`${conflict.dayKey}T00:00:00`).toLocaleDateString("vi-VN")
+    : "";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[100dvh] overflow-y-auto sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle>Điều chỉnh ngày đã chốt</DialogTitle>
+          <DialogDescription>
+            Ngày {day} đã được chốt. Bút toán gốc không bị sửa hoặc xóa.
+          </DialogDescription>
+        </DialogHeader>
+        <Alert>
+          <AlertTitle>Không có giao dịch nào được tạo</AlertTitle>
+          <AlertDescription>
+            Số dư hiện tại vẫn là{" "}
+            {formatMoney(conflict?.currentBalanceCents ?? 0, undefined, registerCurrency)}.
+          </AlertDescription>
+        </Alert>
+        <div className="space-y-3">
+          <select
+            className="h-11 w-full rounded-md border bg-background px-3 text-base sm:h-10 sm:text-sm"
+            value={correctionType}
+            onChange={(event) =>
+              setCorrectionType(
+                event.target.value as ClosedDayCorrectionDialogProps["correctionType"]
+              )
+            }
+          >
+            <option value="MISSING_ENTRY">Thiếu doanh thu / giao dịch</option>
+            <option value="REVERSE_ENTRY">Giao dịch trùng hoặc cần đảo</option>
+            <option value="REPLACE_ENTRY">Sai số tiền hoặc thông tin</option>
+            <option value="BALANCE_EXPLANATION">Giải thích chênh lệch quỹ</option>
+          </select>
+          <Textarea value={reason} onChange={(event) => setReason(event.target.value)} />
+          <label className="flex gap-2 rounded-md border p-3 text-sm">
+            <input
+              type="checkbox"
+              checked={cashIsInRegister}
+              onChange={(event) => setCashIsInRegister(event.target.checked)}
+            />
+            <span>Tôi xác nhận số tiền này hiện vẫn có trong quỹ.</span>
+          </label>
+          {isError ? (
+            <p className="text-sm text-destructive">Không thể tạo bút toán điều chỉnh.</p>
+          ) : null}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Hủy
+          </Button>
+          <Button
+            onClick={onConfirm}
+            disabled={isPending || reason.trim().length < 3 || !cashIsInRegister}
+          >
+            {isPending ? "Đang lưu…" : "Tạo bút toán điều chỉnh"}
           </Button>
         </DialogFooter>
       </DialogContent>

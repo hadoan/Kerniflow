@@ -381,6 +381,13 @@ export function KassenberichtScreen() {
     queryFn: () => cashManagementApi.getKassenbericht(id as string, dayKey),
     enabled: Boolean(id),
   });
+  const revisionsQuery = useQuery({
+    queryKey: id
+      ? ["cash-closed-day-revisions", id, dayKey]
+      : ["cash-closed-day-revisions", "missing-id"],
+    queryFn: () => cashManagementApi.listClosedDayRevisions(id as string, dayKey),
+    enabled: Boolean(id),
+  });
 
   if (!id) {
     return null;
@@ -395,6 +402,9 @@ export function KassenberichtScreen() {
       <div className="p-6 text-sm text-destructive">{t("cash.ui.kassenbericht.loadFailed")}</div>
     );
   }
+
+  const revisions = revisionsQuery.data?.revisions ?? [];
+  const latestRevision = revisions.length > 0 ? revisions[revisions.length - 1] : null;
 
   const downloadPdf = async () => {
     setIsDownloading(true);
@@ -455,6 +465,19 @@ export function KassenberichtScreen() {
       </div>
       <Card className="print:border-0 print:shadow-none">
         <CardContent className="p-0 sm:p-4 print:p-0">
+          {latestRevision ? (
+            <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 print:border-black print:bg-white">
+              <p className="font-semibold">
+                Kassenbericht đã được điều chỉnh - Revision {latestRevision.revisionNo}
+              </p>
+              <p className="mt-1">
+                {latestRevision.reason}. Bản chốt gốc vẫn được lưu giữ đầy đủ.
+                {latestRevision.downstreamReviewRequired
+                  ? " Các ngày đã chốt sau đó cần được quản lý kiểm tra."
+                  : ""}
+              </p>
+            </div>
+          ) : null}
           <KassenberichtPaper report={reportQuery.data.preview} />
         </CardContent>
       </Card>

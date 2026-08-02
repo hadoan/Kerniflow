@@ -10,8 +10,9 @@ import {
   CashEntryType,
   CashPaymentMethod,
 } from "@corely/contracts";
-import type {
-  AuditPort,
+import {
+  ConflictError,
+  type AuditPort,
   OutboxPort,
   TransactionContext,
   UnitOfWorkPort,
@@ -361,6 +362,10 @@ describe("cash-management use cases", () => {
       replaceCountLines: async () => {},
       listDayCloses: async () => [],
       listDayClosesForMonth: async () => [],
+      createRevision: async () => {
+        throw new Error("not used");
+      },
+      createReviewRequirements: async () => {},
     };
 
     const useCase = new ReverseCashEntryUseCase(
@@ -648,6 +653,10 @@ describe("cash-management use cases", () => {
       replaceCountLines: async () => {},
       listDayCloses: async () => [],
       listDayClosesForMonth: async () => [],
+      createRevision: async () => {
+        throw new Error("not used");
+      },
+      createReviewRequirements: async () => {},
     };
 
     const useCase = new CreateCashEntryUseCase(
@@ -682,6 +691,7 @@ describe("cash-management use cases", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.code).toBe("CashManagement:DayAlreadyClosed");
+      expect(result.error).toBeInstanceOf(ConflictError);
     }
   });
 

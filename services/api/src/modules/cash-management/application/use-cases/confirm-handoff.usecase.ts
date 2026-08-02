@@ -67,6 +67,17 @@ export class ConfirmHandoffUseCase extends BaseUseCase<ConfirmHandoffInput, { en
       }
 
       if (handoff.status === "CONSUMED") {
+        if (handoff.confirmationId) {
+          const consumedConfirmation = await this.confirmationRepo.findEntryConfirmationById(
+            tenantId,
+            handoff.sourceWorkspaceId,
+            handoff.confirmationId,
+            tx
+          );
+          if (consumedConfirmation?.consumedEntryId) {
+            return ok({ entryId: consumedConfirmation.consumedEntryId });
+          }
+        }
         throw new ValidationError("Handoff has already been consumed");
       }
       if (handoff.status === "CANCELLED") {

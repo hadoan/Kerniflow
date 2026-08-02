@@ -31,6 +31,7 @@ import { UpdateCashRegisterUseCase } from "./application/use-cases/update-cash-r
 import { ListCashEntriesQueryUseCase } from "./application/use-cases/list-cash-entries.query";
 import { GetCashEntryQueryUseCase } from "./application/use-cases/get-cash-entry.query";
 import { CreateCashEntryUseCase } from "./application/use-cases/create-cash-entry.usecase";
+import { CreateClosedDayCorrectionUseCase } from "./application/use-cases/create-closed-day-correction.usecase";
 import { ReverseCashEntryUseCase } from "./application/use-cases/reverse-cash-entry.usecase";
 import { GetCashDayCloseQueryUseCase } from "./application/use-cases/get-cash-day-close.query";
 import { SaveCashDayCountUseCase } from "./application/use-cases/save-cash-day-count.usecase";
@@ -90,6 +91,7 @@ import { ConfirmHandoffUseCase } from "./application/use-cases/confirm-handoff.u
     ListCashEntriesQueryUseCase,
     GetCashEntryQueryUseCase,
     CreateCashEntryUseCase,
+    CreateClosedDayCorrectionUseCase,
     ReverseCashEntryUseCase,
     GetCashDayCloseQueryUseCase,
     SaveCashDayCountUseCase,
@@ -124,6 +126,7 @@ import { ConfirmHandoffUseCase } from "./application/use-cases/confirm-handoff.u
     ListCashDayClosesQueryUseCase,
     ListCashEntryAttachmentsQueryUseCase,
     CreateCashEntryUseCase,
+    CreateClosedDayCorrectionUseCase,
     ReverseCashEntryUseCase,
     SaveCashDayCountUseCase,
     SubmitCashDayCloseUseCase,

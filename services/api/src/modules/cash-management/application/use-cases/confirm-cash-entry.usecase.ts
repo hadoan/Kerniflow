@@ -59,6 +59,9 @@ export class ConfirmCashEntryUseCase extends BaseUseCase<
     }
 
     if (confirmation.status === "CONSUMED") {
+      if (confirmation.consumedEntryId) {
+        return ok({ entryId: confirmation.consumedEntryId });
+      }
       throw new ValidationError("Confirmation has already been consumed");
     }
     if (confirmation.status === "EXPIRED" || confirmation.expiresAt < new Date()) {
@@ -88,7 +91,8 @@ export class ConfirmCashEntryUseCase extends BaseUseCase<
     await this.confirmationRepo.markEntryConfirmationConsumed(
       tenantId,
       workspaceId,
-      input.confirmationId
+      input.confirmationId,
+      result.value.entry.id
     );
 
     return ok({ entryId: result.value.entry.id });
