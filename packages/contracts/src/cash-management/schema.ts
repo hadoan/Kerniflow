@@ -274,23 +274,45 @@ export const CreateClosedDayCorrectionInputSchema = z
     occurredAt: z.string(),
     reason: z.string().min(3).max(1_000),
     originalEntryId: z.string().optional(),
-    entry: z.object({
-      type: CashEntryTypeSchema,
-      description: z.string().min(1).max(1_000),
-      grossAmountCents: z.number().int().positive(),
-      tax: z
-        .object({
-          mode: CashEntryTaxModeSchema.optional(),
-          taxCodeId: z.string().optional().nullable(),
-        })
-        .optional(),
-    }),
+    entry: z
+      .object({
+        type: CashEntryTypeSchema,
+        description: z.string().min(1).max(1_000),
+        grossAmountCents: z.number().int().positive(),
+        tax: z
+          .object({
+            mode: CashEntryTaxModeSchema.optional(),
+            taxCodeId: z.string().optional().nullable(),
+          })
+          .optional(),
+      })
+      .optional(),
     attachmentIds: z.array(z.string()).max(10).default([]),
     idempotencyKey: z.string().optional(),
   })
   .superRefine((value, ctx) => {
+    const needsOriginalEntry =
+      value.correctionType === "REVERSE_ENTRY" || value.correctionType === "REPLACE_ENTRY";
+    const needsNewEntry = value.correctionType !== "REVERSE_ENTRY";
+
+    if (needsOriginalEntry && !value.originalEntryId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "originalEntryId is required for reversal or replacement",
+        path: ["originalEntryId"],
+      });
+    }
+
+    if (needsNewEntry && !value.entry) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "entry is required unless correctionType is REVERSE_ENTRY",
+        path: ["entry"],
+      });
+    }
+
     if (
-      value.entry.tax?.mode &&
+      value.entry?.tax?.mode &&
       value.entry.tax.mode !== CashEntryTaxMode.NONE &&
       !value.entry.tax.taxCodeId
     ) {

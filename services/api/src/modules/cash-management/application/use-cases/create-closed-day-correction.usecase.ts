@@ -1,5 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  CashEntryDirection,
+  CashEntryType,
   CashManagementBillingMetricKeys,
   CashManagementProductKey,
   type CreateClosedDayCorrectionInput,
@@ -28,8 +30,11 @@ import { TaxProfileRepoPort } from "../../../tax/domain/ports/tax-profile-repo.p
 import { TaxRateRepoPort } from "../../../tax/domain/ports/tax-rate-repo.port";
 import { assertCanManageCash } from "../../policies/assert-cash-policies";
 import { CashBalanceCalculator } from "../../domain/cash-balance-calculator";
-import { normalizeCashEntryInput } from "../../domain/cash-entry-rules";
-import { resolveCashEntryTax } from "../../domain/cash-entry-tax";
+import {
+  normalizeCashEntryInput,
+  type NormalizedCashEntryCommand,
+} from "../../domain/cash-entry-rules";
+import { resolveCashEntryTax, type CashEntryTaxSnapshot } from "../../domain/cash-entry-tax";
 import { toEntryDto } from "../cash-management.mapper";
 import {
   CASH_ATTACHMENT_REPO,
@@ -41,6 +46,7 @@ import {
   type CashDayCloseRepoPort,
   type CashEntryRepoPort,
   type CashRegisterRepoPort,
+  type CreateEntryRecord,
   type DocumentsPort,
 } from "../ports/cash-management.ports";
 import { getCashBillingNumber, loadCashBillingState } from "./billing-guards";
@@ -52,6 +58,19 @@ import { getIdempotentBody, storeIdempotentBody } from "./idempotency";
 
 const ACTION_KEY = "cash-management.closed-day-correction.create";
 const isClosedStatus = (status: string) => status === "SUBMITTED" || status === "LOCKED";
+const needsOriginalEntry = (correctionType: CreateClosedDayCorrectionInput["correctionType"]) =>
+  correctionType === "REVERSE_ENTRY" || correctionType === "REPLACE_ENTRY";
+const needsReplacementEntry = (correctionType: CreateClosedDayCorrectionInput["correctionType"]) =>
+  correctionType !== "REVERSE_ENTRY";
+const reverseDirection = (direction: CashEntryDirection): CashEntryDirection =>
+  direction === CashEntryDirection.IN ? CashEntryDirection.OUT : CashEntryDirection.IN;
+const readSnapshotNumber = (snapshot: unknown, key: string): number | null => {
+  if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
+    return null;
+  }
+  const value = (snapshot as Record<string, unknown>)[key];
+  return typeof value === "number" ? value : null;
+};
 
 type Response = {
   entry: ReturnType<typeof toEntryDto>;
@@ -105,7 +124,9 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
   ): Promise<Result<Response, UseCaseError>> {
     assertCanManageCash(ctx, input.registerId);
     const { tenantId, workspaceId } = ctx;
-    if (!tenantId || !workspaceId) {throw new ValidationError("Missing tenant/workspace context");}
+    if (!tenantId || !workspaceId) {
+      throw new ValidationError("Missing tenant/workspace context");
+    }
 
     const cached = await getIdempotentBody<Response>({
       idempotency: this.idempotencyStore,
@@ -113,19 +134,22 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
       actionKey: ACTION_KEY,
       idempotencyKey: input.idempotencyKey,
     });
-    if (cached) {return ok(cached);}
+    if (cached) {
+      return ok(cached);
+    }
 
     const register = await this.registerRepo.findRegisterById(
       tenantId,
       workspaceId,
       input.registerId
     );
-    if (!register)
-      {throw new NotFoundError(
+    if (!register) {
+      throw new NotFoundError(
         "Cash register not found",
         undefined,
         "CashManagement:RegisterNotFound"
-      );}
+      );
+    }
     const dayClose = await this.dayCloseRepo.findDayCloseByRegisterAndDay(
       tenantId,
       workspaceId,
@@ -140,6 +164,57 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
       );
     }
 
+    const requiresOriginalEntry = needsOriginalEntry(input.correctionType);
+    const originalEntryId = input.originalEntryId;
+    if (requiresOriginalEntry && !originalEntryId) {
+      throw new ValidationError(
+        "originalEntryId is required for reversal or replacement",
+        undefined,
+        "CashManagement:OriginalEntryRequired"
+      );
+    }
+    const original =
+      requiresOriginalEntry && originalEntryId
+        ? await this.entryRepo.findEntryById(tenantId, workspaceId, originalEntryId)
+        : null;
+    if (needsOriginalEntry(input.correctionType) && !original) {
+      throw new NotFoundError(
+        "Original cash entry not found",
+        { originalEntryId: input.originalEntryId },
+        "CashManagement:EntryNotFound"
+      );
+    }
+    if (original) {
+      if (original.registerId !== register.id || original.dayKey !== input.dayKey) {
+        throw new ValidationError(
+          "The original entry must belong to the closed register day being corrected",
+          {
+            originalEntryId: original.id,
+            originalRegisterId: original.registerId,
+            originalDayKey: original.dayKey,
+            registerId: register.id,
+            dayKey: input.dayKey,
+          },
+          "CashManagement:CorrectionEntryDayMismatch"
+        );
+      }
+      if (original.reversalOfEntryId) {
+        throw new ValidationError(
+          "A reversal entry cannot itself be reversed through closed-day correction",
+          { originalEntryId: original.id, reversalOfEntryId: original.reversalOfEntryId },
+          "CashManagement:CannotReverseReversal"
+        );
+      }
+      if (original.reversedByEntryId) {
+        throw new ConflictError(
+          "Entry has already been reversed",
+          { originalEntryId: original.id, reversedByEntryId: original.reversedByEntryId },
+          "CashManagement:EntryAlreadyReversed"
+        );
+      }
+    }
+
+    const entriesNeeded = input.correctionType === "REPLACE_ENTRY" ? 2 : 1;
     const billingState = await loadCashBillingState(this.billingAccess, tenantId);
     const entriesUsed = await this.entryRepo.countEntriesForPeriod(
       tenantId,
@@ -147,10 +222,10 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
       billingState.periodEnd
     );
     const limit = getCashBillingNumber(billingState.entitlements, "maxEntriesPerMonth");
-    if (limit !== null && entriesUsed >= limit) {
+    if (limit !== null && entriesUsed + entriesNeeded > limit) {
       throw new ForbiddenError(
         "Your current plan has reached the monthly cash entry limit",
-        { limit, used: entriesUsed },
+        { limit, used: entriesUsed, required: entriesNeeded },
         "CashManagement:EntryLimitReached"
       );
     }
@@ -161,35 +236,58 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
       )
     );
 
-    const normalized = normalizeCashEntryInput({
-      registerId: register.id,
-      type: input.entry.type,
-      description: input.entry.description,
-      grossAmountCents: input.entry.grossAmountCents,
-      occurredAt: input.occurredAt,
-      dayKey: input.dayKey,
-      tax: input.entry.tax,
-    });
-    const taxSnapshot = await resolveCashEntryTax({
-      tenantId: workspaceId,
-      occurredAt: normalized.occurredAt,
-      entryType: normalized.type,
-      grossAmountCents: normalized.amountCents,
-      input: {
+    const replacementInput = needsReplacementEntry(input.correctionType) ? input.entry : undefined;
+    if (needsReplacementEntry(input.correctionType) && !replacementInput) {
+      throw new ValidationError(
+        "A new entry is required for this correction type",
+        undefined,
+        "CashManagement:CorrectionEntryRequired"
+      );
+    }
+
+    let normalized: NormalizedCashEntryCommand | null = null;
+    let taxSnapshot: CashEntryTaxSnapshot | null = null;
+    if (replacementInput) {
+      normalized = normalizeCashEntryInput({
         registerId: register.id,
-        type: input.entry.type,
-        description: input.entry.description,
-        grossAmountCents: input.entry.grossAmountCents,
-        tax: input.entry.tax,
-      },
-      taxProfileRepo: this.taxProfileRepo,
-      taxCodeRepo: this.taxCodeRepo,
-      taxRateRepo: this.taxRateRepo,
-    });
-    const nextBalance = CashBalanceCalculator.applyDelta(register.currentBalanceCents, {
-      direction: normalized.direction,
-      amountCents: normalized.amountCents,
-    });
+        type: replacementInput.type,
+        description: replacementInput.description,
+        grossAmountCents: replacementInput.grossAmountCents,
+        occurredAt: input.occurredAt,
+        dayKey: input.dayKey,
+        tax: replacementInput.tax,
+      });
+      taxSnapshot = await resolveCashEntryTax({
+        tenantId: workspaceId,
+        occurredAt: normalized.occurredAt,
+        entryType: normalized.type,
+        grossAmountCents: normalized.amountCents,
+        input: {
+          registerId: register.id,
+          type: replacementInput.type,
+          description: replacementInput.description,
+          grossAmountCents: replacementInput.grossAmountCents,
+          tax: replacementInput.tax,
+        },
+        taxProfileRepo: this.taxProfileRepo,
+        taxCodeRepo: this.taxCodeRepo,
+        taxRateRepo: this.taxRateRepo,
+      });
+    }
+
+    let nextBalance = register.currentBalanceCents;
+    if (original) {
+      nextBalance = CashBalanceCalculator.applyDelta(nextBalance, {
+        direction: reverseDirection(original.direction),
+        amountCents: original.amountCents,
+      });
+    }
+    if (normalized) {
+      nextBalance = CashBalanceCalculator.applyDelta(nextBalance, {
+        direction: normalized.direction,
+        amountCents: normalized.amountCents,
+      });
+    }
     if (register.disallowNegativeBalance && nextBalance < 0) {
       throw new ValidationError(
         "Negative cash balance is not allowed",
@@ -205,10 +303,104 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
       })
     ).filter((close) => close.dayKey > input.dayKey && isClosedStatus(close.status));
 
+    const previousRevisions = await this.dayCloseRepo.listRevisions(
+      tenantId,
+      workspaceId,
+      register.id,
+      input.dayKey
+    );
+    const expectedBalanceBeforeCorrection =
+      readSnapshotNumber(previousRevisions.at(-1)?.correctedSnapshot, "expectedBalanceCents") ??
+      dayClose.expectedBalanceCents;
+    let revisedExpectedBalanceCents = expectedBalanceBeforeCorrection;
+    if (original) {
+      revisedExpectedBalanceCents = CashBalanceCalculator.applyDelta(revisedExpectedBalanceCents, {
+        direction: reverseDirection(original.direction),
+        amountCents: original.amountCents,
+      });
+    }
+    if (normalized) {
+      revisedExpectedBalanceCents = CashBalanceCalculator.applyDelta(revisedExpectedBalanceCents, {
+        direction: normalized.direction,
+        amountCents: normalized.amountCents,
+      });
+    }
+
     const result = await this.unitOfWork.withinTransaction(async (tx) => {
-      const entryNo = await this.entryRepo.nextEntryNo(tenantId, workspaceId, register.id, tx);
-      const entry = await this.entryRepo.createEntry(
-        {
+      let runningBalance = register.currentBalanceCents;
+      let reversalEntryId: string | null = null;
+
+      if (original) {
+        const reversalDirection = reverseDirection(original.direction);
+        runningBalance = CashBalanceCalculator.applyDelta(runningBalance, {
+          direction: reversalDirection,
+          amountCents: original.amountCents,
+        });
+        const reversalEntryNo = await this.entryRepo.nextEntryNo(
+          tenantId,
+          workspaceId,
+          register.id,
+          tx
+        );
+        const reversal = await this.entryRepo.createEntry(
+          {
+            tenantId,
+            workspaceId,
+            registerId: register.id,
+            entryNo: reversalEntryNo,
+            occurredAt: original.occurredAt,
+            dayKey: original.dayKey,
+            description: `Reversal #${original.entryNo}: ${input.reason}`,
+            type: CashEntryType.CORRECTION,
+            direction: reversalDirection,
+            source: "MANUAL",
+            paymentMethod: original.paymentMethod,
+            amountCents: original.amountCents,
+            grossAmountCents: original.grossAmountCents,
+            netAmountCents: original.netAmountCents,
+            taxAmountCents: original.taxAmountCents,
+            taxMode: original.taxMode,
+            taxCodeId: original.taxCodeId,
+            taxCode: original.taxCode,
+            taxRateBps: original.taxRateBps,
+            taxLabel: original.taxLabel,
+            currency: original.currency,
+            balanceAfterCents: runningBalance,
+            sourceDocumentId: original.sourceDocumentId,
+            sourceDocumentRef: original.sourceDocumentRef,
+            sourceDocumentKind: original.sourceDocumentKind,
+            referenceId: original.referenceId,
+            reversalOfEntryId: original.id,
+            lockedByDayCloseId: dayClose.id,
+            createdByUserId: ctx.userId ?? "system",
+          },
+          tx
+        );
+        reversalEntryId = reversal.id;
+        const markedAsReversed = await this.entryRepo.setReversedByEntryId(
+          tenantId,
+          workspaceId,
+          original.id,
+          reversal.id,
+          tx
+        );
+        if (!markedAsReversed) {
+          throw new ConflictError(
+            "Entry has already been reversed",
+            { originalEntryId: original.id },
+            "CashManagement:EntryAlreadyReversed"
+          );
+        }
+      }
+
+      let replacement = null;
+      if (normalized && taxSnapshot) {
+        runningBalance = CashBalanceCalculator.applyDelta(runningBalance, {
+          direction: normalized.direction,
+          amountCents: normalized.amountCents,
+        });
+        const entryNo = await this.entryRepo.nextEntryNo(tenantId, workspaceId, register.id, tx);
+        const replacementRecord: CreateEntryRecord = {
           tenantId,
           workspaceId,
           registerId: register.id,
@@ -238,31 +430,41 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
           reversalOfEntryId: null,
           lockedByDayCloseId: dayClose.id,
           createdByUserId: ctx.userId ?? "system",
-        },
-        tx
-      );
-      const revisedExpectedBalanceCents = CashBalanceCalculator.applyDelta(
-        dayClose.expectedBalanceCents,
-        {
-          direction: normalized.direction,
-          amountCents: normalized.amountCents,
-        }
-      );
+        };
+        replacement = await this.entryRepo.createEntry(replacementRecord, tx);
+      }
+
+      const correctionEntry =
+        replacement ??
+        (reversalEntryId
+          ? await this.entryRepo.findEntryById(tenantId, workspaceId, reversalEntryId, tx)
+          : null);
+      if (!correctionEntry) {
+        throw new ValidationError(
+          "The correction did not create an entry",
+          undefined,
+          "CashManagement:CorrectionEntryRequired"
+        );
+      }
+
       const revision = await this.dayCloseRepo.createRevision(
         {
           tenantId,
           workspaceId,
           registerId: register.id,
           dayCloseId: dayClose.id,
-          correctionEntryId: entry.id,
+          correctionEntryId: correctionEntry.id,
           correctionType: input.correctionType,
           reason: input.reason,
-          occurredAt: normalized.occurredAt,
+          occurredAt: normalized?.occurredAt ?? original?.occurredAt ?? new Date(input.occurredAt),
           createdByUserId: ctx.userId ?? "system",
           originalSnapshot: {
-            expectedBalanceCents: dayClose.expectedBalanceCents,
+            expectedBalanceCents: expectedBalanceBeforeCorrection,
             countedBalanceCents: dayClose.countedBalanceCents,
-            differenceCents: dayClose.differenceCents,
+            differenceCents:
+              dayClose.countedBalanceCents === null
+                ? null
+                : dayClose.countedBalanceCents - expectedBalanceBeforeCorrection,
             status: dayClose.status,
             closedAt:
               dayClose.lockedAt?.toISOString() ?? dayClose.submittedAt?.toISOString() ?? null,
@@ -274,6 +476,9 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
               dayClose.countedBalanceCents === null
                 ? null
                 : dayClose.countedBalanceCents - revisedExpectedBalanceCents,
+            originalEntryId: original?.id ?? null,
+            reversalEntryId,
+            replacementEntryId: replacement?.id ?? null,
           },
         },
         tx
@@ -290,7 +495,7 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
           {
             tenantId,
             workspaceId,
-            entryId: entry.id,
+            entryId: correctionEntry.id,
             documentId,
             uploadedByUserId: ctx.userId ?? null,
           },
@@ -301,7 +506,7 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
         tenantId,
         workspaceId,
         register.id,
-        nextBalance,
+        runningBalance,
         tx
       );
       await this.audit.log(
@@ -314,7 +519,10 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
           metadata: {
             registerId: register.id,
             dayKey: input.dayKey,
-            correctionEntryId: entry.id,
+            correctionEntryId: correctionEntry.id,
+            originalEntryId: original?.id ?? null,
+            reversalEntryId,
+            replacementEntryId: replacement?.id ?? null,
             correctionType: input.correctionType,
             reason: input.reason,
             downstreamCloseIds: downstreamCloses.map((close) => close.id),
@@ -328,7 +536,10 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
           eventType: "cash.closed-day.correction-created",
           payload: {
             revisionId: revision.id,
-            entryId: entry.id,
+            entryId: correctionEntry.id,
+            originalEntryId: original?.id ?? null,
+            reversalEntryId,
+            replacementEntryId: replacement?.id ?? null,
             registerId: register.id,
             dayKey: input.dayKey,
             downstreamReviewRequired: downstreamCloses.length > 0,
@@ -341,10 +552,10 @@ export class CreateClosedDayCorrectionUseCase extends BaseUseCase<
         tenantId,
         CashManagementProductKey,
         CashManagementBillingMetricKeys.entries,
-        1,
+        entriesNeeded,
         tx
       );
-      return { entry, revision };
+      return { entry: correctionEntry, revision };
     });
 
     const response: Response = {

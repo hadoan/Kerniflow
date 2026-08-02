@@ -45,6 +45,12 @@ const defaultFilters: CashEntryFilters = {
 
 const defaultAttachBelegForm = (): AttachBelegForm => ({ attachmentFile: null });
 
+const toDateTimeInputValue = (value: string): string => {
+  const date = new Date(value);
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+};
+
 export function CashEntriesScreen() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -61,6 +67,8 @@ export function CashEntriesScreen() {
   const [correctionType, setCorrectionType] = useState<
     "MISSING_ENTRY" | "REVERSE_ENTRY" | "REPLACE_ENTRY" | "BALANCE_EXPLANATION"
   >("MISSING_ENTRY");
+  const [correctionOriginalEntryId, setCorrectionOriginalEntryId] = useState("");
+  const [correctionTypeLocked, setCorrectionTypeLocked] = useState(false);
   const [reverseTargetId, setReverseTargetId] = useState<string | null>(null);
   const [reverseReason, setReverseReason] = useState("");
   const [belegEntryId, setBelegEntryId] = useState<string | null>(null);
@@ -97,6 +105,33 @@ export function CashEntriesScreen() {
     enabled: Boolean(id),
   });
 
+  const dayClosesQuery = useQuery({
+    queryKey: id
+      ? cashKeys.dayCloses.list({ registerId: id, dayKeyFrom: "0000-01-01" })
+      : ["cash-day-closes", "missing-id"],
+    queryFn: () => cashManagementApi.listDayCloses(id as string),
+    enabled: Boolean(id),
+  });
+
+  const correctionOriginalEntriesQuery = useQuery({
+    queryKey:
+      id && closedDayConflict
+        ? cashKeys.entries.list({
+            registerId: id,
+            dayKeyFrom: closedDayConflict.dayKey,
+            dayKeyTo: closedDayConflict.dayKey,
+          })
+        : ["cash-entries", "closed-day-correction", "missing-context"],
+    queryFn: () =>
+      cashManagementApi.listEntries(id as string, {
+        dayKeyFrom: closedDayConflict?.dayKey,
+        dayKeyTo: closedDayConflict?.dayKey,
+      }),
+    enabled:
+      Boolean(id && closedDayConflict && correctionOpen) &&
+      (correctionType === "REVERSE_ENTRY" || correctionType === "REPLACE_ENTRY"),
+  });
+
   const taxProfileQuery = useQuery({
     queryKey: ["tax-profile"],
     queryFn: () => taxApi.getProfile(),
@@ -115,6 +150,15 @@ export function CashEntriesScreen() {
   });
 
   const entries = useMemo(() => entriesQuery.data?.entries ?? [], [entriesQuery.data?.entries]);
+  const closedDayByDayKey = useMemo(
+    () =>
+      new Map(
+        (dayClosesQuery.data?.closes ?? [])
+          .filter((close) => close.status === "SUBMITTED")
+          .map((close) => [close.dayKey, close])
+      ),
+    [dayClosesQuery.data?.closes]
+  );
 
   const attachmentQueries = useQueries({
     queries: entries.slice(0, 50).map((entry) => ({
@@ -204,6 +248,8 @@ export function CashEntriesScreen() {
         setCorrectionReason("");
         setCashIsInRegister(false);
         setCorrectionType("MISSING_ENTRY");
+        setCorrectionOriginalEntryId("");
+        setCorrectionTypeLocked(false);
         setCorrectionOpen(true);
       }
     },
@@ -224,17 +270,24 @@ export function CashEntriesScreen() {
         correctionType,
         occurredAt,
         reason: correctionReason.trim(),
-        entry: {
-          type: createForm.type,
-          description: createForm.description.trim(),
-          grossAmountCents: Math.round(Number(createForm.grossAmountInput) * 100),
-          tax: isTaxRelevantType(createForm.type)
-            ? {
-                mode: createForm.taxCodeId ? deriveTaxModeFromType(createForm.type) : "NONE",
-                taxCodeId: createForm.taxCodeId || undefined,
-              }
-            : { mode: "NONE" },
-        },
+        originalEntryId:
+          correctionType === "REVERSE_ENTRY" || correctionType === "REPLACE_ENTRY"
+            ? correctionOriginalEntryId
+            : undefined,
+        entry:
+          correctionType === "REVERSE_ENTRY"
+            ? undefined
+            : {
+                type: createForm.type,
+                description: createForm.description.trim(),
+                grossAmountCents: Math.round(Number(createForm.grossAmountInput) * 100),
+                tax: isTaxRelevantType(createForm.type)
+                  ? {
+                      mode: createForm.taxCodeId ? deriveTaxModeFromType(createForm.type) : "NONE",
+                      taxCodeId: createForm.taxCodeId || undefined,
+                    }
+                  : { mode: "NONE" },
+              },
         attachmentIds: uploadedDocumentId ? [uploadedDocumentId] : [],
       });
     },
@@ -245,6 +298,8 @@ export function CashEntriesScreen() {
       await invalidateCashRegisterQueries(queryClient, id);
       setCorrectionOpen(false);
       setClosedDayConflict(null);
+      setCorrectionOriginalEntryId("");
+      setCorrectionTypeLocked(false);
       setCreateForm(defaultCreateForm());
     },
   });
@@ -421,10 +476,36 @@ export function CashEntriesScreen() {
           <CashEntriesTable
             entries={entries}
             registerId={id}
+            canResolveDayCloseStatus={!dayClosesQuery.isLoading && !dayClosesQuery.isError}
             attachmentCountByEntryId={attachmentCountByEntryId}
             isDownloadingAttachments={downloadAttachmentsMutation.isPending}
             onDownloadAttachments={(entryId) => downloadAttachmentsMutation.mutate(entryId)}
             onReverseEntry={(entryId) => {
+              const entry = entries.find((candidate) => candidate.id === entryId);
+              const closedDay = entry ? closedDayByDayKey.get(entry.dayKey) : undefined;
+              if (entry && (entry.lockedByDayCloseId || closedDay)) {
+                setClosedDayConflict({
+                  dayKey: entry.dayKey,
+                  closedAt:
+                    closedDay?.lockedAt ?? closedDay?.submittedAt ?? closedDay?.closedAt ?? null,
+                  currentBalanceCents: register.currentBalanceCents,
+                });
+                setCorrectionReason("");
+                setCashIsInRegister(false);
+                setCorrectionType("REVERSE_ENTRY");
+                setCorrectionOriginalEntryId(entry.id);
+                setCorrectionTypeLocked(true);
+                setCreateForm({
+                  ...defaultCreateForm(),
+                  type: entry.type,
+                  grossAmountInput: String(entry.grossAmountCents / 100),
+                  taxCodeId: entry.taxCodeId ?? "",
+                  description: entry.description,
+                  occurredAt: toDateTimeInputValue(entry.occurredAt),
+                });
+                setCorrectionOpen(true);
+                return;
+              }
               setReverseTargetId(entryId);
               setReverseReason("");
             }}
@@ -443,7 +524,9 @@ export function CashEntriesScreen() {
         open={createOpen}
         onOpenChange={(open) => {
           setCreateOpen(open);
-          if (!open && !createMutation.isPending) createIdempotencyKey.current = null;
+          if (!open && !createMutation.isPending) {
+            createIdempotencyKey.current = null;
+          }
         }}
         form={createForm}
         setForm={setCreateForm}
@@ -471,13 +554,27 @@ export function CashEntriesScreen() {
           setCorrectionOpen(open);
           if (!open) {
             setClosedDayConflict(null);
+            setCorrectionTypeLocked(false);
           }
         }}
         conflict={closedDayConflict}
         reason={correctionReason}
         setReason={setCorrectionReason}
         correctionType={correctionType}
-        setCorrectionType={setCorrectionType}
+        setCorrectionType={(type) => {
+          setCorrectionType(type);
+          if (type !== "REVERSE_ENTRY" && type !== "REPLACE_ENTRY") {
+            setCorrectionOriginalEntryId("");
+          }
+        }}
+        correctionTypeLocked={correctionTypeLocked}
+        originalEntries={(correctionOriginalEntriesQuery.data?.entries ?? []).filter(
+          (entry) => !entry.reversalOfEntryId && !entry.reversedByEntryId
+        )}
+        originalEntriesLoading={correctionOriginalEntriesQuery.isLoading}
+        originalEntriesError={correctionOriginalEntriesQuery.isError}
+        originalEntryId={correctionOriginalEntryId}
+        setOriginalEntryId={setCorrectionOriginalEntryId}
         registerCurrency={register.currency}
         cashIsInRegister={cashIsInRegister}
         setCashIsInRegister={setCashIsInRegister}

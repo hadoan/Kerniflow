@@ -23,6 +23,7 @@ import type { TaxCodeRepoPort } from "../../tax/domain/ports/tax-code-repo.port"
 import type { TaxProfileRepoPort } from "../../tax/domain/ports/tax-profile-repo.port";
 import type { TaxRateRepoPort } from "../../tax/domain/ports/tax-rate-repo.port";
 import { CreateCashEntryUseCase } from "../application/use-cases/create-cash-entry.usecase";
+import { CreateClosedDayCorrectionUseCase } from "../application/use-cases/create-closed-day-correction.usecase";
 import { ReverseCashEntryUseCase } from "../application/use-cases/reverse-cash-entry.usecase";
 import { GetCashDashboardQueryUseCase } from "../application/use-cases/get-cash-dashboard.query";
 import { SaveCashDayCountUseCase } from "../application/use-cases/save-cash-day-count.usecase";
@@ -34,8 +35,14 @@ import type {
   CashEntryRepoPort,
   CashExportRepoPort,
   CashRegisterRepoPort,
+  DocumentsPort,
 } from "../application/ports/cash-management.ports";
-import type { CashDayCloseEntity, CashEntryEntity, CashRegisterEntity } from "../domain/entities";
+import type {
+  CashDayCloseEntity,
+  CashDayCloseRevisionEntity,
+  CashEntryEntity,
+  CashRegisterEntity,
+} from "../domain/entities";
 
 const createCtx = (): UseCaseContext => ({
   tenantId: "tenant-1",
@@ -309,6 +316,145 @@ const baseEntry: CashEntryEntity = {
   createdByUserId: "user-1",
 };
 
+const makeClosedCorrectionHarness = (
+  originalEntry: CashEntryEntity,
+  options: {
+    currentBalanceCents?: number;
+    expectedBalanceCents?: number;
+    countedBalanceCents?: number;
+    taxProfileRepo?: TaxProfileRepoPort;
+  } = {}
+) => {
+  const entries: CashEntryEntity[] = [{ ...originalEntry }];
+  const revisions: CashDayCloseRevisionEntity[] = [];
+  let registerBalance = options.currentBalanceCents ?? 85640;
+  let nextEntryNo = originalEntry.entryNo + 1;
+  const dayClose: CashDayCloseEntity = {
+    id: "close-1",
+    tenantId: "tenant-1",
+    workspaceId: "ws-1",
+    registerId: originalEntry.registerId,
+    dayKey: originalEntry.dayKey,
+    expectedBalanceCents: options.expectedBalanceCents ?? 85640,
+    countedBalanceCents: options.countedBalanceCents ?? 73640,
+    differenceCents:
+      (options.countedBalanceCents ?? 73640) - (options.expectedBalanceCents ?? 85640),
+    status: CashDayCloseStatus.SUBMITTED,
+    note: null,
+    submittedAt: new Date("2026-07-31T18:30:00.000Z"),
+    submittedByUserId: "user-1",
+    lockedAt: null,
+    lockedByUserId: null,
+    counts: [],
+    createdAt: new Date("2026-07-31T18:30:00.000Z"),
+    updatedAt: new Date("2026-07-31T18:30:00.000Z"),
+  };
+
+  const registerRepo = {
+    findRegisterById: async () => ({
+      ...baseRegister,
+      id: originalEntry.registerId,
+      currentBalanceCents: registerBalance,
+    }),
+    setCurrentBalance: async (
+      _tenantId: string,
+      _workspaceId: string,
+      _registerId: string,
+      value: number
+    ) => {
+      registerBalance = value;
+    },
+  } as CashRegisterRepoPort;
+  const entryRepo = {
+    nextEntryNo: async () => nextEntryNo++,
+    createEntry: async (data: Parameters<CashEntryRepoPort["createEntry"]>[0]) => {
+      const created: CashEntryEntity = {
+        ...baseEntry,
+        ...data,
+        id: `entry-created-${entries.length}`,
+        reversedByEntryId: null,
+        createdAt: new Date("2026-08-02T18:48:00.000Z"),
+      };
+      entries.push(created);
+      return created;
+    },
+    countEntriesForPeriod: async () => entries.length,
+    findEntryById: async (_tenantId: string, _workspaceId: string, entryId: string) =>
+      entries.find((entry) => entry.id === entryId) ?? null,
+    setReversedByEntryId: async (
+      _tenantId: string,
+      _workspaceId: string,
+      entryId: string,
+      reversedByEntryId: string
+    ) => {
+      const entry = entries.find((candidate) => candidate.id === entryId);
+      if (!entry || entry.reversedByEntryId) return false;
+      entry.reversedByEntryId = reversedByEntryId;
+      return true;
+    },
+  } as CashEntryRepoPort;
+  const dayCloseRepo = {
+    findDayCloseByRegisterAndDay: async () => dayClose,
+    listDayCloses: async () => [dayClose],
+    createRevision: async (
+      data: Parameters<CashDayCloseRepoPort["createRevision"]>[0]
+    ): Promise<CashDayCloseRevisionEntity> => {
+      const revision: CashDayCloseRevisionEntity = {
+        id: `revision-${revisions.length + 1}`,
+        tenantId: data.tenantId,
+        workspaceId: data.workspaceId,
+        registerId: data.registerId,
+        dayCloseId: data.dayCloseId,
+        correctionEntryId: data.correctionEntryId,
+        revisionNo: revisions.length + 2,
+        correctionType: data.correctionType,
+        reason: data.reason,
+        occurredAt: data.occurredAt,
+        recordedAt: new Date("2026-08-02T18:48:00.000Z"),
+        createdByUserId: data.createdByUserId,
+        downstreamReviewRequired: false,
+        originalSnapshot: data.originalSnapshot,
+        correctedSnapshot: data.correctedSnapshot,
+      };
+      revisions.push(revision);
+      return revision;
+    },
+    createReviewRequirements: async () => {},
+    listRevisions: async () => revisions,
+  } as CashDayCloseRepoPort;
+  const attachmentRepo = {
+    createAttachment: async () => {
+      throw new Error("not used");
+    },
+  } as CashAttachmentRepoPort;
+  const documentsPort: DocumentsPort = {
+    assertDocumentAccessible: async () => {},
+  };
+
+  const useCase = new CreateClosedDayCorrectionUseCase(
+    registerRepo,
+    entryRepo,
+    dayCloseRepo,
+    attachmentRepo,
+    documentsPort,
+    makeBillingAccess(),
+    options.taxProfileRepo ?? makeTaxProfileRepo(),
+    makeTaxCodeRepo(),
+    makeTaxRateRepo(),
+    makeAudit(),
+    makeOutbox(),
+    makeUnitOfWork(),
+    new InMemoryIdempotencyStore()
+  );
+
+  return {
+    useCase,
+    entries,
+    revisions,
+    getRegisterBalance: () => registerBalance,
+  };
+};
+
 describe("cash-management use cases", () => {
   it("reversal creates a new entry and marks original as reversed", async () => {
     vi.useFakeTimers();
@@ -348,6 +494,7 @@ describe("cash-management use cases", () => {
         if (target) {
           target.reversedByEntryId = reversedByEntryId;
         }
+        return Boolean(target);
       },
       listEntriesForMonth: async () => entries,
       getExpectedBalanceAtDay: async () => 10000,
@@ -397,6 +544,162 @@ describe("cash-management use cases", () => {
     expect(entries[1].lockedByDayCloseId).toBeNull();
     expect(registerBalance).toBe(7500);
     vi.useRealTimers();
+  });
+
+  it("closed-day reversal copies the original tax snapshot and applies the opposite direction", async () => {
+    const original: CashEntryEntity = {
+      ...baseEntry,
+      id: "closed-sale-1",
+      registerId: "reg-1",
+      entryNo: 7,
+      occurredAt: new Date("2026-07-31T12:00:00.000Z"),
+      dayKey: "2026-07-31",
+      description: "Duplicate cash sale",
+      amountCents: 12000,
+      grossAmountCents: 12000,
+      netAmountCents: 10084,
+      taxAmountCents: 1916,
+      taxMode: "OUTPUT_VAT",
+      taxCodeId: "tax-code-1",
+      taxCode: "DE_STD_19",
+      taxRateBps: 1900,
+      taxLabel: "USt 19%",
+      balanceAfterCents: 85640,
+      lockedByDayCloseId: "close-1",
+    };
+    const harness = makeClosedCorrectionHarness(original);
+
+    const result = await harness.useCase.execute(
+      {
+        registerId: "reg-1",
+        dayKey: "2026-07-31",
+        correctionType: "REVERSE_ENTRY",
+        occurredAt: "2026-08-02T18:48:00.000Z",
+        reason: "Duplicate cash sale",
+        originalEntryId: original.id,
+        attachmentIds: [],
+        idempotencyKey: "closed-reverse-1",
+      },
+      createCtx()
+    );
+
+    expect(result.ok).toBe(true);
+    expect(harness.entries).toHaveLength(2);
+    const reversal = harness.entries[1];
+    expect(reversal.type).toBe(CashEntryType.CORRECTION);
+    expect(reversal.direction).toBe(CashEntryDirection.OUT);
+    expect(reversal.amountCents).toBe(original.amountCents);
+    expect(reversal.netAmountCents).toBe(original.netAmountCents);
+    expect(reversal.taxAmountCents).toBe(original.taxAmountCents);
+    expect(reversal.taxRateBps).toBe(1900);
+    expect(reversal.occurredAt).toEqual(original.occurredAt);
+    expect(reversal.dayKey).toBe(original.dayKey);
+    expect(reversal.reversalOfEntryId).toBe(original.id);
+    expect(harness.entries[0].reversedByEntryId).toBe(reversal.id);
+    expect(harness.getRegisterBalance()).toBe(73640);
+    expect(harness.revisions[0].correctionEntryId).toBe(reversal.id);
+  });
+
+  it("closed-day replacement reverses the original and creates the corrected entry atomically", async () => {
+    const original: CashEntryEntity = {
+      ...baseEntry,
+      id: "wrong-sale-1",
+      registerId: "reg-1",
+      entryNo: 7,
+      occurredAt: new Date("2026-07-31T12:00:00.000Z"),
+      dayKey: "2026-07-31",
+      description: "Wrong cash sale amount",
+      amountCents: 12000,
+      grossAmountCents: 12000,
+      netAmountCents: 10084,
+      taxAmountCents: 1916,
+      taxMode: "OUTPUT_VAT",
+      taxCodeId: "tax-code-1",
+      taxCode: "DE_STD_19",
+      taxRateBps: 1900,
+      taxLabel: "USt 19%",
+      balanceAfterCents: 85640,
+      lockedByDayCloseId: "close-1",
+    };
+    const harness = makeClosedCorrectionHarness(original, {
+      taxProfileRepo: makeTaxProfileRepo("STANDARD_VAT"),
+    });
+
+    const result = await harness.useCase.execute(
+      {
+        registerId: "reg-1",
+        dayKey: "2026-07-31",
+        correctionType: "REPLACE_ENTRY",
+        occurredAt: "2026-07-31T12:00:00.000Z",
+        reason: "Correct amount is 94.40 EUR",
+        originalEntryId: original.id,
+        entry: {
+          type: CashEntryType.SALE_CASH,
+          description: "Corrected cash sale",
+          grossAmountCents: 9440,
+          tax: { mode: "OUTPUT_VAT", taxCodeId: "tax-code-1" },
+        },
+        attachmentIds: [],
+        idempotencyKey: "closed-replace-1",
+      },
+      createCtx()
+    );
+
+    expect(result.ok).toBe(true);
+    expect(harness.entries).toHaveLength(3);
+    const reversal = harness.entries[1];
+    const replacement = harness.entries[2];
+    expect(reversal.reversalOfEntryId).toBe(original.id);
+    expect(reversal.direction).toBe(CashEntryDirection.OUT);
+    expect(replacement.reversalOfEntryId).toBeNull();
+    expect(replacement.referenceId).toBe(original.id);
+    expect(replacement.type).toBe(CashEntryType.SALE_CASH);
+    expect(replacement.direction).toBe(CashEntryDirection.IN);
+    expect(replacement.grossAmountCents).toBe(9440);
+    expect(replacement.netAmountCents).toBe(7933);
+    expect(replacement.taxAmountCents).toBe(1507);
+    expect(replacement.taxRateBps).toBe(1900);
+    expect(harness.getRegisterBalance()).toBe(83080);
+    expect(harness.revisions[0].correctionEntryId).toBe(replacement.id);
+  });
+
+  it("builds each closed-day revision on the previous corrected balance", async () => {
+    const original: CashEntryEntity = {
+      ...baseEntry,
+      occurredAt: new Date("2026-07-31T12:00:00.000Z"),
+      dayKey: "2026-07-31",
+      lockedByDayCloseId: "close-1",
+    };
+    const harness = makeClosedCorrectionHarness(original);
+
+    for (const [index, grossAmountCents] of [100, 50].entries()) {
+      const result = await harness.useCase.execute(
+        {
+          registerId: "reg-1",
+          dayKey: "2026-07-31",
+          correctionType: "MISSING_ENTRY",
+          occurredAt: "2026-07-31T16:00:00.000Z",
+          reason: `Missing owner deposit ${index + 1}`,
+          entry: {
+            type: CashEntryType.OWNER_DEPOSIT,
+            description: `Missing deposit ${index + 1}`,
+            grossAmountCents,
+            tax: { mode: "NONE" },
+          },
+          attachmentIds: [],
+          idempotencyKey: `closed-missing-${index + 1}`,
+        },
+        createCtx()
+      );
+      expect(result.ok).toBe(true);
+    }
+
+    const firstSnapshot = harness.revisions[0].correctedSnapshot as Record<string, unknown>;
+    const secondOriginalSnapshot = harness.revisions[1].originalSnapshot as Record<string, unknown>;
+    const secondSnapshot = harness.revisions[1].correctedSnapshot as Record<string, unknown>;
+    expect(firstSnapshot.expectedBalanceCents).toBe(85740);
+    expect(secondOriginalSnapshot.expectedBalanceCents).toBe(85740);
+    expect(secondSnapshot.expectedBalanceCents).toBe(85790);
   });
 
   it("day close with difference creates closing adjustment entry", async () => {

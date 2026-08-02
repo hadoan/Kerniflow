@@ -195,7 +195,7 @@ export interface CashEntryRepoPort {
     entryId: string,
     reversedByEntryId: string,
     tx?: TransactionContext
-  ): Promise<void>;
+  ): Promise<boolean>;
   listEntriesForMonth(
     tenantId: string,
     workspaceId: string,

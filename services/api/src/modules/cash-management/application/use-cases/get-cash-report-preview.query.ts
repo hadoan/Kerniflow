@@ -27,6 +27,7 @@ import {
   type CashAttachmentRepoPort,
 } from "../ports/cash-management.ports";
 import { assertCanReadCash } from "../../policies/assert-cash-policies";
+import { toCashReportingMovements } from "../../domain/cash-entry-reporting";
 
 const receiptRequiredTypes = new Set<string>([
   "EXPENSE_CASH",
@@ -120,12 +121,23 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     const previousClose =
       previousCloses.length > 0 ? previousCloses[previousCloses.length - 1] : null;
 
+    const previousCloseRevisions = previousClose
+      ? ((await this.dayCloseRepo.listRevisions(
+          tenantId,
+          workspaceId,
+          register.id,
+          previousClose.dayKey
+        )) ?? [])
+      : [];
+
     // Before the first submitted close, derive the opening balance from the ledger.
     // Falling back to zero makes the preview disagree with the submit use case for
     // registers that already have entries from earlier days.
     const openingBalanceCents =
       previousClose !== null
-        ? (previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents)
+        ? previousCloseRevisions.length > 0
+          ? ledgerOpeningBalanceCents
+          : (previousClose.countedBalanceCents ?? previousClose.expectedBalanceCents)
         : ledgerOpeningBalanceCents;
 
     const goodsPurchasesCents = 0;
@@ -141,7 +153,7 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
     let bankWithdrawalsToCashCents = 0;
     const cashRefundInflowsCents = 0;
 
-    for (const entry of entries) {
+    for (const entry of toCashReportingMovements(entries)) {
       // If there are specific types to skip, add them here.
       // E.g., if there are transfers that don't affect cash flow in the same way, skip them.
       const amount = entry.amountCents;
@@ -185,8 +197,20 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
       cashRefundOutflowsCents -
       otherCashOutflowsCents;
 
+    const revisions = dayClose
+      ? ((await this.dayCloseRepo.listRevisions(tenantId, workspaceId, register.id, dayKey)) ?? [])
+      : [];
+    const latestRevision = revisions.at(-1);
     const countedClosingCashCents = dayClose?.countedBalanceCents ?? null;
-    const effectiveClosingCashCents = countedClosingCashCents ?? expectedClosingCashCents;
+    const hasCorrectionInBalanceChain =
+      latestRevision !== undefined || previousCloseRevisions.length > 0;
+    // A correction revision changes the reported ledger balance but must never overwrite
+    // the physical count captured when the day was closed. A later day inherits that
+    // revised opening balance, so it must also use the carried ledger balance rather
+    // than a count that was captured before the correction existed.
+    const effectiveClosingCashCents = hasCorrectionInBalanceChain
+      ? expectedClosingCashCents
+      : (countedClosingCashCents ?? expectedClosingCashCents);
 
     const cashDifferenceCents =
       countedClosingCashCents === null ? null : countedClosingCashCents - expectedClosingCashCents;
@@ -303,6 +327,15 @@ export class GetCashReportPreviewQueryUseCase extends BaseUseCase<
 
     const warnings: CashReportWarning[] = [];
     let status: "OPEN" | "CALCULATED" | "VERIFIED" | "LOCKED" = "OPEN";
+
+    if (hasCorrectionInBalanceChain) {
+      warnings.push({
+        code: "OTHER",
+        severity: "WARNING",
+        message:
+          "Der Kassenbericht berechnet die Korrekturversion aus dem fortgeführten Kassenbuch; der ursprünglich gezählte Kassenbestand bleibt im Prüfpfad erhalten.",
+      });
+    }
 
     if (dayClose?.status === "SUBMITTED") {
       status = "LOCKED";

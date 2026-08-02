@@ -155,6 +155,7 @@ model CashDayCloseRevision {
 
   @@unique([dayCloseId, revisionNo])
   @@index([tenantId, workspaceId, registerId, dayCloseId])
+  @@map("cash_day_close_revisions")
   @@schema("accounting")
 }
 
@@ -174,6 +175,7 @@ model CashDayCloseReviewRequirement {
 
   @@unique([revisionId, affectedDayCloseId])
   @@index([tenantId, workspaceId, affectedDayCloseId, status])
+  @@map("cash_day_close_review_requirements")
   @@schema("accounting")
 }
 

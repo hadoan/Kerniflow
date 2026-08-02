@@ -413,17 +413,19 @@ export class PrismaCashRepository
     entryId: string,
     reversedByEntryId: string,
     tx?: TransactionContext
-  ): Promise<void> {
-    await this.client(tx).cashEntry.updateMany({
+  ): Promise<boolean> {
+    const result = await this.client(tx).cashEntry.updateMany({
       where: {
         id: entryId,
         tenantId,
         workspaceId,
+        reversedByEntryId: null,
       },
       data: {
         reversedByEntryId,
       },
     });
+    return result.count === 1;
   }
 
   async listEntriesForMonth(
@@ -1104,6 +1106,8 @@ export class PrismaCashRepository
       recordedAt: row.recordedAt,
       createdByUserId: row.createdByUserId,
       downstreamReviewRequired,
+      originalSnapshot: row.originalSnapshot,
+      correctedSnapshot: row.correctedSnapshot,
     };
   }
 

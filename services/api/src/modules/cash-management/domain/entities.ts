@@ -95,6 +95,8 @@ export type CashDayCloseRevisionEntity = {
   recordedAt: Date;
   createdByUserId: string;
   downstreamReviewRequired: boolean;
+  originalSnapshot: unknown;
+  correctedSnapshot: unknown;
 };
 
 export type CashEntryAttachmentEntity = {
