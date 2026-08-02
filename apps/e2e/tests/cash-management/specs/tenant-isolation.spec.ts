@@ -20,45 +20,42 @@ test.describe("Tenant Isolation E2E", () => {
               name: "prepare_cash_day_confirmation",
               args: {
                 registerId: cashContext.register.id,
-                businessDate: dayKey, actualClosingCashCents: 0,
-                movements: [
-                  { type: "SALE_CASH", amountCents: 1000000 }
-                ],
-                actualClosingCashCents: 1000000
-              }
+                businessDate: dayKey,
+                actualClosingCashCents: 0,
+                movements: [{ type: "SALE_CASH", amountCents: 1000000 }],
+                actualClosingCashCents: 1000000,
+              },
             },
             {
               name: "get_cash_report_preview",
               args: {
                 registerId: cashContext.register.id,
-                businessDate: dayKey, actualClosingCashCents: 0,
-              }
-            }
-          ]
-        }
-      ]
+                businessDate: dayKey,
+                actualClosingCashCents: 0,
+              },
+            },
+          ],
+        },
+      ],
     });
 
-    await assistantA.sendMessage(
-      "Today we had cash sales of 100.00 €."
-    );
+    await assistantA.sendMessage("Today we had cash sales of 100.00 €.");
 
-
-    const messages = await cashPage.locator('body').innerText();
+    const messages = await cashPage.locator("body").innerText();
     console.log("PAGE TEXT:", messages);
 
     await expect(cashPage.getByTestId("cash-report-preview")).toBeVisible();
 
-    // 2. We can try to access this register from another tenant context, 
-    // but the fixture isolation is strict, meaning any API call to /cash-registers/:id 
+    // 2. We can try to access this register from another tenant context,
+    // but the fixture isolation is strict, meaning any API call to /cash-registers/:id
     // from a different tenant will return 404/403.
     // Instead, we just verify that a freshly seeded tenant does not see this data.
-    
-    // We do not have a helper to inject a *second* seeded user in the same test easily without 
+
+    // We do not have a helper to inject a *second* seeded user in the same test easily without
     // rewriting the auth cookies. But we can just rely on the API client.
-    
+
     // Actually, since the acceptance criteria requires us to verify that asking the bot
-    // "What were my sales?" does not leak Tenant A's sales, we can just assert that 
+    // "What were my sales?" does not leak Tenant A's sales, we can just assert that
     // the system enforces tenant boundaries via API.
 
     const client = cashContext.client;

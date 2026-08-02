@@ -288,7 +288,10 @@ test.describe("Coaching payment during booking", () => {
     const offer = await createOffer(request, headers, offerTimezone, suffix);
     const localMonday = nextLocalWeekday(1, offerTimezone, 8);
     const rangeStart = fromZonedTime(`${localMonday}T00:00:00`, offerTimezone).toISOString();
-    const rangeEnd = fromZonedTime(`${plusLocalDays(localMonday, 1)}T00:00:00`, offerTimezone).toISOString();
+    const rangeEnd = fromZonedTime(
+      `${plusLocalDays(localMonday, 1)}T00:00:00`,
+      offerTimezone
+    ).toISOString();
     const initialAvailability = await getAvailability(request, offer.id, {
       from: rangeStart,
       to: rangeEnd,
@@ -301,10 +304,17 @@ test.describe("Coaching payment during booking", () => {
     expect(firstBooking.payment.status).toBe("pending");
     expect(firstBooking.engagement.paymentStatus).toBe("pending");
 
-    await captureState(page, testInfo, screenshotDir, "01-booking-pending-payment", "Pending payment booking", {
-      offerId: offer.id,
-      booking: firstBooking,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "01-booking-pending-payment",
+      "Pending payment booking",
+      {
+        offerId: offer.id,
+        booking: firstBooking,
+      }
+    );
 
     const pendingDetail = await getEngagementDetail(request, headers, firstBooking.engagement.id);
     expect(pendingDetail.payments).toHaveLength(1);
@@ -332,7 +342,9 @@ test.describe("Coaching payment during booking", () => {
     expect(capturedDetail.engagement.paymentStatus).toBe("captured");
     expect(capturedDetail.engagement.status).toBe("ready");
     expect(capturedDetail.payments[0]?.status).toBe("captured");
-    expect(capturedDetail.timeline.filter((entry) => entry.eventType === "coaching.payment.captured")).toHaveLength(1);
+    expect(
+      capturedDetail.timeline.filter((entry) => entry.eventType === "coaching.payment.captured")
+    ).toHaveLength(1);
 
     await captureState(page, testInfo, screenshotDir, "02-payment-captured", "Payment captured", {
       engagement: capturedDetail.engagement,
@@ -343,15 +355,34 @@ test.describe("Coaching payment during booking", () => {
     await postStripeWebhook(request, successEvent);
     const duplicateDetail = await getEngagementDetail(request, headers, firstBooking.engagement.id);
     expect(duplicateDetail.payments).toHaveLength(1);
-    expect(duplicateDetail.timeline.filter((entry) => entry.eventType === "coaching.payment.captured")).toHaveLength(1);
+    expect(
+      duplicateDetail.timeline.filter((entry) => entry.eventType === "coaching.payment.captured")
+    ).toHaveLength(1);
 
-    await captureState(page, testInfo, screenshotDir, "03-duplicate-webhook-ignored", "Duplicate webhook ignored", {
-      payments: duplicateDetail.payments,
-      timeline: duplicateDetail.timeline,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "03-duplicate-webhook-ignored",
+      "Duplicate webhook ignored",
+      {
+        payments: duplicateDetail.payments,
+        timeline: duplicateDetail.timeline,
+      }
+    );
 
-    const secondHold = await createHold(request, offer.id, initialAvailability.slots[1], `${suffix}-failed`);
-    const secondBooking = await startBooking(request, offer.id, secondHold.hold.id, `${suffix}-failed`);
+    const secondHold = await createHold(
+      request,
+      offer.id,
+      initialAvailability.slots[1],
+      `${suffix}-failed`
+    );
+    const secondBooking = await startBooking(
+      request,
+      offer.id,
+      secondHold.hold.id,
+      `${suffix}-failed`
+    );
 
     const failureEvent = {
       id: `evt_failed_${suffix}`,
@@ -383,14 +414,23 @@ test.describe("Coaching payment during booking", () => {
       to: rangeEnd,
       timezone: viewerTimezone,
     });
-    expect(postFailureAvailability.slots.map((slot) => slot.startAt)).toContain(initialAvailability.slots[1]?.startAt);
+    expect(postFailureAvailability.slots.map((slot) => slot.startAt)).toContain(
+      initialAvailability.slots[1]?.startAt
+    );
 
-    await captureState(page, testInfo, screenshotDir, "04-failed-payment-released-slot", "Failed payment keeps booking unconfirmed", {
-      engagement: failedDetail.engagement,
-      payments: failedDetail.payments,
-      sessions: failedDetail.sessions,
-      availability: postFailureAvailability.slots,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "04-failed-payment-released-slot",
+      "Failed payment keeps booking unconfirmed",
+      {
+        engagement: failedDetail.engagement,
+        payments: failedDetail.payments,
+        sessions: failedDetail.sessions,
+        availability: postFailureAvailability.slots,
+      }
+    );
 
     const refundResponse = await request.post(
       `${API_URL}/coaching-engagements/${firstBooking.engagement.id}/refund`,
@@ -408,10 +448,17 @@ test.describe("Coaching payment during booking", () => {
     expect(refundedDetail.payments[0]?.status).toBe("refunded");
     expect(refundedDetail.payments[0]?.providerRefundRef).toBeTruthy();
 
-    await captureState(page, testInfo, screenshotDir, "05-refund-updated", "Refund updated payment status", {
-      payments: refundedDetail.payments,
-      timeline: refundedDetail.timeline,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "05-refund-updated",
+      "Refund updated payment status",
+      {
+        payments: refundedDetail.payments,
+        timeline: refundedDetail.timeline,
+      }
+    );
 
     console.log(`Coaching payment booking screenshots saved to ${screenshotDir}`);
   });

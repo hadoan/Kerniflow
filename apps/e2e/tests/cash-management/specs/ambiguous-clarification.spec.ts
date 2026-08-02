@@ -123,7 +123,9 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
 
     await assistant.sendMessage("Em mua đồ 50 €.");
 
-    await expect(assistant.page.getByText("Khoản mua/chi phí này thuộc loại nào?").first()).toBeVisible();
+    await expect(
+      assistant.page.getByText("Khoản mua/chi phí này thuộc loại nào?").first()
+    ).toBeVisible();
     await expect(
       assistant.page.getByRole("button", { name: "Mua hàng hóa / nguyên liệu cho tiệm" })
     ).toBeVisible();
@@ -214,7 +216,9 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
 
     await assistant.page.getByRole("button", { name: "Dùng cá nhân" }).click();
     await expect(
-      assistant.page.getByText("Sau khi lấy tiền ra, em đếm thực tế trong ngăn kéo còn bao nhiêu?").first()
+      assistant.page
+        .getByText("Sau khi lấy tiền ra, em đếm thực tế trong ngăn kéo còn bao nhiêu?")
+        .first()
     ).toBeVisible();
 
     // Verify still no entries in DB
@@ -252,7 +256,7 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
         },
         {
           assistantText: "Mời bạn kiểm tra.",
-        }
+        },
       ],
     });
 
@@ -279,7 +283,7 @@ test.describe("Daily Cash E2E - Generic Clarification Flow", () => {
         },
         {
           assistantText: "Hoàn tất.",
-        }
+        },
       ],
     });
 

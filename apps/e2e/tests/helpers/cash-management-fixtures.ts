@@ -48,7 +48,8 @@ export async function createCashRegister(
   const payload = CreateCashRegisterSchema.parse(input);
   const { response, body } = await client.postJson("/cash-registers", payload, idempotency);
   expect(response.status(), `API returned ${response.status()}: ${JSON.stringify(body)}`).toBe(201);
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const register = expectZod(CashRegisterSchema, record.register) as CashRegister;
   return { response, register };
 }
@@ -60,7 +61,8 @@ export async function listCashRegisters(
   const { response, body } = query
     ? await client.getJson("/cash-registers", { query })
     : await client.getJson("/cash-registers");
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const registers = asArray(record.registers).map(
     (row) => expectZod(CashRegisterSchema, row) as CashRegister
   );
@@ -71,7 +73,8 @@ export async function getCashRegister(client: HttpClient, registerId: string) {
   const { response, body } = await client.getJson(
     `/cash-registers/${encodeURIComponent(registerId)}`
   );
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const register = expectZod(CashRegisterSchema, record.register) as CashRegister;
   return { response, register };
 }
@@ -92,7 +95,8 @@ export async function updateCashRegister(
     payload,
     idempotency
   );
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const register = expectZod(CashRegisterSchema, record.register) as CashRegister;
   return { response, register };
 }
@@ -128,9 +132,12 @@ export async function createCashEntry(
     idempotency
   );
   if (!response.ok()) {
-    throw new Error(`createCashEntry failed with status ${response.status()}: ${JSON.stringify(body)}`);
+    throw new Error(
+      `createCashEntry failed with status ${response.status()}: ${JSON.stringify(body)}`
+    );
   }
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const entry = expectZod(CashEntrySchema, record.entry) as CashEntry;
   return { response, entry };
 }
@@ -143,7 +150,8 @@ export async function listCashEntries(
   const { response, body } = query
     ? await client.getJson(`/cash-registers/${encodeURIComponent(registerId)}/entries`, { query })
     : await client.getJson(`/cash-registers/${encodeURIComponent(registerId)}/entries`);
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const entries = asArray(record.entries).map(
     (row) => expectZod(CashEntrySchema, row) as CashEntry
   );
@@ -162,7 +170,8 @@ export async function reverseCashEntry(
     payload,
     idempotency
   );
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const entry = expectZod(CashEntrySchema, record.entry) as CashEntry;
   return { response, entry };
 }
@@ -190,7 +199,8 @@ export async function submitCashDayClose(
   if (!response.ok()) {
     throw new Error("submitCashDayClose failed: " + JSON.stringify(body));
   }
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const dayClose = expectZod(CashDayCloseSchema, record.dayClose) as CashDayClose;
   return { response, dayClose };
 }
@@ -199,7 +209,8 @@ export async function getCashDayClose(client: HttpClient, registerId: string, da
   const { response, body } = await client.getJson(
     `/cash-registers/${encodeURIComponent(registerId)}/day-closes/${encodeURIComponent(dayKey)}`
   );
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const dayClose = expectZod(CashDayCloseSchema, record.dayClose) as CashDayClose;
   return { response, dayClose };
 }
@@ -214,7 +225,8 @@ export async function listCashDayCloses(
         query,
       })
     : await client.getJson(`/cash-registers/${encodeURIComponent(registerId)}/day-closes`);
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const closes = asArray(record.closes).map(
     (row) => expectZod(CashDayCloseSchema, row) as CashDayClose
   );
@@ -254,7 +266,8 @@ export async function attachBelegToEntry(
     payload,
     idempotency
   );
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const attachment = expectZod(CashEntryAttachmentSchema, record.attachment) as CashEntryAttachment;
   return { response, attachment };
 }
@@ -263,7 +276,8 @@ export async function listEntryAttachments(client: HttpClient, entryId: string) 
   const { response, body } = await client.getJson(
     `/cash-entries/${encodeURIComponent(entryId)}/attachments`
   );
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const attachments = asArray(record.attachments).map(
     (row) => expectZod(CashEntryAttachmentSchema, row) as CashEntryAttachment
   );
@@ -286,7 +300,8 @@ export async function exportCashBook(
     payload,
     idempotency
   );
-  console.log("BODY IS:", JSON.stringify(body, null, 2)); const record = asRecord(body);
+  console.log("BODY IS:", JSON.stringify(body, null, 2));
+  const record = asRecord(body);
   const artifact = expectZod(ExportCashBookOutputSchema, record.export) as ExportCashBookOutput;
   return { response, artifact };
 }

@@ -1,21 +1,21 @@
 import { APIRequestContext } from "@playwright/test";
 import { HttpClient } from "./http-client.ts";
-import { 
-  createCashRegister, 
-  listCashRegisters, 
-  getCashRegister, 
-  updateCashRegister, 
-  createCashEntry, 
-  listCashEntries, 
-  reverseCashEntry, 
-  submitCashDayClose, 
-  getCashDayClose, 
-  listCashDayCloses, 
-  uploadBase64Document, 
-  attachBelegToEntry, 
-  listEntryAttachments, 
-  exportCashBook, 
-  downloadCashExport 
+import {
+  createCashRegister,
+  listCashRegisters,
+  getCashRegister,
+  updateCashRegister,
+  createCashEntry,
+  listCashEntries,
+  reverseCashEntry,
+  submitCashDayClose,
+  getCashDayClose,
+  listCashDayCloses,
+  uploadBase64Document,
+  attachBelegToEntry,
+  listEntryAttachments,
+  exportCashBook,
+  downloadCashExport,
 } from "./cash-management-fixtures.ts";
 
 import { type AuthContext } from "./auth.ts";
@@ -55,7 +55,13 @@ export class CashApiClient {
     return reverseCashEntry(this.httpClient, entryId, input, idempotency);
   }
 
-  async submitCashDayClose(tenantId: string, registerId: string, dayKey: string, input: any, idempotency = "") {
+  async submitCashDayClose(
+    tenantId: string,
+    registerId: string,
+    dayKey: string,
+    input: any,
+    idempotency = ""
+  ) {
     return submitCashDayClose(this.httpClient, registerId, dayKey, input, idempotency);
   }
 
@@ -71,7 +77,12 @@ export class CashApiClient {
     return uploadBase64Document(this.httpClient, input, idempotency);
   }
 
-  async attachBelegToEntry(tenantId: string, entryId: string, documentId: string, idempotency = "") {
+  async attachBelegToEntry(
+    tenantId: string,
+    entryId: string,
+    documentId: string,
+    idempotency = ""
+  ) {
     return attachBelegToEntry(this.httpClient, entryId, documentId, idempotency);
   }
 

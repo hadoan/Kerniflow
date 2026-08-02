@@ -427,7 +427,10 @@ test.describe("Coaching contract signature", () => {
 
     const localMonday = nextLocalWeekday(1, offerTimezone, 8);
     const rangeStart = fromZonedTime(`${localMonday}T00:00:00`, offerTimezone).toISOString();
-    const rangeEnd = fromZonedTime(`${plusLocalDays(localMonday, 1)}T00:00:00`, offerTimezone).toISOString();
+    const rangeEnd = fromZonedTime(
+      `${plusLocalDays(localMonday, 1)}T00:00:00`,
+      offerTimezone
+    ).toISOString();
     const availability = await getAvailability(request, offer.id, {
       from: rangeStart,
       to: rangeEnd,
@@ -448,13 +451,17 @@ test.describe("Coaching contract signature", () => {
     expect(detail.contractRequest?.recipientName).toBe(`Contract Client ${suffix}`);
     expect(detail.contractRequest?.templateLocale).toBe("en");
     expect(detail.contractRequest?.contractTitle).toBe(offer.title.en);
-    expect(detail.timeline.filter((entry) => entry.eventType === "coaching.contract_signature.requested")).toHaveLength(1);
+    expect(
+      detail.timeline.filter((entry) => entry.eventType === "coaching.contract_signature.requested")
+    ).toHaveLength(1);
 
     const initialContractRequestId = detail.contractRequest!.id;
     await runOutboxTick(request);
     detail = await getEngagementDetail(request, headers, booking.engagement.id);
     expect(detail.contractRequest?.id).toBe(initialContractRequestId);
-    expect(detail.timeline.filter((entry) => entry.eventType === "coaching.contract_signature.requested")).toHaveLength(1);
+    expect(
+      detail.timeline.filter((entry) => entry.eventType === "coaching.contract_signature.requested")
+    ).toHaveLength(1);
 
     const contractRequests = await listContractRequests(testData.tenant.id, booking.engagement.id);
     expect(contractRequests).toHaveLength(1);
@@ -528,7 +535,9 @@ test.describe("Coaching contract signature", () => {
     expect(detail.engagement.contractStatus).toBe("pending");
     expect(detail.engagement.status).toBe("pending_signature");
     expect(detail.payments[0]?.status).toBe("captured");
-    expect(detail.timeline.filter((entry) => entry.eventType === "coaching.payment.captured")).toHaveLength(1);
+    expect(
+      detail.timeline.filter((entry) => entry.eventType === "coaching.payment.captured")
+    ).toHaveLength(1);
 
     await captureState(
       page,
@@ -565,7 +574,9 @@ test.describe("Coaching contract signature", () => {
     expect(detail.contractRequest?.signerName).toBe(signerName);
     expect(detail.contractRequest?.signerEmail).toBe(clientEmail);
     expect(detail.contractRequest?.signedDocumentId).toBeTruthy();
-    expect(detail.timeline.filter((entry) => entry.eventType === "coaching.contract.signed")).toHaveLength(1);
+    expect(
+      detail.timeline.filter((entry) => entry.eventType === "coaching.contract.signed")
+    ).toHaveLength(1);
 
     const signedDocumentText = await downloadDocumentText(
       request,
@@ -580,11 +591,16 @@ test.describe("Coaching contract signature", () => {
       expect(signedDocumentText).toContain(line);
     }
 
-    const finalContractRequests = await listContractRequests(testData.tenant.id, booking.engagement.id);
+    const finalContractRequests = await listContractRequests(
+      testData.tenant.id,
+      booking.engagement.id
+    );
     expect(finalContractRequests).toHaveLength(1);
     expect(finalContractRequests[0]?.status).toBe("signed");
     expect(finalContractRequests[0]?.signerName).toBe(signerName);
-    expect(finalContractRequests[0]?.signedDocumentId).toBe(detail.contractRequest?.signedDocumentId ?? null);
+    expect(finalContractRequests[0]?.signedDocumentId).toBe(
+      detail.contractRequest?.signedDocumentId ?? null
+    );
 
     await captureState(
       page,

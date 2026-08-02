@@ -31,12 +31,19 @@ export class CashDescriptionTranslationService {
         scope: SCOPE,
         key: this.key(text),
       });
-      if (cached && this.isTranslation(cached.value)) {result.set(text, cached.value.translatedText);}
-      else {missing.push(text);}
+      if (cached && this.isTranslation(cached.value)) {
+        result.set(text, cached.value.translatedText);
+      } else {
+        missing.push(text);
+      }
     }
-    if (missing.length === 0) {return result;}
+    if (missing.length === 0) {
+      return result;
+    }
     const projectId = this.env.GOOGLE_CLOUD_PROJECT;
-    if (!projectId) {throw new Error("Google Cloud Translation is not configured");}
+    if (!projectId) {
+      throw new Error("Google Cloud Translation is not configured");
+    }
     const client = await this.auth.getClient();
     const response = await client.request<{
       data?: { translations?: Array<{ translatedText?: string }> };
@@ -47,13 +54,15 @@ export class CashDescriptionTranslationService {
       data: { q: missing, source: "vi", target: "de", format: "text" },
     });
     const translations = response.data.data?.translations ?? [];
-    if (translations.length !== missing.length)
-      {throw new Error("Google Cloud Translation returned an incomplete response");}
+    if (translations.length !== missing.length) {
+      throw new Error("Google Cloud Translation returned an incomplete response");
+    }
     await Promise.all(
       missing.map(async (text, index) => {
         const translatedText = translations[index]?.translatedText;
-        if (!translatedText)
-          {throw new Error("Google Cloud Translation returned an invalid response");}
+        if (!translatedText) {
+          throw new Error("Google Cloud Translation returned an invalid response");
+        }
         result.set(text, translatedText);
         await this.cache.set({
           tenantId,

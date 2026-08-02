@@ -15,7 +15,9 @@
         --accent-soft: rgba(15, 118, 110, 0.12);
         --warn: #b45309;
       }
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         min-height: 100vh;
@@ -43,7 +45,11 @@
         grid-template-columns: 1.06fr 0.94fr;
         gap: 22px;
       }
-      .headline, .summary, .workspace { padding: 28px 30px; }
+      .headline,
+      .summary,
+      .workspace {
+        padding: 28px 30px;
+      }
       .eyebrow {
         font-size: 12px;
         font-weight: 700;
@@ -91,7 +97,8 @@
         grid-template-columns: 0.92fr 1.08fr;
         gap: 18px;
       }
-      .before, .after {
+      .before,
+      .after {
         border: 1px solid var(--line);
         border-radius: 20px;
         background: rgba(255, 255, 255, 0.78);
@@ -115,8 +122,15 @@
         opacity: 0.48;
         text-decoration: line-through;
       }
-      .item strong { display: block; font-size: 17px; }
-      .item span { display: block; margin-top: 4px; color: var(--muted); }
+      .item strong {
+        display: block;
+        font-size: 17px;
+      }
+      .item span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+      }
       .modifier {
         margin-top: 6px;
         color: var(--warn);
@@ -135,9 +149,16 @@
         border-bottom: 1px dashed rgba(31, 41, 51, 0.12);
         color: var(--muted);
       }
-      .row:last-child { border-bottom: 0; }
-      .row strong { color: var(--ink); }
-      code { font-family: "Menlo", "SFMono-Regular", monospace; font-size: 12px; }
+      .row:last-child {
+        border-bottom: 0;
+      }
+      .row strong {
+        color: var(--ink);
+      }
+      code {
+        font-family: "Menlo", "SFMono-Regular", monospace;
+        font-size: 12px;
+      }
     </style>
   </head>
   <body>

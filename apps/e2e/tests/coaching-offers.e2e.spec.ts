@@ -90,10 +90,10 @@ test.describe("Coaching offers UI", () => {
     console.log(`Coaching offers screenshots saved to ${screenshotDir}`);
   });
 
-  test("coach can create, edit, and archive an offer in the UI", async (
-    { page, testData },
-    testInfo
-  ) => {
+  test("coach can create, edit, and archive an offer in the UI", async ({
+    page,
+    testData,
+  }, testInfo) => {
     const screenshotDir = screenshotDirFor(testInfo);
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const title = `E2E Coaching Offer ${suffix}`;
