@@ -229,6 +229,10 @@ export const CreateCashEntryInputSchema = z
     sourceDocument: CashEntrySourceDocumentSchema.optional(),
     referenceId: z.string().optional().nullable(),
     reversalOfEntryId: z.string().optional().nullable(),
+    /** A single end-of-day Z report; only one active report may exist per register/day. */
+    dailyZReport: z.boolean().optional().default(false),
+    /** Explicit acknowledgement after the API has identified a possible duplicate. */
+    allowPossibleDuplicate: z.boolean().optional().default(false),
     idempotencyKey: z.string().optional(),
   })
   .superRefine((value, ctx) => {
@@ -253,6 +257,87 @@ export const CreateCashEntryInputSchema = z
     }
   });
 export type CreateCashEntryInput = z.infer<typeof CreateCashEntryInputSchema>;
+
+export const ClosedDayCorrectionTypeSchema = z.enum([
+  "MISSING_ENTRY",
+  "REVERSE_ENTRY",
+  "REPLACE_ENTRY",
+  "BALANCE_EXPLANATION",
+]);
+export type ClosedDayCorrectionType = z.infer<typeof ClosedDayCorrectionTypeSchema>;
+
+export const CreateClosedDayCorrectionInputSchema = z
+  .object({
+    registerId: z.string(),
+    dayKey: DayKeySchema,
+    correctionType: ClosedDayCorrectionTypeSchema,
+    occurredAt: z.string(),
+    reason: z.string().min(3).max(1_000),
+    originalEntryId: z.string().optional(),
+    entry: z
+      .object({
+        type: CashEntryTypeSchema,
+        description: z.string().min(1).max(1_000),
+        grossAmountCents: z.number().int().positive(),
+        tax: z
+          .object({
+            mode: CashEntryTaxModeSchema.optional(),
+            taxCodeId: z.string().optional().nullable(),
+          })
+          .optional(),
+      })
+      .optional(),
+    attachmentIds: z.array(z.string()).max(10).default([]),
+    idempotencyKey: z.string().optional(),
+  })
+  .superRefine((value, ctx) => {
+    const needsOriginalEntry =
+      value.correctionType === "REVERSE_ENTRY" || value.correctionType === "REPLACE_ENTRY";
+    const needsNewEntry = value.correctionType !== "REVERSE_ENTRY";
+
+    if (needsOriginalEntry && !value.originalEntryId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "originalEntryId is required for reversal or replacement",
+        path: ["originalEntryId"],
+      });
+    }
+
+    if (needsNewEntry && !value.entry) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "entry is required unless correctionType is REVERSE_ENTRY",
+        path: ["entry"],
+      });
+    }
+
+    if (
+      value.entry?.tax?.mode &&
+      value.entry.tax.mode !== CashEntryTaxMode.NONE &&
+      !value.entry.tax.taxCodeId
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "entry.tax.taxCodeId is required when tax mode is taxable",
+        path: ["entry", "tax", "taxCodeId"],
+      });
+    }
+  });
+export type CreateClosedDayCorrectionInput = z.infer<typeof CreateClosedDayCorrectionInputSchema>;
+
+export const CashDayCloseRevisionSchema = z.object({
+  id: z.string(),
+  dayCloseId: z.string(),
+  correctionEntryId: z.string(),
+  revisionNo: z.number().int().positive(),
+  correctionType: ClosedDayCorrectionTypeSchema,
+  reason: z.string(),
+  occurredAt: z.string(),
+  recordedAt: z.string(),
+  createdByUserId: z.string(),
+  downstreamReviewRequired: z.boolean(),
+});
+export type CashDayCloseRevision = z.infer<typeof CashDayCloseRevisionSchema>;
 
 export const ReverseCashEntryInputSchema = z.object({
   tenantId: z.string().optional(),
@@ -325,111 +410,6 @@ export const ListCashRegistersQuerySchema = z.object({
   currency: z.string().length(3).optional(),
 });
 export type ListCashRegistersQuery = z.infer<typeof ListCashRegistersQuerySchema>;
-
-export const CashDashboardDayStatusSchema = z.enum([
-  "open",
-  "needs-review",
-  "ready-to-close",
-  "closed",
-]);
-export type CashDashboardDayStatus = z.infer<typeof CashDashboardDayStatusSchema>;
-
-export const CashDashboardExportStatusSchema = z.enum([
-  "ready",
-  "blocked-receipts",
-  "blocked-open-days",
-  "blocked-review",
-  "exported",
-]);
-export type CashDashboardExportStatus = z.infer<typeof CashDashboardExportStatusSchema>;
-
-export const CashDashboardEntryTypeSchema = z.enum([
-  "income",
-  "expense",
-  "private-deposit",
-  "private-withdrawal",
-]);
-export type CashDashboardEntryType = z.infer<typeof CashDashboardEntryTypeSchema>;
-
-export const CashDashboardEntrySchema = z.object({
-  id: z.string(),
-  occurredAt: z.string(),
-  type: CashDashboardEntryTypeSchema,
-  amountCents: z.number().int().nonnegative(),
-  note: z.string(),
-  hasReceipt: z.boolean(),
-  receiptRequired: z.boolean(),
-  needsReview: z.boolean(),
-  missingNote: z.boolean(),
-  canReverse: z.boolean(),
-});
-export type CashDashboardEntry = z.infer<typeof CashDashboardEntrySchema>;
-
-export const GetCashDashboardQuerySchema = z.object({
-  registerId: z.string(),
-  dayKey: DayKeySchema.optional(),
-});
-export type GetCashDashboardQuery = z.infer<typeof GetCashDashboardQuerySchema>;
-
-export const CashDashboardResponseSchema = z.object({
-  registerId: z.string(),
-  salonName: z.string(),
-  location: z.string().nullable().optional(),
-  currency: z.string().length(3),
-  dayKey: DayKeySchema,
-  monthKey: MonthKeySchema,
-  summary: z.object({
-    openingBalanceCents: z.number().int(),
-    cashIncomeTodayCents: z.number().int().nonnegative(),
-    cashExpensesTodayCents: z.number().int().nonnegative(),
-    privateDepositsCents: z.number().int().nonnegative(),
-    privateWithdrawalsCents: z.number().int().nonnegative(),
-    expectedClosingCents: z.number().int(),
-    countedCashCents: z.number().int().nullable().optional(),
-    differenceCents: z.number().int().nullable().optional(),
-  }),
-  status: z.object({
-    dayStatus: CashDashboardDayStatusSchema,
-    missingReceiptsToday: z.number().int().nonnegative(),
-    missingReceiptsThisMonth: z.number().int().nonnegative(),
-    receiptsAttachedToday: z.number().int().nonnegative(),
-    reviewItemsCount: z.number().int().nonnegative(),
-    suspiciousEntriesCount: z.number().int().nonnegative(),
-    missingNotesCount: z.number().int().nonnegative(),
-    openDaysThisWeek: z.number().int().nonnegative(),
-    openDaysThisMonth: z.number().int().nonnegative(),
-    receiptCompletionPercent: z.number().int().min(0).max(100),
-    exportStatus: CashDashboardExportStatusSchema,
-    exportAlreadyGenerated: z.boolean(),
-  }),
-  closing: z.object({
-    isClosed: z.boolean(),
-    countedCashEntered: z.boolean(),
-    lastClosedDate: DayKeySchema.nullable().optional(),
-    lastClosedBy: z.string().nullable().optional(),
-    responsiblePerson: z.string().nullable().optional(),
-  }),
-  export: z.object({
-    lastExportDate: z.string().nullable().optional(),
-    monthEntriesCompleted: z.number().int().nonnegative(),
-    monthEntriesTotal: z.number().int().nonnegative(),
-    checklist: z.object({
-      daysClosed: z.boolean(),
-      receiptsComplete: z.boolean(),
-      reviewQueueClear: z.boolean(),
-    }),
-  }),
-  trend: z.object({
-    weekIncomeCents: z.number().int(),
-    weekExpensesCents: z.number().int(),
-    openDaysCount: z.number().int().nonnegative(),
-    missingReceiptsCount: z.number().int().nonnegative(),
-    monthCashTotalCents: z.number().int(),
-    lastMonthCashTotalCents: z.number().int(),
-  }),
-  recentEntries: z.array(CashDashboardEntrySchema),
-});
-export type CashDashboardResponse = z.infer<typeof CashDashboardResponseSchema>;
 
 export const ListCashDayClosesQuerySchema = z.object({
   registerId: z.string().optional(),

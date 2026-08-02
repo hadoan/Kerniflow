@@ -236,7 +236,10 @@ test.describe("Coaching public booking", () => {
 
     const localMonday = nextLocalWeekday(1, offerTimezone, 8);
     const rangeStart = fromZonedTime(`${localMonday}T00:00:00`, offerTimezone).toISOString();
-    const rangeEnd = fromZonedTime(`${plusLocalDays(localMonday, 1)}T00:00:00`, offerTimezone).toISOString();
+    const rangeEnd = fromZonedTime(
+      `${plusLocalDays(localMonday, 1)}T00:00:00`,
+      offerTimezone
+    ).toISOString();
 
     const initialAvailability = await getAvailability(request, offer.id, {
       from: rangeStart,
@@ -248,7 +251,10 @@ test.describe("Coaching public booking", () => {
     expect(initialAvailability.displayTimezone).toBe(viewerTimezone);
     expect(initialAvailability.slots).toHaveLength(3);
 
-    const expectedFirstStartUtc = fromZonedTime(`${localMonday}T09:00:00`, offerTimezone).toISOString();
+    const expectedFirstStartUtc = fromZonedTime(
+      `${localMonday}T09:00:00`,
+      offerTimezone
+    ).toISOString();
     const expectedFirstStartViewer = formatInTimeZone(
       new Date(expectedFirstStartUtc),
       viewerTimezone,
@@ -256,23 +262,33 @@ test.describe("Coaching public booking", () => {
     );
     expect(initialAvailability.slots[0].startAt).toBe(expectedFirstStartUtc);
     expect(initialAvailability.slots[0].displayStart).toBe(expectedFirstStartViewer);
-    await captureState(page, testInfo, screenshotDir, "01-initial-availability", "Initial availability", {
-      offerId: offer.id,
-      offerTimezone,
-      viewerTimezone,
-      localMonday,
-      slots: initialAvailability.slots,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "01-initial-availability",
+      "Initial availability",
+      {
+        offerId: offer.id,
+        offerTimezone,
+        viewerTimezone,
+        localMonday,
+        slots: initialAvailability.slots,
+      }
+    );
 
-    const unavailableHold = await request.post(`${API_URL}/coaching/public/offers/${offer.id}/holds`, {
-      data: {
-        startAt: fromZonedTime(`${localMonday}T13:00:00`, offerTimezone).toISOString(),
-        endAt: fromZonedTime(`${localMonday}T14:00:00`, offerTimezone).toISOString(),
-        bookedByName: "Unavailable Client",
-        bookedByEmail: `unavailable-${suffix}@example.com`,
-        ttlSeconds: 5,
-      },
-    });
+    const unavailableHold = await request.post(
+      `${API_URL}/coaching/public/offers/${offer.id}/holds`,
+      {
+        data: {
+          startAt: fromZonedTime(`${localMonday}T13:00:00`, offerTimezone).toISOString(),
+          endAt: fromZonedTime(`${localMonday}T14:00:00`, offerTimezone).toISOString(),
+          bookedByName: "Unavailable Client",
+          bookedByEmail: `unavailable-${suffix}@example.com`,
+          ttlSeconds: 5,
+        },
+      }
+    );
     expect(unavailableHold.status()).toBe(409);
     await captureState(
       page,
@@ -322,11 +338,18 @@ test.describe("Coaching public booking", () => {
       timezone: viewerTimezone,
     });
     expect(blockedAvailability.slots.map((slot) => slot.startAt)).not.toContain(heldSlot.startAt);
-    await captureState(page, testInfo, screenshotDir, "03-held-slot-removed", "Held slot removed from availability", {
-      heldSlot,
-      duplicateHoldStatus: duplicateHoldResponse.status(),
-      remainingSlots: blockedAvailability.slots,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "03-held-slot-removed",
+      "Held slot removed from availability",
+      {
+        heldSlot,
+        duplicateHoldStatus: duplicateHoldResponse.status(),
+        remainingSlots: blockedAvailability.slots,
+      }
+    );
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
@@ -336,10 +359,17 @@ test.describe("Coaching public booking", () => {
       timezone: viewerTimezone,
     });
     expect(postExpiryAvailability.slots.map((slot) => slot.startAt)).toContain(heldSlot.startAt);
-    await captureState(page, testInfo, screenshotDir, "04-expired-slot-returned", "Expired slot returned", {
-      returnedSlot: heldSlot,
-      slots: postExpiryAvailability.slots,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "04-expired-slot-returned",
+      "Expired slot returned",
+      {
+        returnedSlot: heldSlot,
+        slots: postExpiryAvailability.slots,
+      }
+    );
 
     const bookedSlot = initialAvailability.slots[1];
     const bookingResponse = await request.post(`${API_URL}/coaching-engagements`, {
@@ -390,21 +420,37 @@ test.describe("Coaching public booking", () => {
       }
     );
     expect(doubleBookResponse.status()).toBe(409);
-    await captureState(page, testInfo, screenshotDir, "05-double-booking-blocked", "Double booking blocked", {
-      bookedSlot,
-      bookingStatus: bookingResponse.status(),
-      doubleBookStatus: doubleBookResponse.status(),
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "05-double-booking-blocked",
+      "Double booking blocked",
+      {
+        bookedSlot,
+        bookingStatus: bookingResponse.status(),
+        doubleBookStatus: doubleBookResponse.status(),
+      }
+    );
 
     const postBookingAvailability = await getAvailability(request, offer.id, {
       from: rangeStart,
       to: rangeEnd,
       timezone: viewerTimezone,
     });
-    expect(postBookingAvailability.slots.map((slot) => slot.startAt)).not.toContain(bookedSlot.startAt);
-    await captureState(page, testInfo, screenshotDir, "06-booked-slot-removed", "Booked slot removed from availability", {
-      slots: postBookingAvailability.slots,
-    });
+    expect(postBookingAvailability.slots.map((slot) => slot.startAt)).not.toContain(
+      bookedSlot.startAt
+    );
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "06-booked-slot-removed",
+      "Booked slot removed from availability",
+      {
+        slots: postBookingAvailability.slots,
+      }
+    );
 
     const cancelResponse = await request.post(
       `${API_URL}/coaching-sessions/${bookingBody.session.id}/cancel`,
@@ -421,10 +467,17 @@ test.describe("Coaching public booking", () => {
       timezone: viewerTimezone,
     });
     expect(postCancelAvailability.slots.map((slot) => slot.startAt)).toContain(bookedSlot.startAt);
-    await captureState(page, testInfo, screenshotDir, "07-cancelled-slot-returned", "Cancelled slot returned", {
-      cancelledSessionId: bookingBody.session.id,
-      slots: postCancelAvailability.slots,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "07-cancelled-slot-returned",
+      "Cancelled slot returned",
+      {
+        cancelledSessionId: bookingBody.session.id,
+        slots: postCancelAvailability.slots,
+      }
+    );
 
     console.log(`Coaching public booking screenshots saved to ${screenshotDir}`);
   });

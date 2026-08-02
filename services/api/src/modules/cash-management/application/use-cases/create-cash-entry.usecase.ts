@@ -6,6 +6,7 @@ import {
   OUTBOX_PORT,
   UNIT_OF_WORK,
   ForbiddenError,
+  ConflictError,
   NotFoundError,
   ValidationError,
   type AuditPort,
@@ -42,6 +43,7 @@ import { TaxProfileRepoPort } from "../../../tax/domain/ports/tax-profile-repo.p
 import { TaxRateRepoPort } from "../../../tax/domain/ports/tax-rate-repo.port";
 import { resolveCashEntryTax, type CashEntryTaxSnapshot } from "../../domain/cash-entry-tax";
 import type { NormalizedCashEntryCommand } from "../../domain/cash-entry-rules";
+import { Prisma } from "@prisma/client";
 
 const ACTION_KEY = "cash-management.entry.create";
 
@@ -160,9 +162,15 @@ export class CreateCashEntryUseCase extends BaseUseCase<
     );
 
     if (dayClose && isClosedStatus(dayClose.status) && !canPostIntoClosedDay(normalized.type)) {
-      throw new ValidationError(
+      throw new ConflictError(
         `Day ${normalized.dayKey} is already closed`,
-        { dayKey: normalized.dayKey, dayCloseId: dayClose.id },
+        {
+          dayKey: normalized.dayKey,
+          dayCloseId: dayClose.id,
+          closedAt: dayClose.lockedAt?.toISOString() ?? dayClose.submittedAt?.toISOString() ?? null,
+          currentBalanceCents: register.currentBalanceCents,
+          correctionEndpoint: `/cash-registers/${register.id}/closed-days/${normalized.dayKey}/corrections`,
+        },
         "CashManagement:DayAlreadyClosed"
       );
     }
@@ -206,109 +214,175 @@ export class CreateCashEntryUseCase extends BaseUseCase<
 
     const sourceDocumentId = input.sourceDocument?.documentId?.trim() || null;
     const sourceDocumentRef = input.sourceDocument?.reference?.trim() || null;
-    const sourceDocumentKind = input.sourceDocument?.kind?.trim() || null;
+    const sourceDocumentKind = input.dailyZReport
+      ? "DAILY_Z_REPORT"
+      : input.sourceDocument?.kind?.trim() || null;
 
-    const entry = await this.unitOfWork.withinTransaction(async (tx) => {
-      const entryNo = await this.entryRepo.nextEntryNo(tenantId, workspaceId, register.id, tx);
-
-      const created = await this.entryRepo.createEntry(
-        {
-          tenantId,
-          workspaceId,
-          registerId: register.id,
-          entryNo,
-          occurredAt: normalized.occurredAt,
-          dayKey: normalized.dayKey,
-          description: normalized.description,
-          type: normalized.type,
-          direction: normalized.direction,
-          source: normalized.source,
-          paymentMethod: normalized.paymentMethod,
-          amountCents: normalized.amountCents,
-          grossAmountCents: taxSnapshot.grossAmountCents,
-          netAmountCents: taxSnapshot.netAmountCents,
-          taxAmountCents: taxSnapshot.taxAmountCents,
-          taxMode: taxSnapshot.taxMode,
-          taxCodeId: taxSnapshot.taxCodeId,
-          taxCode: taxSnapshot.taxCode,
-          taxRateBps: taxSnapshot.taxRateBps,
-          taxLabel: taxSnapshot.taxLabel,
-          currency: normalized.currency,
-          balanceAfterCents: nextBalance,
-          sourceDocumentId,
-          sourceDocumentRef,
-          sourceDocumentKind,
-          referenceId: normalized.referenceId,
-          reversalOfEntryId: normalized.reversalOfEntryId,
-          lockedByDayCloseId: dayClose && isClosedStatus(dayClose.status) ? dayClose.id : null,
-          createdByUserId: ctx.userId ?? "system",
-        },
-        tx
+    if (input.dailyZReport && normalized.type !== "SALE_CASH") {
+      throw new ValidationError(
+        "Only cash sales can be recorded as a daily Z report",
+        undefined,
+        "CashManagement:InvalidDailyZReport"
       );
+    }
 
-      await this.registerRepo.setCurrentBalance(
+    if (input.dailyZReport) {
+      const existingDailyZReport = await this.entryRepo.findActiveDailyZReport(
         tenantId,
         workspaceId,
         register.id,
-        nextBalance,
-        tx
+        normalized.dayKey
       );
+      if (existingDailyZReport) {
+        throw new ConflictError(
+          `A daily Z report has already been recorded for ${normalized.dayKey}`,
+          { existingEntry: toEntryDto(existingDailyZReport) },
+          "CashManagement:DailyZReportAlreadyExists"
+        );
+      }
+    }
 
-      await this.audit.log(
-        {
-          tenantId,
-          userId: ctx.userId ?? "system",
-          action: "cash.entry.created",
-          entityType: "CashEntry",
-          entityId: created.id,
-          metadata: {
-            registerId: created.registerId,
-            dayKey: created.dayKey,
-            amountCents: created.amountCents,
-            taxMode: created.taxMode,
-            taxCode: created.taxCode,
-            taxAmountCents: created.taxAmountCents,
-            direction: created.direction,
-            entryType: created.type,
-            source: created.source,
-            entryNo: created.entryNo,
+    const existingDuplicate = await this.entryRepo.findActivePossibleDuplicate(
+      tenantId,
+      workspaceId,
+      {
+        registerId: register.id,
+        dayKey: normalized.dayKey,
+        type: normalized.type,
+        direction: normalized.direction,
+        amountCents: normalized.amountCents,
+        source: normalized.source,
+      }
+    );
+    if (existingDuplicate && !input.allowPossibleDuplicate) {
+      throw new ConflictError(
+        "A possible duplicate cash entry already exists",
+        { existingEntry: toEntryDto(existingDuplicate) },
+        "CashManagement:PossibleDuplicate"
+      );
+    }
+
+    let entry;
+    try {
+      entry = await this.unitOfWork.withinTransaction(async (tx) => {
+        const entryNo = await this.entryRepo.nextEntryNo(tenantId, workspaceId, register.id, tx);
+
+        const created = await this.entryRepo.createEntry(
+          {
+            tenantId,
+            workspaceId,
+            registerId: register.id,
+            entryNo,
+            occurredAt: normalized.occurredAt,
+            dayKey: normalized.dayKey,
+            description: normalized.description,
+            type: normalized.type,
+            direction: normalized.direction,
+            source: normalized.source,
+            paymentMethod: normalized.paymentMethod,
+            amountCents: normalized.amountCents,
+            grossAmountCents: taxSnapshot.grossAmountCents,
+            netAmountCents: taxSnapshot.netAmountCents,
+            taxAmountCents: taxSnapshot.taxAmountCents,
+            taxMode: taxSnapshot.taxMode,
+            taxCodeId: taxSnapshot.taxCodeId,
+            taxCode: taxSnapshot.taxCode,
+            taxRateBps: taxSnapshot.taxRateBps,
+            taxLabel: taxSnapshot.taxLabel,
+            currency: normalized.currency,
+            balanceAfterCents: nextBalance,
+            sourceDocumentId,
+            sourceDocumentRef,
+            sourceDocumentKind,
+            referenceId: normalized.referenceId,
+            reversalOfEntryId: normalized.reversalOfEntryId,
+            lockedByDayCloseId: dayClose && isClosedStatus(dayClose.status) ? dayClose.id : null,
+            idempotencyKey: input.idempotencyKey ?? null,
+            createdByUserId: ctx.userId ?? "system",
           },
-        },
-        tx
-      );
+          tx
+        );
 
-      await this.outbox.enqueue(
-        {
+        await this.registerRepo.setCurrentBalance(
           tenantId,
-          eventType: "cash.entry.created",
-          payload: {
-            entryId: created.id,
-            registerId: created.registerId,
-            entryNo: created.entryNo,
-            amountCents: created.amountCents,
-            grossAmountCents: created.grossAmountCents,
-            taxAmountCents: created.taxAmountCents,
-            taxMode: created.taxMode,
-            type: created.direction,
-            direction: created.direction,
-            sourceType: created.source,
-            businessDate: created.dayKey,
+          workspaceId,
+          register.id,
+          nextBalance,
+          tx
+        );
+
+        await this.audit.log(
+          {
+            tenantId,
+            userId: ctx.userId ?? "system",
+            action: "cash.entry.created",
+            entityType: "CashEntry",
+            entityId: created.id,
+            metadata: {
+              registerId: created.registerId,
+              dayKey: created.dayKey,
+              amountCents: created.amountCents,
+              taxMode: created.taxMode,
+              taxCode: created.taxCode,
+              taxAmountCents: created.taxAmountCents,
+              direction: created.direction,
+              entryType: created.type,
+              source: created.source,
+              entryNo: created.entryNo,
+            },
           },
-          correlationId: ctx.correlationId,
-        },
-        tx
-      );
+          tx
+        );
 
-      await this.billingAccess.recordUsage(
-        tenantId,
-        CashManagementProductKey,
-        CashManagementBillingMetricKeys.entries,
-        1,
-        tx
-      );
+        await this.outbox.enqueue(
+          {
+            tenantId,
+            eventType: "cash.entry.created",
+            payload: {
+              entryId: created.id,
+              registerId: created.registerId,
+              entryNo: created.entryNo,
+              amountCents: created.amountCents,
+              grossAmountCents: created.grossAmountCents,
+              taxAmountCents: created.taxAmountCents,
+              taxMode: created.taxMode,
+              type: created.direction,
+              direction: created.direction,
+              sourceType: created.source,
+              businessDate: created.dayKey,
+            },
+            correlationId: ctx.correlationId,
+          },
+          tx
+        );
 
-      return created;
-    });
+        await this.billingAccess.recordUsage(
+          tenantId,
+          CashManagementProductKey,
+          CashManagementBillingMetricKeys.entries,
+          1,
+          tx
+        );
+
+        return created;
+      });
+    } catch (error) {
+      if (
+        input.idempotencyKey &&
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        const existing = await this.entryRepo.findEntryByIdempotencyKey(
+          tenantId,
+          workspaceId,
+          input.idempotencyKey
+        );
+        if (existing) {
+          return ok({ entry: toEntryDto(existing) });
+        }
+      }
+      throw error;
+    }
 
     const response = { entry: toEntryDto(entry) };
     await storeIdempotentBody({

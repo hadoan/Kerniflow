@@ -448,7 +448,10 @@ test.describe("Coaching prep questionnaire", () => {
 
     const localMonday = nextLocalWeekday(1, offerTimezone, 8);
     const rangeStart = fromZonedTime(`${localMonday}T00:00:00`, offerTimezone).toISOString();
-    const rangeEnd = fromZonedTime(`${plusLocalDays(localMonday, 1)}T00:00:00`, offerTimezone).toISOString();
+    const rangeEnd = fromZonedTime(
+      `${plusLocalDays(localMonday, 1)}T00:00:00`,
+      offerTimezone
+    ).toISOString();
     const availability = await getAvailability(request, offer.id, {
       from: rangeStart,
       to: rangeEnd,
@@ -465,20 +468,15 @@ test.describe("Coaching prep questionnaire", () => {
 
     let detail = await getEngagementDetail(request, headers, booking.engagement.id);
     expect(detail.sessions[0]?.prepRequestedAt).toBeNull();
-    expect(detail.timeline.filter((entry) => entry.eventType === "coaching.prep_form.requested")).toHaveLength(0);
+    expect(
+      detail.timeline.filter((entry) => entry.eventType === "coaching.prep_form.requested")
+    ).toHaveLength(0);
 
-    await captureState(
-      page,
-      testInfo,
-      screenshotDir,
-      "01-before-prep-is-due",
-      "Prep not due yet",
-      {
-        engagement: detail.engagement,
-        session: detail.sessions[0],
-        timeline: detail.timeline,
-      }
-    );
+    await captureState(page, testInfo, screenshotDir, "01-before-prep-is-due", "Prep not due yet", {
+      engagement: detail.engagement,
+      session: detail.sessions[0],
+      timeline: detail.timeline,
+    });
 
     const dueStartAt = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString();
     const dueEndAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
@@ -493,7 +491,9 @@ test.describe("Coaching prep questionnaire", () => {
 
     detail = await getEngagementDetail(request, headers, booking.engagement.id);
     expect(detail.sessions[0]?.prepRequestedAt).toBeTruthy();
-    expect(detail.timeline.filter((entry) => entry.eventType === "coaching.prep_form.requested")).toHaveLength(1);
+    expect(
+      detail.timeline.filter((entry) => entry.eventType === "coaching.prep_form.requested")
+    ).toHaveLength(1);
 
     const prepAccess = await getPrepAccess(testData.tenant.id, booking.session.id);
     expect(prepAccess?.prepAccessToken).toBeTruthy();
@@ -513,24 +513,19 @@ test.describe("Coaching prep questionnaire", () => {
       "energy",
     ]);
 
-    await captureState(
-      page,
-      testInfo,
-      screenshotDir,
-      "02-prep-link-ready",
-      "Prep link ready",
-      {
-        prepUrl,
-        prepAccess,
-        questionnaire,
-      }
-    );
+    await captureState(page, testInfo, screenshotDir, "02-prep-link-ready", "Prep link ready", {
+      prepUrl,
+      prepAccess,
+      questionnaire,
+    });
 
     const firstPrepRequestedAt = detail.sessions[0]?.prepRequestedAt ?? null;
     await runWorkerTick(request);
     detail = await getEngagementDetail(request, headers, booking.engagement.id);
     const prepAccessAfterRetry = await getPrepAccess(testData.tenant.id, booking.session.id);
-    expect(detail.timeline.filter((entry) => entry.eventType === "coaching.prep_form.requested")).toHaveLength(1);
+    expect(
+      detail.timeline.filter((entry) => entry.eventType === "coaching.prep_form.requested")
+    ).toHaveLength(1);
     expect(detail.sessions[0]?.prepRequestedAt).toBe(firstPrepRequestedAt);
     expect(prepAccessAfterRetry?.prepAccessToken).toBe(prepAccess?.prepAccessToken ?? null);
 
@@ -573,9 +568,9 @@ test.describe("Coaching prep questionnaire", () => {
       "PARTY",
       detail.engagement.clientPartyId
     );
-    expect(partyDocuments.items.some((document) => document.id === detail.sessions[0]?.prepDocumentId)).toBe(
-      true
-    );
+    expect(
+      partyDocuments.items.some((document) => document.id === detail.sessions[0]?.prepDocumentId)
+    ).toBe(true);
 
     const prepDocumentText = await downloadDocumentText(
       request,

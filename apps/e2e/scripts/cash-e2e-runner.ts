@@ -24,11 +24,15 @@ async function checkDatabaseSafety() {
   const dbName = dbNameMatch[1];
 
   if (!dbName.includes("_e2e") && !dbName.includes("_test")) {
-    throw new Error("E2E_DATABASE_URL must contain '_e2e' or '_test' to prevent destruction of dev data.");
+    throw new Error(
+      "E2E_DATABASE_URL must contain '_e2e' or '_test' to prevent destruction of dev data."
+    );
   }
 
   if (process.env.DATABASE_URL === dbUrl) {
-    throw new Error("E2E_DATABASE_URL cannot be the exact same as DATABASE_URL to avoid conflicts.");
+    throw new Error(
+      "E2E_DATABASE_URL cannot be the exact same as DATABASE_URL to avoid conflicts."
+    );
   }
 
   return { adminUrl, dbUrl, dbName };
@@ -54,7 +58,11 @@ async function provisionDatabase(adminUrl: string, dbName: string) {
 
 function runCommand(command: string, args: string[], env: NodeJS.ProcessEnv): Promise<void> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(command, args, { stdio: "inherit", env: { ...process.env, ...env }, shell: true });
+    const proc = spawn(command, args, {
+      stdio: "inherit",
+      env: { ...process.env, ...env },
+      shell: true,
+    });
     proc.on("close", (code) => {
       if (code === 0) resolve();
       else reject(new Error(`Command ${command} ${args.join(" ")} failed with code ${code}`));
@@ -73,9 +81,13 @@ async function run() {
     await provisionDatabase(adminUrl, dbName);
 
     console.log("Running Prisma schema push (sync)...");
-    await runCommand("pnpm", ["--filter", "@corely/data", "exec", "prisma", "db", "push", "--accept-data-loss"], {
-      DATABASE_URL: dbUrl,
-    });
+    await runCommand(
+      "pnpm",
+      ["--filter", "@corely/data", "exec", "prisma", "db", "push", "--accept-data-loss"],
+      {
+        DATABASE_URL: dbUrl,
+      }
+    );
 
     console.log("Starting E2E API and Web servers on dedicated ports...");
     const e2eEnv = {
@@ -95,11 +107,23 @@ async function run() {
       stdio: "inherit",
     });
 
-    const webProc = spawn("pnpm", ["--filter", "@corely/cash-management", "dev", "--host", "0.0.0.0", "--port", process.env.E2E_WEB_PORT || "3100"], {
-      env: { ...process.env, ...e2eEnv },
-      shell: true,
-      stdio: "inherit",
-    });
+    const webProc = spawn(
+      "pnpm",
+      [
+        "--filter",
+        "@corely/cash-management",
+        "dev",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        process.env.E2E_WEB_PORT || "3100",
+      ],
+      {
+        env: { ...process.env, ...e2eEnv },
+        shell: true,
+        stdio: "inherit",
+      }
+    );
 
     const cleanup = () => {
       console.log("Shutting down E2E servers...");
@@ -118,17 +142,17 @@ async function run() {
     // Wait for health check
     console.log("Checking API health endpoint...");
     const healthUrl = `${process.env.E2E_API_URL || "http://127.0.0.1:3101"}/test/health`;
-    
+
     // Attempt health check with basic retry
     let healthOk = false;
     let lastError = null;
     for (let i = 0; i < 10; i++) {
       try {
-        const res = await fetch(healthUrl, { 
+        const res = await fetch(healthUrl, {
           method: "POST",
           headers: {
-            "X-Test-Secret": process.env.TEST_HARNESS_SECRET || "test-secret-key"
-          }
+            "X-Test-Secret": process.env.TEST_HARNESS_SECRET || "test-secret-key",
+          },
         });
         if (res.ok) {
           healthOk = true;
@@ -150,13 +174,18 @@ async function run() {
     }
 
     console.log("Running Playwright tests...");
-    const testArgs = process.argv.slice(2).length > 0 ? process.argv.slice(2) : ["tests/cash-management/specs"];
+    const testArgs =
+      process.argv.slice(2).length > 0 ? process.argv.slice(2) : ["tests/cash-management/specs"];
     try {
-      await runCommand("playwright", ["test", "--config", "playwright.cash.config.ts", ...testArgs], {
-        CASH_BASE_URL: process.env.E2E_BASE_URL || "http://localhost:3100",
-        DATABASE_URL: dbUrl,
-        API_URL: process.env.E2E_API_URL || "http://127.0.0.1:3101",
-      });
+      await runCommand(
+        "playwright",
+        ["test", "--config", "playwright.cash.config.ts", ...testArgs],
+        {
+          CASH_BASE_URL: process.env.E2E_BASE_URL || "http://localhost:3100",
+          DATABASE_URL: dbUrl,
+          API_URL: process.env.E2E_API_URL || "http://127.0.0.1:3101",
+        }
+      );
     } finally {
       cleanup();
     }

@@ -103,6 +103,13 @@ export class ReverseCashEntryUseCase extends BaseUseCase<
         "CashManagement:EntryAlreadyReversed"
       );
     }
+    if (original.reversalOfEntryId) {
+      throw new ValidationError(
+        "A reversal entry cannot itself be reversed",
+        { entryId: original.id, reversalOfEntryId: original.reversalOfEntryId },
+        "CashManagement:CannotReverseReversal"
+      );
+    }
 
     const register = await this.registerRepo.findRegisterById(
       tenantId,
@@ -191,7 +198,20 @@ export class ReverseCashEntryUseCase extends BaseUseCase<
         tx
       );
 
-      await this.entryRepo.setReversedByEntryId(tenantId, workspaceId, original.id, created.id, tx);
+      const markedAsReversed = await this.entryRepo.setReversedByEntryId(
+        tenantId,
+        workspaceId,
+        original.id,
+        created.id,
+        tx
+      );
+      if (!markedAsReversed) {
+        throw new ValidationError(
+          "Entry has already been reversed",
+          { entryId: original.id },
+          "CashManagement:EntryAlreadyReversed"
+        );
+      }
 
       await this.registerRepo.setCurrentBalance(
         tenantId,

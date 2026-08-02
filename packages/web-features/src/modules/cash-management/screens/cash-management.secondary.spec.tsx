@@ -18,6 +18,7 @@ const { apiMocks, taxApiMocks, uploadMocks } = vi.hoisted(() => ({
     reverseEntry: vi.fn(),
     attachBeleg: vi.fn(),
     getDayClose: vi.fn(),
+    listDayCloses: vi.fn(),
     getKassenbericht: vi.fn(),
     getDashboard: vi.fn(),
     submitDayClose: vi.fn(),
@@ -282,6 +283,7 @@ describe("cash-management screens secondary", () => {
       },
     });
     apiMocks.listEntries.mockImplementation(async () => ({ entries }));
+    apiMocks.listDayCloses.mockResolvedValue({ closes: [] });
     apiMocks.listAttachments.mockResolvedValue({ attachments: [] });
     apiMocks.reverseEntry.mockImplementation(async () => {
       entries[0].reversedByEntryId = "entry-2";
@@ -329,8 +331,8 @@ describe("cash-management screens secondary", () => {
     const reverseButtons = await screen.findAllByText("Reverse");
     fireEvent.click(reverseButtons[0]);
 
-    await screen.findByLabelText("Reason");
-    await user.type(screen.getByLabelText("Reason"), "Wrong entry");
+    await waitFor(() => expect(document.querySelector("#reverse-reason")).not.toBeNull());
+    await user.type(document.querySelector("#reverse-reason") as HTMLElement, "Wrong entry");
     await user.click(screen.getByRole("button", { name: "Confirm reversal" }));
 
     await waitFor(() =>

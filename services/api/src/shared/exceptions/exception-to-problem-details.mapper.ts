@@ -263,6 +263,7 @@ export class ExceptionToProblemDetailsMapper {
     // Try to extract existing error info
     let detail: string;
     let code: string;
+    let data: Record<string, unknown> | undefined;
 
     if (typeof response === "string") {
       detail = response;
@@ -271,6 +272,10 @@ export class ExceptionToProblemDetailsMapper {
       const respObj = response as any;
       detail = respObj.message || respObj.error || this.getSafeDetail(status);
       code = respObj.code || `Common:Http${status}`;
+      data =
+        typeof respObj.details === "object" && respObj.details !== null
+          ? (respObj.details as Record<string, unknown>)
+          : undefined;
     } else {
       detail = this.getSafeDetail(status);
       code = `Common:Http${status}`;
@@ -284,6 +289,7 @@ export class ExceptionToProblemDetailsMapper {
       instance: this.instance,
       code,
       traceId: this.traceId,
+      data,
     };
   }
 

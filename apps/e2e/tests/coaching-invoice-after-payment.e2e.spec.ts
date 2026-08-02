@@ -265,7 +265,8 @@ async function postStripeWebhook(
   }
 
   const stripeSecret =
-    process.env.STRIPE_WEBHOOK_SECRET ?? "whsec_cd7d117e34d198633d3c215ce9321c687c821577f783047cff8ecf25f0edeee5";
+    process.env.STRIPE_WEBHOOK_SECRET ??
+    "whsec_cd7d117e34d198633d3c215ce9321c687c821577f783047cff8ecf25f0edeee5";
   const stripeSignature = Stripe.webhooks.generateTestHeaderString({
     payload: rawBody,
     secret: stripeSecret,
@@ -300,11 +301,14 @@ async function waitForInvoicesBySource(
   const deadline = Date.now() + 60_000;
   while (Date.now() < deadline) {
     await apiClient.post("/test/drain-outbox");
-    const body = await apiClient.post<{ invoices: SourceInvoiceLookup[] }>("/test/invoices/by-source", {
-      tenantId,
-      sourceType: "coaching_engagement",
-      sourceId,
-    });
+    const body = await apiClient.post<{ invoices: SourceInvoiceLookup[] }>(
+      "/test/invoices/by-source",
+      {
+        tenantId,
+        sourceType: "coaching_engagement",
+        sourceId,
+      }
+    );
     if (body.invoices.length >= expectedCount) {
       return body.invoices;
     }
@@ -321,10 +325,13 @@ async function waitForInvoiceDeliveries(
   const deadline = Date.now() + 90_000;
   while (Date.now() < deadline) {
     await apiClient.post("/test/drain-outbox");
-    const body = await apiClient.post<{ deliveries: InvoiceDelivery[] }>("/test/invoices/email-deliveries", {
-      tenantId,
-      invoiceIds: [invoiceId],
-    });
+    const body = await apiClient.post<{ deliveries: InvoiceDelivery[] }>(
+      "/test/invoices/email-deliveries",
+      {
+        tenantId,
+        invoiceIds: [invoiceId],
+      }
+    );
     if (
       body.deliveries.length >= expectedCount &&
       body.deliveries[0] &&
@@ -454,10 +461,17 @@ test.describe("Coaching invoice after payment", () => {
 
     const initialDeliveries = await waitForInvoiceDeliveries(testData.workspace.id, invoiceId, 1);
     expect(initialDeliveries).toHaveLength(1);
-    await captureState(page, testInfo, screenshotDir, "03-email-sent", "Initial invoice email sent", {
-      invoiceId,
-      deliveries: initialDeliveries,
-    });
+    await captureState(
+      page,
+      testInfo,
+      screenshotDir,
+      "03-email-sent",
+      "Initial invoice email sent",
+      {
+        invoiceId,
+        deliveries: initialDeliveries,
+      }
+    );
 
     const resendResponse = await request.post(
       `${API_URL}/coaching-engagements/${booking.engagement.id}/invoice/resend`,

@@ -6,6 +6,8 @@ import type {
   CashEntryAttachment,
   CashRegister,
   CreateCashEntryInput,
+  CreateClosedDayCorrectionInput,
+  CashDayCloseRevision,
   CreateCashRegister,
   ExportCashBookInput,
   ExportCashBookOutput,
@@ -33,6 +35,10 @@ type EntryListInput = Omit<Partial<ListCashEntriesQuery>, "registerId">;
 type DayCloseListInput = Omit<Partial<ListCashDayClosesQuery>, "registerId">;
 type CreateRegisterInput = Omit<CreateCashRegister, "tenantId" | "workspaceId">;
 type CreateEntryInput = Omit<CreateCashEntryInput, "tenantId" | "workspaceId" | "registerId">;
+type CreateClosedDayCorrectionRequest = Omit<
+  CreateClosedDayCorrectionInput,
+  "registerId" | "dayKey"
+>;
 type ReverseEntryInput = Omit<ReverseCashEntryInput, "tenantId" | "entryId" | "originalEntryId">;
 type SubmitDayCloseInput = Omit<
   SubmitCashDayCloseInput,
@@ -96,9 +102,34 @@ export class CashManagementApi {
       `/cash-registers/${registerId}/entries`,
       { ...input, registerId },
       {
+        idempotencyKey: input.idempotencyKey ?? apiClient.generateIdempotencyKey(),
+        correlationId: apiClient.generateCorrelationId(),
+      }
+    );
+  }
+
+  async createClosedDayCorrection(
+    registerId: string,
+    dayKey: string,
+    input: CreateClosedDayCorrectionRequest
+  ): Promise<{ entry: CashEntry; revision: CashDayCloseRevision }> {
+    return apiClient.post<{ entry: CashEntry; revision: CashDayCloseRevision }>(
+      `/cash-registers/${registerId}/closed-days/${dayKey}/corrections`,
+      { ...input, registerId, dayKey },
+      {
         idempotencyKey: apiClient.generateIdempotencyKey(),
         correlationId: apiClient.generateCorrelationId(),
       }
+    );
+  }
+
+  async listClosedDayRevisions(
+    registerId: string,
+    dayKey: string
+  ): Promise<{ revisions: CashDayCloseRevision[] }> {
+    return apiClient.get<{ revisions: CashDayCloseRevision[] }>(
+      `/cash-registers/${registerId}/closed-days/${dayKey}/revisions`,
+      { correlationId: apiClient.generateCorrelationId() }
     );
   }
 

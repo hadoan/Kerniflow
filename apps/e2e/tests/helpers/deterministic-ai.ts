@@ -6,7 +6,7 @@ export class DeterministicAiHelper {
 
   constructor(
     private readonly request: APIRequestContext,
-    private readonly tenantId: string,
+    private readonly tenantId: string
   ) {
     this.apiUrl = process.env.API_URL || "http://localhost:3000";
   }

@@ -21,24 +21,24 @@ test.describe("Monthly Cash E2E - Kassenabrechnung", () => {
               args: {
                 registerId: cashContext.register.id,
                 year: 2026,
-                month: 7
-              }
-            }
-          ]
-        }
-      ]
+                month: 7,
+              },
+            },
+          ],
+        },
+      ],
     });
 
     const assistant = new CashAssistantPage(cashPage);
     await cashPage.goto(`/assistant`);
     await assistant.sendMessage("Show me the monthly report for 2026-07.");
 
-    const messages = await cashPage.locator('body').innerText();
+    const messages = await cashPage.locator("body").innerText();
     console.log("PAGE TEXT:", messages);
 
     // Verify HTML Preview renders
     await reportPreview.expectVisible();
-    
+
     // Check coverage status
     await reportPreview.expectCoverageStatus("Unvollständig");
 

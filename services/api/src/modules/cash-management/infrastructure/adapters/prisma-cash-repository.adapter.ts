@@ -8,6 +8,7 @@ import {
   type CashExportArtifact,
   type CashRegister,
   type CashDayConfirmation,
+  type CashDayCloseRevision,
   type CashEntryConfirmation,
   type CashWorkspaceHandoff,
 } from "@prisma/client";
@@ -32,6 +33,7 @@ import type {
   CreateCashEntryConfirmationRecord,
   CashWorkspaceHandoffRepoPort,
   CreateCashWorkspaceHandoffRecord,
+  CreateCashDayCloseRevisionRecord,
 } from "../../application/ports/cash-management.ports";
 import type {
   CashDayCloseEntity,
@@ -41,6 +43,7 @@ import type {
   CashExportArtifactEntity,
   CashRegisterEntity,
   CashDayConfirmationEntity,
+  CashDayCloseRevisionEntity,
 } from "../../domain/entities";
 
 const monthStart = (month: string): string => `${month}-01`;
@@ -260,6 +263,7 @@ export class PrismaCashRepository
         referenceId: data.referenceId,
         reversalOfEntryId: data.reversalOfEntryId,
         lockedByDayCloseId: data.lockedByDayCloseId,
+        idempotencyKey: data.idempotencyKey ?? null,
         createdByUserId: data.createdByUserId,
 
         // Legacy compatibility columns
@@ -340,23 +344,88 @@ export class PrismaCashRepository
     return row ? this.mapEntry(row) : null;
   }
 
+  async findActivePossibleDuplicate(
+    tenantId: string,
+    workspaceId: string,
+    input: {
+      registerId: string;
+      dayKey: string;
+      type: CashEntryType;
+      direction: CashEntryDirection;
+      amountCents: number;
+      source: string;
+    },
+    tx?: TransactionContext
+  ): Promise<CashEntryEntity | null> {
+    const row = await this.client(tx).cashEntry.findFirst({
+      where: {
+        tenantId,
+        workspaceId,
+        registerId: input.registerId,
+        dayKey: input.dayKey,
+        entryType: input.type,
+        direction: input.direction,
+        amountCents: input.amountCents,
+        source: input.source,
+        reversedByEntryId: null,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return row ? this.mapEntry(row) : null;
+  }
+
+  async findEntryByIdempotencyKey(
+    tenantId: string,
+    workspaceId: string,
+    idempotencyKey: string,
+    tx?: TransactionContext
+  ): Promise<CashEntryEntity | null> {
+    const row = await this.client(tx).cashEntry.findFirst({
+      where: { tenantId, workspaceId, idempotencyKey },
+    });
+    return row ? this.mapEntry(row) : null;
+  }
+
+  async findActiveDailyZReport(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string,
+    tx?: TransactionContext
+  ): Promise<CashEntryEntity | null> {
+    const row = await this.client(tx).cashEntry.findFirst({
+      where: {
+        tenantId,
+        workspaceId,
+        registerId,
+        dayKey,
+        entryType: "SALE_CASH",
+        sourceDocumentKind: "DAILY_Z_REPORT",
+        reversedByEntryId: null,
+      },
+    });
+    return row ? this.mapEntry(row) : null;
+  }
+
   async setReversedByEntryId(
     tenantId: string,
     workspaceId: string,
     entryId: string,
     reversedByEntryId: string,
     tx?: TransactionContext
-  ): Promise<void> {
-    await this.client(tx).cashEntry.updateMany({
+  ): Promise<boolean> {
+    const result = await this.client(tx).cashEntry.updateMany({
       where: {
         id: entryId,
         tenantId,
         workspaceId,
+        reversedByEntryId: null,
       },
       data: {
         reversedByEntryId,
       },
     });
+    return result.count === 1;
   }
 
   async listEntriesForMonth(
@@ -582,6 +651,69 @@ export class PrismaCashRepository
     });
 
     return rows.map((row) => this.mapDayClose(row, row.countLines));
+  }
+
+  async createRevision(
+    data: CreateCashDayCloseRevisionRecord,
+    tx?: TransactionContext
+  ): Promise<CashDayCloseRevisionEntity> {
+    const client = this.client(tx);
+    const latest = await client.cashDayCloseRevision.aggregate({
+      where: { dayCloseId: data.dayCloseId },
+      _max: { revisionNo: true },
+    });
+    const row = await client.cashDayCloseRevision.create({
+      data: {
+        tenantId: data.tenantId,
+        workspaceId: data.workspaceId,
+        registerId: data.registerId,
+        dayCloseId: data.dayCloseId,
+        correctionEntryId: data.correctionEntryId,
+        revisionNo: (latest._max.revisionNo ?? 1) + 1,
+        correctionType: data.correctionType,
+        reason: data.reason,
+        occurredAt: data.occurredAt,
+        createdByUserId: data.createdByUserId,
+        originalSnapshot: data.originalSnapshot,
+        correctedSnapshot: data.correctedSnapshot,
+      },
+    });
+    return this.mapRevision(row);
+  }
+
+  async createReviewRequirements(
+    tenantId: string,
+    workspaceId: string,
+    revisionId: string,
+    affectedDayCloseIds: string[],
+    tx?: TransactionContext
+  ): Promise<void> {
+    if (affectedDayCloseIds.length === 0) {
+      return;
+    }
+    await this.client(tx).cashDayCloseReviewRequirement.createMany({
+      data: affectedDayCloseIds.map((affectedDayCloseId) => ({
+        tenantId,
+        workspaceId,
+        revisionId,
+        affectedDayCloseId,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
+  async listRevisions(
+    tenantId: string,
+    workspaceId: string,
+    registerId: string,
+    dayKey: string
+  ): Promise<CashDayCloseRevisionEntity[]> {
+    const rows = await this.prisma.cashDayCloseRevision.findMany({
+      where: { tenantId, workspaceId, registerId, dayClose: { dayKey } },
+      include: { reviewRequirements: { select: { id: true } } },
+      orderBy: { revisionNo: "asc" },
+    });
+    return rows.map((row) => this.mapRevision(row, row.reviewRequirements.length > 0));
   }
 
   async createAttachment(
@@ -956,6 +1088,29 @@ export class PrismaCashRepository
     };
   }
 
+  private mapRevision(
+    row: CashDayCloseRevision,
+    downstreamReviewRequired = false
+  ): CashDayCloseRevisionEntity {
+    return {
+      id: row.id,
+      tenantId: row.tenantId,
+      workspaceId: row.workspaceId,
+      registerId: row.registerId,
+      dayCloseId: row.dayCloseId,
+      correctionEntryId: row.correctionEntryId,
+      revisionNo: row.revisionNo,
+      correctionType: row.correctionType,
+      reason: row.reason,
+      occurredAt: row.occurredAt,
+      recordedAt: row.recordedAt,
+      createdByUserId: row.createdByUserId,
+      downstreamReviewRequired,
+      originalSnapshot: row.originalSnapshot,
+      correctedSnapshot: row.correctedSnapshot,
+    };
+  }
+
   private mapAttachment(row: CashEntryAttachment): CashEntryAttachmentEntity {
     return {
       id: row.id,
@@ -1094,11 +1249,12 @@ export class PrismaCashRepository
     tenantId: string,
     workspaceId: string,
     id: string,
+    entryId: string,
     tx?: TransactionContext
   ): Promise<void> {
     await this.client(tx).cashEntryConfirmation.updateMany({
       where: { id, tenantId, workspaceId, status: "PENDING" },
-      data: { status: "CONSUMED", consumedAt: new Date() },
+      data: { status: "CONSUMED", consumedAt: new Date(), consumedEntryId: entryId },
     });
   }
 

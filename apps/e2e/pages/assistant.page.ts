@@ -30,9 +30,11 @@ export class CashAssistantPage {
    */
   async waitForResponse(timeout = 60_000) {
     // First wait for the input to become disabled (streaming started)
-    await expect(this.chatInput).toBeDisabled({ timeout: 10_000 }).catch(() => {
-      // May already be done if response was very fast
-    });
+    await expect(this.chatInput)
+      .toBeDisabled({ timeout: 10_000 })
+      .catch(() => {
+        // May already be done if response was very fast
+      });
     // Then wait for it to become enabled again (streaming finished)
     await expect(this.chatInput).toBeEnabled({ timeout });
   }
@@ -50,4 +52,3 @@ export class CashAssistantPage {
     await this.confirmSaveButton.click();
   }
 }
-

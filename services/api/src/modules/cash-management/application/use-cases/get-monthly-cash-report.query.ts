@@ -25,6 +25,7 @@ import {
   type CashRegisterRepoPort,
   type CashDayCloseRepoPort,
 } from "../ports/cash-management.ports";
+import { toCashReportingMovements } from "../../domain/cash-entry-reporting";
 import { assertCanManageCash } from "../../policies/assert-cash-policies";
 
 const isExpectedOperatingDay = (dayKey: string, todayKey: string): boolean => {
@@ -277,7 +278,7 @@ export class GetMonthlyCashReportQueryUseCase extends BaseUseCase<
       let privateDepositsCents = 0;
       let bankWithdrawalsToCashCents = 0;
 
-      for (const entry of dayEntries) {
+      for (const entry of toCashReportingMovements(dayEntries)) {
         const amount = entry.amountCents;
         if (entry.direction === "OUT") {
           if (entry.type === "EXPENSE_CASH") {

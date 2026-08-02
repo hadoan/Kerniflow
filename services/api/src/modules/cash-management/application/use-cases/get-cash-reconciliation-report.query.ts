@@ -22,6 +22,14 @@ import {
   type CashRegisterRepoPort,
 } from "../ports/cash-management.ports";
 import { assertCanManageCash } from "../../policies/assert-cash-policies";
+import { CashBalanceCalculator } from "../../domain/cash-balance-calculator";
+import { toCashReportingMovements } from "../../domain/cash-entry-reporting";
+
+const previousDayKey = (dayKey: string): string => {
+  const date = new Date(`${dayKey}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return date.toISOString().slice(0, 10);
+};
 
 @RequireTenant()
 @Injectable()
@@ -55,8 +63,13 @@ export class GetCashReconciliationReportQueryUseCase extends BaseUseCase<
     if (!register) {
       throw new NotFoundError("Cash register not found");
     }
-    const [allEntries, periodEntries, periodCloses] = await Promise.all([
-      this.entries.listEntries(ctx.tenantId, ctx.workspaceId, { registerId: register.id }),
+    const [opening, periodEntries, periodCloses] = await Promise.all([
+      this.entries.getExpectedBalanceAtDay(
+        ctx.tenantId,
+        ctx.workspaceId,
+        register.id,
+        previousDayKey(input.fromDate)
+      ),
       this.entries.listEntries(ctx.tenantId, ctx.workspaceId, {
         registerId: register.id,
         dayKeyFrom: input.fromDate,
@@ -68,26 +81,35 @@ export class GetCashReconciliationReportQueryUseCase extends BaseUseCase<
         dayKeyTo: input.toDate,
       }),
     ]);
-    const orderedAll = [...allEntries].sort(
-      (a, b) =>
-        a.dayKey.localeCompare(b.dayKey) ||
-        a.occurredAt.getTime() - b.occurredAt.getTime() ||
-        a.entryNo - b.entryNo
-    );
-    const opening =
-      orderedAll.filter((entry) => entry.dayKey < input.fromDate).at(-1)?.balanceAfterCents ?? 0;
     const ordered = [...periodEntries].sort(
       (a, b) =>
         a.dayKey.localeCompare(b.dayKey) ||
         a.occurredAt.getTime() - b.occurredAt.getTime() ||
         a.entryNo - b.entryNo
     );
-    const totalIncomeCents = ordered
-      .filter((entry) => entry.direction === "IN")
-      .reduce((sum, entry) => sum + entry.amountCents, 0);
-    const totalExpenseCents = ordered
-      .filter((entry) => entry.direction === "OUT")
-      .reduce((sum, entry) => sum + entry.amountCents, 0);
+    const movements = toCashReportingMovements(ordered);
+    let runningBalanceCents = opening;
+    const rows = ordered.map((entry, index) => {
+      const movement = movements[index];
+      runningBalanceCents = CashBalanceCalculator.applyDelta(runningBalanceCents, movement);
+
+      return {
+        id: entry.id,
+        dayKey: entry.dayKey,
+        entryNo: entry.entryNo,
+        description: entry.description,
+        direction: movement.direction,
+        amountCents: movement.amountCents,
+        balanceAfterCents: runningBalanceCents,
+        receiptNumber: entry.sourceDocumentRef,
+      };
+    });
+    const totalIncomeCents = movements
+      .filter((movement) => movement.direction === "IN")
+      .reduce((sum, movement) => sum + movement.amountCents, 0);
+    const totalExpenseCents = movements
+      .filter((movement) => movement.direction === "OUT")
+      .reduce((sum, movement) => sum + movement.amountCents, 0);
     const calculatedClosingBalanceCents = opening + totalIncomeCents - totalExpenseCents;
     const lastClose = periodCloses
       .filter((close) => close.status === "SUBMITTED")
@@ -104,16 +126,7 @@ export class GetCashReconciliationReportQueryUseCase extends BaseUseCase<
         fromDate: input.fromDate,
         toDate: input.toDate,
         openingBalanceCents: opening,
-        rows: ordered.map((entry) => ({
-          id: entry.id,
-          dayKey: entry.dayKey,
-          entryNo: entry.entryNo,
-          description: entry.description,
-          direction: entry.direction,
-          amountCents: entry.amountCents,
-          balanceAfterCents: entry.balanceAfterCents,
-          receiptNumber: entry.sourceDocumentRef,
-        })),
+        rows,
         totalIncomeCents,
         totalExpenseCents,
         calculatedClosingBalanceCents,

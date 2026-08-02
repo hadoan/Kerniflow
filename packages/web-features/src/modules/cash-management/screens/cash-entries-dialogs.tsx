@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { CashEntryType } from "@corely/contracts";
@@ -36,6 +29,7 @@ export type CreateEntryForm = {
   taxCodeId: string;
   description: string;
   documentReference: string;
+  dailyZReport: boolean;
   occurredAt: string;
   attachmentFile: File | null;
 };
@@ -56,6 +50,7 @@ export const defaultCreateForm = (): CreateEntryForm => ({
   taxCodeId: "",
   description: "",
   documentReference: "",
+  dailyZReport: false,
   occurredAt: getCurrentDateTimeInputValue(),
   attachmentFile: null,
 });
@@ -123,7 +118,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[100dvh] max-h-[100dvh] gap-0 overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-[520px]">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] flex-col gap-0 overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-[520px]">
         <DialogHeader className="sticky top-0 z-10 border-b bg-background px-4 py-4 pr-14 sm:px-6">
           <DialogTitle>{t("cash.ui.entries.createDialog.title")}</DialogTitle>
           <DialogDescription>{t("cash.ui.entries.createDialog.description")}</DialogDescription>
@@ -216,6 +211,18 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
               }
             />
           </div>
+          {form.type === "SALE_CASH" ? (
+            <label className="flex gap-2 rounded-md border p-3 text-sm">
+              <input
+                type="checkbox"
+                checked={form.dailyZReport}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, dailyZReport: event.target.checked }))
+                }
+              />
+              <span>Đây là tổng doanh thu Z-Bon của ngày này</span>
+            </label>
+          ) : null}
           <div className="space-y-1">
             <Label htmlFor="create-entry-document-reference">
               {t("cash.ui.entries.createDialog.documentReference")}

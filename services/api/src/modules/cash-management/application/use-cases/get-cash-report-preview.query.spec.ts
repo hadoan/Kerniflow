@@ -113,4 +113,100 @@ describe("GetCashReportPreviewQueryUseCase", () => {
       expect(result.value.preview.expectedClosingCashCents).toBe(5440);
     }
   });
+
+  it("uses the latest closed-day revision for cash receipt calculations", async () => {
+    registerRepo.findRegisterById.mockResolvedValue({
+      id: "reg-1",
+      name: "Main Register",
+      currentBalanceCents: 66100,
+    } as CashRegister);
+    dayCloseRepo.listDayCloses.mockResolvedValue([
+      { dayKey: "2026-07-27", status: "SUBMITTED", countedBalanceCents: 53440 } as any,
+    ]);
+    dayCloseRepo.findDayCloseByRegisterAndDay.mockResolvedValue({
+      status: "SUBMITTED",
+      countedBalanceCents: 78760,
+    } as any);
+    dayCloseRepo.listRevisions.mockResolvedValue([
+      {
+        revisionNo: 1,
+        correctedSnapshot: { expectedBalanceCents: 66100 },
+      } as any,
+    ]);
+    entryRepo.getExpectedBalanceAtDay.mockResolvedValue(53440);
+    entryRepo.listEntries.mockResolvedValue([
+      {
+        id: "sale-1",
+        amountCents: 12660,
+        type: CashEntryType.SALE_CASH,
+        direction: CashEntryDirection.IN,
+        occurredAt: new Date("2026-07-28T10:00:00Z"),
+        entryNo: 1,
+        balanceAfterCents: 66100,
+      } as any,
+    ]);
+    attachmentRepo.listAttachmentsForMonth.mockResolvedValue([]);
+
+    const result = await useCase.execute({ registerId: "reg-1", businessDate: "2026-07-28" }, ctx);
+
+    expect(isErr(result)).toBe(false);
+    if (!isErr(result)) {
+      const { preview } = result.value;
+      expect(preview.countedClosingCashCents).toBe(78760);
+      expect(preview.effectiveClosingCashCents).toBe(66100);
+      expect(preview.calculatedCashSalesCents).toBe(12660);
+    }
+  });
+
+  it("carries a prior corrected close into the next closed-day revision", async () => {
+    registerRepo.findRegisterById.mockResolvedValue({
+      id: "reg-1",
+      name: "Main Register",
+      currentBalanceCents: 34500,
+    } as CashRegister);
+    dayCloseRepo.listDayCloses.mockResolvedValue([
+      { dayKey: "2026-07-28", status: "SUBMITTED", countedBalanceCents: 78760 } as any,
+    ]);
+    dayCloseRepo.findDayCloseByRegisterAndDay.mockResolvedValue({
+      status: "SUBMITTED",
+      countedBalanceCents: 15560,
+    } as any);
+    dayCloseRepo.listRevisions.mockImplementation(async (_tenant, _workspace, _register, dayKey) =>
+      dayKey === "2026-07-28"
+        ? ([{ revisionNo: 1, correctedSnapshot: { expectedBalanceCents: 66100 } }] as any)
+        : []
+    );
+    entryRepo.getExpectedBalanceAtDay.mockResolvedValue(66100);
+    entryRepo.listEntries.mockResolvedValue([
+      {
+        id: "sale-1",
+        amountCents: 8400,
+        type: CashEntryType.SALE_CASH,
+        direction: CashEntryDirection.IN,
+        occurredAt: new Date("2026-07-29T10:00:00Z"),
+        entryNo: 1,
+        balanceAfterCents: 74500,
+      } as any,
+      {
+        id: "bank-deposit-1",
+        amountCents: 40000,
+        type: CashEntryType.BANK_DEPOSIT,
+        direction: CashEntryDirection.OUT,
+        occurredAt: new Date("2026-07-29T11:00:00Z"),
+        entryNo: 2,
+        balanceAfterCents: 34500,
+      } as any,
+    ]);
+    attachmentRepo.listAttachmentsForMonth.mockResolvedValue([]);
+
+    const result = await useCase.execute({ registerId: "reg-1", businessDate: "2026-07-29" }, ctx);
+
+    expect(isErr(result)).toBe(false);
+    if (!isErr(result)) {
+      const { preview } = result.value;
+      expect(preview.previousClosingCashCents).toBe(66100);
+      expect(preview.effectiveClosingCashCents).toBe(34500);
+      expect(preview.calculatedCashSalesCents).toBe(8400);
+    }
+  });
 });

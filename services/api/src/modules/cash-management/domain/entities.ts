@@ -81,6 +81,24 @@ export type CashDayCloseEntity = {
   updatedAt: Date;
 };
 
+export type CashDayCloseRevisionEntity = {
+  id: string;
+  tenantId: string;
+  workspaceId: string;
+  registerId: string;
+  dayCloseId: string;
+  correctionEntryId: string;
+  revisionNo: number;
+  correctionType: string;
+  reason: string;
+  occurredAt: Date;
+  recordedAt: Date;
+  createdByUserId: string;
+  downstreamReviewRequired: boolean;
+  originalSnapshot: unknown;
+  correctedSnapshot: unknown;
+};
+
 export type CashEntryAttachmentEntity = {
   id: string;
   tenantId: string;

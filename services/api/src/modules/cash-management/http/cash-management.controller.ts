@@ -17,6 +17,7 @@ import type { Response } from "express";
 import {
   AttachBelegInputSchema,
   CreateCashEntryInputSchema,
+  CreateClosedDayCorrectionInputSchema,
   CreateCashRegisterSchema,
   ExportCashBookInputSchema,
   GetCashDashboardQuerySchema,
@@ -43,6 +44,7 @@ import { CreateCashRegisterUseCase } from "../application/use-cases/create-cash-
 import { UpdateCashRegisterUseCase } from "../application/use-cases/update-cash-register.usecase";
 import { ListCashEntriesQueryUseCase } from "../application/use-cases/list-cash-entries.query";
 import { CreateCashEntryUseCase } from "../application/use-cases/create-cash-entry.usecase";
+import { CreateClosedDayCorrectionUseCase } from "../application/use-cases/create-closed-day-correction.usecase";
 import { ReverseCashEntryUseCase } from "../application/use-cases/reverse-cash-entry.usecase";
 import { GetCashDayCloseQueryUseCase } from "../application/use-cases/get-cash-day-close.query";
 import { SubmitCashDayCloseUseCase } from "../application/use-cases/submit-cash-day-close.usecase";
@@ -69,6 +71,7 @@ export class CashManagementController {
     private readonly updateRegisterUseCase: UpdateCashRegisterUseCase,
     private readonly listEntriesQuery: ListCashEntriesQueryUseCase,
     private readonly createEntryUseCase: CreateCashEntryUseCase,
+    private readonly createClosedDayCorrectionUseCase: CreateClosedDayCorrectionUseCase,
     private readonly reverseEntryUseCase: ReverseCashEntryUseCase,
     private readonly getDayCloseQuery: GetCashDayCloseQueryUseCase,
     private readonly submitDayCloseUseCase: SubmitCashDayCloseUseCase,
@@ -158,6 +161,57 @@ export class CashManagementController {
       ctx
     );
     return mapResultToHttp(result);
+  }
+
+  @Post("cash-registers/:id/closed-days/:dayKey/corrections")
+  async createClosedDayCorrection(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("dayKey") dayKey: string,
+    @Body() body: unknown
+  ) {
+    const ctx = buildUseCaseContext(req);
+    const parsed = CreateClosedDayCorrectionInputSchema.parse({
+      ...(body as object),
+      registerId,
+      dayKey,
+    });
+    const result = await this.createClosedDayCorrectionUseCase.execute(
+      { ...parsed, idempotencyKey: resolveIdempotencyKey(req) ?? parsed.idempotencyKey },
+      ctx
+    );
+    return mapResultToHttp(result);
+  }
+
+  @Get("cash-registers/:id/closed-days/:dayKey/revisions")
+  async listClosedDayRevisions(
+    @Req() req: ContextAwareRequest,
+    @Param("id") registerId: string,
+    @Param("dayKey") dayKey: string
+  ) {
+    const ctx = buildUseCaseContext(req);
+    if (!ctx.tenantId || !ctx.workspaceId) {
+      throw new BadRequestException("Missing tenant/workspace context");
+    }
+    const revisions = await this.createClosedDayCorrectionUseCase.listRevisions(
+      registerId,
+      dayKey,
+      ctx
+    );
+    return {
+      revisions: revisions.map((revision) => ({
+        id: revision.id,
+        dayCloseId: revision.dayCloseId,
+        correctionEntryId: revision.correctionEntryId,
+        revisionNo: revision.revisionNo,
+        correctionType: revision.correctionType,
+        reason: revision.reason,
+        occurredAt: revision.occurredAt.toISOString(),
+        recordedAt: revision.recordedAt.toISOString(),
+        createdByUserId: revision.createdByUserId,
+        downstreamReviewRequired: revision.downstreamReviewRequired,
+      })),
+    };
   }
 
   @Post("cash-registers/:id/confirm-entry/:confirmationId")

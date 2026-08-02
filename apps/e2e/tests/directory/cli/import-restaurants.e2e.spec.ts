@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { assertApiReady } from "../helpers/bootstrap-api.ts";
-import { closePrisma, countRestaurantsByPrefix, ensureDirectorySchemaReady } from "../helpers/db.ts";
+import {
+  closePrisma,
+  countRestaurantsByPrefix,
+  ensureDirectorySchemaReady,
+} from "../helpers/db.ts";
 import {
   cleanupDirectoryFixtureSet,
   createRunTag,

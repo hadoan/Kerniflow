@@ -53,7 +53,11 @@ export const test = base.extend<CashFixtures>({
     const testRunId = `e2e-${Date.now()}-${randomUUID()}`;
 
     const httpClient = new HttpClient(request, auth);
-    const { response } = await startBillingTrial(httpClient, { productKey: "cash-management" as any }, randomUUID());
+    const { response } = await startBillingTrial(
+      httpClient,
+      { productKey: "cash-management" as any },
+      randomUUID()
+    );
     if (!response.ok()) {
       throw new Error(`Failed to start trial: ${response.status()} ${response.statusText()}`);
     }
@@ -86,7 +90,7 @@ export const test = base.extend<CashFixtures>({
       console.warn("Failed to reset test data:", error);
     }
   },
-  
+
   cashPage: async ({ page, cashContext, request }, use) => {
     const auth = await loginAsSeededUser(request, {
       tenant: cashContext.tenant,
@@ -97,9 +101,9 @@ export const test = base.extend<CashFixtures>({
       accessToken: auth.accessToken,
       workspaceId: cashContext.workspace.id,
     });
-    page.on('console', msg => console.log('BROWSER:', msg.text()));
+    page.on("console", (msg) => console.log("BROWSER:", msg.text()));
     await use(page);
-  }
+  },
 });
 
 export { expect };

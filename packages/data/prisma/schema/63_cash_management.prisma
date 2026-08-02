@@ -62,6 +62,7 @@ model CashEntry {
   reversalOfEntryId  String?
   reversedByEntryId  String?  @unique
   lockedByDayCloseId String?
+  idempotencyKey     String?
 
   // Legacy compatibility fields
   type         String
@@ -73,12 +74,14 @@ model CashEntry {
 
   register      CashRegister          @relation(fields: [registerId], references: [id], onDelete: Cascade)
   lockedByClose CashDayClose?         @relation("CashDayCloseLockedEntries", fields: [lockedByDayCloseId], references: [id], onDelete: SetNull)
+  closedDayCorrection CashDayCloseRevision? @relation("CashDayCloseRevisionEntry")
   attachments   CashEntryAttachment[]
 
   tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, workspaceId, registerId, entryNo])
+  @@unique([tenantId, workspaceId, idempotencyKey])
   @@index([tenantId, workspaceId, registerId, dayKey, occurredAt])
   @@index([tenantId, workspaceId, registerId, occurredAt])
   @@index([tenantId, workspaceId, reversalOfEntryId])
@@ -116,6 +119,8 @@ model CashDayClose {
   register      CashRegister            @relation(fields: [registerId], references: [id], onDelete: Cascade)
   entriesLocked CashEntry[]             @relation("CashDayCloseLockedEntries")
   countLines    CashDayCloseCountLine[]
+  revisions     CashDayCloseRevision[]
+  reviewRequirements CashDayCloseReviewRequirement[] @relation("AffectedCloseReviewRequirements")
 
   tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -124,6 +129,53 @@ model CashDayClose {
   @@index([tenantId, workspaceId, registerId, dayKey])
   @@index([tenantId, workspaceId, registerId, submittedAt])
   @@map("cash_day_closes")
+  @@schema("accounting")
+}
+
+model CashDayCloseRevision {
+  id                String   @id @default(cuid())
+  tenantId          String
+  workspaceId       String
+  registerId        String
+  dayCloseId        String
+  correctionEntryId String   @unique
+  revisionNo        Int
+  correctionType    String
+  reason            String
+  occurredAt        DateTime @db.Timestamptz(6)
+  recordedAt        DateTime @default(now()) @db.Timestamptz(6)
+  createdByUserId   String
+  originalSnapshot  Json
+  correctedSnapshot Json
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+
+  dayClose        CashDayClose @relation(fields: [dayCloseId], references: [id], onDelete: Restrict)
+  correctionEntry CashEntry    @relation("CashDayCloseRevisionEntry", fields: [correctionEntryId], references: [id], onDelete: Restrict)
+  reviewRequirements CashDayCloseReviewRequirement[]
+
+  @@unique([dayCloseId, revisionNo])
+  @@index([tenantId, workspaceId, registerId, dayCloseId])
+  @@map("cash_day_close_revisions")
+  @@schema("accounting")
+}
+
+model CashDayCloseReviewRequirement {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  workspaceId        String
+  revisionId         String
+  affectedDayCloseId String
+  status             String   @default("REVIEW_REQUIRED")
+  reviewedAt         DateTime? @db.Timestamptz(6)
+  reviewedByUserId   String?
+  createdAt          DateTime @default(now()) @db.Timestamptz(6)
+
+  revision         CashDayCloseRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  affectedDayClose CashDayClose @relation("AffectedCloseReviewRequirements", fields: [affectedDayCloseId], references: [id], onDelete: Restrict)
+
+  @@unique([revisionId, affectedDayCloseId])
+  @@index([tenantId, workspaceId, affectedDayCloseId, status])
+  @@map("cash_day_close_review_requirements")
   @@schema("accounting")
 }
 
@@ -220,6 +272,7 @@ model CashDayConfirmation {
 
   confirmedAt DateTime? @db.Timestamptz(6)
   consumedAt  DateTime? @db.Timestamptz(6)
+  consumedEntryId String?
 
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
@@ -333,6 +386,7 @@ model CashEntryConfirmation {
 
   confirmedAt DateTime? @db.Timestamptz(6)
   consumedAt  DateTime? @db.Timestamptz(6)
+  consumedEntryId String?
 
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)

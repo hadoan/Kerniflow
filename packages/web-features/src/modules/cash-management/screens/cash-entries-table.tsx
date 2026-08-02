@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 type CashEntriesTableProps = {
   entries: CashEntry[];
   registerId: string;
+  canResolveDayCloseStatus: boolean;
   attachmentCountByEntryId: Map<string, number>;
   isDownloadingAttachments: boolean;
   onDownloadAttachments: (entryId: string) => void;
@@ -21,6 +22,7 @@ type CashEntriesTableProps = {
 export function CashEntriesTable({
   entries,
   registerId,
+  canResolveDayCloseStatus,
   attachmentCountByEntryId,
   isDownloadingAttachments,
   onDownloadAttachments,
@@ -97,7 +99,10 @@ export function CashEntriesTable({
                   type="button"
                   variant="ghost"
                   className="min-h-11"
-                  disabled={Boolean(entry.reversedByEntryId)}
+                  disabled={
+                    !canResolveDayCloseStatus ||
+                    Boolean(entry.reversedByEntryId || entry.reversalOfEntryId)
+                  }
                   onClick={() => onReverseEntry(entry.id)}
                 >
                   {t("cash.ui.entries.rowActions.reverse")}
@@ -189,7 +194,9 @@ export function CashEntriesTable({
                         {
                           label: t("cash.ui.entries.rowActions.reverse"),
                           onClick: () => onReverseEntry(entry.id),
-                          disabled: Boolean(entry.reversedByEntryId),
+                          disabled:
+                            !canResolveDayCloseStatus ||
+                            Boolean(entry.reversedByEntryId || entry.reversalOfEntryId),
                         },
                         {
                           label: t("cash.ui.entries.rowActions.addBeleg"),

@@ -24,24 +24,26 @@ test.describe("Daily Cash E2E - Private Withdrawal", () => {
               name: "prepare_cash_day_confirmation",
               args: {
                 registerId: cashContext.register.id,
-                businessDate: dayKey, actualClosingCashCents: 0,
+                businessDate: dayKey,
+                actualClosingCashCents: 0,
                 movements: [
                   { type: "SALE_CASH", amountCents: 1296000 },
-                  { type: "OWNER_WITHDRAWAL", amountCents: 1296000 }
+                  { type: "OWNER_WITHDRAWAL", amountCents: 1296000 },
                 ],
-                actualClosingCashCents: 0
-              }
+                actualClosingCashCents: 0,
+              },
             },
             {
               name: "get_cash_report_preview",
               args: {
                 registerId: cashContext.register.id,
-                businessDate: dayKey, actualClosingCashCents: 0,
-              }
-            }
-          ]
-        }
-      ]
+                businessDate: dayKey,
+                actualClosingCashCents: 0,
+              },
+            },
+          ],
+        },
+      ],
     };
 
     await cashContext.e2eAi.activateScenario(scenario);
@@ -62,14 +64,15 @@ test.describe("Daily Cash E2E - Private Withdrawal", () => {
               name: "confirm_cash_day_draft",
               args: {
                 registerId: cashContext.register.id,
-                businessDate: dayKey, actualClosingCashCents: 0,
+                businessDate: dayKey,
+                actualClosingCashCents: 0,
                 confirmationId: "$$LAST_CONFIRMATION_ID$$",
-                idempotencyKey: "$$LAST_IDEMPOTENCY_KEY$$"
-              }
-            }
-          ]
-        }
-      ]
+                idempotencyKey: "$$LAST_IDEMPOTENCY_KEY$$",
+              },
+            },
+          ],
+        },
+      ],
     });
     await assistant.sendMessage("Yes, confirm it.");
     await assistant.page.getByText("Confirmed.").waitFor();
@@ -86,9 +89,13 @@ test.describe("Daily Cash E2E - Private Withdrawal", () => {
     await reportPreview.expectAmount("Kundenzahl", "4");
 
     // Verify database entries directly
-    const { entries } = await listCashEntries(cashContext.client.httpClient, cashContext.register.id, {
-      dayKey,
-    });
+    const { entries } = await listCashEntries(
+      cashContext.client.httpClient,
+      cashContext.register.id,
+      {
+        dayKey,
+      }
+    );
 
     const cashSale = entries.find((e) => e.type === "SALE_CASH");
     expect(cashSale).toBeDefined();
